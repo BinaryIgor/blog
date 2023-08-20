@@ -11,16 +11,26 @@
 </head>
 
 <body class="bg-black text-white">
+    <div class="sticky top-0 p-2 mb-2 z-10 bg-black">
+        <div id="navigation-toggle" class="absolute top-2 right-2 text-4xl cursor-pointer">1</div>
+        <div class="absolute top-2 left-2 text-4xl cursor-pointer">0</div>
+    </div>
+    <nav id="navigation" class="mb-8 hidden flex flex-col md:flex-row items-center justify-center gap-8 text-2xl">
+        <a href="index.html" class="underline">Home</a>
+        <a href="about.html">About</a>
+        <a href="posts.html">Posts</a>
+    </nav>
     <div class="p-4 text-center">
         <h1 class="text-4xl font-bold">Binary Igor</h1>
-        <div class="py-4">Some thoughts about binary machines by <a target="_blank" href="https://igor.roztropinski.com/about" class="font-semibold">Igor Roztropiński</a>.</div>
-    
+        <div class="py-4">Some thoughts about binary machines by <a target="_blank"
+                href="https://igor.roztropinski.com/about" class="font-semibold">Igor Roztropiński</a>.</div>
+
         <ul class="pt-8 flex flex-col gap-10 items-center justify-center">
             <li class="cursor-pointer border-[3px] border-dashed border-slate-200 max-w-[700px] rounded-md p-6">
                 <!-- <div class="text-4xl font-bold">---</div> -->
                 <h2 class="text-2xl mb-2 font-semibold">Reduce the search space</h2>
                 <div class="text-xl mb-4">2022-08-24</div>
-                <div>Some excerpt, that's pretty long,  that's pretty long,  that's pretty long...</div>
+                <div>Some excerpt, that's pretty long, that's pretty long, that's pretty long...</div>
             </li>
             <li class="cursor-pointer border-[3px] border-dashed border-slate-200 max-w-[700px] rounded-md p-6">
                 <!-- <div class="text-4xl font-bold">---</div> -->
@@ -38,6 +48,13 @@
         console.log("Clicking on a post...");
         location.href = "/blog/templates/post.html";
     });
+
+    const navigation = document.getElementById("navigation");
+
+    document.getElementById("navigation-toggle").onclick = () => {
+        console.log("Toggling nav...", navigation);
+        navigation.classList.toggle("hidden");
+    };
 </script>
 
 </html>
