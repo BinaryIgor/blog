@@ -18,6 +18,9 @@ const templatesDir = path.join(__dirname, "..", "templates");
 const distDir = path.join(__dirname, "..", "dist");
 const postsJsonPath = path.join(distDir, "posts.json");
 
+const configPath = path.join(__dirname, "..", "config.json");
+const config = JSON.parse(await fileContent(configPath));
+
 function fileContent(filePath) {
     return fs.promises.readFile(filePath, 'utf-8');
 }
@@ -43,8 +46,12 @@ async function allTemplates(templatesDir, postsData) {
 
         for (const match of matches) {
             const trimmedName = match[1].trim();
+
+            if (!trimmedName.includes(".html") && !trimmedName.includes(".js")) {
+                continue;
+            }
+
             let templ = templates[trimmedName];
-            console.log("Templ:", trimmedName, templ);
             if (!templ) {
                 if (trimmedName.includes(".js:")) {
                     templ = await jsTemplate(postsData);
@@ -103,32 +110,17 @@ function templateWithReplacedVariables(template, data) {
         }
 
         renderedTemplate = renderedTemplate.replace(match[0], value);
+
+        console.log("Replace", match[0], value);
     }
 
     return renderedTemplate;
 }
 
-const index = await fileContent(path.join(templatesDir, "index.html"));
-const post = await fileContent(path.join(postsDir, "reduce-the-search-space.md"));
-
-const html = marked.parse(post);
-
-// console.log(html)
-
-// console.log("\n");
-
-// console.log("Raw index: ", index);
-// console.log();
-
-// const renderedIndex = templateWithReplacedVariables(index, {
-//     posts: [
-//         `<p>Reduce the search space</p>\n`,
-//          `<p>Building Static Site Generator from scratch</p>`]
-// });
-// console.log("Rendered index:", renderedIndex);
 
 const posts = await allPosts(postsDir);
 const postsData = [];
+const postsToRender = [];
 
 for (const [k, e] of Object.entries(posts)) {
     const { fontMatter, content } = e;
@@ -139,4 +131,18 @@ await writeFileContent(postsJsonPath, JSON.stringify(postsData, null, 2));
 
 const templates = await allTemplates(templatesDir, postsData);
 
-console.log(templates["index.html"]);
+for (const p of config.pagesToRender) {
+    await writeFileContent(path.join(distDir, p), templates[p]);
+}
+
+const postTemplate = templates[config.postTemplate];
+
+for (const [k, e] of Object.entries(posts)) {
+    const htmlContent = marked.parse(e.content);
+    const variables = { ...config, ...e.fontMatter, post: htmlContent};
+    const post = templateWithReplacedVariables(postTemplate, variables);
+
+    await writeFileContent(path.join(distDir, `${e.fontMatter.slug}.html`), post);
+}
+
+

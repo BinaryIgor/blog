@@ -1,0 +1,8 @@
+{
+    "author": "Igor Roztropiński",
+    "pagesToRender": [
+        "index.html",
+        "posts.html"
+    ],
+    "postTemplate": "post.html"
+}

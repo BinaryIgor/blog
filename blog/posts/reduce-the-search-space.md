@@ -3,7 +3,7 @@
     "title": "Reduce the search space",
     "slug": "reduce-the-search-space",
     "publishedAt": "2023-08-27",
-    "excerpt": "When we work with a set of persisted (somewhere) data, we obviously want our queries to be fast. Whenever I think about optimizing certain data query, be it SQL (mostly) or NoSQL, I find it useful to think about those problems as a search space problems. What I mean is that, you query will be fast, if your search space is small."
+    "excerpt": "When we work with a set of persisted (somewhere) data, we obviously want our queries to be fast. Whenever I think about optimizing certain data query, be it SQL (mostly) or NoSQL, I find it useful to think about those problems as a search space problems..."
 }
 ---
 
@@ -59,14 +59,14 @@ where n is the averaged size of our columns
 
 We will get to **partitioning** later, but you can also think about it as **vertical partitioning**, since we slice our table into two separate vertical slices really. Vertical, because all rows are in both tables, but we have split previous row into two, where 2 columns are in the first table and 3 are in the second one.
 
-# Indexing
+## Indexing
 
 Index is just a separate datastructure that:
 * have a particular structure that help with searching
 points to a table (collection/document in the case of NoSQL databases) and  
 
-# Partioning 
+## Partitioning
 
-# Sharding
+## Sharding
 
-# Conclusion
+## Conclusion

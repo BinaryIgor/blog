@@ -2,29 +2,17 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Semantics for combining classes! */
-@layer components {
-    h1.error{
-      @apply text-red-700 text-sm transition-transform origin-left duration-150 ease-in-out;
-    }
-
-    body {
-        @apply font-mono;
-    }
-
-    .post h2 {
-        @apply text-2xl mt-16 mb-8 font-bold text-center;
-    }
-
-    .post h3 {
-        @apply text-xl my-6 font-semibold;
-    }
-
-    
-    .post pre {
-        @apply bg-slate-900 p-4 my-4 text-left border-l-2 rounded-sm;
-    }
-  }
+:root {
+    --background-color: black;
+    --scrollbar-color: white;
+    --scrollbar-hover-color: black;
+    /* ==scroll firefox== */
+    /* "auto" or "thin" */
+    scrollbar-width: auto;
+    /* scroll thumb and track */
+    scrollbar-color: var(--scrollbar-color) black;
+    /* ==scroll firefox== */
+}
 
 /* ==chrome,safari scroll== */
 ::-webkit-scrollbar {
@@ -43,8 +31,32 @@
 ::-webkit-scrollbar-thumb:hover {
     background: var(--scrollbar-hover-color);
 }
-/* ==chrome,safari scroll== */
+/* ==chrome,safari scroll==
 
-.main-text-color {
-    color: var(--main-text-color);
-}
+/* Semantics for combining classes! */
+@layer components {
+    h1.error{
+      @apply text-red-700 text-sm transition-transform origin-left duration-150 ease-in-out;
+    }
+
+    body {
+        @apply font-mono;
+    }
+
+    .post h1 {
+        @apply text-4xl font-bold text-center;
+    }
+
+    .post h2 {
+        @apply text-2xl mt-16 mb-8 font-bold text-center;
+    }
+
+    .post h3 {
+        @apply text-xl my-6 font-semibold;
+    }
+
+    
+    .post pre {
+        @apply bg-slate-900 p-4 my-4 text-left border-l-2 rounded-sm;
+    }
+  }
