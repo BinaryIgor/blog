@@ -1,6 +1,7 @@
 ---
 {
     "title": "Reduce the search space",
+    "slug": "reduce-the-search-space",
     "publishedAt": "2023-08-27"
 }
 ---

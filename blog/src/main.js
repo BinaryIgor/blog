@@ -15,8 +15,15 @@ const templateVariablesRegex = /\{\{(.+?)\}\}/g;
 const postsDir = path.join(__dirname, "..", "posts");
 const templatesDir = path.join(__dirname, "..", "templates");
 
-async function fileContent(filePath) {
+const distDir = path.join(__dirname, "..", "dist");
+const postsJsonPath = path.join(distDir, "posts.json");
+
+function fileContent(filePath) {
     return fs.promises.readFile(filePath, 'utf-8');
+}
+
+function writeFileContent(filePath, fileContent) {
+    return fs.promises.writeFile(filePath, fileContent);
 }
 
 async function allTemplates(templatesDir) {
@@ -96,9 +103,13 @@ const templates = await allTemplates(templatesDir);
 // console.log(templates);
 
 const posts = await allPosts(postsDir);
+const postsData = [];
 
-for (const e of Object.entries(posts)) {
-    // console.log(marked.parse(p.content));
-    const content = e[1].content;
+for (const [k, e] of Object.entries(posts)) {
+    const { fontMatter, content } = e;
+    console.log(fontMatter);
     console.log(marked.parse(content));
+    postsData.push(fontMatter);
 }
+
+await writeFileContent(postsJsonPath, JSON.stringify(postsData, null, 2));
