@@ -1,0 +1,20 @@
+{
+    "name": "Binary Igor blog",
+    "version": "1.0.0",
+    "description": "Some experimental blog",
+    "scripts": {
+      "generate:css": "npx tailwindcss -i ./assets/styles.css -o ./dist/styles.css --watch",
+      "generate:site": "node src/main.js"
+    },
+    "author": "Igor Roztropiński",
+    "license": "ISC",
+    "engines": {
+      "node": ">=19.0.0"
+    },
+    "devDependencies": {
+      "marked": "^7.0.3",
+      "tailwindcss": "^3.3.3"
+    },
+    "type": "module"
+  }
+  

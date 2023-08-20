@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta id="viewport" name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="/blog/dist/styles.css">
+    <title>Igor Roztropiński</title>
+    <meta property="description" content="Personal site of Igor Roztropiński" />
+    <meta name="author" content="Igor Roztropiński" />
+</head>
+
+<body class="bg-black text-white">
+    <div class="p-4 text-center">
+        <h1 class="text-4xl font-bold">Binary Igor</h1>
+        <div class="py-4">Some thoughts about binary machines by <a target="_blank" href="https://igor.roztropinski.com/about" class="font-semibold">Igor Roztropiński</a>.</div>
+    
+        <ul class="pt-8 flex flex-col gap-10 items-center justify-center">
+            <li class="cursor-pointer border-[3px] border-dashed border-slate-200 max-w-[700px] rounded-md p-6">
+                <!-- <div class="text-4xl font-bold">---</div> -->
+                <h2 class="text-2xl mb-2 font-semibold">Reduce the search space</h2>
+                <div class="text-xl mb-4">2022-08-24</div>
+                <div>Some excerpt, that's pretty long,  that's pretty long,  that's pretty long...</div>
+            </li>
+            <li class="cursor-pointer border-[3px] border-dashed border-slate-200 max-w-[700px] rounded-md p-6">
+                <!-- <div class="text-4xl font-bold">---</div> -->
+                <h2 class="text-2xl mb-2 font-semibold">HTMX - a new approach to building web apps/websites</h2>
+                <div class="text-xl mb-4">2022-08-22</div>
+                <div>Some excerpt</div>
+            </li>
+        </ul>
+    </div>
+</body>
+
+<script>
+    const posts = document.querySelectorAll("li");
+    posts.forEach(p => p.onclick = () => {
+        console.log("Clicking on a post...");
+        location.href = "/blog/templates/post.html";
+    });
+</script>
+
+</html>

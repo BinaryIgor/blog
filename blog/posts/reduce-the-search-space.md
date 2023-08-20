@@ -1,7 +1,7 @@
 ---
 {
     "title": "Reduce the search space",
-    "publishedAt": "2023-08-20"
+    "publishedAt": "2023-08-27"
 }
 ---
 
@@ -59,7 +59,9 @@ We will get to **partitioning** later, but you can also think about it as **vert
 
 # Indexing
 
-Some content
+Index is just a separate datastructure that:
+* have a particular structure that help with searching
+points to a table (collection/document in the case of NoSQL databases) and  
 
 # Partioning 
 

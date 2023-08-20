@@ -1,0 +1,50 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Semantics for combining classes! */
+@layer components {
+    h1.error{
+      @apply text-red-700 text-sm transition-transform origin-left duration-150 ease-in-out;
+    }
+
+    body {
+        @apply font-mono;
+    }
+
+    .post h2 {
+        @apply text-2xl mt-16 mb-8 font-bold text-center;
+    }
+
+    .post h3 {
+        @apply text-xl my-6 font-semibold;
+    }
+
+    
+    .post pre {
+        @apply bg-slate-900 p-4 my-4 text-left border-l-2 rounded-sm;
+    }
+  }
+
+/* ==chrome,safari scroll== */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--background-color);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--scrollbar-color);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--scrollbar-hover-color);
+}
+/* ==chrome,safari scroll== */
+
+.main-text-color {
+    color: var(--main-text-color);
+}
