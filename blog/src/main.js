@@ -26,7 +26,7 @@ function writeFileContent(filePath, fileContent) {
     return fs.promises.writeFile(filePath, fileContent);
 }
 
-async function allTemplates(templatesDir) {
+async function allTemplates(templatesDir, postsData) {
     const fileNames = fs.readdirSync(templatesDir);
 
     const templates = {};
@@ -36,7 +36,36 @@ async function allTemplates(templatesDir) {
         templates[fn] = content;
     }
 
+    for (const [k, v] of Object.entries(templates)) {
+        const matches = v.matchAll(templateVariablesRegex);
+
+        let renderedTemplate = v;
+
+        for (const match of matches) {
+            const trimmedName = match[1].trim();
+            let templ = templates[trimmedName];
+            console.log("Templ:", trimmedName, templ);
+            if (!templ) {
+                if (trimmedName.includes(".js:")) {
+                    templ = await jsTemplate(postsData);
+                }
+                if (!templ) {
+                    throw new Error(`There is no template of ${trimmedName} name , but was expected by ${k} template`);
+                }
+            }
+
+            renderedTemplate = renderedTemplate.replace(match[0], templ);
+        }
+
+        templates[k] = renderedTemplate;
+    }
+
     return templates;
+}
+
+async function jsTemplate(postsData) {
+    const jsTemplates = await import('../templates/templates.js');
+    return jsTemplates['postsPreview']({ posts: postsData });
 }
 
 async function allPosts(postsDir) {
@@ -98,18 +127,16 @@ const html = marked.parse(post);
 // });
 // console.log("Rendered index:", renderedIndex);
 
-const templates = await allTemplates(templatesDir);
-
-// console.log(templates);
-
 const posts = await allPosts(postsDir);
 const postsData = [];
 
 for (const [k, e] of Object.entries(posts)) {
     const { fontMatter, content } = e;
-    console.log(fontMatter);
-    console.log(marked.parse(content));
     postsData.push(fontMatter);
 }
 
 await writeFileContent(postsJsonPath, JSON.stringify(postsData, null, 2));
+
+const templates = await allTemplates(templatesDir, postsData);
+
+console.log(templates["index.html"]);

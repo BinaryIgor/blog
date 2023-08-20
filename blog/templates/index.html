@@ -1,29 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
 
-<head>
-    <meta charset="UTF-8">
-    <meta id="viewport" name="viewport" content="width=device-width, initial-scale=1" />
-    <link rel="stylesheet" href="/blog/dist/styles.css">
-    <title>Igor Roztropiński</title>
-    <meta property="description" content="Personal site of Igor Roztropiński" />
-    <meta name="author" content="Igor Roztropiński" />
-</head>
+{{ head.html }}
 
 <body class="bg-black text-white">
     <div class="sticky top-0 p-2 mb-2 z-10 bg-black">
         <div id="navigation-toggle" class="absolute top-2 right-2 text-4xl cursor-pointer">1</div>
         <div class="absolute top-2 left-2 text-4xl cursor-pointer">0</div>
     </div>
-    <nav id="navigation" class="mb-8 hidden flex flex-col md:flex-row items-center justify-center gap-8 text-2xl">
-        <a href="index.html" class="underline">Home</a>
-        <a href="about.html">About</a>
-        <a href="posts.html">Posts</a>
-    </nav>
+    {{ navigation.html }}
     <div class="p-4 text-center">
         <h1 class="text-4xl font-bold">Binary Igor</h1>
         <div class="py-4">Some thoughts about binary machines by <a target="_blank"
-                href="https://igor.roztropinski.com/about" class="font-semibold">Igor Roztropiński</a>.</div>
+                href="https://igor.roztropinski.com" class="font-semibold">Igor Roztropiński</a>.</div>
 
         <ul class="pt-8 flex flex-col gap-10 items-center justify-center">
             <li class="cursor-pointer border-[3px] border-dashed border-slate-200 max-w-[700px] rounded-md p-6">
@@ -39,6 +28,8 @@
                 <div>Some excerpt</div>
             </li>
         </ul>
+
+        {{ templates.js: postsPreview }}
     </div>
 </body>
 
