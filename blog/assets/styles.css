@@ -5,7 +5,7 @@
 :root {
     --background-color: black;
     --scrollbar-color: white;
-    --scrollbar-hover-color: black;
+    --scrollbar-hover-color: #e2e8f0;
     /* ==scroll firefox== */
     /* "auto" or "thin" */
     scrollbar-width: auto;
