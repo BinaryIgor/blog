@@ -10,9 +10,9 @@
 <body class="bg-black text-white">
     {{ navigation.html }}
 
-    <div class="flex flex-col items-center justify-center post">
-        <h1>{{ title }}</h1>
-        <div class="p-4 max-w-[700px]">
+    <div class="post-container post">
+        <h1 class="px-4">{{ title }}</h1>
+        <div class="p-4 max-content-width">
             {{ post }}
         </div>
     </div>

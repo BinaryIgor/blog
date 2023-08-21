@@ -35,12 +35,16 @@
 
 /* Semantics for combining classes! */
 @layer components {
-    h1.error{
-      @apply text-red-700 text-sm transition-transform origin-left duration-150 ease-in-out;
-    }
-
     body {
         @apply font-mono;
+    }
+
+    .max-content-width {
+        @apply max-w-[700px];
+    }
+
+    .post-container {
+        @apply flex flex-col items-center justify-center;
     }
 
     .post h1 {
@@ -55,8 +59,7 @@
         @apply text-xl my-6 font-semibold;
     }
 
-    
     .post pre {
-        @apply bg-slate-900 p-4 my-4 text-left border-l-2 rounded-sm;
+        @apply bg-slate-900 p-4 my-4 text-left border-l-2 rounded-sm overflow-auto;
     }
   }

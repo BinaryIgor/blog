@@ -13,13 +13,17 @@ const fontMatterRegex = /^---(.*?)---/s;
 const templateVariablesRegex = /\{\{(.+?)\}\}/g;
 
 const postsDir = path.join(__dirname, "..", "posts");
-const templatesDir = path.join(__dirname, "..", "templates");
+const pagesDir = path.join(__dirname, "..", "pages");
 
 const distDir = path.join(__dirname, "..", "dist");
 const postsJsonPath = path.join(distDir, "posts.json");
 
 const configPath = path.join(__dirname, "..", "config.json");
 const config = JSON.parse(await fileContent(configPath));
+
+const HTML_EXTENSION = ".html";
+const JS_EXTENSION = ".js";
+const MD_EXTENSION = ".md";
 
 function fileContent(filePath) {
     return fs.promises.readFile(filePath, 'utf-8');
@@ -29,49 +33,59 @@ function writeFileContent(filePath, fileContent) {
     return fs.promises.writeFile(filePath, fileContent);
 }
 
-async function allTemplates(templatesDir, postsData) {
-    const fileNames = fs.readdirSync(templatesDir);
+async function allPages(pagesDir, postsData) {
+    const fileNames = fs.readdirSync(pagesDir);
 
-    const templates = {};
+    const pages = {};
 
     for (const fn of fileNames) {
-        const content = await fileContent(path.join(templatesDir, fn));
-        templates[fn] = content;
+        const content = await fileContent(path.join(pagesDir, fn));
+        pages[fn] = content;
     }
 
-    for (const [k, v] of Object.entries(templates)) {
+    for (const [k, v] of Object.entries(pages)) {
         const matches = v.matchAll(templateVariablesRegex);
 
-        let renderedTemplate = v;
+        let renderedPage = v;
 
         for (const match of matches) {
             const trimmedName = match[1].trim();
 
-            if (!trimmedName.includes(".html") && !trimmedName.includes(".js")) {
+            if (!trimmedName.includes(HTML_EXTENSION)
+                && !trimmedName.includes(MD_EXTENSION)
+                && !trimmedName.includes(JS_EXTENSION)) {
                 continue;
             }
 
-            let templ = templates[trimmedName];
+            let templ = pages[trimmedName];
             if (!templ) {
                 if (trimmedName.includes(".js:")) {
                     templ = await jsTemplate(postsData);
                 }
                 if (!templ) {
-                    throw new Error(`There is no template of ${trimmedName} name , but was expected by ${k} template`);
+                    throw new Error(`There is no page of ${trimmedName} name , but was expected by ${k} page`);
                 }
             }
 
-            renderedTemplate = renderedTemplate.replace(match[0], templ);
+            if (trimmedName.includes(MD_EXTENSION)) {
+                templ = markdownToHtml(templ);
+            }
+
+            renderedPage = renderedPage.replace(match[0], templ);
         }
 
-        templates[k] = renderedTemplate;
+        pages[k] = renderedPage;
     }
 
-    return templates;
+    return pages;
+}
+
+function markdownToHtml(markdown) {
+    return marked.parse(markdown);
 }
 
 async function jsTemplate(postsData) {
-    const jsTemplates = await import('../templates/templates.js');
+    const jsTemplates = await import('../pages/templates.js');
     return jsTemplates['postsPreview']({ posts: postsData });
 }
 
@@ -120,7 +134,6 @@ function templateWithReplacedVariables(template, data) {
 
 const posts = await allPosts(postsDir);
 const postsData = [];
-const postsToRender = [];
 
 for (const [k, e] of Object.entries(posts)) {
     const { fontMatter, content } = e;
@@ -129,17 +142,17 @@ for (const [k, e] of Object.entries(posts)) {
 
 await writeFileContent(postsJsonPath, JSON.stringify(postsData, null, 2));
 
-const templates = await allTemplates(templatesDir, postsData);
+const pages = await allPages(pagesDir, postsData);
 
 for (const p of config.pagesToRender) {
-    await writeFileContent(path.join(distDir, p), templates[p]);
+    await writeFileContent(path.join(distDir, p), pages[p]);
 }
 
-const postTemplate = templates[config.postTemplate];
+const postTemplate = pages[config.postTemplate];
 
 for (const [k, e] of Object.entries(posts)) {
-    const htmlContent = marked.parse(e.content);
-    const variables = { ...config, ...e.fontMatter, post: htmlContent};
+    const htmlContent = markdownToHtml(e.content);
+    const variables = { ...config, ...e.fontMatter, post: htmlContent };
     const post = templateWithReplacedVariables(postTemplate, variables);
 
     await writeFileContent(path.join(distDir, `${e.fontMatter.slug}.html`), post);

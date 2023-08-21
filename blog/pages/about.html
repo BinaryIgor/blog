@@ -8,10 +8,12 @@
 
 <body class="bg-black text-white">
     {{ navigation.html }}
-    <div class="p-4 text-center">
-        <h1 class="text-4xl font-bold">About Binary Igor</h1>
-        <p class="py-4">Some words about the blog</p>
-              
+    <div class="post-container post">
+        <h1>About</h1>
+        <div class="p-4 max-content-width">
+            {{ about.md }}
+        </div>
+    </div>
 </body>
 
 {{ init-script.html }}
