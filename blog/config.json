@@ -2,7 +2,8 @@
     "author": "Igor Roztropiński",
     "pagesToRender": [
         "index.html",
-        "posts.html"
+        "posts.html",
+        "about.html"
     ],
     "postTemplate": "post.html"
 }
