@@ -13,6 +13,12 @@ When we work with a set of persisted (somewhere)  data, we obviously want our qu
 Whenever I think about optimizing certain data query, be it SQL (mostly) or NoSQL, I find it useful to think about those problems as a search space problems. What I mean is that, you query will be fast, if your search space is small.
 Building on that, if you search space is huge (you work with $10^6$, $10^9$ and more number of rows for example), you need to find a way to make your search space small again. There are a couple ways of doing that, so let's explore them!
 
+..before, that testing image look:
+<figure>
+    <img src="{{ imagesPath }}/postgres.png" alt="Glorious postgres" title="Glorious postgres">
+    <figcaption>Glorious postgres</figcaption>
+</figure>
+
 ## Changing schema
 
 First, seach space also related to the *size* fo each row that we (any given database) needs to scan. So, let's say that we have the following schema of the SQL database: 

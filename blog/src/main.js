@@ -89,7 +89,7 @@ async function jsTemplate(postsData) {
     return jsTemplates['postsPreview']({ posts: postsData });
 }
 
-async function allPosts(postsDir) {
+async function allPosts(postsDir, variables) {
     const fileNames = fs.readdirSync(postsDir);
 
     const posts = {};
@@ -103,7 +103,8 @@ async function allPosts(postsDir) {
 
         posts[fn] = {
             fontMatter: fMatter,
-            content: postContent
+            content: templateWithReplacedVariables(postContent,
+                { ...variables, ...postContent })
         };
     }
 
@@ -132,7 +133,7 @@ function templateWithReplacedVariables(template, data) {
 }
 
 
-const posts = await allPosts(postsDir);
+const posts = await allPosts(postsDir, config);
 const postsData = [];
 
 for (const [k, e] of Object.entries(posts)) {
