@@ -43,8 +43,8 @@
         @apply max-w-[700px];
     }
 
-    .post-container {
-        @apply flex flex-col items-center justify-center;
+    .post > * {
+        @apply m-auto;
     }
 
     .post h1 {
@@ -60,7 +60,8 @@
     }
 
     .post pre {
-        @apply bg-slate-900 p-4 my-4 text-left border-l-2 rounded-sm overflow-auto;
+        @apply bg-slate-900 p-4 my-4 text-left border-l-2 rounded-sm overflow-auto
+            max-w-[700px];
     }
 
     .post figure {
@@ -68,7 +69,7 @@
     }
 
     .post img {
-        @apply w-full h-[400px] object-cover rounded-sm; 
+        @apply w-full max-h-[500px] object-cover rounded-sm; 
     }
 
     .post figcaption {
