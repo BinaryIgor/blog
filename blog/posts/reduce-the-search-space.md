@@ -73,6 +73,12 @@ points to a table (collection/document in the case of NoSQL databases) and
 
 ## Partitioning
 
+Partitioning is quite nice.
+
 ## Sharding
 
+Sharding is not bad too.
+
 ## Conclusion
+
+Some thought-provoking conclusions.
