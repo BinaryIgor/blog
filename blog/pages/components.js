@@ -16,3 +16,8 @@ export function postsPreview({ posts }) {
         ${posts.map(p => postPreview(p)).join("\n")}
     </ul>`;
 }
+
+export function latestsPostsPreview({ posts }) {
+    let latestsPosts = posts.length > 10 ? posts.slice(0, 10) : posts;
+    return postsPreview({posts: latestsPosts});
+}
