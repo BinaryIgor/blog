@@ -5,4 +5,51 @@
         console.log("Toggling nav...", navigation);
         navigation.classList.toggle("hidden");
     };
+
+    function setupMode() {
+        const KEY = "MODE";
+
+        const LIGHT_MODE = 'light';
+        const DARK_MODE = 'dark';
+        const DARK_MODE_ICON = "0";
+        const LIGHT_MODE_ICON = "1";
+
+        const themeToggle = document.getElementById("theme-toggle");
+
+        const currentMode = () => {
+            const mode = localStorage.getItem(KEY);
+            if (mode) {
+                return mode;
+            }
+            return DARK_MODE;
+        }
+
+        const setDarkMode = () => {
+            document.documentElement.classList.add(DARK_MODE);
+            localStorage.setItem(KEY, DARK_MODE)
+            themeToggle.textContent = DARK_MODE_ICON;
+        };
+
+        const setLightMode = () => {
+            document.documentElement.classList.remove(DARK_MODE);
+            localStorage.setItem(KEY, LIGHT_MODE)
+            themeToggle.textContent = LIGHT_MODE_ICON;
+        };
+
+        if (currentMode() == LIGHT_MODE) {
+            setLightMode();
+        } else {
+            setDarkMode();
+        }
+
+        themeToggle.onclick = e => {
+            if (currentMode() == LIGHT_MODE) {
+                setDarkMode();
+            } else {
+                setLightMode();
+            }
+        };
+    }
+
+    setupMode();
 </script>

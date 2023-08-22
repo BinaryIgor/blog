@@ -1,0 +1,18 @@
+<script>
+    (function () {
+        const KEY = "MODE";
+        const LIGHT_MODE = 'light';
+        const DARK_MODE = 'dark';
+
+        let currentMode = localStorage.getItem(KEY);
+        if (!currentMode) {
+            currentMode = DARK_MODE;
+        }
+
+        if (currentMode == LIGHT_MODE) {
+            document.documentElement.classList.remove(DARK_MODE);
+        } else {
+            document.documentElement.classList.add(DARK_MODE);
+        }
+    })();
+</script>

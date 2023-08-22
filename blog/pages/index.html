@@ -5,15 +5,17 @@
     {{ head-tags.html }}
     <title>Igor Roztropiński</title>
     <meta name="author" content="Igor Roztropiński" />
+    {{ theme-script.html }}
 </head>
 
 <body class="bg-black text-white">
     {{ navigation.html }}
     <div class="p-4 text-center">
         <h1 class="text-4xl font-bold">Binary Igor</h1>
-        <div class="py-4">Some thoughts about binary machines by <a target="_blank"
+        <div class="pt-4">Some thoughts about binary machines by <a target="_blank"
                 href="https://igor.roztropinski.com" class="font-semibold">Igor Roztropiński</a>.</div>
-
+        <div class="font-bold text-xl pb-16">---</div>
+        <h2 class="text-3xl font-bold">Latest posts</h2>
         {{ templates.js: postsPreview }}
     </div>
 </body>
