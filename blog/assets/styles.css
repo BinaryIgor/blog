@@ -2,15 +2,34 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-    --background-color: black;
+html.dark {
+    --primary-color: black;
+    --secondary-1-color: #0f172a;
+    --secondary-2-color: #1e293b;
+    --primary-text-color: white;
+    --secondary-1-text-color: #f1f5f9;
+    --secondary-2-text-color: #e2e8f0;
     --scrollbar-color: white;
-    --scrollbar-hover-color: #e2e8f0;
+    --scrollbar-hover-color: #cbd5e1;
+}
+
+html {
+    --primary-color: white;
+    --secondary-1-color: #f1f5f9;
+    --secondary-2-color: #e2e8f0;
+    --primary-text-color: black;
+    --secondary-1-text-color: #0f172a;
+    --secondary-2-text-color: #1e293b;
+    --scrollbar-color: black;
+    --scrollbar-hover-color: #334155;
+}
+
+:root {
     /* ==scroll firefox== */
     /* "auto" or "thin" */
     scrollbar-width: auto;
     /* scroll thumb and track */
-    scrollbar-color: var(--scrollbar-color) black;
+    scrollbar-color: var(--scrollbar-color) var(--primary-color);
     /* ==scroll firefox== */
 }
 
@@ -34,9 +53,34 @@
 /* ==chrome,safari scroll==
 
 /* Semantics for combining classes! */
+
+.bg-primary {
+    background-color: var(--primary-color);
+}
+
+.bg-secondary-1 {
+    background-color: var(--secondary-1-color);
+}
+
+.bg-secondary-2 {
+    background-color: var(--secondary-2-color);
+}
+
+.text-primary {
+    color: var(--primary-text-color);
+}
+
+.border-text-primary {
+    border-color: var(--primary-text-color);
+}
+
+.border-text-secondary-2 {
+    border-color: var(--secondary-2-text-color);
+}
+
 @layer components {
     body {
-        @apply font-mono;
+        @apply font-mono bg-primary text-primary;
     }
 
     .max-content-width {
@@ -60,8 +104,8 @@
     }
 
     .post pre {
-        @apply bg-slate-900 p-4 my-4 text-left border-l-2 rounded-sm overflow-auto
-            max-w-[700px];
+        @apply bg-secondary-2 p-4 my-4 text-left border-l-2 
+            border-text-primary max-content-width overflow-auto;
     }
 
     .post figure {

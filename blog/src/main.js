@@ -60,7 +60,7 @@ async function allPages(pagesDir, postsData) {
             let templ = pages[trimmedName];
             if (!templ) {
                 if (trimmedName.includes(".js:")) {
-                    templ = await jsTemplate(postsData);
+                    templ = await jsComponent(postsData);
                 }
                 if (!templ) {
                     throw new Error(`There is no page of ${trimmedName} name , but was expected by ${k} page`);
@@ -84,8 +84,8 @@ function markdownToHtml(markdown) {
     return marked.parse(markdown);
 }
 
-async function jsTemplate(postsData) {
-    const jsTemplates = await import('../pages/templates.js');
+async function jsComponent(postsData) {
+    const jsTemplates = await import('../pages/components.js');
     return jsTemplates['postsPreview']({ posts: postsData });
 }
 
