@@ -1,2 +1,8 @@
 **/node_modules
 **/dist
+
+# Scripts
+**/_deploy/
+**/__pycache__/
+**/venv/
+**/certs/

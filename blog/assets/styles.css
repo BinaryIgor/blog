@@ -52,6 +52,7 @@ html {
 ::-webkit-scrollbar-thumb:hover {
     background: var(--scrollbar-hover-color);
 }
+
 /* ==chrome,safari scroll==
 
 /* Semantics for combining classes! */
@@ -97,7 +98,7 @@ html {
         @apply max-w-[700px];
     }
 
-    .post > * {
+    .post>* {
         @apply m-auto;
     }
 
@@ -114,8 +115,7 @@ html {
     }
 
     .post pre {
-        @apply bg-secondary-1 p-4 my-4 text-left border-l-2 rounded-sm
-            border-text-primary max-content-width overflow-auto;
+        @apply bg-secondary-1 p-4 my-4 text-left border-l-2 rounded-sm border-text-primary max-content-width overflow-auto;
     }
 
     .post figure {
@@ -123,9 +123,9 @@ html {
     }
 
     .post img {
-        @apply w-full max-h-[500px] object-cover rounded-sm; 
+        @apply w-full object-contain rounded-md m-auto;
     }
-
+    
     .post figcaption {
         @apply italic text-center opacity-90;
     }
@@ -133,4 +133,4 @@ html {
     .delimiter-like {
         @apply text-secondary-2 font-bold text-xl text-center;
     }
-  }
+}

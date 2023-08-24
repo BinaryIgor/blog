@@ -15,7 +15,7 @@ Building on that, if you search space is huge (you work with $10^6$, $10^9$ and 
 
 ..before, that testing image look:
 <figure>
-    <img src="{{ imagesPath }}/postgres.png" alt="Glorious postgres" title="Glorious postgres">
+    <img src="{{ imagesPath }}/postgres_resized.png" alt="Glorious postgres" title="Glorious postgres">
     <figcaption>Glorious postgres</figcaption>
 </figure>
 
