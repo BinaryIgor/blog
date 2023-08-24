@@ -110,7 +110,7 @@ html {
     }
 
     .post h3 {
-        @apply text-xl my-6 font-semibold;
+        @apply text-xl mt-8 mb-4 font-semibold text-center;
     }
 
     .post pre {

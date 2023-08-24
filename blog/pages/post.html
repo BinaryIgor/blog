@@ -7,20 +7,114 @@
     <meta name="author" content="{{ author }}" />
 </head>
 
-<body>
+<body data-post-slug="{{ slug }}">
     {{ navigation.html }}
 
     <div class="post">
         <h1 class="px-4 mb-0">{{ title }}</h1>
         <div class="text-xl m-0 text-center text-secondary-2">{{ publishedAt }}</div>
-        <div class="p-4 mb-16 max-content-width">
+        <div class="p-4 mb-32 max-content-width">
             {{ post }}
         </div>
 
-        <!-- <h3>Something else to ponder...</h3> -->
+        <div class="mb-16 px-4 hidden" id="random-posts-component">
+            <div class="delimiter-like mb-32">---</div>
+            <div class="text-2xl text-center font-semibold">Something else to ponder:</div>
+            <div class="text-center" id="random-posts-container"></div>
+        </div>
+
+        <div class="max-content-width mb-16 italic">
+            <div class="delimiter-like mb-16">---</div>
+            <p>
+                If you have valuable feedback/correction/comments or you just want to get in touch, shoot me an email at
+                <span id="contact-email" class="font-bold cursor-pointer"
+                    onclick="copyToClipboard('{{ contactEmail }}')">{{ contactEmail }}</span>.
+            </p>
+            <p>Waiting for you there!</p>
+        </div>
     </div>
 </body>
 
 {{ init-script.html }}
+
+<script>
+    function copyToClipboard(email) {
+        try {
+            navigator.clipboard.writeText(email);
+        } catch (_) { }
+    }
+
+    const HIDDEN_CLASS = "hidden";
+    const RANDOM_POSTS = 3;
+    const MIN_POSTS_FOR_RANDOM = 2;
+    const currentPostSlug = document.body.getAttribute("data-post-slug");
+
+    const randomPostsComponent = document.getElementById("random-posts-component");
+    const randomPostsContainer = document.getElementById("random-posts-container");
+
+    function randomPostsExceptCurrentOne(posts) {
+        if (posts.length < MIN_POSTS_FOR_RANDOM) {
+            return [];
+        }
+
+        const desiredRandomPosts = posts.length > (RANDOM_POSTS + 1) ? RANDOM_POSTS : 1;
+        const randomPosts = [];
+
+        while (desiredRandomPosts > randomPosts.length) {
+            const randomIdx = randomNumber(0, posts.length);
+            const randomPost = posts[randomIdx];
+            if (randomPost.slug != currentPostSlug &&
+                !doRandomPostsIncludePost(randomPosts, randomPost)) {
+                randomPosts.push(randomPost);
+            }
+        }
+
+        return randomPosts;
+    }
+
+    function randomNumber(min, max) {
+        return min + Math.floor(Math.random() * max);
+    }
+
+    function doRandomPostsIncludePost(randomPosts, post) {
+        for (const p of randomPosts) {
+            if (p.slug == post.slug) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    //Also used in pages/components.js, remember to keep in sync!
+    function postPreview(post) {
+        const postUrl = `${post.slug}.html`;
+        return `
+        <li class="cursor-pointer border-[3px] border-dashed border-text-secondary-2 rounded-md p-6
+            max-content-width m-auto"
+        onclick="location.href='${postUrl}'">
+            <a href="${postUrl}" class="text-2xl mb-2 font-semibold">${post.title}</a>
+            <div class="text-xl mb-4 text-secondary-2">${post.publishedAt}</div>
+            <div>${post.excerpt}</div>
+        </li>`;
+    }
+
+    function postsPreview(posts) {
+        return `
+        <ul class="pt-8 space-y-8">
+            ${posts.map(p => postPreview(p)).join("\n")}
+        </ul>`;
+    }
+
+    fetch("posts.json")
+        .then(r => r.json())
+        .then(posts => {
+            const randomPosts = randomPostsExceptCurrentOne(posts);
+            if (randomPosts.length > 0) {
+                randomPostsComponent.classList.remove(HIDDEN_CLASS);
+                randomPostsContainer.innerHTML = postsPreview(randomPosts);
+            }
+        })
+        .catch(e => console.log("Failed to get posts", e));
+</script>
 
 </html>

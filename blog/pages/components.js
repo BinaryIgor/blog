@@ -1,3 +1,4 @@
+//Also used in post.html js, remember to keep in sync!
 export function postPreview(post) {
    const postUrl = `${post.slug}.html`;
    return `

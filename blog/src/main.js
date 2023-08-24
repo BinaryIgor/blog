@@ -69,7 +69,7 @@ async function allPages(pagesDir, postsData) {
             }
 
             if (trimmedName.includes(MD_EXTENSION)) {
-                templ = markdownToHtml(templ);
+                templ = templateWithReplacedVariables(markdownToHtml(templ), config);
             }
 
             renderedPage = renderedPage.replace(match[0], templ);
@@ -106,7 +106,7 @@ async function allPosts(postsDir, variables) {
         posts[fn] = {
             fontMatter: fMatter,
             content: templateWithReplacedVariables(postContent,
-                { ...variables, ...postContent })
+                { ...fMatter, ...variables })
         };
     }
 
