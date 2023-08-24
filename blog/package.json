@@ -5,7 +5,7 @@
     "scripts": {
       "generate:css": "npx tailwindcss -i ./assets/styles.css -o ./dist/styles.css",
       "generate:css:live": "npx tailwindcss -i ./assets/styles.css -o ./dist/styles.css --watch",
-      "generate:site": "node src/main.js"
+      "generate:site": "node src/generator.js"
     },
     "author": "Igor Roztropiński",
     "license": "ISC",

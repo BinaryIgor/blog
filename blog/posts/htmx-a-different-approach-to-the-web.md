@@ -6,5 +6,4 @@
     "excerpt": "HTMX is quite interesting"
 }
 ---
-
 Some article about HTMX.
