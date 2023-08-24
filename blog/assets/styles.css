@@ -9,6 +9,7 @@ html.dark {
     --primary-text-color: white;
     --secondary-1-text-color: #f1f5f9;
     --secondary-2-text-color: #e2e8f0;
+    --secondary-3-text-color: #cbd5e1;
     --scrollbar-color: white;
     --scrollbar-hover-color: #cbd5e1;
 }
@@ -20,6 +21,7 @@ html {
     --primary-text-color: black;
     --secondary-1-text-color: #0f172a;
     --secondary-2-text-color: #1e293b;
+    --secondary-3-text-color: #334155;
     --scrollbar-color: black;
     --scrollbar-hover-color: #334155;
 }
@@ -70,6 +72,14 @@ html {
     color: var(--primary-text-color);
 }
 
+.text-secondary-1 {
+    color: var(--secondary-1-text-color);
+}
+
+.text-secondary-2 {
+    color: var(--secondary-2-text-color);
+}
+
 .border-text-primary {
     border-color: var(--primary-text-color);
 }
@@ -104,7 +114,7 @@ html {
     }
 
     .post pre {
-        @apply bg-secondary-2 p-4 my-4 text-left border-l-2 
+        @apply bg-secondary-1 p-4 my-4 text-left border-l-2 rounded-sm
             border-text-primary max-content-width overflow-auto;
     }
 
@@ -118,5 +128,9 @@ html {
 
     .post figcaption {
         @apply italic text-center opacity-90;
+    }
+
+    .delimiter-like {
+        @apply text-secondary-2 font-bold text-xl text-center;
     }
   }

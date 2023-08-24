@@ -5,7 +5,7 @@ export function postPreview(post) {
         max-content-width m-auto"
     onclick="location.href='${postUrl}'">
         <a href="${postUrl}" class="text-2xl mb-2 font-semibold">${post.title}</a>
-        <div class="text-xl mb-4">${post.publishedAt}</div>
+        <div class="text-xl mb-4 text-secondary-2">${post.publishedAt}</div>
         <div>${post.excerpt}</div>
     </li>`;
 }

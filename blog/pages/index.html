@@ -12,13 +12,15 @@
     {{ navigation.html }}
     <div class="p-4 text-center">
         <h1 class="text-4xl font-bold">Binary Igor</h1>
-        <div class="pt-4 m-auto">
-            <p>Some thoughts about binary machines (also known as computers),</p>
-            <p>controlled by the people called</p>
-            <p>programmers/software engineers/coders/hackers,</p>
-            <a target="_blank" href="https://igor.roztropinski.com" class="font-semibold">by Igor Roztropiński</a>.
+        <div class="mt-4 m-auto max-content-width">
+            <p class="mb-2">
+                Some thoughts about binary machines (also known as computers),
+                controlled by the people called
+                programmers/software engineers/coders/hackers,
+            </p>
+            <a href="about.html" class="font-semibold">by Igor Roztropiński</a>.
         </div>
-        <div class="font-bold text-xl pb-8">---</div>
+        <div class="delimiter-like pb-8">---</div>
         <h2 class="text-3xl font-bold">Latest posts</h2>
         {{ components.js: latestsPostsPreview }}
     </div>
