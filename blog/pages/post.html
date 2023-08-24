@@ -5,6 +5,7 @@
     {{ head-tags.html }}
     <title>{{ title }}</title>
     <meta name="author" content="{{ author }}" />
+    {{ theme-script.html }}
 </head>
 
 <body data-post-slug="{{ slug }}">
@@ -34,7 +35,7 @@
     </div>
 </body>
 
-{{ init-script.html }}
+<script>{{ index.js }}</script>
 
 <script>
     function copyToClipboard(email) {
