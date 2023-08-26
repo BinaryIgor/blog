@@ -89,6 +89,10 @@ html {
     border-color: var(--secondary-2-text-color);
 }
 
+.object-position-50 {
+    object-position: 50% 50%;
+}
+
 @layer components {
     body {
         @apply font-mono bg-primary text-primary;
@@ -123,7 +127,7 @@ html {
     }
 
     .post img {
-        @apply w-full object-contain rounded-md m-auto;
+        @apply w-full object-cover object-position-50 rounded-md max-h-[700px];
     }
     
     .post figcaption {

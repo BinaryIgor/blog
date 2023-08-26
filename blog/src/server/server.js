@@ -21,6 +21,10 @@ app.post("/analytics/post-view", (req, res) => {
     res.sendStatus(200);
 });
 
+app.get("/stats", (req, res) => {
+
+});
+
 app.use((error, req, res, next) => {
     console.error("Something went wrong...", error);
     res.status(500);

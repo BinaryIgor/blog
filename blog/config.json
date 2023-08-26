@@ -6,6 +6,8 @@
         "about.html"
     ],
     "postTemplate": "post.html",
+    "devAssetsPathPrefix": "/blog/dist",
+    "assetsPath": "/assets",
     "imagesPath": "/assets/images",
     "contactEmail": "binaryigor4@gmail.com"
 }

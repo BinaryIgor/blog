@@ -21,6 +21,11 @@ const postsJsonPath = path.join(distDir, "posts.json");
 const configPath = path.join(__dirname, "..", "config.json");
 const config = JSON.parse(await fileContent(configPath));
 
+if (process.env.ENV == 'dev') {
+    config.assetsPath = path.join(config.devAssetsPathPrefix, config.assetsPath);
+    config.imagesPath = path.join(config.devAssetsPathPrefix, config.imagesPath);
+}
+
 const HTML_EXTENSION = ".html";
 const JS_EXTENSION = ".js";
 const MD_EXTENSION = ".md";
@@ -36,12 +41,14 @@ function writeFileContent(filePath, fileContent) {
 async function allPages(pagesDir, postsData) {
     const fileNames = fs.readdirSync(pagesDir);
 
-    const pages = {};
+    let pages = {};
 
     for (const fn of fileNames) {
         const content = await fileContent(path.join(pagesDir, fn));
         pages[fn] = content;
     }
+
+    pages = pagesWithReplacedVariables(pages, config);
 
     for (const [k, v] of Object.entries(pages)) {
         const matches = v.matchAll(templateVariablesRegex);
@@ -51,9 +58,7 @@ async function allPages(pagesDir, postsData) {
         for (const match of matches) {
             const trimmedName = match[1].trim();
 
-            if (!trimmedName.includes(HTML_EXTENSION)
-                && !trimmedName.includes(MD_EXTENSION)
-                && !trimmedName.includes(JS_EXTENSION)) {
+            if (!isFileVariable(trimmedName)) {
                 continue;
             }
 
@@ -69,7 +74,7 @@ async function allPages(pagesDir, postsData) {
             }
 
             if (trimmedName.includes(MD_EXTENSION)) {
-                templ = templateWithReplacedVariables(markdownToHtml(templ), config);
+                templ = markdownToHtml(templ);
             }
 
             renderedPage = renderedPage.replace(match[0], templ);
@@ -79,6 +84,19 @@ async function allPages(pagesDir, postsData) {
     }
 
     return pages;
+}
+
+function pagesWithReplacedVariables(pages, variables) {
+    const replacedVariablesPages = {...pages};
+    for (const [k, v] of Object.entries(pages)) {
+        replacedVariablesPages[k] = templateWithReplacedVariables(v, variables, true);
+    }
+    return replacedVariablesPages;
+}
+
+function isFileVariable(variable) {
+    return variable.includes(HTML_EXTENSION) || variable.includes(MD_EXTENSION)
+        || variable.includes(JS_EXTENSION);
 }
 
 function markdownToHtml(markdown) {
@@ -113,7 +131,7 @@ async function allPosts(postsDir, variables) {
     return posts;
 }
 
-function templateWithReplacedVariables(template, data) {
+function templateWithReplacedVariables(template, data, skipMissing=false) {
     const matches = template.matchAll(templateVariablesRegex);
 
     let renderedTemplate = template;
@@ -123,12 +141,13 @@ function templateWithReplacedVariables(template, data) {
         const value = data[key];
 
         if (!value) {
+            if (skipMissing) {
+                continue;
+            }
             throw new Error(`Variable of ${key} hasn't been provided`);
         }
 
         renderedTemplate = renderedTemplate.replace(match[0], value);
-
-        console.log("Replace", match[0], value);
     }
 
     return renderedTemplate;
