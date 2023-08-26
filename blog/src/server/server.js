@@ -49,7 +49,7 @@ app.post("/analytics/view", async (req, res) => {
     try {
         const ipHash = hashedIp(req);
         const reqBody = req.body;
-        const view = new View(Date.now(), reqBody.visitorId, ipHash, reqBody.sourceUrl, "/some-post.html");
+        const view = new View(Date.now(), reqBody.visitorId, ipHash, reqBody.sourceUrl, reqBody.path);
         await analylitcsService.addView(view);
     } catch (e) {
         console.log("Failed to add view, ignoring the result", e);
@@ -64,7 +64,7 @@ function hashedIp(req) {
     //Shorter hash!
     const hasher = createHash('sha1');
     hasher.update(ip)
-    return hasher.digest("hex");
+    return hasher.digest("base64url");
 }
 
 app.post("/analytics/post-view", (req, res) => {

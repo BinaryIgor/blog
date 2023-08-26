@@ -1,6 +1,7 @@
 import { URL } from "url";
 
 const MAX_VISITOR_ID_LENGTH = 100;
+const MAX_PATH_LENGTH = 250;
 const MAX_IP_HASH_VISITOR_IDS_IN_LAST_DAY = 10;
 const DAY_SECONDS = 24 * 60 * 60;
 
@@ -28,9 +29,14 @@ export class AnalyticsService {
     }
 
     _validateView(view) {
+        //TODO: truncate source
         const sourceUrl = new URL(view.source);
 
         this._validateVisitorId(view.visitorId);
+
+        if (!view.path || view.path.length > MAX_PATH_LENGTH) {
+            throw new Error(`Path can't be empty and must be less than ${MAX_PATH_LENGTH} of lenght, but was: ${view.path}`);
+        }
     }
 
     _validateVisitorId(visitorId) {
@@ -64,7 +70,7 @@ export class AnalyticsService {
             return;
         }
 
-        if (!await this.postsSource.postOfPathExists(view.path)) {
+        if (!this.postsSource.postOfPathExists(view.path)) {
             throw new Error(`Path: ${view.path} is neither allowed nor it has associated post`);
         }
     }
