@@ -17,16 +17,22 @@
     </div>
 </body>
 
-<script>{ { index.js } }</script>
+<script>{{ index.js }}</script>
 
 <script type="module">
     const statsContainer = document.getElementById("stats-container");
     const statsLoader = document.getElementById("stats-loader");
 
-    function fetchPostsPaths() {
+    function fetchPosts() {
         return fetch("posts.json")
             .then(r => r.json())
-            .then(posts => new Set(posts.map(p => `/${p.slug}.html`)))
+            .then(posts => {
+                const postsByPath = new Map();
+                posts.forEach(p => {
+                    postsByPath.set(`/${p.slug}.html`, p);
+                });
+                return postsByPath;
+            })
             .catch(e => {
                 console.log("Failed to get posts", e);
                 statsLoader.innerHTML = "Failed to get posts";
@@ -42,14 +48,16 @@
             });
     }
 
-    function toStatsView(postsPaths, stats) {
+    function toStatsView(postsByPath, stats) {
         return {
             views: stats.general.views,
             uniqueVisitors: stats.general.uniqueVisitors,
-            posts: stats.pages.filter(p => postsPaths.has(p.path))
+            posts: stats.pages.filter(p => postsByPath.has(p.path))
                 .map(p => {
+                    const post = postsByPath.get(p.path);
                     return {
-                        title: p.path,
+                        title: post.title,
+                        path: p.path,
                         views: p.views,
                         uniqueVisitors: p.uniqueVisitors
                     }
@@ -57,9 +65,9 @@
         };
     }
 
-    const postsPaths = await fetchPostsPaths();
+    const postsByPath = await fetchPosts();
     const stats = await fetchStats();
-    const statsView = toStatsView(postsPaths, stats);
+    const statsView = toStatsView(postsByPath, stats);
 
     function renderStats(stats) {
         statsContainer.innerHTML = `
@@ -89,6 +97,7 @@
         return `
         <div>
             <h3 class="text-xl font-semibold">${post.title}</h3>
+            <a class="italic font-semibold mb-4" href="${post.path}" target="_blank">${post.path}</a>
             <div>Views: ${post.views}</div>
             <div>Unique visitors: ${post.uniqueVisitors}</div>
             <div class="delimiter-like">---</div>
