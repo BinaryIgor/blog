@@ -17,27 +17,49 @@
     </div>
 </body>
 
-<script>{{ index.js }}</script>
+<script>{ { index.js } }</script>
 
-<script>
+<script type="module">
     const statsContainer = document.getElementById("stats-container");
+    const statsLoader = document.getElementById("stats-loader");
 
-    const fakeStats = {
-        views: 100,
-        uniqueVisitors: 15,
-        posts: [
-            {
-                title: "Reduce the search space",
-                views: 1000,
-                uniqueVisitors: 99
-            },
-            {
-                title: "Htmx a different approach",
-                views: 999,
-                uniqueVisitors: 101
-            }
-        ]
-    };
+    function fetchPostsPaths() {
+        return fetch("posts.json")
+            .then(r => r.json())
+            .then(posts => new Set(posts.map(p => `/${p.slug}.html`)))
+            .catch(e => {
+                console.log("Failed to get posts", e);
+                statsLoader.innerHTML = "Failed to get posts";
+            });
+    }
+
+    function fetchStats() {
+        return fetch("/api/stats")
+            .then(r => r.json())
+            .catch(e => {
+                console.log("Failed to get stats", e);
+                statsLoader.innerHTML = "Failed to get stats";
+            });
+    }
+
+    function toStatsView(postsPaths, stats) {
+        return {
+            views: stats.general.views,
+            uniqueVisitors: stats.general.uniqueVisitors,
+            posts: stats.pages.filter(p => postsPaths.has(p.path))
+                .map(p => {
+                    return {
+                        title: p.path,
+                        views: p.views,
+                        uniqueVisitors: p.uniqueVisitors
+                    }
+                })
+        };
+    }
+
+    const postsPaths = await fetchPostsPaths();
+    const stats = await fetchStats();
+    const statsView = toStatsView(postsPaths, stats);
 
     function renderStats(stats) {
         statsContainer.innerHTML = `
@@ -74,6 +96,7 @@
         `;
     }
 
-    setTimeout(() => renderStats(fakeStats), 1000);
+    renderStats(statsView);
 </script>
+
 </html>
