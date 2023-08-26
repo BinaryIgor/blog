@@ -1,7 +1,7 @@
 import bodyParser from "body-parser";
 import express from "express";
 import { createHash } from "crypto";
-import { AnalyticsService, SqliteAnalyticsRepository, View } from "./analytics.js";
+import { AnalyticsService, DeferredSqliteAnalyticsRepository, View } from "./analytics.js";
 
 import * as Config from "./config.js";
 
@@ -30,7 +30,7 @@ const clock = new Clock();
 
 const postsSource = new PostsSource(config.postsPath);
 
-const analyticsRepository = new SqliteAnalyticsRepository(db);
+const analyticsRepository = new DeferredSqliteAnalyticsRepository(db);
 const analylitcsService = new AnalyticsService(analyticsRepository, postsSource, config.allowedPaths, clock);
 
 const app = express();
