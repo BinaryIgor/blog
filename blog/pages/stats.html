@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    {{ head-tags.html }}
+    <title>Stats</title>
+    {{ theme-script.html }}
+</head>
+
+<body>
+    {{ navigation.html }}
+    <div class="p-6 text-center">
+        <h1 class="text-4xl font-bold mb-16">Stats</h1>
+        <div id="stats-container" class="max-content-width m-auto">
+            <div id="stats-loader">Loading...</div>
+        </div>
+    </div>
+</body>
+
+<script>{{ index.js }}</script>
+
+<script>
+    const statsContainer = document.getElementById("stats-container");
+
+    const fakeStats = {
+        views: 100,
+        uniqueVisitors: 15,
+        posts: [
+            {
+                title: "Reduce the search space",
+                views: 1000,
+                uniqueVisitors: 99
+            },
+            {
+                title: "Htmx a different approach",
+                views: 999,
+                uniqueVisitors: 101
+            }
+        ]
+    };
+
+    function renderStats(stats) {
+        statsContainer.innerHTML = `
+            <div class="mb-16">
+                <h2 class="text-3xl mb-4">Overall</h2>
+                ${generalStatsComponent(stats)}
+            </div>
+            <div>
+                <h2 class="text-3xl mb-4">Posts</h2>
+                ${postsStatsComponent(stats)}
+            </div>
+        `;
+    }
+
+    function generalStatsComponent(stats) {
+        return `
+            <div>Views: ${stats.views}</div>
+            <div>Unique visitors: ${stats.uniqueVisitors}</div>
+            `;
+    }
+
+    function postsStatsComponent(stats) {
+        return `<div class="space-y-8">${stats.posts.map(postStatsComponent).join('\n')}</div>`;
+    }
+
+    function postStatsComponent(post) {
+        return `
+        <div>
+            <h3 class="text-xl font-semibold">${post.title}</h3>
+            <div>Views: ${post.views}</div>
+            <div>Unique visitors: ${post.uniqueVisitors}</div>
+            <div class="delimiter-like">---</div>
+        </div>
+        `;
+    }
+
+    setTimeout(() => renderStats(fakeStats), 1000);
+</script>
+</html>

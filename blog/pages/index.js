@@ -2,7 +2,6 @@
 const navigation = document.getElementById("navigation");
 
 document.getElementById("navigation-toggle").onclick = () => {
-    console.log("Toggling nav...", navigation);
     navigation.classList.toggle("hidden");
 };
 

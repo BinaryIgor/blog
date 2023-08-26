@@ -3,7 +3,8 @@
     "pagesToRender": [
         "index.html",
         "posts.html",
-        "about.html"
+        "about.html",
+        "stats.html"
     ],
     "postTemplate": "post.html",
     "devAssetsPathPrefix": "/blog/dist",
