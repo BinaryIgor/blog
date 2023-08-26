@@ -37,10 +37,6 @@ const app = express();
 
 app.use(bodyParser.json());
 
-const asyncHandler = (fn) => (req, res, next) => {
-    return Promise.resolve(fn(req, res, next)).catch(next);
-}
-
 app.post("/analytics/view", async (req, res) => {
     console.log("Getting view...");
     console.log(req.url);
@@ -77,7 +73,7 @@ app.post("/analytics/post-view", (req, res) => {
 
 app.get("/stats", async (req, res) => {
     try {
-        const stats = await analyticsRepository.generalStats();
+        const stats = await analylitcsService.stats();
         res.send(stats);
     } catch (e) {
         console.log("Problem while getting stats...", e);
@@ -93,6 +89,17 @@ app.use((error, req, res, next) => {
     });
 });
 
-app.listen(8080, () => {
-    console.log(`Server started on 8080`);
+app.listen(config.serverPort, () => {
+    console.log(`Server started on ${config.serverPort}`);
+});
+
+//TODO: graceful shutdown
+process.on('SIGTERM', () => {
+    console.log("Received SIGTERM signal, exiting...")
+    process.exit();
+});
+
+process.on('SIGINT', () => {
+    console.log("Received SIGINT signal, exiting...")
+    process.exit();
 });

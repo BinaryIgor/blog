@@ -74,6 +74,13 @@ export class AnalyticsService {
             throw new Error(`Path: ${view.path} is neither allowed nor it has associated post`);
         }
     }
+
+    async stats() {
+        const general = await this.analyticsRepository.generalStats();
+        const pagesStats = await this.analyticsRepository.pagesStats();
+
+        return new Stats(general, pagesStats);
+    }
 }
 
 export class View {
@@ -93,6 +100,22 @@ export class GeneralStats {
     }
 }
 
+export class PageStats {
+    constructor(path, views, uniqueVisitors) {
+        this.path = path;
+        this.views = views;
+        this.uniqueVisitors = uniqueVisitors;
+    }
+}
+
+export class Stats {
+    constructor(general, pages) {
+        this.general = general;
+        this.pages = pages;
+    }
+}
+
+
 export class DeferredSqliteAnalyticsRepository {
 
     constructor(db) {
@@ -106,7 +129,7 @@ export class DeferredSqliteAnalyticsRepository {
             try {
                 this._saveViews();
                 this._viewsToSave = [];
-            } catch(e) {
+            } catch (e) {
                 console.log("Failed to save views:", e);
             }
         }, 1000);
@@ -139,6 +162,28 @@ export class DeferredSqliteAnalyticsRepository {
     }
 
     generalStats() {
-        return this.db.query("SELECT * FROM view");
+        return this.db.queryOne(`SELECT 
+            COUNT(*) as views, 
+            COUNT(DISTINCT visitor_id) as unique_visitors
+            FROM view`)
+            .then(r => {
+                if (r) {
+                    return new GeneralStats(r['views'], r['unique_visitors'])
+                }
+                return new GeneralStats(0, 0);
+            });
+    }
+
+    pagesStats() {
+        return this.db.query(`SELECT 
+            path,
+            COUNT(*) as views, 
+            COUNT(DISTINCT visitor_id) as unique_visitors
+            FROM view
+            GROUP BY path
+        `).then(rows => rows.map(r =>
+            new PageStats(r["path"],
+                r["views"],
+                r["unique_visitors"])));
     }
 }
