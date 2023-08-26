@@ -1,26 +1,41 @@
 import { URL } from "url";
-import {promisify}  from "util";
 
 const MAX_VISITOR_ID_LENGTH = 100;
+const MAX_IP_HASH_VISITOR_IDS_IN_LAST_DAY = 10;
+const DAY_SECONDS = 24 * 60 * 60;
 
 export class AnalyticsService {
 
-    constructor(analyticsRepository) {
+    constructor(analyticsRepository, clock) {
         this.analyticsRepository = analyticsRepository;
+        this.clock = clock;
     }
 
-    addView(view) {
+    async addView(view) {
         console.log("Validating view...", view);
         this._validateView(view);
         console.log("Adding view...", view);
 
-        this.analyticsRepository.addView(view);
+        await this._validateIpHashUniqueVisitorsLimit(view);
+
+        await this.analyticsRepository.addView(view);
     }
 
     _validateView(view) {
         const sourceUrl = new URL(view.source);
 
         this._validateVisitorId(view.visitorId);
+    }
+
+    async _validateIpHashUniqueVisitorsLimit(view) {
+        const timestampAgoTocheck = this.clock.timestampSecondsAgo(DAY_SECONDS);
+
+        const uniqueVisitorIdsOfIp = await this.analyticsRepository
+            .countDistinctVisitorIdsOfIpHashAfterTimestamp(view.ipHash, timestampAgoTocheck);
+
+        if (uniqueVisitorIdsOfIp > MAX_IP_HASH_VISITOR_IDS_IN_LAST_DAY) {
+            throw new Error(`To many visitor ids for a given ipHash in the last day`);
+        }
     }
 
     _validateVisitorId(visitorId) {
@@ -58,37 +73,32 @@ export class GeneralStats {
     }
 }
 
-class InMemoryAnalyticsRepository {
-    constructor() {
-        this._db = {};
-    }
-
-    addView(view) {
-        const key = `${view.date}-${view.visitorId}-${view.source}`;
-    }
-
-
-}
-
 export class SqliteAnalyticsRepository {
+
     constructor(db) {
         this.db = db;
     }
 
-    addView(view) {
-        this.db.run(`
+    async addView(view) {
+        await this.db.execute(`
             INSERT INTO view (timestamp, visitor_id, ip_hash, source, path)
                 VALUES (?, ?, ?, ?, ?)
         `, [view.timestamp, view.visitorId, view.ipHash, view.source, view.path]);
+    }
 
-        this.db.each("SELECT * FROM view", (err, row) => {
-            console.log("row: ", row);
-        });
+    countDistinctVisitorIdsOfIpHashAfterTimestamp(ipHash, timestamp) {
+        return this.db.queryOne(`SELECT COUNT(DISTINCT visitor_id) AS visitor_ids 
+            FROM view WHERE ip_hash = ? AND timestamp >= ?`,
+            [ipHash, timestamp])
+            .then(r => {
+                if (r) {
+                    return r["visitor_ids"]
+                }
+                return r;
+            });
     }
 
     generalStats() {
-        this.db.all("SELECT * FROM view", (rows, error ) => {
-            console.log(rows);
-        })
+        return this.db.query("SELECT * FROM view");
     }
 }

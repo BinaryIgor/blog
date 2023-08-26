@@ -3,33 +3,45 @@ import express from "express";
 import { createHash } from "crypto";
 import { AnalyticsService, SqliteAnalyticsRepository, View } from "./analytics.js";
 
-import sqlite3 from "sqlite3";
+import * as Config from "./config.js";
 
-const db = new sqlite3.Database(":memory:");
+import { SqliteDb } from "./db.js";
 
-db.serialize(() => {
-    db.run(`
-    CREATE TABLE view (
-        timestamp INTEGER(8) NOT NULL,
-        visitor_id TEXT NOT NULL,
-        ip_hash TEXT NOT NULL,
-        source TEXT NOT NULL,
-        path TEXT NOT NULL
-    );
+import { Clock } from "../shared/clock.js";
 
-    CREATE INDEX view_timestamp ON view(timestamp);
-    `);
+const config = Config.read();
 
-});
+const db = new SqliteDb(config.dbPath);
+
+const VALID_PATHS = [
+    "/",
+    "index.html",
+    "about.html",
+    "posts.html"
+];
+
+await db.execute(`
+CREATE TABLE IF NOT EXISTS view (
+    timestamp INTEGER(8) NOT NULL,
+    visitor_id TEXT NOT NULL,
+    ip_hash TEXT NOT NULL,
+    source TEXT NOT NULL,
+    path TEXT NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS view_timestamp ON view(timestamp);
+`);
+
+const clock = new Clock();
 
 const analyticsRepository = new SqliteAnalyticsRepository(db);
-const analylitcsService = new AnalyticsService(analyticsRepository);
+const analylitcsService = new AnalyticsService(analyticsRepository, clock);
 
 const app = express();
 
 app.use(bodyParser.json());
 
-app.post("/analytics/view", (req, res) => {
+app.post("/analytics/view", async (req, res) => {
     console.log("Getting view...");
     console.log(req.url);
     console.log(req.body);
@@ -38,7 +50,7 @@ app.post("/analytics/view", (req, res) => {
         const ipHash = hashedIp(req);
         const reqBody = req.body;
         const view = new View(Date.now(), reqBody.visitorId, ipHash, reqBody.sourceUrl, "/some-post.html");
-        analylitcsService.addView(view);
+        await analylitcsService.addView(view);
     } catch (e) {
         console.log("Failed to add view, ignoring the result", e);
     }
@@ -49,7 +61,8 @@ app.post("/analytics/view", (req, res) => {
 function hashedIp(req) {
     const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
     console.log("Ip address...", ip);
-    const hasher = createHash('sha256');
+    //Shorter hash!
+    const hasher = createHash('sha1');
     hasher.update(ip)
     return hasher.digest("hex");
 }
@@ -62,11 +75,14 @@ app.post("/analytics/post-view", (req, res) => {
     res.sendStatus(200);
 });
 
-app.get("/stats", (req, res) => {
-
-    analyticsRepository.generalStats();
-
-    res.send({ views: 1000 });
+app.get("/stats", async (req, res) => {
+    try {
+        const stats = await analyticsRepository.generalStats();
+        res.send(stats);
+    } catch (e) {
+        console.log("Problem while getting stats...", e);
+        res.sendStatus(500);
+    }
 });
 
 app.use((error, req, res, next) => {
