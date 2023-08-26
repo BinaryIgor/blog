@@ -16,4 +16,9 @@ echo "Generate blog..."
 
 node src/generator.js
 
+echo "Hash assets..."
+
+cd scripts
+python3 hash_assets.py;
+
 echo "Package built!"
