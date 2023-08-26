@@ -8,17 +8,11 @@ import * as Config from "./config.js";
 import { SqliteDb } from "./db.js";
 
 import { Clock } from "../shared/clock.js";
+import { PostsSource } from "./posts.js";
 
 const config = Config.read();
 
 const db = new SqliteDb(config.dbPath);
-
-const VALID_PATHS = [
-    "/",
-    "index.html",
-    "about.html",
-    "posts.html"
-];
 
 await db.execute(`
 CREATE TABLE IF NOT EXISTS view (
@@ -34,12 +28,18 @@ CREATE INDEX IF NOT EXISTS view_timestamp ON view(timestamp);
 
 const clock = new Clock();
 
+const postsSource = new PostsSource(config.postsPath);
+
 const analyticsRepository = new SqliteAnalyticsRepository(db);
-const analylitcsService = new AnalyticsService(analyticsRepository, clock);
+const analylitcsService = new AnalyticsService(analyticsRepository, postsSource, config.allowedPaths, clock);
 
 const app = express();
 
 app.use(bodyParser.json());
+
+const asyncHandler = (fn) => (req, res, next) => {
+    return Promise.resolve(fn(req, res, next)).catch(next);
+}
 
 app.post("/analytics/view", async (req, res) => {
     console.log("Getting view...");

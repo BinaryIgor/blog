@@ -6,17 +6,23 @@ const DAY_SECONDS = 24 * 60 * 60;
 
 export class AnalyticsService {
 
-    constructor(analyticsRepository, clock) {
+    constructor(analyticsRepository, postsSource, allowedPaths, clock) {
         this.analyticsRepository = analyticsRepository;
+        this.postsSource = postsSource;
         this.clock = clock;
+        this.allowedPaths = allowedPaths;
     }
 
     async addView(view) {
         console.log("Validating view...", view);
+        
         this._validateView(view);
-        console.log("Adding view...", view);
+
+        await this._validatePathExists(view);
 
         await this._validateIpHashUniqueVisitorsLimit(view);
+
+        console.log("Adding view...", view);
 
         await this.analyticsRepository.addView(view);
     }
@@ -25,17 +31,6 @@ export class AnalyticsService {
         const sourceUrl = new URL(view.source);
 
         this._validateVisitorId(view.visitorId);
-    }
-
-    async _validateIpHashUniqueVisitorsLimit(view) {
-        const timestampAgoTocheck = this.clock.timestampSecondsAgo(DAY_SECONDS);
-
-        const uniqueVisitorIdsOfIp = await this.analyticsRepository
-            .countDistinctVisitorIdsOfIpHashAfterTimestamp(view.ipHash, timestampAgoTocheck);
-
-        if (uniqueVisitorIdsOfIp > MAX_IP_HASH_VISITOR_IDS_IN_LAST_DAY) {
-            throw new Error(`To many visitor ids for a given ipHash in the last day`);
-        }
     }
 
     _validateVisitorId(visitorId) {
@@ -51,8 +46,27 @@ export class AnalyticsService {
         return true;
     }
 
-    addPostView(postView) {
-        console.log("Adding post view...", postView);
+
+    async _validateIpHashUniqueVisitorsLimit(view) {
+        const timestampAgoTocheck = this.clock.timestampSecondsAgo(DAY_SECONDS);
+
+        const uniqueVisitorIdsOfIp = await this.analyticsRepository
+            .countDistinctVisitorIdsOfIpHashAfterTimestamp(view.ipHash, timestampAgoTocheck);
+
+        if (uniqueVisitorIdsOfIp > MAX_IP_HASH_VISITOR_IDS_IN_LAST_DAY) {
+            throw new Error(`To many visitor ids for a given ipHash in the last day`);
+        }
+    }
+
+    async _validatePathExists(view) {
+        const inAllowedPaths = this.allowedPaths.some(p => p === view.path);
+        if (inAllowedPaths) {
+            return;
+        }
+
+        if (!await this.postsSource.postOfPathExists(view.path)) {
+            throw new Error(`Path: ${view.path} is neither allowed nor it has associated post`);
+        }
     }
 }
 
