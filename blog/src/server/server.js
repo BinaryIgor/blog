@@ -1,9 +1,29 @@
 import bodyParser from "body-parser";
 import express from "express";
 import { createHash } from "crypto";
-import {AnalyticsService, View, PostView } from "./analytics.js";
+import { AnalyticsService, SqliteAnalyticsRepository, View } from "./analytics.js";
 
-const analylitcsService = new AnalyticsService({});
+import sqlite3 from "sqlite3";
+
+const db = new sqlite3.Database(":memory:");
+
+db.serialize(() => {
+    db.run(`
+    CREATE TABLE view (
+        timestamp INTEGER(8) NOT NULL,
+        visitor_id TEXT NOT NULL,
+        ip_hash TEXT NOT NULL,
+        source TEXT NOT NULL,
+        path TEXT NOT NULL
+    );
+
+    CREATE INDEX view_timestamp ON view(timestamp);
+    `);
+
+});
+
+const analyticsRepository = new SqliteAnalyticsRepository(db);
+const analylitcsService = new AnalyticsService(analyticsRepository);
 
 const app = express();
 
@@ -14,13 +34,12 @@ app.post("/analytics/view", (req, res) => {
     console.log(req.url);
     console.log(req.body);
 
-    const ipHash = hashedIp(req);
-
     try {
+        const ipHash = hashedIp(req);
         const reqBody = req.body;
-        const view = new View(reqBody.sourceUrl, Date.now(), ipHash, reqBody.visitorId);
+        const view = new View(Date.now(), reqBody.visitorId, ipHash, reqBody.sourceUrl, "/some-post.html");
         analylitcsService.addView(view);
-    } catch(e) {
+    } catch (e) {
         console.log("Failed to add view, ignoring the result", e);
     }
 
@@ -44,7 +63,10 @@ app.post("/analytics/post-view", (req, res) => {
 });
 
 app.get("/stats", (req, res) => {
-    res.send({ views: 1000});
+
+    analyticsRepository.generalStats();
+
+    res.send({ views: 1000 });
 });
 
 app.use((error, req, res, next) => {
