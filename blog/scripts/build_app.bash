@@ -34,9 +34,9 @@ mkdir dist
 
 echo "Building image..."
 
-if [ -n "${PRE_PACKAGE_SCRIPT}" ]; then
-    echo "Running pre $PRE_PACKAGE_SCRIPT package script.."
-    bash ${PRE_PACKAGE_SCRIPT}
+if [ -n "${PRE_BUILD_SCRIPT}" ]; then
+    echo "Running pre $PRE_BUILD_SCRIPT build script.."
+    bash ${PRE_BUILD_SCRIPT}
 fi
 
 docker build . -t ${tagged_image}

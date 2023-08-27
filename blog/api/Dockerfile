@@ -1,6 +1,6 @@
 FROM node:19
 
-COPY dist/ /app
+COPY tmp/ /app
 
 WORKDIR /app
 
