@@ -111,11 +111,15 @@ html {
     }
 
     .post h2 {
-        @apply text-2xl mt-16 mb-8 font-bold text-center;
+        @apply text-2xl mt-8 mb-8 font-bold text-center;
     }
 
     .post h3 {
-        @apply text-xl mt-8 mb-4 font-semibold text-center;
+        @apply text-xl mt-4 mb-4 font-semibold text-center;
+    }
+
+    .post p {
+        @apply my-4;
     }
 
     .post pre {

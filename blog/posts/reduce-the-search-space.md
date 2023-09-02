@@ -69,7 +69,7 @@ We will get to **partitioning** later, but you can also think about it as **vert
 
 Index is just a separate datastructure that:
 * have a particular structure that help with searching
-points to a table (collection/document in the case of NoSQL databases) and  
+* points to a table (collection/document in the case of NoSQL databases) and  
 
 ## Partitioning
 
