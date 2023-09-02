@@ -1,9 +1,11 @@
 import { URL } from "url";
 
-const MAX_VISITOR_ID_LENGTH = 100;
-const MAX_PATH_LENGTH = 250;
+export const MAX_VISITOR_ID_LENGTH = 50;
+export const MAX_PATH_LENGTH = 250;
 const DAY_SECONDS = 24 * 60 * 60;
-const MAX_IP_HASH_VISITOR_IDS_IN_LAST_DAY = 25;
+export const MAX_IP_HASH_VISITOR_IDS_IN_LAST_DAY = 25;
+
+const UUID_REGEX = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'/;
 
 export class AnalyticsService {
 
@@ -15,24 +17,17 @@ export class AnalyticsService {
     }
 
     async addView(view) {
-        console.log("Validating view...", view);
-
-        const validatedView = this._validateView(view);
+        const validatedView = this._validatedView(view);
 
         await this._validatePathExists(view);
 
         await this._validateIpHashUniqueVisitorsLimit(view);
 
-        console.log("Adding view...", validatedView);
-
         this.analyticsRepository.addView(validatedView);
     }
 
-    _validateView(view) {
-        //TODO: truncate source
+    _validatedView(view) {
         const sourceUrl = new URL(view.source);
-
-        console.log("Source...", sourceUrl);
 
         this._validateVisitorId(view.visitorId);
 
@@ -48,7 +43,7 @@ export class AnalyticsService {
             throw new Error(`VisitorId should no be empty and have max ${MAX_VISITOR_ID_LENGTH} characters`)
         }
 
-        const match = visitorId.match('^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$');
+        const match = visitorId.match(UUID_REGEX);
         if (match === null) {
             throw new Error("VisitorId should be valid UUID, but was: " + visitorId);
         }
@@ -130,11 +125,11 @@ export class Stats {
 
 export class DeferredSqliteAnalyticsRepository {
 
-    constructor(db) {
+    constructor(db, scheduler, writeDelay) {
         this.db = db;
         this._viewsToSave = [];
 
-        setInterval(async () => {
+        scheduler.schedule(async () => {
             if (this._viewsToSave.length > 0) {
                 try {
                     this._saveViews();
@@ -143,7 +138,7 @@ export class DeferredSqliteAnalyticsRepository {
                     console.log("Failed to save views:", e);
                 }
             }
-        }, 1000);
+        }, writeDelay);
     }
 
     async _saveViews() {

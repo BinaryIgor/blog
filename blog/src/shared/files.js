@@ -2,11 +2,9 @@ import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 import fs from "fs";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
 export function currentDir() {
-    return __dirname;
+    const __filename = fileURLToPath(import.meta.url);
+    return dirname(__filename);
 }
 
 export function textFileContent(path) {

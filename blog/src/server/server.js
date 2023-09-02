@@ -1,7 +1,9 @@
 import bodyParser from "body-parser";
 import express from "express";
-import { createHash } from "crypto";
 import { AnalyticsService, DeferredSqliteAnalyticsRepository, View } from "./analytics.js";
+import { Scheduler } from "./scheduler.js";
+
+import * as Web from "./web.js"
 
 import * as Config from "./config.js";
 
@@ -12,7 +14,10 @@ import { PostsSource } from "./posts.js";
 
 const REAL_IP_HEADER = "X-Real-Ip";
 
-export async function start() {
+let server;
+let scheduler;
+
+export async function start(clock = new Clock()) {
     const config = Config.read();
 
     const db = new SqliteDb(config.dbPath);
@@ -29,11 +34,11 @@ export async function start() {
     CREATE INDEX IF NOT EXISTS view_timestamp ON view(timestamp);
     `);
 
-    const clock = new Clock();
+    scheduler = new Scheduler();
 
-    const postsSource = new PostsSource(config.postsPath);
+    const postsSource = new PostsSource(config.postsPath, scheduler, config.postsReadDelay);
 
-    const analyticsRepository = new DeferredSqliteAnalyticsRepository(db);
+    const analyticsRepository = new DeferredSqliteAnalyticsRepository(db, scheduler, config.viewsWriteDelay);
     const analylitcsService = new AnalyticsService(analyticsRepository, postsSource, config.analyticsAllowedPaths, clock);
 
     const app = express();
@@ -45,10 +50,10 @@ export async function start() {
         console.log(req.url);
         console.log(req.body);
 
-        try {
-            const ipHash = hashedIp(req);
+        try {   
+            const ipHash = Web.hashedIp(req.headers[REAL_IP_HEADER] || req.socket.remoteAddress);
             const reqBody = req.body;
-            const view = new View(Date.now(), reqBody.visitorId, ipHash, reqBody.sourceUrl, reqBody.path);
+            const view = new View(clock.nowTimestamp(), reqBody.visitorId, ipHash, reqBody.sourceUrl, reqBody.path);
             await analylitcsService.addView(view);
         } catch (e) {
             console.log("Failed to add view, ignoring the result", e);
@@ -56,13 +61,6 @@ export async function start() {
 
         res.sendStatus(200);
     });
-
-    function hashedIp(req) {
-        const ip = req.headers[REAL_IP_HEADER] || req.socket.remoteAddress;
-        const hasher = createHash('sha256');
-        hasher.update(ip)
-        return hasher.digest("base64");
-    }
 
     app.get("/stats", async (req, res) => {
         try {
@@ -82,20 +80,31 @@ export async function start() {
         });
     });
 
-    app.listen(config.serverPort, () => {
+    server = app.listen(config.serverPort, () => {
         console.log(`Server started on ${config.serverPort}`);
     });
 
     //TODO: graceful shutdown
     process.on('SIGTERM', () => {
-        console.log("Received SIGTERM signal, exiting...")
+        console.log("Received SIGTERM signal, exiting...");
+        stop();
         process.exit();
     });
 
     process.on('SIGINT', () => {
-        console.log("Received SIGINT signal, exiting...")
+        console.log("Received SIGINT signal, exiting...");
+        stop();
         process.exit();
     });
+}
+
+export function stop() {
+    if (server) {
+        server.close();
+    }
+    if (scheduler) {
+        scheduler.close();
+    }
 }
 
 //Start only if called directly from the console

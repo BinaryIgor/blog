@@ -2,11 +2,11 @@ import * as Files from "../shared/files.js";
 
 export class PostsSource {
 
-    constructor(postsPath) {
+    constructor(postsPath, scheduler, readDelay) {
         this._postsPath = postsPath;
         this._posts = new Set();
 
-        setInterval(async () => {
+        scheduler.schedule(async () => {
             try {
                 const postsPaths = new Set();
                 
@@ -20,7 +20,7 @@ export class PostsSource {
             } catch(e) {
                 console.error("Problem while reading posts...", e);
             }
-        }, 1000);
+        }, readDelay);
     }
 
     postOfPathExists(path) {

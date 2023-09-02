@@ -8,7 +8,9 @@ export function read() {
         dbPath: envVarOrDefault("DB_PATH", "/tmp/analytics.db"),
         dbBackupPath: envVarOrDefault("DB_BACKUP_PATH", "/tmp/analytics_backup.db"),
         analyticsAllowedPaths: analyticsAllowedPaths(),
-        postsPath: envVarOrDefault("POSTS_PATH", localPostsPath())
+        postsPath: envVarOrDefault("POSTS_PATH", localPostsPath()),
+        postsReadDelay: envVarOrDefault("POSTS_READ_DELAY", 5000),
+        viewsWriteDelay: envVarOrDefault("VIEWS_WRITE_DELAY", 1000)
     }
 }
 
