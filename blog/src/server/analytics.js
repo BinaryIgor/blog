@@ -3,7 +3,7 @@ import { URL } from "url";
 const MAX_VISITOR_ID_LENGTH = 100;
 const MAX_PATH_LENGTH = 250;
 const DAY_SECONDS = 24 * 60 * 60;
-const MAX_IP_HASH_VISITOR_IDS_IN_LAST_DAY = 10;
+const MAX_IP_HASH_VISITOR_IDS_IN_LAST_DAY = 25;
 
 export class AnalyticsService {
 
@@ -63,8 +63,8 @@ export class AnalyticsService {
         const uniqueVisitorIdsOfIp = await this.analyticsRepository
             .countDistinctVisitorIdsOfIpHashAfterTimestamp(view.ipHash, timestampAgoTocheck);
 
-        if (uniqueVisitorIdsOfIp > MAX_IP_HASH_VISITOR_IDS_IN_LAST_DAY) {
-            throw new Error(`To many visitor ids for a given ipHash in the last day`);
+        if (uniqueVisitorIdsOfIp >= MAX_IP_HASH_VISITOR_IDS_IN_LAST_DAY) {
+            throw new Error(`Too many visitor ids for a given ipHash in the last day`);
         }
     }
 
@@ -135,20 +135,19 @@ export class DeferredSqliteAnalyticsRepository {
         this._viewsToSave = [];
 
         setInterval(async () => {
-            if (this._viewsToSave.length < 1) {
-                return;
-            }
-            try {
-                this._saveViews();
-                this._viewsToSave = [];
-            } catch (e) {
-                console.log("Failed to save views:", e);
+            if (this._viewsToSave.length > 0) {
+                try {
+                    this._saveViews();
+                    this._viewsToSave = [];
+                } catch (e) {
+                    console.log("Failed to save views:", e);
+                }
             }
         }, 1000);
     }
 
     async _saveViews() {
-        const argsPlaceholders = this._viewsToSave.map(a => "(?, ?, ?, ?, ?)")
+        const argsPlaceholders = this._viewsToSave.map(_ => "(?, ?, ?, ?, ?)")
             .join(",\n");
         const argsValues = this._viewsToSave.flatMap(v => [v.timestamp, v.visitorId, v.ipHash, v.source, v.path]);
 
@@ -169,7 +168,7 @@ export class DeferredSqliteAnalyticsRepository {
                 if (r) {
                     return r["visitor_ids"]
                 }
-                return r;
+                return 0;
             });
     }
 
@@ -205,7 +204,7 @@ export class DeferredSqliteAnalyticsRepository {
 
     _viewsBySourceStats() {
         return this.db.query(
-            `SELECT source, COUNT(*) as views FROM view GROUP BY source`)
+            `SELECT source, COUNT(*) as views FROM view GROUP BY source ORDER BY views DESC`)
             .then(rows => rows.map(r => {
                 return {
                     source: r['source'],
@@ -221,6 +220,7 @@ export class DeferredSqliteAnalyticsRepository {
             COUNT(DISTINCT visitor_id) as unique_visitors
             FROM view
             GROUP BY path
+            ORDER BY views DESC
         `).then(rows => rows.map(r =>
             new PageStats(r["path"],
                 r["views"],

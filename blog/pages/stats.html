@@ -52,6 +52,12 @@
         return {
             views: stats.general.views,
             uniqueVisitors: stats.general.uniqueVisitors,
+            viewsBySource: stats.general.viewsBySource.map(v => {
+                return {
+                    source: v.source,
+                    views: `${Math.round(v.views * 100) / 100}%`
+                }
+            }),
             posts: stats.pages.filter(p => postsByPath.has(p.path))
                 .map(p => {
                     const post = postsByPath.get(p.path);
@@ -75,6 +81,10 @@
                 <h2 class="text-3xl mb-4">Overall</h2>
                 ${generalStatsComponent(stats)}
             </div>
+            <div class="mb-16">
+                <h2 class="text-3xl mb-4">Views by source</h2>
+                ${viewsBySourceComponent(stats)}
+            </div>
             <div>
                 <h2 class="text-3xl mb-4">Posts</h2>
                 ${postsStatsComponent(stats)}
@@ -87,6 +97,19 @@
             <div>Views: ${stats.views}</div>
             <div>Unique visitors: ${stats.uniqueVisitors}</div>
             `;
+    }
+
+    function viewsBySourceComponent(stats) {
+        return `<div class="space-y-8">${stats.viewsBySource.map(viewsOfSourceComponent).join('\n')}</div>`;
+    }
+
+    function viewsOfSourceComponent(views) {
+        return `
+        <div>
+            <div>${views.source}: ${views.views}</div>
+            <div class="delimiter-like">---</div>
+        </div>
+        `;
     }
 
     function postsStatsComponent(stats) {
