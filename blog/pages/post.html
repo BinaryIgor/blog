@@ -11,29 +11,29 @@
 <body data-post-slug="{{ slug }}">
     {{ navigation.html }}
 
-    <div class="post">
+    <article class="post">
         <h1 class="px-4 mb-0 max-content-width">{{ title }}</h1>
         <div class="text-lg m-0 text-center text-secondary-2 max-content-width m-auto">
             {{ .js: postMetadata() }}
         </div>
-        <article class="px-6 mt-16 mb-16 max-content-width">
+        <div class="px-6 mt-16 mb-16 max-content-width">
             {{ post }}
-        </article>
-
-        <div class="max-content-width mb-16 p-6 italic">
-            <div class="delimiter-like mb-16">---</div>
-            <p>
-                If you have valuable feedback/correction/comments or you just want to get in touch, shoot me an email at
-                <span id="contact-email" class="font-bold cursor-pointer"
-                    onclick="copyToClipboard('{{ contactEmail }}')">{{ contactEmail }}</span>.
-            </p>
-            <p>Waiting for you there!</p>
         </div>
+    </article>
 
-        <div class="mb-8 px-6 hidden" id="random-posts-component">
-            <div class="text-2xl text-center font-semibold">Something else to ponder:</div>
-            <div class="text-center" id="random-posts-container"></div>
-        </div>
+    <div class="max-content-width mb-16 p-6 italic m-auto">
+        <div class="delimiter-like mb-16">---</div>
+        <p>
+            If you have valuable feedback/correction/comments or you just want to get in touch, shoot me an email at
+            <span id="contact-email" class="font-bold cursor-pointer"
+                onclick="copyToClipboard('{{ contactEmail }}')">{{ contactEmail }}</span>.
+        </p>
+        <p>Waiting for you there!</p>
+    </div>
+
+    <div class="mb-8 px-6 hidden" id="random-posts-component">
+        <div class="text-2xl text-center font-semibold">Something else to ponder:</div>
+        <div class="text-center" id="random-posts-container"></div>
     </div>
 </body>
 
