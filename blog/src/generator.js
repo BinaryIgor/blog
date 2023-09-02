@@ -30,6 +30,8 @@ const HTML_EXTENSION = ".html";
 const JS_EXTENSION = ".js";
 const MD_EXTENSION = ".md";
 
+const jsComponents = await import('../pages/components.js');
+
 function fileContent(filePath) {
     return fs.promises.readFile(filePath, 'utf-8');
 }
@@ -58,15 +60,14 @@ async function allPages(pagesDir, postsData) {
         for (const match of matches) {
             const trimmedName = match[1].trim();
 
-            if (!isFileVariable(trimmedName)) {
+            if (!isFileVariable(trimmedName) || isFunctionVariable(trimmedName)) {
                 continue;
             }
 
             let templ = pages[trimmedName];
             if (!templ) {
-                if (trimmedName.includes(".js:")) {
-                    const componentName = trimmedName.split(".js:")[1].trim();
-                    templ = await jsComponent(componentName, postsData);
+                if (isJsComponent(trimmedName)) {
+                    templ = renderedJsComponent(trimmedName, { posts: postsData });
                 }
                 if (!templ) {
                     throw new Error(`There is no page of ${trimmedName} name , but was expected by ${k} page`);
@@ -87,9 +88,9 @@ async function allPages(pagesDir, postsData) {
 }
 
 function pagesWithReplacedVariables(pages, variables) {
-    const replacedVariablesPages = {...pages};
+    const replacedVariablesPages = { ...pages };
     for (const [k, v] of Object.entries(pages)) {
-        replacedVariablesPages[k] = templateWithReplacedVariables(v, variables, true);
+        replacedVariablesPages[k] = templateWithReplacedVariables(v, variables, { skipMissing: true });
     }
     return replacedVariablesPages;
 }
@@ -99,14 +100,24 @@ function isFileVariable(variable) {
         || variable.includes(JS_EXTENSION);
 }
 
-function markdownToHtml(markdown) {
-    return marked.parse(markdown);
+function isJsComponent(variable) {
+    return variable.includes(".js:");
 }
 
-async function jsComponent(name, postsData) {
-    const jsComponents = await import('../pages/components.js');
-    console.log("Getting js component: ", name);
-    return jsComponents[name]({ posts: postsData });
+function renderedJsComponent(variable, args) {
+    let componentName = variable.split(".js:")[1].trim();
+    if (isFunctionVariable(componentName)) {
+        componentName = componentName.replace("(", "").replace(")", "").trim();
+    }
+    return jsComponents[componentName](args);
+}
+
+function isFunctionVariable(variable) {
+    return variable.includes("()") || variable.includes("( )");
+}
+
+function markdownToHtml(markdown) {
+    return marked.parse(markdown);
 }
 
 async function allPosts(postsDir, variables) {
@@ -131,17 +142,23 @@ async function allPosts(postsDir, variables) {
     return posts;
 }
 
-function templateWithReplacedVariables(template, data, skipMissing=false) {
+function templateWithReplacedVariables(template, data, opts = { renderFunctions: false, skipMissing: false }) {
     const matches = template.matchAll(templateVariablesRegex);
 
     let renderedTemplate = template;
 
     for (const match of matches) {
         const key = match[1].trim();
-        const value = data[key];
+
+        let value;
+        if (opts.renderFunctions && isFunctionVariable(key)) {
+            value = renderedJsComponent(key, data);
+        } else {
+            value = data[key];
+        }
 
         if (!value) {
-            if (skipMissing) {
+            if (opts.skipMissing) {
                 continue;
             }
             throw new Error(`Variable of ${key} hasn't been provided`);
@@ -175,7 +192,7 @@ const postTemplate = pages[config.postTemplate];
 for (const [k, e] of Object.entries(posts)) {
     const htmlContent = markdownToHtml(e.content);
     const variables = { ...config, ...e.fontMatter, post: htmlContent };
-    const post = templateWithReplacedVariables(postTemplate, variables);
+    const post = templateWithReplacedVariables(postTemplate, variables, { skipMissing: false, renderFunctions: true });
 
     await writeFileContent(path.join(distDir, `${e.fontMatter.slug}.html`), post);
 }

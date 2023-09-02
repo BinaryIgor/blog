@@ -1,3 +1,20 @@
+export function postMetadata({publishedAt, timeToRead, wordsCount}) {
+    if (!publishedAt) {
+        throw new Error("Published at is required, but wasn't supplied!");
+    }
+    
+    let component = `${publishedAt};`;
+    
+    if (timeToRead) {
+        component += ` ${timeToRead} to read;`;
+    }
+    if (wordsCount) {
+        component += ` ${wordsCount} words;`;
+    }
+
+    return component;
+}
+
 //Also used in post.html js, remember to keep in sync!
 export function postPreview(post) {
    const postUrl = `${post.slug}.html`;
