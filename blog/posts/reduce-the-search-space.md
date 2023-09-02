@@ -3,6 +3,8 @@
     "title": "Reduce the search space",
     "slug": "reduce-the-search-space",
     "publishedAt": "2023-08-27",
+    "timeToRead": "3 minutes",
+    "wordsCount": 600,
     "excerpt": "When we work with a set of persisted (somewhere) data, we obviously want our queries to be fast. Whenever I think about optimizing certain data query, be it SQL (mostly) or NoSQL, I find it useful to think about those problems as a search space problems..."
 }
 ---
