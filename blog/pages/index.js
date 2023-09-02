@@ -53,6 +53,7 @@ function setupMode() {
 setupMode();
 
 // Analytics
+const POST_ATTRIBUTE = "data-post-slug";
 const SENT_VIEW_KEY = "SENT_VIEW";
 const VISITOR_ID_KEY = "VISITOR_ID";
 
@@ -61,7 +62,7 @@ const MIN_POST_VIEW_TIME = 1000 * 5;
 
 const VIEW_URL = "/api/analytics/view";
 
-const postPage = document.body.getAttribute("data-post-slug");
+const postPage = document.body.getAttribute(POST_ATTRIBUTE);
 
 function lastSentViewExpired() {
     const viewSent = localStorage.getItem(SENT_VIEW_KEY);
@@ -95,16 +96,13 @@ function sendView(sourceUrl, visitorId) {
 
 function tryToSendView(sourceUrl, visitorId) {
     if (postPage) {
-        console.log("Post page!");
         setTimeout(() => sendView(sourceUrl, visitorId), MIN_POST_VIEW_TIME);
     } else if (lastSentViewExpired()) {
         sendView(sourceUrl, visitorId);
     }
 }
 
-const sourceUrl = document.referrer ? document.referrer : document.location.origin;
+const sourceUrl = document.referrer ? document.referrer : document.location.href;
 const visitorId = getOrGenerateVisitorId();
-console.log("Source url", sourceUrl);
-console.log("visitor id", visitorId);
 
 tryToSendView(sourceUrl, visitorId);

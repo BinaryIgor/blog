@@ -8,7 +8,7 @@
         "generate:site": "node src/generator.js",
         "generate:site:dev": "ENV=dev node src/generator.js",
         "build:blog": "bash build_blog.bash",
-        "run:blog": "cd deploy/nginx; bash build_and_run_locally.bash",
+        "run:blog": "cd nginx; bash build_and_run_locally.bash",
         "build:run:api": "cd api; bash build_and_run_locally.bash"
     },
     "author": "Igor Roztropiński",

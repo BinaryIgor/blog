@@ -2,8 +2,8 @@ import { URL } from "url";
 
 const MAX_VISITOR_ID_LENGTH = 100;
 const MAX_PATH_LENGTH = 250;
-const MAX_IP_HASH_VISITOR_IDS_IN_LAST_DAY = 10;
 const DAY_SECONDS = 24 * 60 * 60;
+const MAX_IP_HASH_VISITOR_IDS_IN_LAST_DAY = 10;
 
 export class AnalyticsService {
 
@@ -17,26 +17,30 @@ export class AnalyticsService {
     async addView(view) {
         console.log("Validating view...", view);
 
-        this._validateView(view);
+        const validatedView = this._validateView(view);
 
         await this._validatePathExists(view);
 
         await this._validateIpHashUniqueVisitorsLimit(view);
 
-        console.log("Adding view...", view);
+        console.log("Adding view...", validatedView);
 
-        this.analyticsRepository.addView(view);
+        this.analyticsRepository.addView(validatedView);
     }
 
     _validateView(view) {
         //TODO: truncate source
         const sourceUrl = new URL(view.source);
 
+        console.log("Source...", sourceUrl);
+
         this._validateVisitorId(view.visitorId);
 
         if (!view.path || view.path.length > MAX_PATH_LENGTH) {
             throw new Error(`Path can't be empty and must be less than ${MAX_PATH_LENGTH} of lenght, but was: ${view.path}`);
         }
+
+        return {...view, source: sourceUrl.host }
     }
 
     _validateVisitorId(visitorId) {

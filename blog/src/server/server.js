@@ -10,6 +10,8 @@ import { SqliteDb } from "./db.js";
 import { Clock } from "../shared/clock.js";
 import { PostsSource } from "./posts.js";
 
+const REAL_IP_HEADER = "X-Real-Ip";
+
 const config = Config.read();
 
 const db = new SqliteDb(config.dbPath);
@@ -31,14 +33,14 @@ const clock = new Clock();
 const postsSource = new PostsSource(config.postsPath);
 
 const analyticsRepository = new DeferredSqliteAnalyticsRepository(db);
-const analylitcsService = new AnalyticsService(analyticsRepository, postsSource, config.allowedPaths, clock);
+const analylitcsService = new AnalyticsService(analyticsRepository, postsSource, config.analyticsAllowedPaths, clock);
 
 const app = express();
 
 app.use(bodyParser.json());
 
 app.post("/analytics/view", async (req, res) => {
-    console.log("Getting view...");
+    console.log("Posting view...");
     console.log(req.url);
     console.log(req.body);
 
@@ -55,21 +57,11 @@ app.post("/analytics/view", async (req, res) => {
 });
 
 function hashedIp(req) {
-    const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
-    console.log("Ip address...", ip);
-    //Shorter hash!
-    const hasher = createHash('sha1');
+    const ip = req.headers[REAL_IP_HEADER] || req.socket.remoteAddress;
+    const hasher = createHash('sha256');
     hasher.update(ip)
-    return hasher.digest("base64url");
+    return hasher.digest("base64");
 }
-
-app.post("/analytics/post-view", (req, res) => {
-    console.log("Getting post view...");
-    console.log(req.url);
-    console.log(req.body);
-
-    res.sendStatus(200);
-});
 
 app.get("/stats", async (req, res) => {
     try {
@@ -85,7 +77,7 @@ app.use((error, req, res, next) => {
     console.error("Something went wrong...", error);
     res.status(500);
     res.send({
-        error: "ERROR"
+        error: "INTERNAL_ERROR"
     });
 });
 

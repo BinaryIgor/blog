@@ -1,5 +1,5 @@
 #/!bin/bash
-site_dir=${SITE_DIR:-"$PWD/../../dist"}
+site_dir=${SITE_DIR:-"$PWD/../dist"}
 
 docker build -t binary-igor-blog .
 
