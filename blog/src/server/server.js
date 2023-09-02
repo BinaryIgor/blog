@@ -53,7 +53,7 @@ export async function start(clock = new Clock()) {
         try {   
             const ipHash = Web.hashedIp(req.headers[REAL_IP_HEADER] || req.socket.remoteAddress);
             const reqBody = req.body;
-            const view = new View(clock.nowTimestamp(), reqBody.visitorId, ipHash, reqBody.sourceUrl, reqBody.path);
+            const view = new View(clock.nowTimestamp(), reqBody.visitorId, ipHash, reqBody.source, reqBody.path);
             await analylitcsService.addView(view);
         } catch (e) {
             console.log("Failed to add view, ignoring the result", e);

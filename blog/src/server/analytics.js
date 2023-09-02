@@ -5,7 +5,7 @@ export const MAX_PATH_LENGTH = 250;
 const DAY_SECONDS = 24 * 60 * 60;
 export const MAX_IP_HASH_VISITOR_IDS_IN_LAST_DAY = 25;
 
-const UUID_REGEX = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'/;
+const UUID_REGEX = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
 
 export class AnalyticsService {
 

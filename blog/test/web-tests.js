@@ -31,3 +31,7 @@ export function assertJsonResponse(requestResponse, bodyAssert, responseCode = 2
 export function assertResponseCode(requestResponse, responseCode) {
     assert.equal(requestResponse.statusCode, responseCode);
 }
+
+export function assertOkResponseCode(requestResponse) {
+    assertResponseCode(requestResponse, 200);
+}

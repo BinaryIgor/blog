@@ -3,12 +3,15 @@ import * as Files from "../src/shared/files.js";
 import fs from "fs";
 import crypto from 'crypto';
 import path from 'path';
+import { randomNumber } from "./test-utils.js";
+import { SqliteDb } from "../src/server/db.js";
 
 const TMP_DIR = `/tmp/${crypto.randomUUID()}`;
 const SERVER_PORT = 10_000 + Math.ceil(Math.random() * 10_000);
 export const SERVER_URL = `http://localhost:${SERVER_PORT}`;
+const DB_PATH = path.join(TMP_DIR, "analytics.db");
 
-const SCHEDULED_TASKS_DELAY = 100;
+const SCHEDULED_TASKS_DELAY = 10;
 
 const POSTS = [
     {
@@ -27,7 +30,7 @@ export const serverIntTestSuite = (testsDescription, testsCallback) => {
             fs.mkdirSync(TMP_DIR);
 
             process.env['SERVER_PORT'] = SERVER_PORT;
-            process.env['DB_PATH'] = path.join(TMP_DIR, "analytics.db");
+            process.env['DB_PATH'] = DB_PATH;
             process.env['DB_BACKUP_PATH'] = path.join(TMP_DIR, "analytics_backup.db");
 
             const postsPath = path.join(TMP_DIR, "posts.json");
@@ -40,24 +43,32 @@ export const serverIntTestSuite = (testsDescription, testsCallback) => {
             process.env["VIEWS_WRITE_DELAY"] = SCHEDULED_TASKS_DELAY;
 
             await Server.start();
+
+            //Read posts
+            await nextScheduledTasksRunDelay();
         });
 
         afterEach(async () => {
             console.log("After each...");
-
-            fs.rmSync(TMP_DIR, { recursive: true, force: true });
+            await new SqliteDb(DB_PATH).execute("DELETE FROM view");
         });
 
         after(() => {
             Server.stop();
+            fs.rmSync(TMP_DIR, { recursive: true, force: true });
         });
 
         testsCallback();
     })
 };
 
-export async function awaitForNextScheduledTasksRun() {
-    await new Promise((resolve) => {
-        setTimeout(resolve, SCHEDULED_TASKS_DELAY * 2);
+export function nextScheduledTasksRunDelay() {
+    return new Promise((resolve) => {
+        setTimeout(resolve, 2 * SCHEDULED_TASKS_DELAY);
     });
+}
+
+export function randomAllowedPostPath() {
+    const post = POSTS[randomNumber(0, POSTS.length)];
+    return `/${post.slug}.html`;
 }
