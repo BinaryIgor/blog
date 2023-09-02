@@ -40,7 +40,7 @@ export class AnalyticsService {
             throw new Error(`Path can't be empty and must be less than ${MAX_PATH_LENGTH} of lenght, but was: ${view.path}`);
         }
 
-        return {...view, source: sourceUrl.host }
+        return { ...view, source: sourceUrl.host }
     }
 
     _validateVisitorId(visitorId) {
@@ -98,9 +98,17 @@ export class View {
 }
 
 export class GeneralStats {
-    constructor(views, uniqueVisitors) {
+    constructor(views, uniqueVisitors, viewsBySource) {
         this.views = views;
         this.uniqueVisitors = uniqueVisitors;
+        this.viewsBySource = viewsBySource;
+    }
+}
+
+export class ViewsBySource {
+    constructor(source, views) {
+        this.source = source;
+        this.views = views;
     }
 }
 
@@ -165,17 +173,45 @@ export class DeferredSqliteAnalyticsRepository {
             });
     }
 
-    generalStats() {
+    async generalStats() {
+        const viewsVisitorsPromise = this._viewsUniqueVisitorsStats();
+        const viewsBySourcePromise = this._viewsBySourceStats();
+
+        const viewsVisitors = await viewsVisitorsPromise;
+        const viewsBySourceFromDb = await viewsBySourcePromise;
+
+        let viewsBySource;
+        if (viewsVisitors.views > 0) {
+            viewsBySource = viewsBySourceFromDb.map(v => new ViewsBySource(v.source, v.views * 100 / viewsVisitors.views));
+        } else {
+            viewsBySource = [];
+        }
+
+        return new GeneralStats(viewsVisitors.views, viewsVisitors.uniqueVisitors, viewsBySource);
+    }
+
+    _viewsUniqueVisitorsStats() {
         return this.db.queryOne(`SELECT 
-            COUNT(*) as views, 
-            COUNT(DISTINCT visitor_id) as unique_visitors
-            FROM view`)
+        COUNT(*) as views, 
+        COUNT(DISTINCT visitor_id) as unique_visitors
+        FROM view`)
             .then(r => {
                 if (r) {
-                    return new GeneralStats(r['views'], r['unique_visitors'])
+                    return { views: r['views'], uniqueVisitors: r['unique_visitors'] }
                 }
-                return new GeneralStats(0, 0);
+                return { views: 0, uniqueVisitors: 0 };
             });
+    }
+
+    _viewsBySourceStats() {
+        return this.db.query(
+            `SELECT source, COUNT(*) as views FROM view GROUP BY source`)
+            .then(rows => rows.map(r => {
+                return {
+                    source: r['source'],
+                    views: r['views']
+                };
+            }));
     }
 
     pagesStats() {
