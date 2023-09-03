@@ -7,7 +7,7 @@ import * as Web from "./web.js"
 
 import * as Config from "./config.js";
 
-import { SqliteDb } from "./db.js";
+import { SqliteDb, SqliteDbBackuper } from "./db.js";
 
 import { Clock } from "../shared/dates.js";
 import { PostsSource } from "./posts.js";
@@ -16,11 +16,12 @@ const REAL_IP_HEADER = "X-Real-Ip";
 
 let server;
 let scheduler;
+let db;
 
 export async function start(clock = new Clock()) {
     const config = Config.read();
 
-    const db = new SqliteDb(config.dbPath);
+    db = new SqliteDb(config.dbPath);
 
     await db.execute(`
     CREATE TABLE IF NOT EXISTS view (
@@ -35,6 +36,8 @@ export async function start(clock = new Clock()) {
     `);
 
     scheduler = new Scheduler();
+
+    new SqliteDbBackuper(db, config.dbBackupPath, scheduler, config.dbBackupDelay);
 
     const postsSource = new PostsSource(config.postsPath, scheduler, config.postsReadDelay);
 
@@ -102,6 +105,9 @@ export function stop() {
     }
     if (scheduler) {
         scheduler.close();
+    }
+    if (db) {
+        db.close();
     }
 }
 

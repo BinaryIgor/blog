@@ -1,5 +1,5 @@
 import { Scheduler } from "../../src/server/scheduler.js";
-import { TestClock, randomNumber, sleep } from "../test-utils.js";
+import { sleep } from "../test-utils.js";
 import { TestObjects } from "../test-objects.js";
 import { DeferredViewsSaver } from "../../src/server/analytics.js";
 import { expect } from "chai";
@@ -12,7 +12,7 @@ const scheduler = new Scheduler();
 let repository;
 let saver;
 
-describe("Deferred views saver tests", () => {
+describe("DeferredViewsSaver tests", () => {
     beforeEach(() => {
         repository = new FakeAnalyticsRepository();
         saver = new DeferredViewsSaver(repository, scheduler, WRITE_DELAY);

@@ -2,11 +2,15 @@ import { envVarOrDefault } from "../shared/env.js";
 import * as Files from "../shared/files.js";
 import path from 'path';
 
+//3 hours
+const DEFAULT_DB_BACKUP_DELAY = 3 * 60 * 60 * 1000;
+
 export function read() {
     return {
         serverPort: envVarOrDefault("SERVER_PORT", 8080),
         dbPath: envVarOrDefault("DB_PATH", "/tmp/analytics.db"),
         dbBackupPath: envVarOrDefault("DB_BACKUP_PATH", "/tmp/analytics_backup.db"),
+        dbBackupDelay: envVarOrDefault("DB_BACKUP_DELAY", DEFAULT_DB_BACKUP_DELAY),
         analyticsAllowedPaths: analyticsAllowedPaths(),
         postsPath: envVarOrDefault("POSTS_PATH", localPostsPath()),
         postsReadDelay: envVarOrDefault("POSTS_READ_DELAY", 5000),
