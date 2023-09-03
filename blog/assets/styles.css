@@ -135,15 +135,23 @@ html {
     }
 
     .post figure {
-        @apply py-4;
+        @apply py-4 w-full;
     }
 
     .post img {
         @apply w-full object-cover object-position-50 rounded-md max-h-[700px];
     }
 
+    #profile-image {
+        @apply max-w-[350px] object-contain m-auto rounded-md;
+    }
+
     .post figcaption {
         @apply italic text-center opacity-90;
+    }
+
+    .post a {
+        @apply font-bold;
     }
 
     .delimiter-like {
