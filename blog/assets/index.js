@@ -1,4 +1,4 @@
-// Navigation/dark mode
+// Navigation/dark mode switch
 const navigation = document.getElementById("navigation");
 
 document.getElementById("navigation-toggle").onclick = () => {
