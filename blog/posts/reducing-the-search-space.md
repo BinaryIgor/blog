@@ -1,7 +1,7 @@
 ---
 {
-    "title": "Reduce the search space",
-    "slug": "reduce-the-search-space",
+    "title": "Indexing, Partitioning, Sharding... it's all about reducing the search space!",
+    "slug": "reducing-the-search-space",
     "publishedAt": "2023-08-27",
     "timeToRead": "3 minutes",
     "wordsCount": 600,
@@ -9,17 +9,11 @@
 }
 ---
 
-## Searching through space
+## Searching data through space
 
-When we work with a set of persisted (somewhere)  data, we obviously want our queries to be fast. 
-Whenever I think about optimizing certain data query, be it SQL (mostly) or NoSQL, I find it useful to think about those problems as a search space problems. What I mean is that, you query will be fast, if your search space is small.
-Building on that, if you search space is huge (you work with $10^6$, $10^9$ and more number of rows for example), you need to find a way to make your search space small again. There are a couple ways of doing that, so let's explore them!
+When we work with a set of (usually persisted somewhere) data, we usually want our queries to be fast. Whenever I think about optimizing certain data query, be it SQL (mostly) or NoSQL, I find it useful to think about those problems as a search space problems. Basically, how much data needs to be checked in order for our query to be fulfilled?
 
-..before, that testing image look:
-<figure>
-    <img src="{{ imagesPath }}/postgres_resized.png" alt="Glorious postgres" title="Glorious postgres">
-    <figcaption>Glorious postgres</figcaption>
-</figure>
+Building on that, if you search space is huge (you work with 10<sup>6</sup>, 10<sup>9</sup> and more number of rows for example), you need to find a way to make your search space small again. There are a couple ways of doing that, so let's explore them!
 
 ## Changing schema
 
@@ -38,13 +32,13 @@ Now, let's say that for 99% of our queries, we only take id and a name, and addi
 ```
 SELECT id, name FROM account WHERE name = ?;
 ```
-So, we care only about two fields, additionaly (for some arbtrary reason, I know!) we can't index name field. Let's assume that we use Postgres database. Now, we will need to do full table scan, to fulfill this query. When our table have 5 columns each row has ~ 5n size (approximating of course, size of columns can vary a lot). Having $10^9$ we will need to scan:
+So, we care only about two fields, additionaly (for some arbitrary reason, I know!) we can't index name field. Let's also assume that we use Postgres database. Now, we will need to do full table scan, to fulfill this query. When our table have 5 columns each row has ~ 5n size (approximating of course, size of columns can vary a lot). Having 10<sup>9</sup> we will need to scan:
 ```
 10 000 000 000 * 5n = 5 000 000 000,
-where n is the averaged size of our columns
+where n is the average size of our columns
 ``` 
 
-Simply changing schema to something like:
+We can simply change the schema to have two tables:
 ```
 CREATE TABLE account (
     id UUID PRIMARY KEY,
@@ -61,11 +55,11 @@ CREATE TABLE account_details (
 Now, because we are interested only in two columns for our most frequently used query (id, name), our search space is reduced to 
 ```
 10 000 000 000 * 2n = 2 000 000 000,
-where n is the averaged size of our columns
+where n is the average size of our columns
 ``` 
-...which is a 40% of previous size, so our queries need to search through ~ 2.5 less space. 
+...which is a ~ 40% of previous size, so our queries need to search through ~ 2.5 less space (5n /2n = 2.5). 
 
-We will get to **partitioning** later, but you can also think about it as **vertical partitioning**, since we slice our table into two separate vertical slices really. Vertical, because all rows are in both tables, but we have split previous row into two, where 2 columns are in the first table and 3 are in the second one.
+We will get to **partitioning** in a while, but you can also think about it as **vertical partitioning**, since we slice our table into two separate vertical slices. Vertical, because all rows are in both tables, but we have split previous row into two, where 2 columns are in the first table and 3 are in the second one.
 
 ## Indexing
 
