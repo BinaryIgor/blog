@@ -1,4 +1,4 @@
-Hey there! I am Igor, Igor Roztropiński, a programmer.
+Hey there! I am Igor, <a target="_blank" href="https://igor.roztropinski.com">Igor Roztropiński</a>, a programmer.
 
 <figure>
     <img id="profile-image" src="{{ imagesPath }}/profile.png">

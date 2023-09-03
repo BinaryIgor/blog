@@ -6,6 +6,8 @@ python reading_time_counter.py <path-to-file>
 import re
 import sys
 
+# TODO: ignore font matter!
+
 AVG_READING_SPEED = 200
 LINK_REGEX = re.compile("(http://|https://)([^\s]+)")
 NON_WORDS_REGEX = re.compile(",|\\.|\\?|-|>")
@@ -22,13 +24,16 @@ with open(text_path) as f:
 
         l_words = 0
 
-        # Each link as one world
         line_without_links = re.sub(LINK_REGEX, " W ", l.strip())
 
         line_without_sep = re.sub(NON_WORDS_REGEX, " ", line_without_links)
         for w in line_without_sep.split(" "):
             if len(w.strip()) > 0:
                 l_words += 1
+
+        print(line_without_sep)
+        print(l_words)
+        print()
 
         words_count += l_words
 

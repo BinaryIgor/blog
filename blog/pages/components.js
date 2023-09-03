@@ -15,6 +15,10 @@ export function postMetadata({publishedAt, timeToRead, wordsCount}) {
     return component;
 }
 
+export function postHtmlDescription({excerpt, htmlDescription}) {
+    return htmlDescription ? htmlDescription : excerpt;
+}
+
 //Also used in post.html js, remember to keep in sync!
 export function postPreview(post) {
    const postUrl = `${post.slug}.html`;

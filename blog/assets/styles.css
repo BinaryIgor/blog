@@ -115,7 +115,7 @@ html {
     }
 
     .post h3 {
-        @apply text-xl mt-4 mb-4 font-semibold text-center;
+        @apply text-xl mt-6 mb-6 font-semibold text-center;
     }
 
     .post p {
@@ -126,12 +126,24 @@ html {
         @apply list-disc list-inside;
     }
 
+    .post li > ul {
+        @apply ml-4;
+    }
+
     .post ol {
         @apply list-decimal list-inside;
     }
 
+    .post li > ol {
+        @apply ml-4;
+    }
+
     .post pre {
         @apply bg-secondary-1 p-4 my-4 text-left border-l-2 rounded-sm border-text-primary max-content-width overflow-auto;
+    }
+
+    .post blockquote {
+        @apply p-4 my-4 text-left border-l-2 rounded-sm border-text-primary italic;
     }
 
     .post figure {
@@ -151,10 +163,14 @@ html {
     }
 
     .post a {
-        @apply font-bold;
+        @apply font-bold break-words;
     }
 
     .delimiter-like {
         @apply text-secondary-2 font-bold text-xl text-center;
+    }
+
+    .article-delimiter {
+        @apply delimiter-like my-16;
     }
 }
