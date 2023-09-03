@@ -10,8 +10,9 @@ const UUID_REGEX = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}
 
 export class AnalyticsService {
 
-    constructor(analyticsRepository, postsSource, allowedPaths, clock) {
+    constructor(analyticsRepository, viewsSaver, postsSource, allowedPaths, clock) {
         this.analyticsRepository = analyticsRepository;
+        this.viewsSaver = viewsSaver;
         this.postsSource = postsSource;
         this.clock = clock;
         this.allowedPaths = allowedPaths;
@@ -24,7 +25,7 @@ export class AnalyticsService {
 
         await this._validateIpHashUniqueVisitorsLimit(view);
 
-        this.analyticsRepository.addView(validatedView);
+        this.viewsSaver.addView(validatedView);
     }
 
     _validatedView(view) {
@@ -123,42 +124,50 @@ export class Stats {
     }
 }
 
-
-export class DeferredSqliteAnalyticsRepository {
-
-    constructor(db, scheduler, writeDelay) {
-        this.db = db;
+export class DeferredViewsSaver {
+    constructor(analyticsRepository, scheduler, writeDelay) {
+        this.analyticsRepository = analyticsRepository;
         this._viewsToSave = [];
 
-        scheduler.schedule(async () => this.saveViews(), writeDelay);
+        scheduler.schedule(async () => this._saveViews(), writeDelay);
     }
 
-    async saveViews() {
+    async _saveViews() {
         const toSave = [...this._viewsToSave];
 
         if (toSave.length > 0) {
             try {
                 this._viewsToSave = [];
-                await this._saveViews(toSave);
+                await this.analyticsRepository.saveViews(toSave);
             } catch (e) {
-                console.err("Failed to save views:", e);
+                console.error("Failed to save views:", e);
                 this._viewsToSave.push(...toSave);
             }
         }
     }
 
-    _saveViews(viewsToSave) {
-        const argsPlaceholders = viewsToSave.map(_ => "(?, ?, ?, ?, ?)")
-            .join(",\n");
-        const argsValues = viewsToSave.flatMap(v => [v.timestamp, v.visitorId, v.ipHash, v.source, v.path]);
-
-        return this.db.execute(`
-            INSERT INTO view (timestamp, visitor_id, ip_hash, source, path)
-            VALUES ${argsPlaceholders}`, argsValues);
-    }
-
     addView(view) {
         this._viewsToSave.push(view);
+    }
+}
+
+export class SqliteAnalyticsRepository {
+
+    constructor(db) {
+        this.db = db;
+    }
+
+    saveViews(views) {
+        if (views.length > 0) {
+            const argsPlaceholders = views.map(_ => "(?, ?, ?, ?, ?)")
+                .join(",\n");
+            const argsValues = views.flatMap(v => [v.timestamp, v.visitorId, v.ipHash, v.source, v.path]);
+
+            return this.db.execute(`
+            INSERT INTO view (timestamp, visitor_id, ip_hash, source, path)
+            VALUES ${argsPlaceholders}`, argsValues);
+        }
+        return Promise.resolve();
     }
 
     countDistinctVisitorIdsOfIpHashAfterTimestamp(ipHash, timestamp) {

@@ -48,3 +48,9 @@ export class TestClock {
         return this.now().getTime();
     }
 }
+
+export function sleep(millis) {
+    return new Promise((resolve) => {
+        setTimeout(resolve, millis);
+    });
+}

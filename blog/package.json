@@ -3,7 +3,8 @@
     "version": "1.0.0",
     "description": "Some experimental blog",
     "scripts": {
-        "test": "mocha 'test/**/*.test.js'",
+        "test": "mocha 'test/**/*.test.js' --exit",
+        "test:file": "mocha test/**/$file.test.js --exit",
         "generate:css": "npx tailwindcss -i ./assets/styles.css -o ./dist/styles.css",
         "generate:css:live": "npx tailwindcss -i ./assets/styles.css -o ./dist/assets/styles.css --watch",
         "generate:site": "node src/generator.js",

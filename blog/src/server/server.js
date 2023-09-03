@@ -1,6 +1,6 @@
 import bodyParser from "body-parser";
 import express from "express";
-import { AnalyticsService, DeferredSqliteAnalyticsRepository, View } from "./analytics.js";
+import { AnalyticsService, DeferredViewsSaver, SqliteAnalyticsRepository, View } from "./analytics.js";
 import { Scheduler } from "./scheduler.js";
 
 import * as Web from "./web.js"
@@ -38,8 +38,9 @@ export async function start(clock = new Clock()) {
 
     const postsSource = new PostsSource(config.postsPath, scheduler, config.postsReadDelay);
 
-    const analyticsRepository = new DeferredSqliteAnalyticsRepository(db, scheduler, config.viewsWriteDelay);
-    const analylitcsService = new AnalyticsService(analyticsRepository, postsSource, config.analyticsAllowedPaths, clock);
+    const analyticsRepository = new SqliteAnalyticsRepository(db);
+    const viewsSaver = new DeferredViewsSaver(analyticsRepository, scheduler, config.viewsWriteDelay);
+    const analylitcsService = new AnalyticsService(analyticsRepository, viewsSaver, postsSource, config.analyticsAllowedPaths, clock);
 
     const app = express();
 

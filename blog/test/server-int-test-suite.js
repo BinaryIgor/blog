@@ -3,7 +3,7 @@ import * as Files from "../src/shared/files.js";
 import fs from "fs";
 import crypto from 'crypto';
 import path from 'path';
-import { TestClock, randomNumber } from "./test-utils.js";
+import { TestClock, randomNumber, sleep } from "./test-utils.js";
 import { SqliteDb } from "../src/server/db.js";
 
 const TMP_DIR = `/tmp/${crypto.randomUUID()}`;
@@ -55,7 +55,6 @@ export const serverIntTestSuite = (testsDescription, testsCallback) => {
 
         afterEach(async () => {
             await new SqliteDb(DB_PATH).execute("DELETE FROM view");
-            console.log("Views deleted...");
         });
 
         after(() => {
@@ -68,9 +67,7 @@ export const serverIntTestSuite = (testsDescription, testsCallback) => {
 };
 
 export function nextScheduledTasksRunDelay() {
-    return new Promise((resolve) => {
-        setTimeout(resolve, SCHEDULED_TASKS_DELAY_AWAIT);
-    });
+    return sleep(SCHEDULED_TASKS_DELAY_AWAIT);
 }
 
 export function randomAllowedPostPath() {

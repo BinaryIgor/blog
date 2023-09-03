@@ -9,7 +9,8 @@ export const TestObjects = {
         visitorId = crypto.randomUUID(),
         ipHash = hashedIp(randomString(24)),
         source = `https://${randomString(5)}.com`,
-        path = "/index.html" }) {
+        path = "/index.html" } = {}
+    ) {
         return new View(timestamp, visitorId, ipHash, source, path);
     }
 };
