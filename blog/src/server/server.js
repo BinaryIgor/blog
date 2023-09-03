@@ -9,7 +9,7 @@ import * as Config from "./config.js";
 
 import { SqliteDb } from "./db.js";
 
-import { Clock } from "../shared/clock.js";
+import { Clock } from "../shared/dates.js";
 import { PostsSource } from "./posts.js";
 
 const REAL_IP_HEADER = "X-Real-Ip";
@@ -46,12 +46,9 @@ export async function start(clock = new Clock()) {
     app.use(bodyParser.json());
 
     app.post("/analytics/view", async (req, res) => {
-        console.log("Posting view...");
-        console.log(req.url);
-        console.log(req.body);
-
         try {   
-            const ipHash = Web.hashedIp(req.headers[REAL_IP_HEADER] || req.socket.remoteAddress);
+            const ip = req.header(REAL_IP_HEADER) || req.socket.remoteAddress;
+            const ipHash = Web.hashedIp(ip);
             const reqBody = req.body;
             const view = new View(clock.nowTimestamp(), reqBody.visitorId, ipHash, reqBody.source, reqBody.path);
             await analylitcsService.addView(view);

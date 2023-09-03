@@ -28,7 +28,6 @@ export async function assertThrowsException(func, type, containsMessage = null) 
     }
 }
 
-
 export class TestClock {
 
     _now = new Date();
@@ -38,7 +37,7 @@ export class TestClock {
     }
 
     moveTimeBy(seconds) {
-        this._now.setTime(this._now.getTime() + seconds);
+        this._now.setTime(this._now.getTime() + (seconds * 1000));
     }
 
     now() {

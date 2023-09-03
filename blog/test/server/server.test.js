@@ -1,9 +1,9 @@
-import { expect, assert } from "chai";
-import { serverIntTestSuite, SERVER_URL, nextScheduledTasksRunDelay, randomAllowedPostPath } from "../server-int-test-suite.js";
-import { TestRequests, assertJsonResponse, assertOkResponseCode, assertResponseCode } from "../web-tests.js";
+import { assert } from "chai";
+import { serverIntTestSuite, SERVER_URL, nextScheduledTasksRunDelay, randomAllowedPostPath, testClock } from "../server-int-test-suite.js";
+import { TestRequests, assertJsonResponse, assertOkResponseCode } from "../web-tests.js";
 import { Stats, GeneralStats, ViewsBySource, PageStats } from "../../src/server/analytics.js";
-import { randomString } from "../test-utils.js";
-import { MAX_PATH_LENGTH, MAX_IP_HASH_VISITOR_IDS_IN_LAST_DAY } from "../../src/server/analytics.js";
+import { randomNumber, randomString } from "../test-utils.js";
+import { MAX_PATH_LENGTH, MAX_IP_HASH_VISITOR_IDS_IN_LAST_DAY, DAY_SECONDS } from "../../src/server/analytics.js";
 import { TestObjects } from "../test-objects.js";
 import { hashedIp } from "../../src/server/web.js";
 import crypto from 'crypto';
@@ -36,6 +36,42 @@ serverIntTestSuite("Server integration tests", () => {
         const statsResponse = await testRequests.getStats();
 
         assertEmptyStatsResponse(statsResponse);
+    });
+
+    it('should reject too many visitor ids per ip hash in a day', async () => {
+        const ip = randomString();
+        const anotherIp = randomString();
+        const anotherIpViews = 3;
+        const overLimitViews = 5;
+
+        await addViewsFromIp(ip, MAX_IP_HASH_VISITOR_IDS_IN_LAST_DAY);
+
+        await nextScheduledTasksRunDelay();
+
+        await assertStatsHaveViewsAndUniqueVisitors(
+            MAX_IP_HASH_VISITOR_IDS_IN_LAST_DAY,
+            MAX_IP_HASH_VISITOR_IDS_IN_LAST_DAY);
+
+        await addViewsFromIp(anotherIp, anotherIpViews);
+        await addViewsFromIp(ip, overLimitViews);
+
+        await nextScheduledTasksRunDelay();
+
+        await assertStatsHaveViewsAndUniqueVisitors(
+            MAX_IP_HASH_VISITOR_IDS_IN_LAST_DAY + anotherIpViews,
+            MAX_IP_HASH_VISITOR_IDS_IN_LAST_DAY + anotherIpViews);
+
+        testClock.moveTimeBy(DAY_SECONDS + 1);
+
+        const limitExpiredViews = randomNumber(1, 10);
+
+        await addViewsFromIp(ip, limitExpiredViews);
+
+        await nextScheduledTasksRunDelay();
+
+        await assertStatsHaveViewsAndUniqueVisitors(
+            MAX_IP_HASH_VISITOR_IDS_IN_LAST_DAY + anotherIpViews + limitExpiredViews,
+            MAX_IP_HASH_VISITOR_IDS_IN_LAST_DAY + anotherIpViews + limitExpiredViews);
     });
 
     it('should add views', async () => {
@@ -93,7 +129,7 @@ serverIntTestSuite("Server integration tests", () => {
         const statsResponse = await testRequests.getStats();
 
         const expectedStats = new Stats(
-            new GeneralStats(4, 2, 
+            new GeneralStats(4, 2,
                 [
                     new ViewsBySource(source1, 50),
                     new ViewsBySource(source2, 50),
@@ -128,4 +164,23 @@ function assertEmptyStatsResponse(response) {
         const emptyStats = new Stats(new GeneralStats(0, 0, []), []);
         assert.deepEqual(actualStats, emptyStats);
     });
+}
+
+async function assertStatsHaveViewsAndUniqueVisitors(views, visitors) {
+    assertJsonResponse(await testRequests.getStats(), actualStats => {
+        assert.deepEqual(actualStats.general.views, views);
+        assert.deepEqual(actualStats.general.uniqueVisitors, visitors);
+    });
+}
+
+async function addViewsFromIp(ip, views) {
+    for (let i = 0; i < views; i++) {
+        await addViewFromIp(ip);
+    }
+}
+
+async function addViewFromIp(ip) {
+    const view = TestObjects.randomView({ ipHash: ip });
+    const response = await testRequests.addViewRequest(view, { "X-Real-Ip": ip });
+    assertOkResponseCode(response);
 }

@@ -1,8 +1,9 @@
 import { URL } from "url";
+import * as Dates from "../shared/dates.js";
 
 export const MAX_VISITOR_ID_LENGTH = 50;
 export const MAX_PATH_LENGTH = 250;
-const DAY_SECONDS = 24 * 60 * 60;
+export const DAY_SECONDS = 24 * 60 * 60;
 export const MAX_IP_HASH_VISITOR_IDS_IN_LAST_DAY = 25;
 
 const UUID_REGEX = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
@@ -53,13 +54,13 @@ export class AnalyticsService {
 
 
     async _validateIpHashUniqueVisitorsLimit(view) {
-        const timestampAgoTocheck = this.clock.timestampSecondsAgo(DAY_SECONDS);
+        const timestampAgoToCheck = Dates.timestampSecondsAgo(this.clock.nowTimestamp(), DAY_SECONDS);
 
         const uniqueVisitorIdsOfIp = await this.analyticsRepository
-            .countDistinctVisitorIdsOfIpHashAfterTimestamp(view.ipHash, timestampAgoTocheck);
+            .countDistinctVisitorIdsOfIpHashAfterTimestamp(view.ipHash, timestampAgoToCheck);
 
         if (uniqueVisitorIdsOfIp >= MAX_IP_HASH_VISITOR_IDS_IN_LAST_DAY) {
-            throw new Error(`Too many visitor ids for a given ipHash in the last day`);
+            throw new Error(`Too many visitor ids for a given ipHash in the last day (${uniqueVisitorIdsOfIp})`);
         }
     }
 
@@ -129,24 +130,29 @@ export class DeferredSqliteAnalyticsRepository {
         this.db = db;
         this._viewsToSave = [];
 
-        scheduler.schedule(async () => {
-            if (this._viewsToSave.length > 0) {
-                try {
-                    this._saveViews();
-                    this._viewsToSave = [];
-                } catch (e) {
-                    console.log("Failed to save views:", e);
-                }
-            }
-        }, writeDelay);
+        scheduler.schedule(async () => this.saveViews(), writeDelay);
     }
 
-    async _saveViews() {
-        const argsPlaceholders = this._viewsToSave.map(_ => "(?, ?, ?, ?, ?)")
-            .join(",\n");
-        const argsValues = this._viewsToSave.flatMap(v => [v.timestamp, v.visitorId, v.ipHash, v.source, v.path]);
+    async saveViews() {
+        const toSave = [...this._viewsToSave];
 
-        await this.db.execute(`
+        if (toSave.length > 0) {
+            try {
+                this._viewsToSave = [];
+                await this._saveViews(toSave);
+            } catch (e) {
+                console.err("Failed to save views:", e);
+                this._viewsToSave.push(...toSave);
+            }
+        }
+    }
+
+    _saveViews(viewsToSave) {
+        const argsPlaceholders = viewsToSave.map(_ => "(?, ?, ?, ?, ?)")
+            .join(",\n");
+        const argsValues = viewsToSave.flatMap(v => [v.timestamp, v.visitorId, v.ipHash, v.source, v.path]);
+
+        return this.db.execute(`
             INSERT INTO view (timestamp, visitor_id, ip_hash, source, path)
             VALUES ${argsPlaceholders}`, argsValues);
     }

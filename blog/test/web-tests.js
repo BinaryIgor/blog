@@ -7,10 +7,15 @@ export class TestRequests {
         this.serverUrl = serverUrl;
     }
 
-    async addViewRequest(request) {
-        return this._appRequest()
-            .post("/analytics/view")
-            .send(request);
+    async addViewRequest(request, headers={}) {
+        let req = this._appRequest()
+            .post("/analytics/view");
+
+        for (let [k, v] of Object.entries(headers)) {
+            req.set(k, v);
+        }
+
+        return req.send(request);
     }
 
     async getStats() {
