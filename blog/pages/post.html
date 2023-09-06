@@ -21,10 +21,10 @@
         </div>
     </article>
 
-    <div class="max-content-width mb-16 p-6 italic m-auto">
+    <div class="max-content-width mb-16 px-6 italic m-auto">
         <div class="delimiter-like mb-16">---</div>
         <p>
-            If you have valuable feedback/correction/comments or you just want to get in touch, shoot me an email at
+            If you have valuable feedback, correction, comment, or you just want to get in touch, shoot me an email at
             <span id="contact-email" class="font-bold cursor-pointer"
                 onclick="copyToClipboard('{{ contactEmail }}')">{{ contactEmail }}</span>.
         </p>
@@ -35,6 +35,8 @@
         <div class="text-2xl text-center font-semibold">Something else to ponder:</div>
         <div class="text-center" id="random-posts-container"></div>
     </div>
+
+    {{ footer.html }}
 </body>
 
 {{ init-script.html }}

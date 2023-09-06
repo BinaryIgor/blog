@@ -100,27 +100,28 @@ Now we have all data we need in the index (name and id columns), so it could be 
 
 ## Partitioning
 
-Generally, when we refer to *partitioning*, in a database context, we mean table partitioning. It is an optimization strategy, where we take a table and split it into multiple subtables using one, or many, of its fields as a partition key. Additionaly, we need to chose a partition strategy, which describes how column(s) value(s) maps into a specific subtable (partition). Each subtable has exactly the same schema (as opposed to vertical partitoning that we did earlier). Most commonly used strategies (forms) are range, list and hash partitioning. Let us demonstrate them on examples:
+Generally, when we refer to *partitioning*, in the database context, we mean table partitioning. It is an optimization strategy, where we take a table and split it into multiple subtables using one, or many, of its fields as a partition key. Additionaly, we need to chose a partition strategy, which describes how column(s) value(s) maps into a specific subtable (partition). Each subtable has exactly the same schema (as opposed to vertical partitoning that we did earlier). Most commonly used strategies (forms) are range, list and hash partitioning. Let us demonstrate them on examples:
 ```
 // Range partitioning
-partition_key=(0-10) -> table_0 (partition 0 of a table)
-parition_key=(10-20) -> table_1
-partition_key=(20-30) -> table_2
+partition_key = (0-10) -> table_0 (partition 0 of a table)
+parition_key = (10-20) -> table_1
+partition_key = (20-30) -> table_2
 
 // List partitioning
-partition_key=a -> table_a
-parition_key=b -> table_b
-parition_key=c -> table_c
+partition_key = a -> table_a
+parition_key = b -> table_b
+parition_key = c -> table_c
 
 // Hash partitioning
 hash(partition_key) % 2 (number of partitions) = 0 -> table_0
-hash(partition_key) % 2 (number of partitions) = 1 -> table_1
-hash(partition_key) % 2 (number of partitions) = 1 -> table_2
+hash(partition_key) % 2 = 1 -> table_1
+hash(partition_key) % 2 = 1 -> table_2
 ```
 
 Let's use our account table, but change it a little:
 ```
-ALTER TABLE account ADD COLUMN country_code INTEGER NOT NULL;
+ALTER TABLE account
+ADD COLUMN country_code INTEGER NOT NULL;
 ```
 
 I will assume that we still have approximately 10<sup>9</sup> of rows, but we are now almost always interested in account from a given country_code. Our queries look like:
@@ -156,12 +157,17 @@ Our next assumption is that we have 10 country codes in the account table and th
 ```
 ...which is 10-fold improvement. Of course, improvement is directly proportional to the number of partitions that we decide to have:
 ```
-10 partitions:
- ~ 10% of data in each partition, 10 times smaller search space
-100 partitions:
- ~ 1% of data in each partition, 100 times smaller search space
+10 partitions: 
+    ~ 10% of data in each partition, 
+    10 times smaller search space
+
+100 partitions: 
+    ~ 1% of data in each partition, 
+    100 times smaller search space
+
 1000 partitions:
- ~ 0.1% of data in each partition, 1000 times smaller search space
+    ~ 0.1% of data in each partition,
+    1000 times smaller search space
 ```
 
 \

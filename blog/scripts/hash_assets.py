@@ -11,7 +11,7 @@ ASSETS_VERSION = os.environ.get('ASSETS_VERSION',
                                 codecs.encode(os.urandom(8), "hex").decode())
 
 IMAGES_EXTENSIONS = ['jpg', 'jpeg', 'png', 'svg']
-EXCLUDE_PATHS = []
+EXCLUDE_PATHS = ["favicon.svg"]
 
 LINK_TAG = "link"
 HREF_ATTR = "href"
@@ -38,7 +38,7 @@ def walk_dir_recursively(root_dir, files_data=None):
         if os.path.isdir(f_path):
             if should_process(f_path):
                 walk_dir_recursively(f_path, files_data=files_data)
-        else:
+        elif should_process(f_path):
             if f.endswith(".js"):
                 set_files_data_tuple(files_data, JS_KEY, JS_KEY, root_dir, f_path, f)
             elif f.endswith(".css"):
