@@ -1,10 +1,10 @@
 ---
 {
-    "title": "Indexing, Partitioning, Sharding... it is all about reducing the search space!",
+    "title": "Indexing, Partitioning, Sharding - it is all about reducing the search space",
     "slug": "reducing-the-search-space",
     "publishedAt": "2023-09-08",
-    "timeToRead": "9 minutes",
-    "wordsCount": 1762,
+    "timeToRead": "10 minutes",
+    "wordsCount": 1966,
     "excerpt": "Whenever I think about optimizing certain data query, be it SQL (mostly) or NoSQL, I find it useful to think about these problems as a search space problems. In other words, how much data need to be scanned/checked in order for my query to be fulfilled?",
     "writingLog": [ 1, 2, 3.5, 4 ]
 }
@@ -70,7 +70,7 @@ We will get to the **partitioning** in a while, but you can also think about it 
 
 ## Indexing
 
-As we know, <a target="_blank" href="https://use-the-index-luke.com/sql/anatomy">index</a> is just a separate data structure (B-tree most often) that points to a specific rows (documents) of a table<sup>1</sup> (collection) and has a particular structure that makes searching fast.
+As we know, <a target="_blank" href="https://use-the-index-luke.com/sql/anatomy">index</a> is just a separate data structure (B-tree most often) that points to a specific rows (documents) of a table (collection) and has a particular structure that makes searching fast.
 
 Using previous example of our account table, we had a query:
 ```
@@ -194,7 +194,7 @@ country_code % 5 = 4 -> db_4,
 where 5 is the number of shards
 ```
 
-That constitutes our routing to shards, and because shards are separate, physical databses, we need to know which shard needs to be queried to get proper results (data). Some databases (<a href="https://www.mongodb.com/docs/manual/sharding">Mongo</a>), support various sharding strategies out of the box, for others (like Postgres or Mysql) we need to do application-level sharding (there are also some third-party solutions). In that approach, we need maintain connections to all databases (shards) in our application and, based on issued query, decide which one(s) to query. If there is a need to query more than one shard, we also need to assembly the results.
+That constitutes our routing to shards, and because shards are separate, physical databses, we need to know which shard needs to be queried to get proper results (data). Some databases (<a target="_blank" href="https://www.mongodb.com/docs/manual/sharding">Mongo</a>), support various sharding strategies out of the box, for others (like Postgres or Mysql) we need to do application-level sharding (there are also some third-party solutions). In that approach, we need maintain connections to all databases (shards) in our application and, based on issued query, decide which one(s) to query. If there is a need to query more than one shard, we also need to assembly the results.
 
 Going back to numbers, with 5 shards we have approximately 5-fold improvement (similarly to partitioning, we need to strive for more or less equal distribution of data). Same as with the number of partitions, the more shards we decide to have, the larger improvement we will have. Also, same as with partitioning (and indexing for that matter) it is mostly true for the queries that can utilize our partitioning/sharding schema. For our example, they need to have country_code in the where clause. Assuming again that we have 5 shards:
 ```
@@ -211,7 +211,7 @@ needs to scan all shards, since a particular name can be in any shard!
 
 ...but of course, same could be said about partitoning (and to some extend about indexes, it depends on the particular index). What is worth remembering is that with sharding, each shard is an independent database, co even if we need to query a few shards at once, it is still pretty fast, because we can do this in parallel.
 
-Lastly, sharding is far more complex than all previous strategies. When we change schema, create indexes or partition a table we work with a single, simple database, where the entirety of our data is contained. With sharding, that is no longer the case. Even if we use database that does routing and assembling for us, we still have more than one database, we have a distrubuted system now with all the complexity it brings. Needless to say, **we should consider sharding only when all other strategies have failed us and it is absolutely necessary**.
+Lastly, sharding is far more complex than all previous strategies. When we change schema, create indexes or partition a table we work with a single, simple database, where the entirety of our data is contained. With sharding, that is no longer the case. Even if we use database that does routing and assembling for us, we still have more than one database, we have a distrubuted system now with all the complexity it brings. Needless to say, we should **consider sharding only when all other strategies have failed us and it is absolutely necessary**.
 
 ## Practical considerations
 
@@ -221,21 +221,24 @@ Usually (when we deal with large and stil growing data) it will go something lik
 
 ## Some closing thoughts
 
-We just went over most commonly used strategies to reduce the search space of our data. Now we know how to, regardless of how big our data is, always work with the small search space. **And as we know, working with small set of data is always fast.** 
+We just went over most commonly used strategies to reduce the search space of our data. Now we know how to, regardless of how big our data is, always work with the small search space. **And as we know, working with small set of data is always fast**.
 
 <div class="article-delimiter">---</div>
 
+### Related videos on my <a href="{{ youtubeChannelUrl }}">youtube channel</a>
+1. Partitioning: https://www.youtube.com/watch?v=xVZsFpYa1Yc
+2. Sharding: https://www.youtube.com/watch?v=B5aHDQFDiuw
+
+<div class="article-delimiter">---</div>
 
 ### Notes and resources
 
-1. I know that in many databases (Mysql and Sqlite for example) there is a notion of primary and secondary indexes, where only primary index points to a table (collection/document) and all secondary indexes point to a primary indexes. I skipped that to simplify analysis, the same rules still apply, we just have additional level/layer of indirection. I also intentionally skip many, many details about different types of indexes, structure/architecture of the data on the disk and so one. In fact, you can write a whole book about the details and trade-offs of various types of indexes.
-2. B-tree is the most commonly used data structure to implements indexes, but there are also other ones with different trade-offs. <a href="https://www.postgresql.org/docs/current/indexes-types.html">Here is a nice overview about different indexes available in Postgres.
-3. https://rcoh.me/posts/postgres-indexes-under-the-hood
-4. Anatomy of the B-tree index: https://use-the-index-luke.com/sql/anatomy
-4. <a href="https://www.postgresql.org/docs/current/indexes-index-only-scans.html" target="_blank">Postgres - index only scans/covering indexes.</a>
-5. https://www.postgresql.org/docs/current/ddl-partitioning.html
-6. https://www.notion.so/blog/sharding-postgres-at-notion
-7. https://www.elastic.co/guide/en/elasticsearch/reference/current/scalability.html
-8. Mongo sharding: https://www.mongodb.com/docs/manual/sharding
-9. https://www.percona.com/blog/horizontal-scaling-in-mysql-sharding-followup/
-10. https://vitess.io/
+1. I know that in some databases, MySQL and SQLite for example, there is a notion of primary and secondary indexes. There, only primary index points to a table (collection) and all secondary indexes point to a primary index, and only primary index points to a table (collection) data. I skipped that to simplify analysis, the same rules still apply, we just have additional level/layer of indirection. I also intentionally skipped many, many details about different types of indexes, structure/architecture of the data on the disk (clustered tables for example) and so on.
+2. As said, B-tree is the most commonly used data structure to implement indexes, but there are also other ones with different trade-offs. Postgres documentation gives a nice overview of different types available there: https://www.postgresql.org/docs/current/indexes-types.html
+3. Anatomy of an index: https://use-the-index-luke.com/sql/anatomy
+4. Interesting Postgres indexes implementation details: https://rcoh.me/posts/postgres-indexes-under-the-hood
+5. Postgres - index only scans/covering indexes: https://www.postgresql.org/docs/current/indexes-index-only-scans.html
+6. Postgres partitioning details: https://www.postgresql.org/docs/current/ddl-partitioning.html
+7. Mongo sharding: https://www.mongodb.com/docs/manual/sharding
+8. How Notion partitioned their Postgres: https://www.notion.so/blog/sharding-postgres-at-notion
+9. Third-party, open-source solutution to shard Mysql db: https://vitess.io

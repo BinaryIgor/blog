@@ -13,7 +13,7 @@ This is my blog about programming, software engineering, computer science and bi
 
 ...and are not satisifed with easy, shallow answer you will feel at home here!
 
-Also, if you like videos more, <a target="_blank" href="https://youtube.com/@BinaryIgor"> I run a youtube channel under the same name (Binary Igor)</a>.
+Also, if you like videos more, <a target="_blank" href="{{youtubeChannelUrl}}"> I run a youtube channel under the same name (Binary Igor)</a>.
 
 Finally, If you have some valuable feedback/correction/extension of my work, or just want to get in touch, shoot me an email at <span id="contact-email" class="font-bold">{{ contactEmail }}</span>.
 
