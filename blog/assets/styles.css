@@ -95,7 +95,8 @@ html {
 
 @layer components {
     body {
-        @apply font-mono bg-primary text-primary;
+        /* relative for footer to work properly*/
+        @apply font-mono bg-primary text-primary min-h-screen relative;
     }
 
     .max-content-width {
@@ -139,11 +140,11 @@ html {
     }
 
     .post pre {
-        @apply bg-secondary-1 p-4 my-4 text-left border-l-2 rounded-sm border-text-primary max-content-width overflow-auto;
+        @apply bg-secondary-1 p-4 my-4 text-left border-l-[3px] rounded-sm border-text-primary max-content-width overflow-auto;
     }
 
     .post blockquote {
-        @apply p-4 my-4 text-left border-l-2 rounded-sm border-text-primary italic;
+        @apply p-4 my-4 text-left border-l-[3px] rounded-sm border-text-primary italic;
     }
 
     .post figure {
