@@ -9,8 +9,6 @@ fi
 
 scripts_dir=${PWD}
 
-cd ..
-
 if [ -e ci_config.env ]; then
     source ci_config.env
 fi

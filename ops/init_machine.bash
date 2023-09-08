@@ -35,3 +35,13 @@ apt install docker-ce -y
 
 # Allow non root access to a docker
 usermod -aG docker ${USERNAME}
+# limit docker logs size
+echo '{
+  "log-driver": "json-file",
+  "log-opts": {
+    "max-size": "20m",
+    "max-file": "5"
+  }
+}' > /etc/docker/daemon.json
+# Restart to use new config
+systemctl restart docker

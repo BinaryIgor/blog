@@ -2,7 +2,7 @@ import { URL } from "url";
 import * as Dates from "../shared/dates.js";
 
 export const MAX_VISITOR_ID_LENGTH = 50;
-export const MAX_PATH_LENGTH = 250;
+export const MAX_PATH_LENGTH = 500;
 export const DAY_SECONDS = 24 * 60 * 60;
 export const MAX_IP_HASH_VISITOR_IDS_IN_LAST_DAY = 25;
 
@@ -34,7 +34,7 @@ export class AnalyticsService {
         this._validateVisitorId(view.visitorId);
 
         if (!view.path || view.path.length > MAX_PATH_LENGTH) {
-            throw new Error(`Path can't be empty and must be less than ${MAX_PATH_LENGTH} of lenght, but was: ${view.path}`);
+            throw new Error(`Path can't be empty and must be less than ${MAX_PATH_LENGTH} of length, but was: ${view.path}`);
         }
 
         return { ...view, source: sourceUrl.host }
@@ -171,8 +171,10 @@ export class SqliteAnalyticsRepository {
     }
 
     countDistinctVisitorIdsOfIpHashAfterTimestamp(ipHash, timestamp) {
-        return this.db.queryOne(`SELECT COUNT(DISTINCT visitor_id) AS visitor_ids 
-            FROM view WHERE ip_hash = ? AND timestamp >= ?`,
+        return this.db.queryOne(
+            `SELECT COUNT(DISTINCT visitor_id) AS visitor_ids 
+            FROM view
+            WHERE ip_hash = ? AND timestamp >= ?`,
             [ipHash, timestamp])
             .then(r => {
                 if (r) {

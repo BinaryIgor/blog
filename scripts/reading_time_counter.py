@@ -6,8 +6,6 @@ python reading_time_counter.py <path-to-file>
 import re
 import sys
 
-# TODO: ignore font matter!
-
 AVG_READING_SPEED = 200
 LINK_REGEX = re.compile("(http://|https://)([^\s]+)")
 NON_WORDS_REGEX = re.compile(",|\\.|\\?|-|>")

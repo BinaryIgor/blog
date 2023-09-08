@@ -1,5 +1,7 @@
 #/!bin/bash
-site_dir=${SITE_DIR:-"$PWD/../dist"}
+set -e
+
+site_dir=${SITE_DIR:-"$PWD/../../dist"}
 db_dir="/tmp/analytics"
 
 bash prepare_docker_context.bash

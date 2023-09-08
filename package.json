@@ -1,7 +1,7 @@
 {
-    "name": "binary-igor-blog",
+    "name": "binaryigor-blog",
     "version": "1.0.0",
-    "description": "Some experimental blog",
+    "description": "Top-notch blog about programming and binary machines in general",
     "scripts": {
         "test": "mocha 'test/**/*.test.js' --exit",
         "test:file": "mocha test/**/$file.test.js --exit",
@@ -9,10 +9,18 @@
         "generate:css:live": "npx tailwindcss -i ./assets/styles.css -o ./dist/assets/styles.css --watch",
         "generate:site": "node src/generator.js",
         "generate:site:dev": "ENV=dev node src/generator.js",
-        "build:blog": "bash build_blog.bash",
-        "run:blog": "cd nginx; bash build_and_run_locally.bash",
+        "build:blog": "cd ops/blog; bash build_blog.bash",
+        "build:nginx": "cd ops; bash build_app.bash nginx",
+        "build:api": "cd ops; bash build_app.bash api",
+        "run:blog": "cd ops/nginx; bash build_and_run_locally.bash",
+        "deploy:blog": "cd ops/blog; bash deploy_blog.bash",
+        "deploy:nginx": "cd ops/nginx; bash deploy_app.bash nginx",
+        "deploy:api": "cd ops/api; bash deploy_app.bash api",
         "build:run:blog": "npm run build:blog && npm run run:blog",
-        "build:run:api": "cd api; bash build_and_run_locally.bash"
+        "build:run:api": "cd ops/api; bash build_and_run_locally.bash",
+        "build:deploy:blog": "npm run build:blog && npm run deploy:blog",
+        "build:deploy:nginx": "npm run build:nginx && npm run deploy:nginx",
+        "build:deploy:api": "npm run build:api && npm run deploy:api"
     },
     "author": "Igor Roztropiński",
     "license": "ISC",

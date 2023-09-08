@@ -21,7 +21,7 @@
         </div>
     </article>
 
-    <div class="max-content-width mb-16 px-6 italic m-auto">
+    <div class="max-content-width mb-8 px-6 italic m-auto">
         <div class="delimiter-like mb-16">---</div>
         <p>
             If you have valuable feedback, correction, comment, or you just want to get in touch, shoot me an email at
@@ -31,8 +31,8 @@
         <p>See you there!</p>
     </div>
 
-    <div class="mb-8 px-6 hidden" id="random-posts-component">
-        <div class="text-2xl text-center font-semibold">Something else to ponder:</div>
+    <div class="py-8 px-6 hidden" id="random-posts-component">
+        <div class="text-2xl text-center font-semibold mb-6">Something else to ponder:</div>
         <div class="text-center" id="random-posts-container"></div>
     </div>
 
@@ -102,7 +102,7 @@
 
     function postsPreview(posts) {
         return `
-        <ul class="pt-8 space-y-6">
+        <ul class="space-y-6">
             ${posts.map(p => postPreview(p)).join("\n")}
         </ul>`;
     }

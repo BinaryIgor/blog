@@ -58,7 +58,7 @@ const SENT_VIEW_KEY = "SENT_VIEW";
 const VISITOR_ID_KEY = "VISITOR_ID";
 
 const MIN_SEND_VIEW_INTERVAL = 1000 * 60 * 5;
-const MIN_POST_VIEW_TIME = 1000 * 5;
+const MIN_POST_VIEW_TIME = 1000 * 10;
 
 const VIEW_URL = "/api/analytics/view";
 
@@ -90,7 +90,7 @@ function postRequest(url, body) {
 }
 
 function sendView(sourceUrl, visitorId) {
-    postRequest(VIEW_URL, { sourceUrl: sourceUrl, visitorId: visitorId, path: location.pathname })
+    postRequest(VIEW_URL, { source: sourceUrl, visitorId: visitorId, path: location.pathname })
         .then(r => localStorage.setItem(SENT_VIEW_KEY, Date.now()));
 }
 

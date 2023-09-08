@@ -2,6 +2,7 @@ import bodyParser from "body-parser";
 import express from "express";
 import { AnalyticsService, DeferredViewsSaver, SqliteAnalyticsRepository, View } from "./analytics.js";
 import { Scheduler } from "./scheduler.js";
+import * as Logger from "../shared/logger.js";
 
 import * as Web from "./web.js"
 
@@ -57,7 +58,7 @@ export async function start(clock = new Clock()) {
             const view = new View(clock.nowTimestamp(), reqBody.visitorId, ipHash, reqBody.source, reqBody.path);
             await analylitcsService.addView(view);
         } catch (e) {
-            console.log(`Failed to add view ${req.body}, ignoring the result`, e);
+            Logger.logError(`Failed to add view ${JSON.stringify(req.body)}, ignoring the result`, e);
         }
 
         res.sendStatus(200);
@@ -68,13 +69,13 @@ export async function start(clock = new Clock()) {
             const stats = await analylitcsService.stats();
             res.send(stats);
         } catch (e) {
-            console.log("Problem while getting stats...", e);
+            Logger.logError("Problem while getting stats...", e);
             res.sendStatus(500);
         }
     });
 
     app.use((error, req, res, next) => {
-        console.error("Something went wrong...", error);
+        Logger.logError("Something went wrong...", error);
         res.status(500);
         res.send({
             error: "INTERNAL_ERROR"
@@ -82,18 +83,18 @@ export async function start(clock = new Clock()) {
     });
 
     server = app.listen(config.serverPort, () => {
-        console.log(`Server started on ${config.serverPort}`);
+        Logger.logInfo(`Server started on ${config.serverPort}`);
     });
 
     //TODO: graceful shutdown
     process.on('SIGTERM', () => {
-        console.log("Received SIGTERM signal, exiting...");
+        Logger.logInfo("Received SIGTERM signal, exiting...");
         stop();
         process.exit();
     });
 
     process.on('SIGINT', () => {
-        console.log("Received SIGINT signal, exiting...");
+        Logger.logInfo("Received SIGINT signal, exiting...");
         stop();
         process.exit();
     });
@@ -115,8 +116,8 @@ export function stop() {
 const entryFile = process.argv?.[1];
 
 if (entryFile.endsWith("server.js")) {
-    console.log("Starting server...");
+    Logger.logInfo("Starting server...");
     start();
 } else {
-    console.log(`Different than ${entryFile} file, not starting the server!`);
+    Logger.logInfo(`Different than ${entryFile} file, not starting the server!`);
 }

@@ -1,5 +1,7 @@
 #!/bin/bash
-echo "Preparing previous dist dist..."
+echo "Preparing dist dir..."
+
+cd ../../
 
 rm -r -f dist
 mkdir dist
@@ -18,7 +20,7 @@ node src/generator.js
 
 echo "Hash assets..."
 
-cd scripts
+cd ops
 python3 hash_assets.py;
 
 echo "Package built!"
