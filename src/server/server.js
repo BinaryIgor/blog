@@ -57,7 +57,7 @@ export async function start(clock = new Clock()) {
             const view = new View(clock.nowTimestamp(), reqBody.visitorId, ipHash, reqBody.source, reqBody.path);
             await analylitcsService.addView(view);
         } catch (e) {
-            console.log("Failed to add view, ignoring the result", e);
+            console.log(`Failed to add view ${req.body}, ignoring the result`, e);
         }
 
         res.sendStatus(200);

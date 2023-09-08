@@ -7,7 +7,7 @@
         "stats.html"
     ],
     "postTemplate": "post.html",
-    "devAssetsPathPrefix": "/blog/dist",
+    "devAssetsPathPrefix": "/dist",
     "assetsPath": "/assets",
     "imagesPath": "/assets/images",
     "contactEmail": "iroztropinski@gmail.com",
