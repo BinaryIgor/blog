@@ -34,7 +34,7 @@ export function postPreview(post) {
 
 export function postsPreview({ posts }) {
     return `
-    <ul class="pt-8 space-y-6">
+    <ul class="space-y-6">
         ${posts.map(p => postPreview(p)).join("\n")}
     </ul>`;
 }
