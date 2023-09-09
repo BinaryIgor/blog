@@ -170,7 +170,7 @@ html {
     }
 
     .post h3 {
-        @apply text-xl mt-6 mb-6 font-semibold text-center;
+        @apply text-xl mt-6 mb-6 font-bold text-center;
     }
 
     .post p {

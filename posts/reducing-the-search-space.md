@@ -2,9 +2,9 @@
 {
     "title": "Indexing, Partitioning, Sharding - it is all about reducing the search space",
     "slug": "reducing-the-search-space",
-    "publishedAt": "2023-09-08",
+    "publishedAt": "2023-09-09",
     "timeToRead": "10 minutes",
-    "wordsCount": 1975,
+    "wordsCount": 1983,
     "excerpt": " Whenever I think about optimizing certain data query, be it SQL (mostly) or NoSQL, I find it useful to think about these problems as search space problems. In other words, how much data need to be scanned/checked in order for my query to be fulfilled?",
     "writingLog": [ 1, 2, 3.5, 4, 1, 1.5 ]
 }
@@ -115,7 +115,7 @@ partition_key = c -> table_c
 // Hash partitioning
 hash(partition_key) % 2 (number of partitions) = 0 -> table_0
 hash(partition_key) % 2 = 1 -> table_1
-hash(partition_key) % 2 = 1 -> table_2
+hash(partition_key) % 2 = 2 -> table_2
 ```
 
 Using our account table, but changing it a little:
@@ -144,11 +144,11 @@ CREATE TABLE account (
 
 Now, each country_code will have associated with it subtable, which has the same schema as its parent table, in the following manner:
 ```
-country_code = 0 -> account_0
-country_code = 1 -> account_1
-country_code = 2 -> account_2
+rows with country_code = 0 -> account_0 
+rows with country_code = 1 -> account_1
+rows with country_code = 2 -> account_2
 ...
-country_code = n -> account_n
+rows with country_code = n -> account_n
 ```
 
 Our next assumptions are that we have 10 country codes in the account table, they are more or less equally distributed, and we attach *WHERE country_code = ?* to most queries. In that case, only one of the 10 partitions needs to be checked. Instead of scanning 10<sup>9</sup> rows, we will search through:
