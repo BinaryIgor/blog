@@ -1,5 +1,5 @@
 import { Scheduler } from "../../src/server/scheduler.js";
-import { sleep } from "../test-utils.js";
+import { delay } from "../../src/shared/promises.js";
 
 import { SqliteDb, SqliteDbBackuper } from "../../src/server/db.js";
 
@@ -74,7 +74,7 @@ function countTestTableRows(db) {
 }
 
 function nextBackupDelay() {
-    return sleep(BACKUP_DELAY_AWAIT);
+    return delay(BACKUP_DELAY_AWAIT);
 }
 
 function fromBackupDb() {

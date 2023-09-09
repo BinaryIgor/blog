@@ -1,14 +1,15 @@
-import { assert } from "chai";
-import { serverIntTestSuite, SERVER_URL, nextScheduledTasksRunDelay, randomAllowedPostPath, testClock } from "../server-int-test-suite.js";
-import { TestRequests, assertJsonResponse, assertOkResponseCode } from "../web-tests.js";
+import { assert, expect } from "chai";
+import {
+    serverIntTestSuite, nextScheduledTasksRunDelay, randomAllowedPostPath,
+    testClock, testRequests, failNextNPostsFetches, addPosts
+} from "../server-int-test-suite.js";
+import { assertJsonResponse, assertOkResponseCode, assertResponseCode } from "../web-tests.js";
 import { Stats, GeneralStats, ViewsBySource, PageStats } from "../../src/server/analytics.js";
 import { randomNumber, randomString } from "../test-utils.js";
 import { MAX_PATH_LENGTH, MAX_IP_HASH_VISITOR_IDS_IN_LAST_DAY, DAY_SECONDS } from "../../src/server/analytics.js";
 import { TestObjects } from "../test-objects.js";
 import { hashedIp } from "../../src/server/web.js";
 import crypto from 'crypto';
-
-const testRequests = new TestRequests(SERVER_URL);
 
 serverIntTestSuite("Server integration tests", () => {
     invalidViews().forEach(v => {
@@ -142,6 +143,25 @@ serverIntTestSuite("Server integration tests", () => {
 
         assertJsonResponse(statsResponse, actualStats => {
             assert.deepEqual(actualStats, expectedStats);
+        });
+    });
+
+    it(`should allow to trigger post reload, retrying if necessary`, async function () {
+        //3 retries in test config. Next reload tests eventually successful reload
+        failNextNPostsFetches(5);
+
+        const failedReload = await testRequests.reloadPosts();
+
+        assertResponseCode(failedReload, 500);
+
+        const additionalPosts = ["a", "b"];
+        
+        addPosts(additionalPosts);
+
+        const successfulReload = await testRequests.reloadPosts();
+
+        assertJsonResponse(successfulReload, actualResponse => {
+            expect(actualResponse.knownPosts).to.include("/a.html", "/b.html");
         });
     });
 });

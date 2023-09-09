@@ -1,5 +1,5 @@
 import { Scheduler } from "../../src/server/scheduler.js";
-import { sleep } from "../test-utils.js";
+import { delay } from "../../src/shared/promises.js";
 import { TestObjects } from "../test-objects.js";
 import { DeferredViewsSaver } from "../../src/server/analytics.js";
 import { expect } from "chai";
@@ -43,7 +43,7 @@ describe("DeferredViewsSaver tests", () => {
 })
 
 function nextWriteDelay() {
-    return sleep(WRITE_DELAY_AWAIT);
+    return delay(WRITE_DELAY_AWAIT);
 }
 
 export class FakeAnalyticsRepository {

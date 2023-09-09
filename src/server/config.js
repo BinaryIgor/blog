@@ -4,8 +4,8 @@ import { envVarOrDefault } from "../shared/env.js";
 const DEFAULT_DB_BACKUP_DELAY = 3 * 60 * 60 * 1000;
 
 export function read() {
-    const postsPath = envVarOrDefault("POSTS_URL", "https://localhost/posts.json");
-    if (postsPath.includes("localhost")) {
+    const postsHost = envVarOrDefault("POSTS_HOST", "https://localhost");
+    if (postsHost.includes("localhost")) {
         process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
     }
 
@@ -16,7 +16,7 @@ export function read() {
         dbBackupPath: envVarOrDefault("DB_BACKUP_PATH", "/tmp/analytics_backup.db"),
         dbBackupDelay: envVarOrDefault("DB_BACKUP_DELAY", DEFAULT_DB_BACKUP_DELAY),
         analyticsAllowedPaths: analyticsAllowedPaths(),
-        postsPath: postsPath,
+        postsPath: `${postsHost}/posts.json`,
         postsReadDelay: envVarOrDefault("POSTS_READ_DELAY", 60 * 60_000),
         viewsWriteDelay: envVarOrDefault("VIEWS_WRITE_DELAY", 1000)
     }

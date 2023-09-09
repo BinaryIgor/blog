@@ -20,7 +20,13 @@ let server;
 let scheduler;
 let db;
 
-export async function start(clock = new Clock()) {
+export async function start(clock = new Clock(),
+    schedulePosts = true,
+    postsRetryConfig = {
+        retries: 5,
+        initialDelay: 500,
+        backoffMultiplier: 2
+    }) {
     const config = Config.read();
 
     db = new SqliteDb(config.dbPath);
@@ -41,7 +47,10 @@ export async function start(clock = new Clock()) {
 
     new SqliteDbBackuper(db, config.dbBackupPath, scheduler, config.dbBackupDelay);
 
-    const postsSource = new PostsSource(config.postsPath, scheduler, config.postsReadDelay);
+    const postsSource = new PostsSource(config.postsPath,
+        postsRetryConfig,
+        schedulePosts ? scheduler : null,
+        schedulePosts ? config.postsReadDelay : null);
 
     const analyticsRepository = new SqliteAnalyticsRepository(db);
     const viewsSaver = new DeferredViewsSaver(analyticsRepository, scheduler, config.viewsWriteDelay);
@@ -93,7 +102,7 @@ export async function start(clock = new Clock()) {
         try {
             await postsSource.reload();
             res.send(postsSource.knownPosts());
-        } catch(e) {
+        } catch (e) {
             Logger.logError("Problem while reloading posts...", e);
             res.sendStatus(500);
         }

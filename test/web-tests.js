@@ -22,6 +22,10 @@ export class TestRequests {
         return this._appRequest().get("/meta/stats");
     }
 
+    async reloadPosts() { 
+        return this._appRequest().post("/internal/reload-posts");
+    }
+
     _appRequest() {
         return request(this.serverUrl);
     }
