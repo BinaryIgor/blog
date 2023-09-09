@@ -22,3 +22,6 @@ file=server npm run test:file
 ```
 
 For the rest, checkout package.json and ops and scripts folders!
+
+
+For now, blog is deployed to Digital Ocean app platform and the server (for analytics) is on the separate droplet.

@@ -1,5 +1,6 @@
 import bodyParser from "body-parser";
 import express from "express";
+import cors from "cors";
 import { AnalyticsService, DeferredViewsSaver, SqliteAnalyticsRepository, View } from "./analytics.js";
 import { Scheduler } from "./scheduler.js";
 import * as Logger from "../shared/logger.js";
@@ -50,8 +51,13 @@ export async function start(clock = new Clock()) {
 
     app.use(bodyParser.json());
 
+    const corsOptions = {
+        origin: config.corsAllowedOrigin
+    };
+    app.use(cors(corsOptions));
+
     app.post("/analytics/view", async (req, res) => {
-        try {   
+        try {
             const ip = req.header(REAL_IP_HEADER) || req.socket.remoteAddress;
             const ipHash = Web.hashedIp(ip);
             const reqBody = req.body;
@@ -64,12 +70,21 @@ export async function start(clock = new Clock()) {
         res.sendStatus(200);
     });
 
-    app.get("/stats", async (req, res) => {
+    app.get("/meta/stats", async (req, res) => {
         try {
             const stats = await analylitcsService.stats();
             res.send(stats);
         } catch (e) {
             Logger.logError("Problem while getting stats...", e);
+            res.sendStatus(500);
+        }
+    });
+
+    app.get("/meta/posts", async (req, res) => {
+        try {
+            res.send(postsSource.knownPosts());
+        } catch (e) {
+            Logger.logError("Problem while getting posts...", e);
             res.sendStatus(500);
         }
     });
@@ -84,6 +99,10 @@ export async function start(clock = new Clock()) {
 
     server = app.listen(config.serverPort, () => {
         Logger.logInfo(`Server started on ${config.serverPort}`);
+    });
+
+    process.on('uncaughtException', err => {
+        Logger.logError('Unhandled exception: ', err);
     });
 
     //TODO: graceful shutdown

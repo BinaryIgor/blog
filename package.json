@@ -13,12 +13,10 @@
         "build:nginx": "cd ops; bash build_app.bash nginx",
         "build:api": "cd ops; bash build_app.bash api",
         "run:blog": "cd ops/nginx; bash build_and_run_locally.bash",
-        "deploy:blog": "cd ops/blog; bash deploy_blog.bash",
-        "deploy:nginx": "cd ops/nginx; bash deploy_app.bash nginx",
-        "deploy:api": "cd ops/api; bash deploy_app.bash api",
+        "deploy:nginx": "cd ops; bash deploy_app.bash nginx",
+        "deploy:api": "cd ops; bash deploy_app.bash api",
         "build:run:blog": "npm run build:blog && npm run run:blog",
         "build:run:api": "cd ops/api; bash build_and_run_locally.bash",
-        "build:deploy:blog": "npm run build:blog && npm run deploy:blog",
         "build:deploy:nginx": "npm run build:nginx && npm run deploy:nginx",
         "build:deploy:api": "npm run build:api && npm run deploy:api"
     },
@@ -28,15 +26,16 @@
         "node": ">=19.0.0"
     },
     "dependencies": {
+        "cors": "^2.8.5",
         "express": "^4.18.2",
         "sqlite3": "^5.1.6"
     },
     "devDependencies": {
-        "marked": "^7.0.3",
-        "tailwindcss": "^3.3.3",
         "chai": "^4.2.0",
+        "marked": "^7.0.3",
         "mocha": "^7.1.0",
-        "supertest": "^6.3.3"
+        "supertest": "^6.3.3",
+        "tailwindcss": "^3.3.3"
     },
     "type": "module"
 }

@@ -40,7 +40,7 @@
     }
 
     function fetchStats() {
-        return fetch("/api/stats")
+        return fetch(`${apiDomain()}/meta/stats`)
             .then(r => r.json())
             .catch(e => {
                 console.log("Failed to get stats", e);

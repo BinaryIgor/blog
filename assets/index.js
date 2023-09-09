@@ -52,6 +52,24 @@ function setupMode() {
 
 setupMode();
 
+// Global domain to api
+function apiDomain() {
+    const prodDomain= "https://api.binaryigor.com";
+
+    let domain;
+    try {
+        if (document.location.host.includes("localhost")) {
+            domain = "https://localhost";
+        } else {
+            domain = prodDomain;
+        }
+    } catch(e) {
+        domain = prodDomain;
+    }
+
+    return domain;
+}
+
 // Analytics
 const POST_ATTRIBUTE = "data-post-slug";
 const SENT_VIEW_KEY = "SENT_VIEW";
@@ -60,7 +78,7 @@ const VISITOR_ID_KEY = "VISITOR_ID";
 const MIN_SEND_VIEW_INTERVAL = 1000 * 60 * 5;
 const MIN_POST_VIEW_TIME = 1000 * 10;
 
-const VIEW_URL = "/api/analytics/view";
+const viewUrl = `${apiDomain()}/analytics/view`;
 
 const postPage = document.body.getAttribute(POST_ATTRIBUTE);
 
@@ -90,7 +108,7 @@ function postRequest(url, body) {
 }
 
 function sendView(sourceUrl, visitorId) {
-    postRequest(VIEW_URL, { source: sourceUrl, visitorId: visitorId, path: location.pathname })
+    postRequest(viewUrl, { source: sourceUrl, visitorId: visitorId, path: location.pathname })
         .then(r => localStorage.setItem(SENT_VIEW_KEY, Date.now()));
 }
 

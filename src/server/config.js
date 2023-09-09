@@ -1,25 +1,25 @@
 import { envVarOrDefault } from "../shared/env.js";
-import * as Files from "../shared/files.js";
-import path from 'path';
 
 //3 hours
 const DEFAULT_DB_BACKUP_DELAY = 3 * 60 * 60 * 1000;
 
 export function read() {
+    const postsPath = envVarOrDefault("POSTS_URL", "https://localhost/posts.json");
+    if (postsPath.includes("localhost")) {
+        process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
+    }
+
     return {
         serverPort: envVarOrDefault("SERVER_PORT", 8080),
+        corsAllowedOrigin: envVarOrDefault("CORS_ALLOWED_ORIGIN", "https://binaryigor.com"),
         dbPath: envVarOrDefault("DB_PATH", "/tmp/analytics.db"),
         dbBackupPath: envVarOrDefault("DB_BACKUP_PATH", "/tmp/analytics_backup.db"),
         dbBackupDelay: envVarOrDefault("DB_BACKUP_DELAY", DEFAULT_DB_BACKUP_DELAY),
         analyticsAllowedPaths: analyticsAllowedPaths(),
-        postsPath: envVarOrDefault("POSTS_PATH", localPostsPath()),
-        postsReadDelay: envVarOrDefault("POSTS_READ_DELAY", 5000),
+        postsPath: postsPath,
+        postsReadDelay: envVarOrDefault("POSTS_READ_DELAY", 5 * 60_000),
         viewsWriteDelay: envVarOrDefault("VIEWS_WRITE_DELAY", 1000)
     }
-}
-
-function localPostsPath() {
-    return path.join(Files.currentDir(), "..", "..", "dist", "posts.json");
 }
 
 function analyticsAllowedPaths() {

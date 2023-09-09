@@ -9,8 +9,6 @@ fi
 
 scripts_dir=${PWD}
 
-cd ..
-
 source ci_config.env
 
 cd ${APP_DIR}
@@ -32,22 +30,23 @@ ssh ${REMOTE_HOST} "rm -r -f $previous_deploy_dir;
      mkdir -p $latest_deploy_dir;
      cp -r $latest_deploy_dir $previous_deploy_dir;"
 
-if [ -n "${PRE_DEPLOY_SCRIPT}" ]; then
-    pre_deploy_remote_script_path="${latest_deploy_dir}/${PRE_DEPLOY_SCRIPT}"
-    echo "Copying pre $PRE_DEPLOY_SCRIPT deploy script to run on the remote host from $latest_deploy_dir dir..."
-    ssh ${REMOTE_HOST} "cp ${PRE_DEPLOY_SCRIPT} ${pre_deploy_remote_script_path};
-    cd ${latest_deploy_dir};
-    bash ${PRE_DEPLOY_SCRIPT}"
-    ssh
-fi     
-
 echo
 echo "Dirs prepared, copying package, this can take a while..."
 
 scp -r dist/* ${REMOTE_HOST}:${latest_deploy_dir}
 
 echo
-echo "Package copied, loading and running app, this can take a while.."
+echo "Package copied!"
+
+if [ -n "${PRE_DEPLOY_SCRIPT}" ]; then
+    echo "Running pre $PRE_DEPLOY_SCRIPT deploy script.."
+    ssh ${REMOTE_HOST} "cd ${latest_deploy_dir}; bash ${PRE_DEPLOY_SCRIPT};"
+    echo
+    echo "Pre deploy scrip was run!"
+fi     
+
+echo
+echo "Loading and running app, this can take a while.."
 
 ssh ${REMOTE_HOST} "cd $latest_deploy_dir; bash load_and_run_app.bash"
 
