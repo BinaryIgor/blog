@@ -19,7 +19,7 @@ export class TestRequests {
     }
 
     async getStats() {
-        return this._appRequest().get("/stats");
+        return this._appRequest().get("/meta/stats");
     }
 
     _appRequest() {
