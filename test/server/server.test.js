@@ -49,18 +49,20 @@ serverIntTestSuite("Server integration tests", () => {
 
         await nextScheduledTasksRunDelay();
 
-        await assertStatsHaveViewsAndUniqueVisitors(
+        await assertStatsHaveViewsUniqueVisitorsAndIpHashes(
             MAX_IP_HASH_VISITOR_IDS_IN_LAST_DAY,
-            MAX_IP_HASH_VISITOR_IDS_IN_LAST_DAY);
+            MAX_IP_HASH_VISITOR_IDS_IN_LAST_DAY,
+            1);
 
         await addViewsFromIp(anotherIp, anotherIpViews);
         await addViewsFromIp(ip, overLimitViews);
 
         await nextScheduledTasksRunDelay();
 
-        await assertStatsHaveViewsAndUniqueVisitors(
+        await assertStatsHaveViewsUniqueVisitorsAndIpHashes(
             MAX_IP_HASH_VISITOR_IDS_IN_LAST_DAY + anotherIpViews,
-            MAX_IP_HASH_VISITOR_IDS_IN_LAST_DAY + anotherIpViews);
+            MAX_IP_HASH_VISITOR_IDS_IN_LAST_DAY + anotherIpViews,
+            2);
 
         testClock.moveTimeBy(DAY_SECONDS + 1);
 
@@ -70,9 +72,10 @@ serverIntTestSuite("Server integration tests", () => {
 
         await nextScheduledTasksRunDelay();
 
-        await assertStatsHaveViewsAndUniqueVisitors(
+        await assertStatsHaveViewsUniqueVisitorsAndIpHashes(
             MAX_IP_HASH_VISITOR_IDS_IN_LAST_DAY + anotherIpViews + limitExpiredViews,
-            MAX_IP_HASH_VISITOR_IDS_IN_LAST_DAY + anotherIpViews + limitExpiredViews);
+            MAX_IP_HASH_VISITOR_IDS_IN_LAST_DAY + anotherIpViews + limitExpiredViews,
+            2);
     });
 
     it('should add views', async () => {
@@ -115,22 +118,17 @@ serverIntTestSuite("Server integration tests", () => {
             source: source2Url
         });
 
-        const addIp1View1Response = await testRequests.addViewRequest(ip1View1);
-        const addIp1View2Response = await testRequests.addViewRequest(ip1View2);
-        const addIp2View1Response = await testRequests.addViewRequest(ip2View1);
-        const addIp2View2Response = await testRequests.addViewRequest(ip2View2);
-
-        assertOkResponseCode(addIp1View1Response);
-        assertOkResponseCode(addIp1View2Response);
-        assertOkResponseCode(addIp2View1Response);
-        assertOkResponseCode(addIp2View2Response);
+        await addViewFromIp(ip1, ip1View1);
+        await addViewFromIp(ip1, ip1View2);
+        await addViewFromIp(ip2, ip2View1);
+        await addViewFromIp(ip2, ip2View2);
 
         await nextScheduledTasksRunDelay();
 
         const statsResponse = await testRequests.getStats();
 
         const expectedStats = new Stats(
-            new GeneralStats(4, 2,
+            new GeneralStats(4, 2, 2,
                 [
                     new ViewsBySource(source1, 50),
                     new ViewsBySource(source2, 50),
@@ -155,7 +153,7 @@ serverIntTestSuite("Server integration tests", () => {
         assertResponseCode(failedReload, 500);
 
         const additionalPosts = ["a", "b"];
-        
+
         addPosts(additionalPosts);
 
         const successfulReload = await testRequests.reloadPosts();
@@ -181,15 +179,16 @@ function invalidViews() {
 
 function assertEmptyStatsResponse(response) {
     assertJsonResponse(response, actualStats => {
-        const emptyStats = new Stats(new GeneralStats(0, 0, []), []);
+        const emptyStats = new Stats(new GeneralStats(0, 0, 0, []), []);
         assert.deepEqual(actualStats, emptyStats);
     });
 }
 
-async function assertStatsHaveViewsAndUniqueVisitors(views, visitors) {
+async function assertStatsHaveViewsUniqueVisitorsAndIpHashes(views, visitors, iphashes) {
     assertJsonResponse(await testRequests.getStats(), actualStats => {
         assert.deepEqual(actualStats.general.views, views);
         assert.deepEqual(actualStats.general.uniqueVisitors, visitors);
+        assert.deepEqual(actualStats.general.ipHashes, iphashes);
     });
 }
 
@@ -199,8 +198,10 @@ async function addViewsFromIp(ip, views) {
     }
 }
 
-async function addViewFromIp(ip) {
-    const view = TestObjects.randomView({ ipHash: ip });
+async function addViewFromIp(ip, view = null) {
+    if (!view) {
+        view = TestObjects.randomView({ ipHash: ip });
+    }
     const response = await testRequests.addViewRequest(view, { "X-Real-Ip": ip });
     assertOkResponseCode(response);
 }

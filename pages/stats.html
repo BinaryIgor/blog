@@ -49,16 +49,20 @@
     }
 
     function toStatsView(postsByPath, stats) {
+        const generalStats = stats.general;
+        const pagesStats = stats.pages;
+        
         return {
-            views: stats.general.views,
-            uniqueVisitors: stats.general.uniqueVisitors,
-            viewsBySource: stats.general.viewsBySource.map(v => {
+            views: generalStats.views,
+            uniqueVisitors: generalStats.uniqueVisitors,
+            ipHashes: generalStats.ipHashes,
+            viewsBySource: generalStats.viewsBySource.map(v => {
                 return {
                     source: v.source,
                     views: `${Math.round(v.views * 100) / 100}%`
                 }
             }),
-            posts: stats.pages.filter(p => postsByPath.has(p.path))
+            posts: pagesStats.filter(p => postsByPath.has(p.path))
                 .map(p => {
                     const post = postsByPath.get(p.path);
                     return {
@@ -96,6 +100,7 @@
         return `
             <div>Views: ${stats.views}</div>
             <div>Unique visitors: ${stats.uniqueVisitors}</div>
+            <div>Ip hashes: ${stats.ipHashes}</div>
             `;
     }
 

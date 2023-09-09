@@ -95,8 +95,9 @@ export class View {
 }
 
 export class GeneralStats {
-    constructor(views, uniqueVisitors, viewsBySource) {
+    constructor(views, uniqueVisitors, ipHashes, viewsBySource) {
         this.views = views;
+        this.ipHashes = ipHashes;
         this.uniqueVisitors = uniqueVisitors;
         this.viewsBySource = viewsBySource;
     }
@@ -185,32 +186,37 @@ export class SqliteAnalyticsRepository {
     }
 
     async generalStats() {
-        const viewsVisitorsPromise = this._viewsUniqueVisitorsStats();
+        const viewsVisitorsIpHashesPromise = this._viewsUniqueVisitorsIpHashesStats();
         const viewsBySourcePromise = this._viewsBySourceStats();
 
-        const viewsVisitors = await viewsVisitorsPromise;
+        const { views, uniqueVisitors, ipHashes } = await viewsVisitorsIpHashesPromise;
         const viewsBySourceFromDb = await viewsBySourcePromise;
 
         let viewsBySource;
-        if (viewsVisitors.views > 0) {
-            viewsBySource = viewsBySourceFromDb.map(v => new ViewsBySource(v.source, v.views * 100 / viewsVisitors.views));
+        if (views > 0) {
+            viewsBySource = viewsBySourceFromDb.map(v => new ViewsBySource(v.source, v.views * 100 / views));
         } else {
             viewsBySource = [];
         }
 
-        return new GeneralStats(viewsVisitors.views, viewsVisitors.uniqueVisitors, viewsBySource);
+        return new GeneralStats(views, uniqueVisitors, ipHashes, viewsBySource);
     }
 
-    _viewsUniqueVisitorsStats() {
+    _viewsUniqueVisitorsIpHashesStats() {
         return this.db.queryOne(`SELECT 
         COUNT(*) as views, 
-        COUNT(DISTINCT visitor_id) as unique_visitors
+        COUNT(DISTINCT visitor_id) as unique_visitors,
+        COUNT(DISTINCT ip_hash) as ip_hashes
         FROM view`)
             .then(r => {
                 if (r) {
-                    return { views: r['views'], uniqueVisitors: r['unique_visitors'] }
+                    return {
+                        views: r['views'],
+                        uniqueVisitors: r['unique_visitors'],
+                        ipHashes: r['ip_hashes']
+                    }
                 }
-                return { views: 0, uniqueVisitors: 0 };
+                return { views: 0, uniqueVisitors: 0, iphashes: 0 };
             });
     }
 
