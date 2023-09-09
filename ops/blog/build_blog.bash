@@ -1,4 +1,6 @@
 #!/bin/bash
+set -e
+
 echo "Preparing dist dir..."
 
 cd ../../
