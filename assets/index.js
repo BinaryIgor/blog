@@ -11,7 +11,7 @@ function setupMode() {
     const LIGHT_MODE = 'light';
     const DARK_MODE = 'dark';
     const DARK_MODE_ICON = "0";
-    const LIGHT_MODE_ICON = "1";
+    const LIGHT_MODE_ICON = "I";
 
     const themeToggle = document.getElementById("theme-toggle");
 
