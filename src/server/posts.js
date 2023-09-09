@@ -7,12 +7,12 @@ export class PostsSource {
         this._posts = new Set();
         this._lastReload = undefined;
 
-        this._reloadPosts();
+        this.reload();
 
-        scheduler.schedule(async () => this._reloadPosts(), readDelay);
+        scheduler.schedule(async () => this.reload(), readDelay);
     }
 
-    async _reloadPosts() {
+    async reload() {
         try {
             const postsPaths = new Set();
 

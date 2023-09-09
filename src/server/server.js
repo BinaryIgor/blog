@@ -89,6 +89,16 @@ export async function start(clock = new Clock()) {
         }
     });
 
+    app.post("/internal/reload-posts", async (req, res) => {
+        try {
+            await postsSource.reload();
+            res.send(postsSource.knownPosts());
+        } catch(e) {
+            Logger.logError("Problem while reloading posts...", e);
+            res.sendStatus(500);
+        }
+    });
+
     app.use((error, req, res, next) => {
         Logger.logError("Something went wrong...", error);
         res.status(500);

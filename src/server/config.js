@@ -17,7 +17,7 @@ export function read() {
         dbBackupDelay: envVarOrDefault("DB_BACKUP_DELAY", DEFAULT_DB_BACKUP_DELAY),
         analyticsAllowedPaths: analyticsAllowedPaths(),
         postsPath: postsPath,
-        postsReadDelay: envVarOrDefault("POSTS_READ_DELAY", 5 * 60_000),
+        postsReadDelay: envVarOrDefault("POSTS_READ_DELAY", 60 * 60_000),
         viewsWriteDelay: envVarOrDefault("VIEWS_WRITE_DELAY", 1000)
     }
 }
