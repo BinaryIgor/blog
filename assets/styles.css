@@ -94,9 +94,13 @@ html {
 }
 
 @layer components {
+    /* TODO: font from assets*/
+    * {
+        @apply font-mono;
+    }
     body {
         /* relative for footer to work properly*/
-        @apply font-mono bg-primary text-primary min-h-screen relative;
+        @apply bg-primary text-primary min-h-screen relative;
     }
 
     .max-content-width {
@@ -164,7 +168,7 @@ html {
     }
 
     .post a {
-        @apply font-bold break-words;
+        @apply font-bold break-words underline;
     }
 
     .delimiter-like {
