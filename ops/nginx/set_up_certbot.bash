@@ -10,7 +10,7 @@ sudo ln -s /snap/bin/certbot /usr/bin/certbot
 echo
 echo 'Certbot configured, generating certs...'
 # Standalone mode: certbot will temporarily spin up a webserver on the machine.
-sudo certbot certonly --standalone --non-interactive --agree-tos --email iroztropinski@gmail.com -v --domains \"api.binaryigor.com\"
+sudo certbot certonly --standalone --non-interactive --agree-tos --email igor.thebinary@gmail.com -v --domains \"api.binaryigor.com\"
 
 echo
 echo 'Certbot set, setting up pre and post renew scripts...'
