@@ -14,7 +14,7 @@
 
 When we work with a set of (usually persisted somewhere) data, we most likely want our queries to be fast. Whenever I think about optimizing certain data query, be it SQL (mostly) or NoSQL, I find it useful to think about these problems as search space problems. In other words, **how much data need to be scanned/checked in order for my query to be fulfilled?**
 
-Building on that, if our search space is big, large, huge or enormous (we work with tables/collections consisting of 10<sup>6</sup>, 10<sup>9</sup>, 10<sup>12</sup>, 10<sup>16</sup>... of rows/documents for example), **we need to find a way to make our search space small again**. There are a couple ways of doing that, so let's explore them.
+Building on that, if our search space is big, large, huge or enormous (we work with tables/collections consisting of 10<sup>6</sup>, 10<sup>9</sup>, 10<sup>12</sup>, 10<sup>15</sup>... of rows/documents for example), **we need to find a way to make our search space small again**. There are a couple ways of doing that, so let's explore them.
 
 ## Changing schema
 
