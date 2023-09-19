@@ -9,6 +9,8 @@ import { dirname } from 'path';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
+const draftPrefix = "__draft__";
+
 const fontMatterRegex = /^---(.*?)---/s;
 const templateVariablesRegex = /\{\{(.+?)\}\}/g;
 
@@ -130,7 +132,12 @@ async function allPosts(postsDir, variables) {
 
         const fMatterPost = fontMatterRegex.exec(post);
         let fMatter = JSON.parse(fMatterPost[1]);
+
         let postContent = post.replace(fMatterPost[0], '');
+
+        if (fMatter.draft) {
+            fMatter.slug = draftPrefix + fMatter.slug;
+        }
 
         posts[fn] = {
             fontMatter: fMatter,
@@ -179,9 +186,10 @@ for (const [k, e] of Object.entries(posts)) {
     postsData.push(fontMatter);
 }
 
-await writeFileContent(postsJsonPath, JSON.stringify(postsData, null, 2));
+const withoutDraftsPostData = postsData.filter(p => !p.draft);
+await writeFileContent(postsJsonPath, JSON.stringify(withoutDraftsPostData, null, 2));
 
-const pages = await allPages(pagesDir, postsData);
+const pages = await allPages(pagesDir, withoutDraftsPostData);
 
 for (const p of config.pagesToRender) {
     await writeFileContent(path.join(distDir, p), pages[p]);

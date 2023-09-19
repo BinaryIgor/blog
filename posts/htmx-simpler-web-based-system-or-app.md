@@ -6,7 +6,8 @@
     "timeToRead": "12 minutes",
     "wordsCount": 1983,
     "excerpt": "Nowadays, when we develop web-based app/system it is most likely built as SPA, which is a single page application. We might ask, why have we done that? Why have we switched from multi page applications where the browser supports all of these functions out of the box, that now we need to recreate by writing custom JavaScript code?",
-    "writingLog": [ 1.5, 4.5, 1.5 ]
+    "writingLog": [ 1.5, 4.5, 1.5 ],
+    "draft": true
 }
 ---
 

@@ -81,6 +81,7 @@ const MIN_POST_VIEW_TIME = 1000 * 10;
 const viewUrl = `${apiDomain()}/analytics/view`;
 
 const postPage = document.body.getAttribute(POST_ATTRIBUTE);
+const pageToSkip = postPage && postPage.includes("draft");
 
 function lastSentViewExpired() {
     const viewSent = localStorage.getItem(SENT_VIEW_KEY);
@@ -120,7 +121,8 @@ function tryToSendView(sourceUrl, visitorId) {
     }
 }
 
-const sourceUrl = document.referrer ? document.referrer : document.location.href;
-const visitorId = getOrGenerateVisitorId();
-
-tryToSendView(sourceUrl, visitorId);
+if (!pageToSkip) {
+    const sourceUrl = document.referrer ? document.referrer : document.location.href;
+    const visitorId = getOrGenerateVisitorId();
+    tryToSendView(sourceUrl, visitorId);
+}
