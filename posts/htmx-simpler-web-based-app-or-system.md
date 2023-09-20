@@ -98,7 +98,7 @@ html -> http request -> http response -> html
 ...?
 HTMX takes approach, where it is indeed possible (or at least something very close to it). Instead of going through the hustle of sending and receiving json (or some other data representation format) and then translating it back and forth into HTML, **we can just receive ready to be rendered HTML pages and fragments**.
 
-How does it work? HTML is just a JavaScript library. You add it as a dependency and then it allows you to do trigger virtually any ajax (http) request from any HTML element (WebSockets are also supported). In non-extended, standard HTML this can be done to a very limited degree, both when it comes to form and a source, mostly on form element (and also by getting media directly in the video and audio elements). With HTMX you can update fragments of your HTML page just like this:
+How does it work? HTML is just a JavaScript library. We add it as a dependency and then it allows us to do trigger virtually any ajax (http) request from any HTML element (WebSockets are also supported). In non-extended, standard HTML this can be done to a very limited degree, both when it comes to form and a source of request, mostly on the form element (and also by getting media directly in the video and audio elements). With HTMX, we can update fragments of our HTML page just like this:
 ```
 <html>
   <head>
@@ -120,7 +120,7 @@ How does it work? HTML is just a JavaScript library. You add it as a dependency 
 <html>
 ```
 What will happen here?
-* on button click (you can override it to be virtually any event!) HTMX will issue POST request to the */reverse-items* url
+* on button click (we can override it to be virtually any event!) HTMX will issue *POST* request to the */reverse-items* url
 * it will then take response from the server and swap *#items* div content directly with what it got from the server
 
 To illustrate:
@@ -142,7 +142,8 @@ Page before request:
 </body>
 
 
-On a click, HTMX does POST to /reverse-items and gets HTML fragment in the response:
+On a click, 
+HTMX does POST to /reverse-items and gets HTML fragment in the response:
 <ul>
   <li>Second item: 2</li>
   <li>First item: 1</li>
@@ -253,19 +254,19 @@ Let's get back to our server. As said, in SPA approach it would return mostly js
 And as we know, upon clicking it, the server will return HTML fragment ready to be rendered dirrectly in the browser. 
 Instead of sending and receving json, our server now returns HTML pages and fragments. That does mean a little more code there (on the server side), but we do not have a separate frontend app anymore. We just have a single app, with the server code and UI pages and fragments/components. Server can be written in any language/framework (JavaScript also). Most of our frontend will be defined in HTML pages (with HTMX tags/attributes) + CSS + some custom JS for error handling and whatever we wish. **The amount of JavaScript that we need to write is minimal and it serves only to enhance our app's behavior, not to constitute its most important part**.
 
-Quite interestingly, because we have a single app with one deployment, **we can easily write end-to-end tests using something like <a href="https://playwright.dev/" target="_blank">Playwright</a> or <a href="https://www.cypress.io/">Cypress</a>**. We can run our app locally, in the same manner as it will be run in the production and have it trully e2e-tested (we can also do this with SPA approach, but there we need to setup backend and frontend separately, which is a little harder to do, not impossible, but harder).
+Quite interestingly, because we have a single app with one deployment, **we can easily write end-to-end tests using something like <a href="https://playwright.dev/" target="_blank">Playwright</a> or <a target="_blank" href="https://www.cypress.io/">Cypress</a>**. We can run our app locally, in the same manner as it will be run in the production and have it trully e2e-tested (we can also do this with SPA approach, but there we need to setup backend and frontend separately, which is a little harder to do, not impossible, but harder).
 
 ## Is it really that simple?
 
 Is it really all great and wonderful? Are there no trade-offs? As with everything, there are. Whether they are worth taking depends completely on the particular case. As we have shown, HTMX is quie robust and I believe that majority of UI's can be build using HTMX and the resulting system will be simpler and easier to develop, without sacrificing user experience, than the traditional SPA approach. How much? It depends on the particularities of the project. What are the problems and challenges worth considering before jumping into HTMX?
 
-First of all, it is quite novel approach. Developers might be scarce and reluctant to use HTMX and it can harder to find rich libraries of components. That will most likely change with the passage of time and we can get very far with just CSS (Tailwind/other CSS library) and our own custom JavaScript, but depending on the project design and needs, we might have to write more code to have our desired UI components. There are just less ready-to-use components, like there are for Vue, React or Svelte alternatives (most component libraries are framework-specific). As said, that will probably be less and less true as HTMX gains popularity, but it is still the case now (as of the date of writing this article). Moreover, **there already are interesting ideas and initiatives like <a href="https://shoelace.style" target="_blank">shoelace</a>, which is a library based on <a href="https://developer.mozilla.org/en-US/docs/Web/API/Web_components">Web Components</a>**. The are are completely framework-agnostic and supported natively by the browsers.
+First of all, it is quite novel approach. Developers might be scarce and reluctant to use HTMX and it can harder to find rich libraries of components. That will most likely change with the passage of time and we can get very far with just CSS (Tailwind/other CSS library) and our own custom JavaScript, but depending on the project design and needs, we might have to write more code to have our desired UI components. There are just less ready-to-use components, like there are for Vue, React or Svelte alternatives (most component libraries are framework-specific). As said, that will probably be less and less true as HTMX gains popularity, but it is still the case now (as of the date of writing this article). Moreover, **there already are interesting ideas and initiatives like <a href="https://shoelace.style" target="_blank">shoelace</a>, which is a library based on <a target="_blank" href="https://developer.mozilla.org/en-US/docs/Web/API/Web_components">Web Components</a>**. The are are completely framework-agnostic and supported natively by the browsers.
 
 Second, there are applications that are not be suitable to write in HTMX. Cases where UI changes are mainly done without any interaction with the server or they need to be real-time fast. <a target="_blank" href="https://en.wikipedia.org/wiki/WebRTC">WebRTC (Web Real-Time Communication)</a> comes to mind here. We probably should not build a virtual conference room in HTMX, because UI changes are dictated by non-HTTP data exchanges (we can still build rest of the app in HTMX, implementing this one screen using vanilla JS). Additionally, if we have many (many, not one) cases where input from one fragment on the page often causes data in multiple places of the page to change. Realistically though, we would need to have something similar to an excel spreadsheet, rather than just something like adding an item to the basket + updating items counter in the different part of the page. **<a target="_blank" href="https://htmx.org/examples/update-other-content">For cases like that, HTMX has elegant solutions</a>**. Another example that comes to mind is an application that needs to work offline. Since HTMX depends on the server-side rendering of HTML pages/components it would be quite hard to achieve a trully offline functionality (altough it is possible to some extent with <a href="https://developer.mozilla.org/en-US/docs/Web/API/Service_Worker_API" target="_blank">Service Workers</a>).
 
 Third (maybe), possibly scattered logic. For some cases, there is still a need to write client-side JavaScript to achieve certain behaviors, like modal confirmation or dynamic error handling for example. I am not sure, if we shall call it a logic necessarily, but this is something to keep in mind. As far as validation goes, we can actually move it completely to the server side, where it always should be anyways, which can be viewed as simplification really. Most likely, as times go on, more and more people will figure out useful patterns for working with HTMX, and some frameworks/libraries on top of HTMX will be created, so this will be less and less of a problem. For now, we need to design our apps properly to avoid those problems.
 
-Finally, cohesion versus independence/decoupling. Although more complex, SPA approach draws a clear line between backend and the frontend. It means that two people/teams can work almost independently, in parallel, which can significantly speed up the software development process. It is still possible to split work between people with the cohesive HTMX approach (no clear frontend/backend distinction), but it not as obvious. Again, whether it is advantage or disadvantage depends on the specific case.
+Finally, **cohesion versus independence/decoupling**. Although more complex, SPA approach draws a clear line between backend and the frontend. It means that two people/teams can work almost independently, in parallel, which can significantly speed up the software development process. It is still possible to split work between people with the cohesive HTMX approach (no clear frontend/backend distinction), but it not as obvious. Again, whether it is advantage or disadvantage depends on the specific case.
 
 ## Consequences and closing thoughts
 
@@ -283,7 +284,7 @@ Let's summarize the most important consequences of taking HTMX versus traditiona
 11. It is a new approach, which means that there are less ready to be used UI components.  
 12. If we have larger team of people working on the project, it could be slower, since it is harder to parallelize the work. While frontend/backend separation that comes with SPA approach creates more abstractions it does allow more people to work in parallel since they often just need to agree on the API contact and can then work largely independently.  
 
-Overall, HTMX looks like a great technology and an interesting paradigm that we can use to write our web-based apps/systems faster and make them simpler, thus easier to change and maintain. **As said, there are few caveats, and cases where it is just not a good fit, but I highly, highly recommend you try it. 
+Overall, HTMX looks like a great technology and an interesting paradigm that we can use to write our web-based apps/systems faster and make them simpler, thus easier to change and maintain. **As said, there are few caveats, and cases where it is just not a good fit, but I highly, highly recommend to try it out. 
 Let's simplify web development!**
 
 <div class="article-delimiter">---</div>
