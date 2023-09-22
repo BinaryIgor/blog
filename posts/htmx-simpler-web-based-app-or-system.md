@@ -4,25 +4,24 @@
     "slug": "htmx-simpler-web-based-app-or-system",
     "publishedAt": "2023-09-22",
     "timeToRead": "13 minutes",
-    "wordsCount": 2625,
+    "wordsCount": 2678,
     "excerpt": "Nowadays, when we develop web-based app/system it is most likely built as SPA, which is a single page application. We should ask, why have we done that? Why have we switched from multi page applications, where the browser supported all of these functions out of the box, functions that we now need to recreate by writing custom JavaScript code?",
-    "writingLog": [ 1.5, 4.5, 1.5, 0.5, 4, 1.5],
-    "draft": true
+    "writingLog": [ 1.5, 4.5, 1.5, 0.5, 4, 1.5, 2.5]
 }
 ---
 
 ## Current approach - SPA
 
 Nowadays, when we develop web-based app/system it is most likely built as SPA, which is a single page application.
-In that model, we have *server*, often called *API*, which (for the most part) does not know anything about *UI* (User Interface). 
+In that model, we have *server*, often called *<a href="https://en.wikipedia.org/wiki/REST" target="_blank">REST API</a>*, which (for the most part) does not know anything about *UI* (User Interface). 
 Then we also have a thick *client* which is a JavaScript application responsible for all things that were (and still can be) the responsibility of a browser. This app needs to:
 * handle routing (going through pages) without doing full page reload
 * make http requests to get data in the JSON format (most popular as of now) from the server and map it to HTML, so the browser can render it and show to the user
 * translate some of the user actions (taken on HTML page) into JSON, so that they can be sent to the server and trigger some kind of action/state change
 
-As we can see, there are quite a few functions that were traditionally handled by the browser and now we need to write a custom code to replicate them (if we want to use SPA approach). This problem is a generic one, so many frameworks and libraries have sprang out to solve it, but the complexity is still there.
+As we can see, there are quite a few functions that were traditionally handled by the browser and now we need to write a custom code to replicate them (if we want to use the SPA approach). This problem is a generic one, so many frameworks and libraries have sprang out to solve it, but the complexity is still there.
 
-We should ask, why have we done that? **Why have we switched from multi page applications, where the browser supported all of these functions out of the box, functions that we now need to recreate by writing custom JavaScript code?** Mostly, probably only, because of the user experience. We can create more app-like, arguably superior experience, approaching the web in this way. When we do not need to do full page reload, whole experience in the browser feels much more like a native app, not a website. It can be faster also. After the initial load, we do exchange less data, going through pages, but whether it holds true depends on the particular implementation. For the most part, *if done correctly*, experience of the SPA with comparison to the traditional, multi-page website/application is better (if you do need that kind of experience. For blogs, like this one, I am completely fine with full page reloads. It is a blog after all, not an app).
+We should ask, why have we done that? **Why have we switched from multi page applications, where the browser supported all of these functions out of the box, functions that we now need to recreate by writing custom JavaScript code?** Mostly because of the user experience. We can create a superior, more app-like experience approaching the web in this way. When we do not need to do full page reload, whole experience in the browser feels much more like a native app, not a website. It can be faster also. After the initial load, we do exchange less data, going through pages, but whether it holds true depends on the particular implementation. For the most part, *if done correctly*, experience of the SPA with comparison to the traditional, multi-page website/application is better (if you do need that kind of experience. For blogs, like this one, I am completely fine with full page reloads. It is a blog after all, not an app). Another important factor is work organization. It is just easier to parallelize the development, when we have clear frontend and backend separation and each component could be taken care of by a dedicated person or team.
 
 ## Duplication and complexity
 
@@ -174,39 +173,36 @@ What about routing? It is simply going to a different page (route), but as with 
 ...
 <div class="w-full p-4">
 <div class="relative">
-<input id="search-authors-input" class="p-2 rounded-md bg-indigo-900 shadow-md mb-2 border-2 border-indigo-800 
-  hover:bg-indigo-800 focus:outline-none placeholder-zinc-500 w-full" 
+<input id="search-authors-input" class="p-2 ..." 
   name="authors-search" 
   placeholder="Search for interesting authors by their name..." 
   hx-trigger="keyup changed delay:500ms" 
   hx-post="/search-authors" 
   hx-target="#search-results" 
-  hx-indicator="#search-results-indicator">
+  ...>
 ...
 <div class="mt-2" id="search-results">
 <div class="space-y-4">
-  <div class="rounded-lg shadow-md p-4 cursor-pointer border-2 
-    border-indigo-800 shadow-indigo-800" 
+  <div class="rounded-lg ..." 
     hx-target="#app" 
     hx-get="/authors/Jordan Peterson" 
     hx-push-url="true">
     <div class="text-xl">Jordan Peterson</div>
-    <div class="text-zinc-300 italic mt-2">"When you have something to say silence is a lie."</div>
+    <div class="text-zinc-300 ...">"When you have something to say silence is a lie."</div>
     </div>
-  <div class="rounded-lg shadow-md p-4 cursor-pointer border-2 
-    border-indigo-800 shadow-indigo-800" 
+  <div class="rounded-lg ..." 
     hx-target="#app"
     hx-get="/authors/Saifedean Ammous"
     hx-push-url="true">
     <div class="text-xl">Saifedean Ammous</div>
-    <div class="text-zinc-300 italic mt-2">"Civilization is not about more  capital accumulation per se; rather, it is about what capital accumulation allows humans to achieve, the flourishing and freedom to seek higher meaning in life when their base needs are met and most pressing dangers averted."</div>
+    <div class="text-zinc-300 ...">"Civilization is not about more  capital accumulation per se; rather, it is about what capital accumulation allows humans to achieve, the flourishing and freedom to seek higher meaning in life when their base needs are met and most pressing dangers averted."</div>
   </div>
 </div>
 ...
 ```
-Here, besides <a target="_blank" href="https://tailwindcss.com">Tailwind</a> for CSS, we can see lots of HTMX tags. Let's focus on the div:
+Here, besides <a target="_blank" href="https://tailwindcss.com">Tailwind</a> for CSS, we can see lots of HTMX tags/attributes. Let's focus on the div:
 ```
-<div class="rounded-lg shadow-md p-4 cursor-pointer border-2 border-indigo-800 shadow-indigo-800" 
+<div class="rounded-lg ..." 
   hx-target="#app" 
   hx-get="/authors/Jordan Peterson" 
   hx-push-url="true">
@@ -259,7 +255,7 @@ Quite interestingly, because we have a single app with one deployment, **we can 
 
 ## Is it really that simple?
 
-Is it really all great and wonderful? Are there no trade-offs? As with everything, there are. Whether they are worth taking depends completely on the particular case. As we have shown, HTMX is quite robust. I believe that the majority of UI's can be built using HTMX and the resulting system will be simpler and easier to develop, without sacrificing user experience, than the traditional SPA approach. How much? It depends on the particularities of the project. What are the problems and challenges worth considering before jumping into HTMX?
+Is it really all great and wonderful? **Are there no trade-offs? As with everything, there are. Whether they are worth taking depends completely on the particular case.** As we have shown, HTMX is quite robust. I believe that the majority of UI's can be built using HTMX and the resulting system will be simpler and easier to develop, without sacrificing user experience, than the traditional SPA approach. How much? It depends on the particularities of the project. What are the problems and challenges worth considering before jumping into HTMX?
 
 First of all, it is quite a novel approach. Developers might be scarce and reluctant to use HTMX and it can be harder to find rich libraries of components. That will most likely change with the passage of time and we can get very far with just CSS (Tailwind/other CSS library) and our own custom JavaScript, but depending on the project design and needs, we might have to write more code to have our desired UI components. There are just less ready-to-use components, like there are for Vue, React or Svelte (most libraries of components are framework-specific). As said, that will probably be less and less true as HTMX gains popularity, but it is still the case as of now. Moreover, **there already are interesting ideas and initiatives like <a href="https://shoelace.style" target="_blank">shoelace</a>, which is a library based on <a target="_blank" href="https://developer.mozilla.org/en-US/docs/Web/API/Web_components">Web Components</a>**. They are completely framework-agnostic and supported natively by the browsers.
 
@@ -267,7 +263,7 @@ Second, there are applications that just are not suitable to write in HTMX. Case
 
 Third (maybe), possibly scattered logic. For some cases, there is still a need to write client-side JavaScript to achieve certain behaviors, like modal confirmation or dynamic error handling/representation. I am not sure, if we shall call it a logic necessarily, but this is something to keep in mind. As far as validation goes, we can actually move it completely to the server side, where it always should be anyway, which can be viewed as a simplification. Most likely, as time goes on, more and more people will figure out useful patterns for working with HTMX, and some frameworks/libraries on top of HTMX will be created, so this will be less and less of a problem. For now, we need to design our apps properly to avoid those problems.
 
-Finally, **cohesion versus independence/decoupling**. Although more complex, the SPA approach draws a clear line between backend and the frontend. It means that two people/teams can work almost independently, in parallel, which can significantly speed up the software development process. It is still possible to split work between people with the cohesive HTMX approach (no clear frontend/backend distinction), but it is not as obvious. Again, whether it is an advantage or disadvantage depends on the specific case.
+Finally, **cohesion versus independence/decoupling**. Although more complex, the SPA approach draws a clear line between backend and the frontend. It means that two people/teams can work almost independently, in parallel, which can significantly speed up the software development process. It is still possible to split work between people with the cohesive HTMX approach (no clear frontend/backend distinction), but it is not as obvious. Again, whether it is an advantage or disadvantage depends on the specific case. Additionally, if our server will also have non-HTML clients (mobile apps, other servers), HTMX does not bring its full advantages as we need to write and expose separate API anyway.
 
 ## Consequences and closing thoughts
 
@@ -283,7 +279,8 @@ Let's summarize the most important consequences of taking HTMX versus traditiona
 9. It is easier for one person or a small team to work on the project and have full stack skills, because there are less abstractions and tools to keep in mind and know (no elaborate build setup, no SPA framework + HTMX is just plain simple)
 10. It is easier to thing about system holistically, since we do not have frontend/backend dichotomy anymore (less layers of abstraction)
 11. It is a new approach, which means that there are less ready to be used UI components  
-12. If we have a larger team of people working on the project, the development could be slower, since it is harder to parallelize the work. While frontend/backend separation that comes with SPA approach creates more abstractions, it does allow more people to work in parallel since they often just need to agree on the API contract and can then work largely independently  
+12. If we have a larger team of people working on the project, the development could be slower, since it is harder to parallelize the work. While frontend/backend separation that comes with SPA approach creates more abstractions, it does allow more people to work in parallel since they often just need to agree on the API contract and can then work largely independently
+13. If the server has multiple clients, we will need to write json (most likely) REST API for its other clients, be it mobile apps or other backends (machines). We could still use HTMX approach, but if we have to expose API for non-HTML clients anyway, it defeats the major purpose of HTMX and it is more natural to just write SPA
 
 Overall, HTMX looks like a great technology and an interesting paradigm that we can use to write our web-based apps/systems faster while making them simpler, thus easier to change and maintain. **As said, there are few caveats, and cases where it is just not a good fit, but I highly, highly recommend trying it out. 
 Let's simplify web development!**
@@ -303,6 +300,7 @@ Let's simplify web development!**
 4. Updating many fragments of the page, based on a single response from the server: https://htmx.org/examples/update-other-content
 5. Shoelace, library of web components: https://shoelace.style
 6. Framework-agnostic web components: https://developer.mozilla.org/en-US/docs/Web/API/Web_components
+7. Collections of resources, tools and libraries around Web Components: https://www.webcomponents.org
 7. Interesting Carson Gross (creator of HTMX) talks:   
     1. https://www.youtube.com/watch?v=u2rjnLJ1M98
     2. https://www.youtube.com/watch?v=LRrrxQXWdhI
