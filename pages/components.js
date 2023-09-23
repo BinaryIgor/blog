@@ -1,10 +1,10 @@
-export function postMetadata({publishedAt, timeToRead, wordsCount}) {
+export function postMetadata({ publishedAt, timeToRead, wordsCount }) {
     if (!publishedAt) {
         throw new Error("Published at is required, but wasn't supplied!");
     }
-    
+
     let component = `${publishedAt};`;
-    
+
     if (timeToRead) {
         component += ` ${timeToRead} to read;`;
     }
@@ -15,14 +15,14 @@ export function postMetadata({publishedAt, timeToRead, wordsCount}) {
     return component;
 }
 
-export function postHtmlDescription({excerpt, htmlDescription}) {
+export function postHtmlDescription({ excerpt, htmlDescription }) {
     return htmlDescription ? htmlDescription : excerpt;
 }
 
 //Also used in post.html js, remember to keep in sync!
 export function postPreview(post) {
-   const postUrl = `${post.slug}.html`;
-   return `
+    const postUrl = `${post.slug}.html`;
+    return `
    <li class="cursor-pointer border-[3px] border-dashed border-text-secondary-2 rounded-md p-6
         max-content-width m-auto"
     onclick="location.href='${postUrl}'">
@@ -41,5 +41,13 @@ export function postsPreview({ posts }) {
 
 export function latestsPostsPreview({ posts }) {
     let latestsPosts = posts.length > 10 ? posts.slice(0, 10) : posts;
-    return postsPreview({posts: latestsPosts});
+    return postsPreview({ posts: latestsPosts });
+}
+
+export function postsSiteMap({ domain, posts }) {
+    return posts.map(p => `
+    <url>
+        <loc>https://${domain}/${p.slug}.html</loc>
+        <lastmod>${p.updatedAt ? p.updatedAt : p.publishedAt}</lastmod>
+    </url>`).join("\n");
 }

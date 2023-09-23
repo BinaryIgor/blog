@@ -1,10 +1,13 @@
 {
     "author": "Igor Roztropiński",
+    "domain": "binaryigor.com",
     "pagesToRender": [
         "index.html",
         "posts.html",
         "about.html",
-        "stats.html"
+        "stats.html",
+        "robots.txt",
+        "sitemap.xml"
     ],
     "postTemplate": "post.html",
     "devAssetsPathPrefix": "/dist",

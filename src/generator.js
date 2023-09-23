@@ -69,7 +69,7 @@ async function allPages(pagesDir, postsData) {
             let templ = pages[trimmedName];
             if (!templ) {
                 if (isJsComponent(trimmedName)) {
-                    templ = renderedJsComponent(trimmedName, { posts: postsData });
+                    templ = renderedJsComponent(trimmedName, { ...config, posts: postsData });
                 }
                 if (!templ) {
                     throw new Error(`There is no page of ${trimmedName} name , but was expected by ${k} page`);
@@ -177,7 +177,6 @@ function templateWithReplacedVariables(template, data, opts = { renderFunctions:
     return renderedTemplate;
 }
 
-
 const posts = await allPosts(postsDir, config);
 const postsData = [];
 
@@ -204,5 +203,3 @@ for (const [k, e] of Object.entries(posts)) {
 
     await writeFileContent(path.join(distDir, `${e.fontMatter.slug}.html`), post);
 }
-
-
