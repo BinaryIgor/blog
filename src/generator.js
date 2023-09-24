@@ -149,6 +149,10 @@ async function allPosts(postsDir, variables) {
     return posts;
 }
 
+function sortedPostsFromRecentOnes(posts) {
+    return posts.sort((a, b) => b.publishedAt.localeCompare(a.publishedAt));
+}
+
 function templateWithReplacedVariables(template, data, opts = { renderFunctions: false, skipMissing: false }) {
     const matches = template.matchAll(templateVariablesRegex);
 
@@ -185,10 +189,12 @@ for (const [k, e] of Object.entries(posts)) {
     postsData.push(fontMatter);
 }
 
-const withoutDraftsPostData = postsData.filter(p => !p.draft);
-await writeFileContent(postsJsonPath, JSON.stringify(withoutDraftsPostData, null, 2));
+const withoutDraftsPostsData = postsData.filter(p => !p.draft);
+const withoutDraftsSortedPostsData = sortedPostsFromRecentOnes(withoutDraftsPostsData);
 
-const pages = await allPages(pagesDir, withoutDraftsPostData);
+await writeFileContent(postsJsonPath, JSON.stringify(withoutDraftsSortedPostsData, null, 2));
+
+const pages = await allPages(pagesDir, withoutDraftsSortedPostsData);
 
 for (const p of config.pagesToRender) {
     await writeFileContent(path.join(distDir, p), pages[p]);
