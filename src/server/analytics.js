@@ -118,11 +118,12 @@ export class ViewsBySource {
 }
 
 export class PageStats {
-    constructor(path, views, reads, uniqueVisitors) {
+    constructor(path, views, reads, uniqueViewers, uniqueReaders) {
         this.path = path;
         this.views = views;
         this.reads = reads;
-        this.uniqueVisitors = uniqueVisitors;
+        this.uniqueViewers = uniqueViewers;
+        this.uniqueReaders = uniqueReaders;
     }
 }
 
@@ -240,29 +241,37 @@ export class SqliteAnalyticsRepository {
     }
 
     async pagesStats() {
-        const readsRows = await this.db.query(`SELECT path, COUNT(*) as reads FROM read GROUP BY path`);
+        const readsPromise = this.db.query(`SELECT path, 
+            COUNT(*) AS reads,
+            COUNT(DISTINCT visitor_id) AS unique_readers 
+            FROM read 
+            GROUP BY path`);
 
-        const reads = new Map();
-        readsRows.forEach(r => {
-            reads.set(r['path'], r['reads']);
-        });
-
-        const viewsRows = await this.db.query(`SELECT 
+        const viewsPromise =  this.db.query(`SELECT 
             path,
-            COUNT(*) as views, 
-            COUNT(DISTINCT visitor_id) as unique_visitors
+            COUNT(*) AS views, 
+            COUNT(DISTINCT visitor_id) AS unique_viewers
             FROM view
             GROUP BY path
             ORDER BY views DESC
         `);
 
-        return viewsRows.map(r => {
+        const reads = new Map();
+        (await readsPromise).forEach(r => {
+            reads.set(r['path'], {
+                reads: r['reads'],
+                readers: r['unique_readers']
+            });
+        });
+
+        return (await viewsPromise).map(r => {
             const path = r['path'];
-            const pReads = reads.get(path)
+            const pReads = reads.get(path);
             return new PageStats(path,
                 r["views"],
-                pReads ? pReads : 0,
-                r["unique_visitors"])
+                pReads ? pReads.reads : 0,
+                r["unique_viewers"],
+                pReads ? pReads.readers : 0)
         });
     }
 }

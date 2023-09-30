@@ -160,8 +160,8 @@ serverIntTestSuite("Server integration tests", () => {
                     new ViewsBySource(source2, 50),
                 ]),
             [
-                new PageStats("/index.html", 3, 0, 2),
-                new PageStats(allowedPostPath, 1, 2, 1)
+                new PageStats("/index.html", 3, 0, 2, 0),
+                new PageStats(allowedPostPath, 1, 2, 1, 2)
             ]
         );
 

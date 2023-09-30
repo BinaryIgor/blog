@@ -68,10 +68,7 @@
                     const post = postsByPath.get(p.path);
                     return {
                         title: post.title,
-                        path: p.path,
-                        views: p.views,
-                        reads: p.reads,
-                        uniqueVisitors: p.uniqueVisitors
+                        ...p
                     }
                 })
         };
@@ -130,7 +127,8 @@
             <a class="italic font-semibold mb-4" href="${post.path}" target="_blank">${post.path}</a>
             <div>Views: ${post.views}</div>
             <div>Reads: ${post.reads}</div>
-            <div>Unique visitors: ${post.uniqueVisitors}</div>
+            <div>Unique viewers: ${post.uniqueViewers}</div>
+            <div>Unique readers: ${post.uniqueReaders}</div>
             <div class="delimiter-like">---</div>
         </div>
         `;
