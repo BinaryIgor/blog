@@ -7,6 +7,18 @@ export class SqliteDb {
         this.db = new sqlite3.Database(filePath);
     }
 
+    executeRaw(sql) {
+        return new Promise((resolve, reject) => {
+            this.db.exec(sql, err => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve();
+                }
+            });
+        });
+    }
+
     execute(sql, params = []) {
         return new Promise((resolve, reject) => {
             this.db.run(sql, params, err => {

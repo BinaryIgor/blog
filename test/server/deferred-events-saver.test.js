@@ -1,7 +1,7 @@
 import { Scheduler } from "../../src/server/scheduler.js";
 import { delay } from "../../src/shared/promises.js";
 import { TestObjects } from "../test-objects.js";
-import { DeferredViewsSaver } from "../../src/server/analytics.js";
+import { DeferredEventsSaver } from "../../src/server/analytics.js";
 import { expect } from "chai";
 
 const WRITE_DELAY = 1;
@@ -12,29 +12,29 @@ const scheduler = new Scheduler();
 let repository;
 let saver;
 
-describe("DeferredViewsSaver tests", () => {
+describe("DeferredEventsSaver tests", () => {
     beforeEach(() => {
         repository = new FakeAnalyticsRepository();
-        saver = new DeferredViewsSaver(repository, scheduler, WRITE_DELAY);
+        saver = new DeferredEventsSaver(repository, scheduler, WRITE_DELAY);
     });
 
-    it('should retry failed views save', async () => {
-        repository.error = new Error("Fail to save views");
+    it('should retry failed events save', async () => {
+        repository.error = new Error("Fail to save events");
 
-        saver.addView(TestObjects.randomView());
-        saver.addView(TestObjects.randomView());
+        saver.addEvent(TestObjects.randomEvent());
+        saver.addEvent(TestObjects.randomEvent());
 
         await nextWriteDelay();
 
-        expect(repository.savedViews).to.have.length(0);
+        expect(repository.savedEvents).to.have.length(0);
 
         repository.error = null;
 
-        saver.addView(TestObjects.randomView());
+        saver.addEvent(TestObjects.randomEvent());
 
         await nextWriteDelay();
 
-        expect(repository.savedViews).to.have.length(3);
+        expect(repository.savedEvents).to.have.length(3);
     });
 
     afterEach(() => {
@@ -48,13 +48,13 @@ function nextWriteDelay() {
 
 export class FakeAnalyticsRepository {
 
-    savedViews = [];
+    savedEvents = [];
 
-    saveViews(views) {
+    saveEvents(events) {
         if (this.error) {
             return Promise.reject(this.error);
         }
-        this.savedViews.push(...views);
+        this.savedEvents.push(...events);
         return Promise.resolve();
     }
 }

@@ -70,6 +70,7 @@
                         title: post.title,
                         path: p.path,
                         views: p.views,
+                        reads: p.reads,
                         uniqueVisitors: p.uniqueVisitors
                     }
                 })
@@ -128,6 +129,7 @@
             <h3 class="text-xl font-semibold">${post.title}</h3>
             <a class="italic font-semibold mb-4" href="${post.path}" target="_blank">${post.path}</a>
             <div>Views: ${post.views}</div>
+            <div>Reads: ${post.reads}</div>
             <div>Unique visitors: ${post.uniqueVisitors}</div>
             <div class="delimiter-like">---</div>
         </div>

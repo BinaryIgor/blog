@@ -11,12 +11,15 @@ import { TestObjects } from "../test-objects.js";
 import { hashedIp } from "../../src/server/web.js";
 import crypto from 'crypto';
 
-serverIntTestSuite("Server integration tests", () => {
-    invalidViews().forEach(v => {
-        it('should ignore invalid view and return 200', async () => {
-            const addViewResponse = await testRequests.addViewRequest(v);
+const VIEW_EVENT_TYPE = 'VIEW';
+const READ_EVENT_TYPE = 'READ';
 
-            assertOkResponseCode(addViewResponse);
+serverIntTestSuite("Server integration tests", () => {
+    invalidEvents().forEach(v => {
+        it('should ignore invalid event and return 200', async () => {
+            const addEventResponse = await testRequests.addEventRequest(v);
+
+            assertOkResponseCode(addEventResponse);
 
             await nextScheduledTasksRunDelay();
 
@@ -26,11 +29,15 @@ serverIntTestSuite("Server integration tests", () => {
         });
     })
 
-    it('should ignore not allowed path view and return 200', async () => {
-        const view = TestObjects.randomView({ path: "/not-allowed.html" });
-        const addViewResponse = await testRequests.addViewRequest(view);
+    it('should ignore not allowed path events and return 200', async () => {
+        const view = TestObjects.randomEvent({ path: "/not-allowed.html", type: VIEW_EVENT_TYPE });
+        const read = TestObjects.randomEvent({ path: "/not-allowed.html", type: READ_EVENT_TYPE });
+
+        const addViewResponse = await testRequests.addEventRequest(view);
+        const addReadResponse = await testRequests.addEventRequest(read);
 
         assertOkResponseCode(addViewResponse);
+        assertOkResponseCode(addReadResponse);
 
         await nextScheduledTasksRunDelay();
 
@@ -78,7 +85,7 @@ serverIntTestSuite("Server integration tests", () => {
             2);
     });
 
-    it('should add views', async () => {
+    it('should add events', async () => {
         const ip1 = hashedIp(randomString());
         const ip2 = hashedIp(randomString());
         const visitor1Id = crypto.randomUUID();
@@ -91,37 +98,56 @@ serverIntTestSuite("Server integration tests", () => {
 
         const allowedPostPath = randomAllowedPostPath();
 
-        const ip1View1 = TestObjects.randomView({
+        const ip1View1 = TestObjects.randomEvent({
             ipHash: ip1,
             visitorId: visitor1Id,
             path: "/index.html",
-            source: source1Url
+            source: source1Url,
+            type: VIEW_EVENT_TYPE
         });
-        const ip1View2 = TestObjects.randomView({
+        const ip1View2 = TestObjects.randomEvent({
             ipHash: ip1,
             path: allowedPostPath,
             visitorId: visitor1Id,
-            source: source2Url
+            source: source2Url,
+            type: VIEW_EVENT_TYPE
+        });
+        const ip1Read1 = TestObjects.randomEvent({
+            ipHash: ip1,
+            path: allowedPostPath,
+            visitorId: visitor1Id,
+            source: source2Url,
+            type: READ_EVENT_TYPE
         });
 
-        const ip2View1 = TestObjects.randomView({
+        const ip2View1 = TestObjects.randomEvent({
             ipHash: ip2,
             path: "/index.html",
             visitorId: visitor1Id,
-            source: source1Url
+            source: source1Url,
+            type: VIEW_EVENT_TYPE
         });
-
-        const ip2View2 = TestObjects.randomView({
+        const ip2View2 = TestObjects.randomEvent({
             ipHash: ip2,
             path: "/index.html",
             visitorId: visitor2Id,
-            source: source2Url
+            source: source2Url,
+            type: VIEW_EVENT_TYPE
+        });
+        const ip2Read1 = TestObjects.randomEvent({
+            ipHash: ip2,
+            path: allowedPostPath,
+            visitorId: visitor2Id,
+            source: source2Url,
+            type: READ_EVENT_TYPE
         });
 
-        await addViewFromIp(ip1, ip1View1);
-        await addViewFromIp(ip1, ip1View2);
-        await addViewFromIp(ip2, ip2View1);
-        await addViewFromIp(ip2, ip2View2);
+        await addEventFromIp(ip1, ip1View1);
+        await addEventFromIp(ip1, ip1View2);
+        await addEventFromIp(ip1, ip1Read1);
+        await addEventFromIp(ip2, ip2View1);
+        await addEventFromIp(ip2, ip2View2);
+        await addEventFromIp(ip2, ip2Read1);
 
         await nextScheduledTasksRunDelay();
 
@@ -134,8 +160,8 @@ serverIntTestSuite("Server integration tests", () => {
                     new ViewsBySource(source2, 50),
                 ]),
             [
-                new PageStats("/index.html", 3, 2),
-                new PageStats(allowedPostPath, 1, 1)
+                new PageStats("/index.html", 3, 0, 2),
+                new PageStats(allowedPostPath, 1, 2, 1)
             ]
         );
 
@@ -164,16 +190,17 @@ serverIntTestSuite("Server integration tests", () => {
     });
 });
 
-function invalidViews() {
+function invalidEvents() {
     return [
         {
 
         },
-        TestObjects.randomView({ source: "invalid-url" }),
-        TestObjects.randomView({ visitorId: "" }),
-        TestObjects.randomView({ visitorId: randomString() }),
-        TestObjects.randomView({ path: "" }),
-        TestObjects.randomView({ path: MAX_PATH_LENGTH + 1 })
+        TestObjects.randomEvent({ source: "invalid-url" }),
+        TestObjects.randomEvent({ type: "NEITHER_VIEW_NOR_READ" }),
+        TestObjects.randomEvent({ visitorId: "" }),
+        TestObjects.randomEvent({ visitorId: randomString() }),
+        TestObjects.randomEvent({ path: "" }),
+        TestObjects.randomEvent({ path: MAX_PATH_LENGTH + 1 })
     ]
 }
 
@@ -192,16 +219,20 @@ async function assertStatsHaveViewsUniqueVisitorsAndIpHashes(views, visitors, ip
     });
 }
 
-async function addViewsFromIp(ip, views) {
-    for (let i = 0; i < views; i++) {
-        await addViewFromIp(ip);
+async function addViewsFromIp(ip, events) {
+    return addEventsFromIp(ip, events, VIEW_EVENT_TYPE);
+}
+
+async function addEventsFromIp(ip, events, type) {
+    for (let i = 0; i < events; i++) {
+        await addEventFromIp(ip, TestObjects.randomEvent({ type: type }));
     }
 }
 
-async function addViewFromIp(ip, view = null) {
-    if (!view) {
-        view = TestObjects.randomView({ ipHash: ip });
+async function addEventFromIp(ip, event = null) {
+    if (!event) {
+        event = TestObjects.randomEvent({ ipHash: ip });
     }
-    const response = await testRequests.addViewRequest(view, { "X-Real-Ip": ip });
+    const response = await testRequests.addEventRequest(event, { "X-Real-Ip": ip });
     assertOkResponseCode(response);
 }
