@@ -73,7 +73,7 @@ export const serverIntTestSuite = (testsDescription, testsCallback) => {
 
         afterEach(async () => {
             additionalPosts = [];
-            await new SqliteDb(DB_PATH).execute("DELETE FROM view");
+            await new SqliteDb(DB_PATH).execute("DELETE FROM event");
         });
 
         after(() => {

@@ -1,6 +1,4 @@
 #/!bin/bash
-set -e
-
 db_dir="/tmp/analytics"
 
 bash prepare_build_context.bash

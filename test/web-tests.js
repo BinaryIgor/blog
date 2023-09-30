@@ -7,9 +7,9 @@ export class TestRequests {
         this.serverUrl = serverUrl;
     }
 
-    async addViewRequest(request, headers={}) {
+    async addEventRequest(request, headers={}) {
         let req = this._appRequest()
-            .post("/analytics/view");
+            .post("/analytics/events");
 
         for (let [k, v] of Object.entries(headers)) {
             req.set(k, v);

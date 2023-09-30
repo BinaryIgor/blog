@@ -42,7 +42,7 @@ if [ -n "${PRE_DEPLOY_SCRIPT}" ]; then
     echo "Running pre $PRE_DEPLOY_SCRIPT deploy script.."
     ssh ${REMOTE_HOST} "cd ${latest_deploy_dir}; bash ${PRE_DEPLOY_SCRIPT};"
     echo
-    echo "Pre deploy scrip was run!"
+    echo "Pre deploy script was run!"
 fi     
 
 echo

@@ -54,7 +54,7 @@ setupMode();
 
 // Global domain to api
 function apiDomain() {
-    const prodDomain= "https://api.binaryigor.com";
+    const prodDomain = "https://api.binaryigor.com";
 
     let domain;
     try {
@@ -63,7 +63,7 @@ function apiDomain() {
         } else {
             domain = prodDomain;
         }
-    } catch(e) {
+    } catch (e) {
         domain = prodDomain;
     }
 
@@ -77,8 +77,12 @@ const VISITOR_ID_KEY = "VISITOR_ID";
 
 const MIN_SEND_VIEW_INTERVAL = 1000 * 60 * 5;
 const MIN_POST_VIEW_TIME = 1000 * 10;
+const MIN_POST_READ_TIME = 1000 * 60 * 5;
 
-const viewUrl = `${apiDomain()}/analytics/view`;
+const VIEW_EVENT_TYPE = "VIEW";
+const READ_EVENT_TYPE = "READ";
+
+const eventsUrl = `${apiDomain()}/analytics/events`;
 
 const postPage = document.body.getAttribute(POST_ATTRIBUTE);
 const pageToSkip = postPage && postPage.includes("draft");
@@ -108,21 +112,28 @@ function postRequest(url, body) {
     });
 }
 
-function sendView(sourceUrl, visitorId) {
-    postRequest(viewUrl, { source: sourceUrl, visitorId: visitorId, path: location.pathname })
+function sendEvent(sourceUrl, visitorId, type) {
+    postRequest(eventsUrl, { source: sourceUrl, visitorId: visitorId, path: location.pathname, type: type })
         .then(r => localStorage.setItem(SENT_VIEW_KEY, Date.now()));
 }
 
 function tryToSendView(sourceUrl, visitorId) {
     if (postPage) {
-        setTimeout(() => sendView(sourceUrl, visitorId), MIN_POST_VIEW_TIME);
+        setTimeout(() => sendEvent(sourceUrl, visitorId, VIEW_EVENT_TYPE), MIN_POST_VIEW_TIME);
     } else if (lastSentViewExpired()) {
-        sendView(sourceUrl, visitorId);
+        sendEvent(sourceUrl, visitorId, VIEW_EVENT_TYPE);
     }
+}
+
+function sendReadAfterDelay(sourceUrl, visitorId) {
+    setTimeout(() => sendEvent(sourceUrl, visitorId, READ_EVENT_TYPE), MIN_POST_READ_TIME);
 }
 
 if (!pageToSkip) {
     const sourceUrl = document.referrer ? document.referrer : document.location.href;
     const visitorId = getOrGenerateVisitorId();
     tryToSendView(sourceUrl, visitorId);
+    if (postPage) {
+        sendReadAfterDelay(sourceUrl, visitorId);
+    }
 }

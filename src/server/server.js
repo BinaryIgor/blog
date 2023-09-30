@@ -1,7 +1,7 @@
 import bodyParser from "body-parser";
 import express from "express";
 import cors from "cors";
-import { AnalyticsService, DeferredViewsSaver, SqliteAnalyticsRepository, View } from "./analytics.js";
+import { AnalyticsService, DeferredEventsSaver, SqliteAnalyticsRepository, Event } from "./analytics.js";
 import { Scheduler } from "./scheduler.js";
 import * as Logger from "../shared/logger.js";
 
@@ -31,16 +31,20 @@ export async function start(clock = new Clock(),
 
     db = new SqliteDb(config.dbPath);
 
-    await db.execute(`
-    CREATE TABLE IF NOT EXISTS view (
+    await db.executeRaw(`
+    CREATE TABLE IF NOT EXISTS event (
         timestamp INTEGER(8) NOT NULL,
         visitor_id TEXT NOT NULL,
         ip_hash TEXT NOT NULL,
         source TEXT NOT NULL,
-        path TEXT NOT NULL
+        path TEXT NOT NULL,
+        type TEXT NOT NULL
     );
 
-    CREATE INDEX IF NOT EXISTS view_timestamp ON view(timestamp);
+    CREATE INDEX IF NOT EXISTS event_timestamp ON event(timestamp);
+
+    CREATE VIEW IF NOT EXISTS view AS SELECT * FROM event WHERE type = 'VIEW';
+    CREATE VIEW IF NOT EXISTS read AS SELECT * FROM event WHERE type = 'READ';
     `);
 
     scheduler = new Scheduler();
@@ -53,8 +57,8 @@ export async function start(clock = new Clock(),
         schedulePosts ? config.postsReadDelay : null);
 
     const analyticsRepository = new SqliteAnalyticsRepository(db);
-    const viewsSaver = new DeferredViewsSaver(analyticsRepository, scheduler, config.viewsWriteDelay);
-    const analylitcsService = new AnalyticsService(analyticsRepository, viewsSaver, postsSource, config.analyticsAllowedPaths, clock);
+    const eventsSaver = new DeferredEventsSaver(analyticsRepository, scheduler, config.viewsWriteDelay);
+    const analylitcsService = new AnalyticsService(analyticsRepository, eventsSaver, postsSource, config.analyticsAllowedPaths, clock);
 
     const app = express();
 
@@ -65,15 +69,15 @@ export async function start(clock = new Clock(),
     };
     app.use(cors(corsOptions));
 
-    app.post("/analytics/view", async (req, res) => {
+    app.post("/analytics/events", async (req, res) => {
         try {
             const ip = req.header(REAL_IP_HEADER) || req.socket.remoteAddress;
             const ipHash = Web.hashedIp(ip);
             const reqBody = req.body;
-            const view = new View(clock.nowTimestamp(), reqBody.visitorId, ipHash, reqBody.source, reqBody.path);
-            await analylitcsService.addView(view);
+            const event = new Event(clock.nowTimestamp(), reqBody.visitorId, ipHash, reqBody.source, reqBody.path, reqBody.type);
+            await analylitcsService.addEvent(event);
         } catch (e) {
-            Logger.logError(`Failed to add view ${JSON.stringify(req.body)}, ignoring the result`, e);
+            Logger.logError(`Failed to add event ${JSON.stringify(req.body)}, ignoring the result`, e);
         }
 
         res.sendStatus(200);

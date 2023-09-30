@@ -8,36 +8,43 @@ export const MAX_IP_HASH_VISITOR_IDS_IN_LAST_DAY = 25;
 
 const UUID_REGEX = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
 
+const VIEW_TYPE = 'VIEW';
+const READ_TYPE = 'READ';
+
 export class AnalyticsService {
 
-    constructor(analyticsRepository, viewsSaver, postsSource, allowedPaths, clock) {
+    constructor(analyticsRepository, eventsSaver, postsSource, allowedPaths, clock) {
         this.analyticsRepository = analyticsRepository;
-        this.viewsSaver = viewsSaver;
+        this.eventsSaver = eventsSaver;
         this.postsSource = postsSource;
         this.clock = clock;
         this.allowedPaths = allowedPaths;
     }
 
-    async addView(view) {
-        const validatedView = this._validatedView(view);
+    async addEvent(event) {
+        const validatedEvent = this._validatedEvent(event);
 
-        await this._validatePathExists(view);
+        await this._validatePathExists(event);
 
-        await this._validateIpHashUniqueVisitorsLimit(view);
+        await this._validateIpHashUniqueVisitorsLimit(event);
 
-        this.viewsSaver.addView(validatedView);
+        this.eventsSaver.addEvent(validatedEvent);
     }
 
-    _validatedView(view) {
-        const sourceUrl = new URL(view.source);
+    _validatedEvent(event) {
+        const sourceUrl = new URL(event.source);
 
-        this._validateVisitorId(view.visitorId);
+        this._validateVisitorId(event.visitorId);
 
-        if (!view.path || view.path.length > MAX_PATH_LENGTH) {
-            throw new Error(`Path can't be empty and must be less than ${MAX_PATH_LENGTH} of length, but was: ${view.path}`);
+        if (!event.path || event.path.length > MAX_PATH_LENGTH) {
+            throw new Error(`Path can't be empty and must be less than ${MAX_PATH_LENGTH} of length, but was: ${event.path}`);
         }
 
-        return { ...view, source: sourceUrl.host }
+        if (event.type != VIEW_TYPE && event.type != READ_TYPE) {
+            throw new Error('Unsupported event type!');
+        }
+
+        return { ...event, source: sourceUrl.host }
     }
 
     _validateVisitorId(visitorId) {
@@ -53,26 +60,25 @@ export class AnalyticsService {
         return true;
     }
 
-
-    async _validateIpHashUniqueVisitorsLimit(view) {
+    async _validateIpHashUniqueVisitorsLimit(event) {
         const timestampAgoToCheck = Dates.timestampSecondsAgo(this.clock.nowTimestamp(), DAY_SECONDS);
 
         const uniqueVisitorIdsOfIp = await this.analyticsRepository
-            .countDistinctVisitorIdsOfIpHashAfterTimestamp(view.ipHash, timestampAgoToCheck);
+            .countDistinctVisitorIdsOfIpHashAfterTimestamp(event.ipHash, timestampAgoToCheck);
 
         if (uniqueVisitorIdsOfIp >= MAX_IP_HASH_VISITOR_IDS_IN_LAST_DAY) {
             throw new Error(`Too many visitor ids for a given ipHash in the last day (${uniqueVisitorIdsOfIp})`);
         }
     }
 
-    async _validatePathExists(view) {
-        const inAllowedPaths = this.allowedPaths.some(p => p === view.path);
+    async _validatePathExists(event) {
+        const inAllowedPaths = this.allowedPaths.some(p => p === event.path);
         if (inAllowedPaths) {
             return;
         }
 
-        if (!this.postsSource.postOfPathExists(view.path)) {
-            throw new Error(`Path: ${view.path} is neither allowed nor it has associated post`);
+        if (!this.postsSource.postOfPathExists(event.path)) {
+            throw new Error(`Path: ${event.path} is neither allowed nor it has associated post`);
         }
     }
 
@@ -84,13 +90,14 @@ export class AnalyticsService {
     }
 }
 
-export class View {
-    constructor(timestamp, visitorId, ipHash, source, path) {
+export class Event {
+    constructor(timestamp, visitorId, ipHash, source, path, type) {
         this.timestamp = timestamp;
         this.visitorId = visitorId;
         this.ipHash = ipHash;
         this.source = source;
         this.path = path;
+        this.type = type;
     }
 }
 
@@ -111,9 +118,10 @@ export class ViewsBySource {
 }
 
 export class PageStats {
-    constructor(path, views, uniqueVisitors) {
+    constructor(path, views, reads, uniqueVisitors) {
         this.path = path;
         this.views = views;
+        this.reads = reads;
         this.uniqueVisitors = uniqueVisitors;
     }
 }
@@ -125,30 +133,30 @@ export class Stats {
     }
 }
 
-export class DeferredViewsSaver {
+export class DeferredEventsSaver {
     constructor(analyticsRepository, scheduler, writeDelay) {
         this.analyticsRepository = analyticsRepository;
-        this._viewsToSave = [];
+        this.eventsToSave = [];
 
-        scheduler.schedule(async () => this._saveViews(), writeDelay);
+        scheduler.schedule(async () => this._saveEvents(), writeDelay);
     }
 
-    async _saveViews() {
-        const toSave = [...this._viewsToSave];
+    async _saveEvents() {
+        const toSave = [...this.eventsToSave];
 
         if (toSave.length > 0) {
             try {
-                this._viewsToSave = [];
-                await this.analyticsRepository.saveViews(toSave);
+                this.eventsToSave = [];
+                await this.analyticsRepository.saveEvents(toSave);
             } catch (e) {
-                console.error("Failed to save views:", e);
-                this._viewsToSave.push(...toSave);
+                console.error("Failed to save events:", e);
+                this.eventsToSave.push(...toSave);
             }
         }
     }
 
-    addView(view) {
-        this._viewsToSave.push(view);
+    addEvent(event) {
+        this.eventsToSave.push(event);
     }
 }
 
@@ -158,14 +166,14 @@ export class SqliteAnalyticsRepository {
         this.db = db;
     }
 
-    saveViews(views) {
-        if (views.length > 0) {
-            const argsPlaceholders = views.map(_ => "(?, ?, ?, ?, ?)")
+    saveEvents(events) {
+        if (events.length > 0) {
+            const argsPlaceholders = events.map(_ => "(?, ?, ?, ?, ?, ?)")
                 .join(",\n");
-            const argsValues = views.flatMap(v => [v.timestamp, v.visitorId, v.ipHash, v.source, v.path]);
+            const argsValues = events.flatMap(e => [e.timestamp, e.visitorId, e.ipHash, e.source, e.path, e.type]);
 
             return this.db.execute(`
-            INSERT INTO view (timestamp, visitor_id, ip_hash, source, path)
+            INSERT INTO event (timestamp, visitor_id, ip_hash, source, path, type)
             VALUES ${argsPlaceholders}`, argsValues);
         }
         return Promise.resolve();
@@ -174,7 +182,7 @@ export class SqliteAnalyticsRepository {
     countDistinctVisitorIdsOfIpHashAfterTimestamp(ipHash, timestamp) {
         return this.db.queryOne(
             `SELECT COUNT(DISTINCT visitor_id) AS visitor_ids 
-            FROM view
+            FROM event
             WHERE ip_hash = ? AND timestamp >= ?`,
             [ipHash, timestamp])
             .then(r => {
@@ -231,17 +239,30 @@ export class SqliteAnalyticsRepository {
             }));
     }
 
-    pagesStats() {
-        return this.db.query(`SELECT 
+    async pagesStats() {
+        const readsRows = await this.db.query(`SELECT path, COUNT(*) as reads FROM read GROUP BY path`);
+
+        const reads = new Map();
+        readsRows.forEach(r => {
+            reads.set(r['path'], r['reads']);
+        });
+
+        const viewsRows = await this.db.query(`SELECT 
             path,
             COUNT(*) as views, 
             COUNT(DISTINCT visitor_id) as unique_visitors
             FROM view
             GROUP BY path
             ORDER BY views DESC
-        `).then(rows => rows.map(r =>
-            new PageStats(r["path"],
+        `);
+
+        return viewsRows.map(r => {
+            const path = r['path'];
+            const pReads = reads.get(path)
+            return new PageStats(path,
                 r["views"],
-                r["unique_visitors"])));
+                pReads ? pReads : 0,
+                r["unique_visitors"])
+        });
     }
 }
