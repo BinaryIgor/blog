@@ -197,6 +197,7 @@ function invalidEvents() {
         },
         TestObjects.randomEvent({ source: "invalid-url" }),
         TestObjects.randomEvent({ type: "NEITHER_VIEW_NOR_READ" }),
+        TestObjects.randomEvent({ type: "" }),
         TestObjects.randomEvent({ visitorId: "" }),
         TestObjects.randomEvent({ visitorId: randomString() }),
         TestObjects.randomEvent({ path: "" }),
