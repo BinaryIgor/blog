@@ -7,7 +7,7 @@
     "timeToRead": "14 minutes",
     "wordsCount": 2842,
     "excerpt": "There are many variations and types of it, depending on the underlying database/search engine and its purpose, but the core concept is always the same: <em>let's have an additional data structure that points to/references the original data and makes searching fast.</em>",
-    "writingLog": [ 2, 1.5, 3.5, 2.5, 1.5, 3.5, 1, 4 ]
+    "writingLog": [ 2, 1.5, 3.5, 2.5, 1.5, 3.5, 1, 4, 4.5 ]
 }
 ---
 
@@ -86,12 +86,11 @@ second -> document1
 xyz -> document2, document3, document4
 ```
 
-
 \
-In Postgres, it means that we have a data structure, also B-tree in fact, where each row (tuple) can appear multiple times and we can index complex/composite types like arrays, documents for full-text search or json documents. Its structure is similar to the B-tree from the description above, but leaf-nodes have a key (word/term from the document for example) and a posting list of matching tuples (documents for example). The main difference between *GIN* and a standard B-tree index is that each tuple (row) can appear many times in this index, being associated with a different key, plus, it defines <a href="https://www.postgresql.org/docs/current/gin-builtin-opclasses.html" target="_blank">its own operators for querying</a> that each data-type (like arrays, tsvector or json/jsonb) needs to support. Let's say, that we have a table:
+In Postgres, it means that we have a data structure, also B-tree in fact, where each row (tuple) can appear multiple times and we can index complex/composite types like arrays, text or json documents. Its structure is similar to the B-tree from the description above, but leaf nodes have a key (word/term from the document for example) and a posting list of matching tuples (documents for example). The main difference between *GIN* and a standard B-tree index is that each tuple (row) can appear many times in this index, being associated with a different key, plus, it defines <a href="https://www.postgresql.org/docs/current/gin-builtin-opclasses.html" target="_blank">its own operators for querying</a> that each data-type (like arrays, tsvector or json/jsonb) needs to support. Let's say, that we have a table:
 ```
 CREATE TABLE account (
-  id PRIMARY KEY UUID,
+  id UUID PRIMARY KEY,
   name TEXT NOT NULL,
   attributes JSONB NOT NULL
 );
@@ -114,14 +113,14 @@ Attributes data:
 }
 ```
 
-On the disk, keys will be combined with values before inserting them in the B-tree nodes. So for example, we may have the following entries in B-tree (simplifying):
+On the disk, keys need to be combined with values before inserting them in the B-tree nodes. For example, we may have the following entries in the B-tree (simplifying):
 ```
 state:CREATED -> tuple1
 state:ACTIVATED -> tuple2, tuple3
 country_code:22 -> tuple2
 country_code:101 -> tuple2, tuple3
 ```
-...or alternative implementation:
+...or the alternative implementation:
 ```
 CREATED -> tuple1:[state]
 ACTIVATED -> tuple2:[state], tuple3:[state]
@@ -129,15 +128,15 @@ ACTIVATED -> tuple2:[state], tuple3:[state]
 101 -> tuple3:[country_code]
 ```
 
-...thanks to that approach, we can use similar to B-tree structure to search through custom, complex types (with more than one value). 
+...thanks to that approach, we can use B-tree structure to search through custom, complex types (with more than one value). 
 
 ### GIST
 
-Generalized Search Tree. In Postgres, it is just a template for a balanced, search tree based index on top of which we can build our own implementation. One of its most commonly used implementations is <a href="https://en.wikipedia.org/wiki/R-tree">R-tree</a> used for   searching through multidimensional data, such as rectangles or geographic coordinates. Why is it useful in this context? We can define our own comparison and equality operators (and others, custom ones) to query our data appropriately. Using coordinates, is (0, 1) greater than (1, 0)? Do questions like that even have a place with this data type? We can define these operators as we wish, which allows for new usages of tree-based indexes, like mentioned above R-tree. There is an implementation of it in <a href="https://www.postgresql.org/docs/current/functions-geometry.html" target="_blank">PostgreSQL itself</a> and there is also a <a href="https://postgis.net" target="_blank">famous PostGIS project</a> with its own instance of R-Tree.
+Generalized Search Tree. In Postgres, it is just a template for a balanced, search tree based index on top of which we can build our own implementation. One of its most commonly used instances is <a href="https://en.wikipedia.org/wiki/R-tree" target="_blank">R-tree</a> used for searching through multidimensional data, such as rectangles or geographic coordinates. Why is it useful in this context? We can define our own comparison and equality operators (and others, custom ones) to query our data appropriately. Using coordinates, is (0, 1) greater than (1, 0)? Do questions like that even have a place with this data type? We can define these operators as we wish, which allows for new usages of tree-based indexes, like mentioned above R-tree. There is an implementation of it in <a href="https://www.postgresql.org/docs/current/gist-builtin-opclasses.html" target="_blank">PostgreSQL itself</a> and there is also the <a href="https://postgis.net/workshops/postgis-intro/indexing.html" target="_blank">PostGIS project</a> with its own implementation of R-Tree.
 
 ### BRIN
 
-Its name stands for Block Range INdex. It is helpful for fields that have some natural correlation with their physical location within the table. What does it mean exactly? It means that the more *orderly* our inserts are, the more useful this index is. The more naturally incremental/decremental an indexed field is, the more efficient this index becomes. By orderly I mean something like date/timestamp/version fields where we always/almost always insert new records (according to this field). Let's say that we have a table:
+Its name stands for Block Range INdex. It is helpful for fields that have some natural correlation with their physical location within the table. What does it mean exactly? It means that the more *orderly* our inserts are, the more useful this index is. The more naturally incremental/decremental the indexed field is, the more efficient this index becomes. By orderly I mean something like date/timestamp/version fields where we always/almost always insert new records (according to this field). Let's say that we have a table:
 ```
 CREATE TABLE event (
   id UUID PRIMARY KEY,
@@ -145,7 +144,7 @@ CREATE TABLE event (
   timestamp TIMESTAMP
 );
 CREATE INDEX event_timestamp 
-ON event USING BRIN (timestamp);
+  ON event USING BRIN (timestamp);
 ```
 
 We assume that this table is append-only and we insert new data with larger and larger timestamps (as events occur). The more this is the case, the more BRIN index is beneficial, because its structure on the disk is something like:
@@ -156,29 +155,33 @@ values: 2023-10-05T00:00:00 - 2023-10-05T05:00:00
 page range: 10 - 20 
 values: 2023-10-05T05:00:00 - 2023-10-05T08:22:22 
 
+page range: 20 - 30 
+values: 2023-10-05T08:22:22 - 2023-10-05T11:00:10 
+
 ...
 ```
-...it is a map where page ranges are the keys and range of values are the values that we can find there. The more *orderly* is the layout of our table on the disk, the more beneficial this index becomes.<a href="https://www.postgresql.org/docs/current/storage-page-layout.html" target="_blank">If our table is stored on 100 pages</a> for example, and we have 10 buckets (10 page ranges), for any single value we will only need to check 1 bucket, which is 10% of the table. Sounds familiar? It is because the mechanism and performance benefits are quite similar to *table partitioning*. 
+...it is a map where page ranges are keys and range of values are values that we can find there. The more *orderly* layout of the table on the disk, the more beneficial this index becomes. If our inserts/modifications are random, table layout on the disk will also be random - in that case BRIN index will not give us much. But <a href="https://www.postgresql.org/docs/current/storage-page-layout.html" target="_blank">if our table is sorted on the disk and is stored on 100 pages</a> for example, and we have 10 page ranges in the index, for any single value we will only need to check a single page range, which is just 10% of the whole table. Sounds familiar? It is because the mechanism and performance benefits are quite similar to a *table partitioning*, where the table is divided into smaller, more manageable sections (subtables) for improved query performance. 
 
 ## Primary, Secondary and Clustered Indexes
 
-There is also a distinction between index types depending on how a particular database decides to store data on the disk. In Postgres,there is no primary versus secondary index differentiation (we will get to definition in a while). In that model, there is a clear distinction between index and the table data. Heap table (called that because it is not ordered) is stored on the disk in the insertion/update order, which can be either random or ordered, and it can move on the disk sometimes (due to the <a href="https://www.postgresql.org/docs/current/sql-vacuum.html" target="_blank">vacuum</a> for example). Then, all indexes, without the primary key/others distinction are simply data structures (mostly B-trees as described above) which point to tuples/rows ids/addresses. They do not hold table data, besides the data defined as a part of the index. We there have:
-```
-index-1: -> table row references (addresses on the disk)
-index-2: -> table row references (addresses on the disk)
-index-3: -> table row references (addresses on the disk)
+There is also a distinction between index types depending on how a particular database decides to store data on the disk.
 
-table:
+In Postgres, there is no primary versus secondary index differentiation (we will get to the definition in a while). In that model, there is a clear distinction between index and the table data. Heap table (called that because it is not ordered) is stored on the disk in the insertion/update order, which can be either random or ordered, and it can move on the disk sometimes (due to the <a href="https://www.postgresql.org/docs/current/sql-vacuum.html" target="_blank">vacuum</a> for example). Then, all indexes, without the primary key/others distinction are simply data structures (mostly B-trees as described above) which point to tuples/rows ids/addresses. They do not hold table data, besides the data defined as a part of the index. We there have:
+```
+index-1: -> table rows references (addresses on the disk)
+index-2: -> table rows references (addresses on the disk)
+index-3: -> table rows references (addresses on the disk)
+
+table data:
 page-1, page-2, page-3, ...page-n
 ``` 
-Indexes are uniformly pointing to the table data on the disk, which is stored independently, in a separate space.
+...indexes are uniformly pointing to the table data on the disk, which is stored independently, in a separate space.
 
-**<a href="https://dev.mysql.com/doc/refman/8.0/en/innodb-introduction.html" target="_blank">In some database, like MySQL with InnoDB engine (default one), we have a slightly different approach</a>**. There, we have something called a *Clustered Index* (Oracle database calls this concept Index Organized Table). In that model, each table is required to have a primary key/index (MySQL will generate one for us, if we do not specify it). Then, table data is stored together with its primary index, sorted (because B-tree index is sorted). Main difference here is that, the Primary Index does not point to table data somewhere else on the disk, but it contains it directly. What is then the Secondary Index? Because Primary, Clustered Index is the table in fact, other indexes do not point to a table rows ids/addresess, but to the Primary Index. In the Secondary Index, the key is indexed field/fields and the value is a value of associated row Primary Index field.
-On the disk, it is something like:
+**<a href="https://dev.mysql.com/doc/refman/8.0/en/innodb-introduction.html" target="_blank">In some databases, like MySQL with the default InnoDB engine, there is a slightly different approach</a>**. We use something called a *Clustered Index* (Oracle database calls this concept Index Organized Table). In that model, each table is required to have a primary key (MySQL will generate one for us, if we do not specify it). Then, table data is stored together with its primary key/index, sorted (because B-tree index is sorted). The main difference here is that the Primary Index does not point to table data somewhere else on the disk, but it contains it directly. What is then the Secondary Index? Because Primary, Clustered Index is the table in fact, other indexes do not point to a table rows ids/addresses, but to the Primary Index. In the Secondary Index, the key is indexed field/fields and the value is a value of associated row Primary Index. On the disk, it is something like:
 ```
 CREATE TABLE user (
-  id PRIMARY KEY BIGSERIAL,
-  name text NOT NULL,
+  id BIGSERIAL PRIMARY KEY,
+  name TEXT NOT NULL,
   created_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 CREATE INDEX user_name ON user(name);
@@ -194,9 +197,9 @@ Secondary index, name:
 'Anonymous': 3 (id value)
 ```
 
-This model comes with its own set of advantages and disadvantages. The major advantage is that queries by the primary key are faster, because we can read data directly from the index (index is the table). We also save some space, because data is stored once, in the Primary/Clustered Index. Moreover, if the index is a monotonically increasing value, like auto-incrementing id, the inserts are append-like, which can make inserts faster and range queries (by primary index) are always more efficient, since related data on the disk is not scattered, it is close to each other. The main drawback of this approach is that all Secondary Index queries are slower. In all cases, we first need to gather Primary Index values from Secondary Index and then go again to the Primary Index for table data. Additionally, index is the table, it is sorted on the disk, so there is additional work involved during writes to keep it that way (sorted on the disk).
+This model comes with its own set of advantages and disadvantages. The major advantage is that queries by the primary key are faster, because we can read data directly from the index (index is the table). We also save some space, because data is stored once, in the Primary/Clustered Index. Moreover, range queries by the primary index (only that, not secondary!) are always more efficient, since related data on the disk is not scattered, it is close to each other. The main drawback of this approach is that all Secondary Index queries are slower. In all cases, we first need to gather Primary Index values from Secondary Index(es) and then go again to the Primary Index for table data. Additionally, index is the table, it is sorted on the disk, so there is additional work involved during writes to keep it that way (sorted on the disk).
 
-First model, heap table + indexes offers a more balanced approach. Most queries, omitting index-only scans (more on that below), require to search tuple (row) addresses in the index structure and then to read data from the disk. Second model, where we have Clustered Index and the table is the index, makes queries by Primary (Clustered) Index faster, but all searches that make use of Secondary Index(es) are slower. That is because when we query by Primary Index we only need to search through that data structure (index is the table), but if we use Secondary Index(es) we need to search through their structure to find Primary Index values, which we need to search again in the Primary Index to get the actual table data. What is better? As always, it depends on our use-case, but often we do need to have some kind of a secondary index (other than just a primary key) and that is where the heap-table + indexes model has slightly better performance.
+First model, heap table + indexes, offers a more balanced approach. Most queries, omitting index-only scans (more on that below), require to search tuple (row) addresses in the index structure and then to read data from the disk. Second model, where we have a Clustered Index and the table is the index, makes queries by Primary (Clustered) Index faster, but all searches that make use of Secondary Index(es) are slower. That is because, when we query by Primary Index we only need to search through that data structure (index is the table), but if we use Secondary Index(es) we need to search through their structure to find Primary Index values, which we have to find again in the Primary Index stucture to get the actual table data. What is better? As always, it depends on our use case, but often we do need to have some kind of secondary index (other than just a primary key) and that is where the heap table + indexes model has slightly better performance.
 
 ## Composite and Covering Indexes, Index-Only Scan and the selectivity
 
@@ -259,7 +262,7 @@ WHERE timestamp >= ?;
 We can also index only a subset of the table's data, which is called a *Partial Index*. Working with the table:
 ```
 CREATE TABLE test (
-  id PRIMARY KEY,
+  id BIGSERIAL PRIMARY KEY,
   name TEXT NO NULL,
   results TEXT NOT NULL,
   started_at TIMESTAMP NOT NULL,
@@ -427,9 +430,7 @@ As we saw, **Index is a crucial data structure for search performance**. Simple 
     2. In-depth analysis 1: https://pganalyze.com/blog/gin-index
     3. In-depth analysis 2: https://www.cybertec-postgresql.com/en/gin-just-an-index-type
 8. Different Postgres (applicable also to other databases) query handling strategies, based on available indexes and other criteria: https://www.cybertec-postgresql.com/en/postgresql-indexing-index-scan-vs-bitmap-scan-vs-sequential-scan-basics/
-9. Inverted Index: https://en.wikipedia.org/wiki/Inverted_index
 10. Table's layout on the disk and its performance: https://www.cybertec-postgresql.com/en/cluster-improving-postgresql-performance/
 11. More details about BRIN index: https://www.crunchydata.com/blog/postgres-indexing-when-does-brin-win
 12. Full-text search in Postgres: https://www.postgresql.org/docs/current/textsearch-indexes.html
-13. R-tree: https://en.wikipedia.org/wiki/R-tree
 14. Inverted indexes in Elasticsearch: https://www.elastic.co/blog/found-elasticsearch-from-the-bottom-up
