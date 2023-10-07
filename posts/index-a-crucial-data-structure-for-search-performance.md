@@ -1,13 +1,14 @@
 ---
 {
     "title": "Index: a crucial data structure for search performance",
-    "slug": "index-a-crucial-structure-for-query-performance",
+    "slug": "index-a-crucial-data-structure-for-search-performance",
     "publishedAt": "2023-10-07",
     "startedAt": "2023-09-26",
     "timeToRead": "14 minutes",
-    "wordsCount": 2842,
+    "wordsCount": 2809,
     "excerpt": "There are many variations and types of it, depending on the underlying database/search engine and its purpose, but the core concept is always the same: <em>let's have an additional data structure that points to/references the original data and makes searching fast.</em>",
-    "writingLog": [ 2, 1.5, 3.5, 2.5, 1.5, 3.5, 1, 4, 4.5 ]
+    "writingLog": [ 2, 1.5, 3.5, 2.5, 1.5, 3.5, 1, 4, 4.5 ],
+    "draft": true
 }
 ---
 
@@ -337,7 +338,6 @@ Without going into too much detail, to search for substrings (parts of words) li
 We would then update our inverted index to contain these 3-grams:
 ```
 ...
-
 t -> doc1, doc2
 ti -> doc1, doc2
 tit -> doc1, doc2
@@ -346,7 +346,6 @@ tle -> doc1, doc2
 le -> doc1, doc2
 e -> doc1, doc2
 title -> doc1, doc2
-
 ...
 ```
 Thanks to that simple trick, we can then respond to queries like:
@@ -430,7 +429,7 @@ As we saw, **Index is a crucial data structure for search performance**. Simple 
     2. In-depth analysis 1: https://pganalyze.com/blog/gin-index
     3. In-depth analysis 2: https://www.cybertec-postgresql.com/en/gin-just-an-index-type
 8. Different Postgres (applicable also to other databases) query handling strategies, based on available indexes and other criteria: https://www.cybertec-postgresql.com/en/postgresql-indexing-index-scan-vs-bitmap-scan-vs-sequential-scan-basics/
-10. Table's layout on the disk and its performance: https://www.cybertec-postgresql.com/en/cluster-improving-postgresql-performance/
-11. More details about BRIN index: https://www.crunchydata.com/blog/postgres-indexing-when-does-brin-win
-12. Full-text search in Postgres: https://www.postgresql.org/docs/current/textsearch-indexes.html
-14. Inverted indexes in Elasticsearch: https://www.elastic.co/blog/found-elasticsearch-from-the-bottom-up
+9. Table's layout on the disk and its performance: https://www.cybertec-postgresql.com/en/cluster-improving-postgresql-performance/
+10. More details about BRIN index: https://www.crunchydata.com/blog/postgres-indexing-when-does-brin-win
+11. Full-text search in Postgres: https://www.postgresql.org/docs/current/textsearch-indexes.html
+12. Inverted indexes in Elasticsearch: https://www.elastic.co/blog/found-elasticsearch-from-the-bottom-up
