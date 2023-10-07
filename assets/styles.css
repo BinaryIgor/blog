@@ -135,6 +135,10 @@ html {
     color: var(--secondary-2-text-color);
 }
 
+.text-secondary-3 {
+    color: var(--secondary-3-text-color);
+}
+
 .border-text-primary {
     border-color: var(--primary-text-color);
 }
