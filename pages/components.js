@@ -1,4 +1,4 @@
-export function postMetadata({ publishedAt, wordsCount, timeToRead }) {
+export function postMetadata({ publishedAt, wordsCount, timeToRead, extended = false }) {
     if (!publishedAt) {
         throw new Error("Published at is required, but wasn't supplied!");
     }
@@ -10,10 +10,18 @@ export function postMetadata({ publishedAt, wordsCount, timeToRead }) {
     }
 
     if (timeToRead) {
-        component += ` ${timeToRead} to read;`;
+        component += ` ${timeToRead} to read`;
+        if (extended) {
+            component += ', but probably more to understand';
+        }
+        component += ';';
     }
 
     return component;
+}
+
+export function extendedPostMetadata({ publishedAt, wordsCount, timeToRead }) {
+    return postMetadata({ publishedAt, wordsCount, timeToRead, extended: true });
 }
 
 export function postHtmlDescription({ excerpt, htmlDescription }) {
