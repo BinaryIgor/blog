@@ -3,7 +3,7 @@
     "title": "HTMX: simpler web-based app/system",
     "slug": "htmx-simpler-web-based-app-or-system",
     "publishedAt": "2023-09-22",
-    "timeToRead": "14 minutes",
+    "timeToRead": "18 minutes",
     "wordsCount": 2687,
     "excerpt": "Nowadays, when we develop web-based app/system it is most likely built as SPA, which is a single page application. We should ask, why have we done that? Why have we switched from multi page applications, where the browser supported all of these functions out of the box, functions that we now need to recreate by writing custom JavaScript code?",
     "writingLog": [ 1.5, 4.5, 1.5, 0.5, 4, 1.5, 2.5, 1]

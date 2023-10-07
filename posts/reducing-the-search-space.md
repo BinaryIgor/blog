@@ -3,7 +3,7 @@
     "title": "Indexing, Partitioning, Sharding - it is all about reducing the search space",
     "slug": "reducing-the-search-space",
     "publishedAt": "2023-09-09",
-    "timeToRead": "10 minutes",
+    "timeToRead": "14 minutes",
     "wordsCount": 1983,
     "excerpt": " Whenever I think about optimizing certain data query, be it SQL (mostly) or NoSQL, I find it useful to think about these problems as search space problems. In other words, how much data need to be scanned/checked in order for my query to be fulfilled?",
     "writingLog": [ 1, 2, 3.5, 4, 1, 1.5 ]

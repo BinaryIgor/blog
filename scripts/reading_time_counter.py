@@ -6,7 +6,7 @@ python reading_time_counter.py <path-to-file>
 import re
 import sys
 
-AVG_READING_SPEED = 200
+AVG_READING_SPEED = 150
 LINK_REGEX = re.compile("(http://|https://)([^\s]+)")
 NON_WORDS_REGEX = re.compile(",|\\.|\\?|-|>")
 HTML_REGEX = re.compile('(.*)<(.+)>(.*)')
