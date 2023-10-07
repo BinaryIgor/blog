@@ -147,6 +147,12 @@ html {
     object-position: 50% 50%;
 }
 
+/* to make anchor links work: https://css-tricks.com/hash-tag-links-padding/ */
+.anchor-top-scroll {
+    scroll-margin-top: 75px;
+    scroll-snap-margin-top: 75px; /* iOS 11 and older */
+}
+
 @layer components {
     body {
         /* relative for footer to work properly*/
@@ -166,11 +172,11 @@ html {
     }
 
     .post h2 {
-        @apply text-2xl mt-8 mb-8 font-bold text-center;
+        @apply text-2xl mt-8 mb-8 font-bold text-center cursor-pointer anchor-top-scroll;
     }
 
     .post h3 {
-        @apply text-xl mt-6 mb-6 font-bold text-center;
+        @apply text-xl mt-6 mb-6 font-bold text-center cursor-pointer anchor-top-scroll;
     }
 
     .post p {

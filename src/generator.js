@@ -1,5 +1,25 @@
 import { marked } from 'marked';
 
+const markedRenderer = {
+    heading(text, level) {
+        const escapedText = text.toLowerCase()
+            .replace(/<a(.*?)>(.*?)<\/a>/g, (match, g1, g2) => g2)
+            .replace(/[^\w]+/g, (match) => {
+            const trimmedMatch = match.trim();
+            if (trimmedMatch == '?' || trimmedMatch == '.' || trimmedMatch == '!') {
+                return '';
+            }
+            return '-';   
+        });
+        return `
+                <h${level} id="${escapedText}" onclick="location.href='#${escapedText}'">
+                  ${text}
+                </h${level}>`;
+    }
+};
+
+marked.use({ renderer: markedRenderer });
+
 import fs from "fs";
 import path from "path";
 

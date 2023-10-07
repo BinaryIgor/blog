@@ -43,34 +43,34 @@ B-tree keeps itself balanced, depth/height is kept low and the number of childre
 2. (22|23|30), 32 is greater, so go the right again
 3. (30|32) - we have it
 
-Usually, each value is repeated in the child nodes until the leaf nodes. For example, 10 is in the root, but also in the first node to the left and then right to the left (leaf node). To optimize certain operations (like range queries) leaf nodes are all connected by a doubly linked list (<a href="https://use-the-index-luke.com/sql/anatomy" target="_blank">for details of the anatomy, checkout amazing "Use the Index, Luke!" blog</a>). Then leaf nodes have references (addresses) to the table rows data or they have data itself (see *Clustered Index* below). 
+Usually, each value is repeated in the child nodes until the leaf nodes. For example, 10 is in the root, but also in the first node to the left and then right to the left (leaf node). To optimize certain operations (like range queries) leaf nodes are all connected by a doubly linked list (<a href="https://use-the-index-luke.com/sql/anatomy" target="_blank">for details of the anatomy, checkout amazing "Use the Index, Luke!" blog</a>). Then leaf nodes have references (addresses) to the table rows data or they have data itself (see <a href="#primary-secondary-and-clustered-indexes">Clustered Index</a> below). 
 
-<a href="/reducing-the-search-space.html" target="_blank">As calculated in my blog post about reducing the search space</a>, logarithmic complexity gives us good performance for a very, very long time and for a huge datasets. B-tree search complexity is *O(log<sub>b</sub>n)*. Assuming b = 10, which in practice can go up to hundreds or even thousands, the search complexity will be:
+Logarithmic complexity gives us good performance for a very, very long time and for huge datasets. B-tree search complexity is *O(log<sub>b</sub>n)*. Assuming b = 10, which in practice can go up to hundreds or even thousands (making it even faster), the search complexity will be:
 ```
-dataset with 10^3 rows,
+Table with 10^3 rows:
 log(1000) = 3
 
-dataset with 10^6 rows,
+Table with 10^6 rows:
 log(1 000 000) = 6
 
-dataset with 10^9 rows,
+Table with 10^9 rows:
 log(1 000 000 000) = 9
 
-dataset with 10^12 rows,
+Table with 10^12 rows:
 log(1 000 000 000 000) = 12
 
-dataset with 10^15 rows,
+Table with 10^15 rows,
 log(1 000 000 000 000 000) = 15
 ```
-...giving us great performance for a very, very long time. 
+...giving us great performance as our data continues to grow. 
 
 ### Hash
 
-Hash index is quite useful when we look to support only equality operations. Underneath the hood, as the name suggests, it uses a <a href="https://en.wikipedia.org/wiki/Hash_table" target="_blank">hash map/table</a>. With good implementation, in theory, hash map search complexity is *O(1)*. Sometimes, a hash map needs to be rebalanced/recreated, so in practice it is *O(1) + C* (some amortized constant). But still, for equality only operations it is the fastest option. Hence also there are key-value only databases/stores, like Redis or Etcd, which are making use of this data structure/concept.
+Hash index is quite useful when we look to support only equality operations. Underneath the hood, as the name suggests, it uses a <a href="https://en.wikipedia.org/wiki/Hash_table" target="_blank">hash map/table</a>. With good implementation, in theory, hash map search complexity is *O(1)*. Sometimes, a hash map needs to be rebalanced/recreated, so in practice it is *O(1) + C* (some amortized constant). But still, for equality only operations it is the fastest option. Hence also there are key-value only databases/stores, like Redis or <a href="https://etcd.io" target="_blank">Etcd</a>, which are using this data structure.
 
 ### GIN
 
-GIN stands for <a href="https://www.postgresql.org/docs/current/gin-intro.html" target="_blank">Generalized Inverted Index</a>. Why inverted? It comes from full-text search terminology, as far as I know. There, we work on documents and forward/regular/normal index is something like:
+GIN stands for <a href="https://www.postgresql.org/docs/current/gin-intro.html" target="_blank">Generalized Inverted Index</a>. Why inverted? It comes from the full-text search terminology, as far as I know. There, we work on documents and forward/regular/normal index is something like:
 ```
 document1: "let's say something special" 
 -> [ let's, say, something, special ]
