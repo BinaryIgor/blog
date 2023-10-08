@@ -157,6 +157,10 @@ html {
     scroll-snap-margin-top: 75px; /* iOS 11 and older */
 }
 
+.nowrap {
+  white-space: nowrap;
+}
+
 @layer components {
     body {
         /* relative for footer to work properly*/
