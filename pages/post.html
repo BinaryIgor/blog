@@ -13,7 +13,7 @@
 
     <article class="post">
         <h1 class="px-6 mb-0 max-content-width">{{ title }}</h1>
-        <div class="px-6 text-lg m-0 text-center text-secondary-3 max-content-width m-auto">
+        <div class="px-6 text-lg m-0 text-center text-secondary-3 max-content-width m-auto flex flex-wrap justify-center whitespace-pre-wrap">
             {{ .js: extendedPostMetadata() }}
         </div>
         <div class="px-6 mt-16 mb-16 max-content-width">
@@ -95,18 +95,18 @@
             max-content-width m-auto"
         onclick="location.href='${postUrl}'">
             <a href="${postUrl}" class="text-2xl mb-2 font-semibold">${post.title}</a>
-            <div class="text-lg mb-6 text-secondary-3">${postMetadata(post)}</div>
+            <div class="text-lg mb-6 text-secondary-3 flex flex-wrap justify-center whitespace-pre-wrap">${postMetadata(post)}</div>
             <div>${post.excerpt}</div>
         </li>`;
     }
 
     function postMetadata({ publishedAt, wordsCount, timeToRead }) {
-        let component = `${publishedAt};`;
+        let component = `<span>${publishedAt};</span>`;
         if (wordsCount) {
-            component += ` ${wordsCount} words;`;
+            component += `<span> ${wordsCount} words;</span>`;
         }
         if (timeToRead) {
-            component += ` ${timeToRead} to read;`;
+            component += `<span> ${timeToRead} to read;</span>`;
         }
         return component;
     }

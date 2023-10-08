@@ -3,18 +3,19 @@ export function postMetadata({ publishedAt, wordsCount, timeToRead, extended = f
         throw new Error("Published at is required, but wasn't supplied!");
     }
 
-    let component = `${publishedAt};`;
+    let component = `<span>${publishedAt};</span>`;
 
     if (wordsCount) {
-        component += ` ${wordsCount} words;`;
+        component += `<span> ${wordsCount} words;</span>`;
     }
 
     if (timeToRead) {
-        component += ` ${timeToRead} to read`;
+        component += `<span> ${timeToRead} to read`;
         if (extended) {
-            component += ', but probably more to understand';
+            component += ',</span><span> but probably more to understand</span>';
+        } else {
+            component += ';</span>';
         }
-        component += ';';
     }
 
     return component;
@@ -36,7 +37,7 @@ export function postPreview(post) {
         max-content-width m-auto"
     onclick="location.href='${postUrl}'">
         <a href="${postUrl}" class="text-2xl mb-2 font-semibold">${post.title}</a>
-        <div class="text-lg mb-6 text-secondary-3">${postMetadata(post)}</div>
+        <div class="text-lg mb-6 text-secondary-3 flex flex-wrap justify-center whitespace-pre-wrap">${postMetadata(post)}</div>
         <div>${post.excerpt}</div>
     </li>`;
 }
