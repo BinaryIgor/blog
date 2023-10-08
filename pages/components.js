@@ -12,7 +12,7 @@ export function postMetadata({ publishedAt, wordsCount, timeToRead, extended = f
     if (timeToRead) {
         component += `<span> ${timeToRead} to read`;
         if (extended) {
-            component += ',</span><span> but probably more to understand</span>';
+            component += ',</span><span> but probably more to understand;</span>';
         } else {
             component += ';</span>';
         }
