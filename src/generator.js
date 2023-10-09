@@ -12,7 +12,7 @@ const markedRenderer = {
             return '-';   
         });
         return `
-                <h${level} id="${escapedText}" onclick="location.href='#${escapedText}'">
+                <h${level} id="${escapedText}">
                   ${text}
                 </h${level}>`;
     }
