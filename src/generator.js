@@ -228,4 +228,8 @@ for (const [k, e] of Object.entries(posts)) {
     const post = templateWithReplacedVariables(postTemplate, variables, { skipMissing: false, renderFunctions: true });
 
     await writeFileContent(path.join(distDir, `${e.fontMatter.slug}.html`), post);
+
+    // smartly pretty links having static files still
+    fs.mkdirSync(path.join(distDir, e.fontMatter.slug));
+    await writeFileContent(path.join(distDir, e.fontMatter.slug, `index.html`), post);
 }

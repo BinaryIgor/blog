@@ -10,7 +10,7 @@
 }
 ---
 
-## Seeking for small search space
+## Seeking for a small search space
 
 When we work with a set of (usually persisted somewhere) data, we most likely want our queries to be fast. Whenever I think about optimizing certain data query, be it SQL (mostly) or NoSQL, I find it useful to think about these problems as search space problems. In other words, **how much data need to be scanned/checked in order for my query to be fulfilled?**
 
