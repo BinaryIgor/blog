@@ -227,12 +227,5 @@ for (const [k, e] of Object.entries(posts)) {
     const variables = { ...config, ...e.fontMatter, post: htmlContent };
     const post = templateWithReplacedVariables(postTemplate, variables, { skipMissing: false, renderFunctions: true });
 
-    const postName = e.fontMatter.slug;
-
-    await writeFileContent(path.join(distDir, `${postName}.html`), post);
-
-    const postDir = path.join(distDir, postName);
-    
-    fs.mkdirSync(postDir);
-    await fs.promises.copyFile(path.join(distDir , `${postName}.html`), path.join(postDir, "index.html"));
+    await writeFileContent(path.join(distDir, `${e.fontMatter.slug}.html`), post);
 }
