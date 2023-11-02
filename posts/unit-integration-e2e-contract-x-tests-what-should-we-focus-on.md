@@ -2,12 +2,13 @@
 {
     "title": "Unit, Integration, E2E, Contract, X tests: what should we focus on?",
     "slug": "unit-integration-e2e-contract-x-tests-what-should-we-focus-on",
-    "publishedAt": "2023-11-03",
-    "timeToRead": "20 minutes",
-    "wordsCount": 2978,
+    "publishedAt": "2023-11-04",
+    "timeToRead": "19 minutes",
+    "wordsCount": 2909,
     "excerpt": "When we write software we intend it to be used in some, usually predefined and desirable, way. All software has some specification, either explicitly described or implicitly assumed. How do we know that it (software) works? We can test it manually, using all of its features and functionalities. Unfortunately, this approach breaks down pretty fast.",
     "researchLog": [1, 3, 2],
-    "writingLog": [ 1, 3, 5, 3.5 ]
+    "writingLog": [ 1, 3, 5, 3.5, 1.5 ],
+    "draft": true
 }
 ---
 
@@ -17,28 +18,28 @@ When we write software we intend it to be used in some, usually predefined and d
 
 We can test it manually, using all of its features and functionalities.
 
-Unfortunately, this approach breaks down pretty fast. One, even if our software is small and simple, we need to go through all use cases, manually, after every, even the smallest, change. If we do not, we risk a regression of previously working features and functionalities. If we change our software fairly often, this becomes a significant waste of our/other people's time and energy. Second, as our software grows beyond two or three features this becomes harder and harder to do, sometimes to the point of practical impossibility. It can be done, but it would take so much time and energy, that nobody would even dare to try. 
+Unfortunately, this approach breaks down pretty fast. One, even if our software is small and simple, we need to go through all its use cases, manually, after every, even the smallest, change. If we do not, we risk a regression of previously working features and functionalities.If we change our software fairly often, this becomes a significant waste of our/other people's time and energy. Second, as our software grows beyond two or three features, checking it manually becomes harder and harder to do, sometimes to the point of practical impossibility. It can be done, but it would take so much time and energy, that nobody even dares to try.
 
-Moreover, where will our software even run? This also can get quite tricky and complex - multiple environments, many browsers and devices. Sometimes, we just do not even have access to the same/similar enough environment to the one where our software runs. This problem only amplifies if our software is created to be used by other software or machines, not humans (various libraries, tools and scripts). 
+Moreover, where will our software even run? This can also get quite tricky and complex - multiple environments, many browsers and various devices. Sometimes, we just do not even have access to the same/similar enough environment to the one where our software runs. How then we are going to test it manually, if we can not even run it? This problem only amplifies if our software is created to be used by other software or machines, not humans (various libraries, tools and scripts).
 
-Therefore, **software testing in an automated way seems to be a wise idea**. We can increase its quality, test all edge cases, decrease possible defects, be sure that it still works as we continue to change it and save our own/other people time along the way. But is it really that simple?
+Therefore, **automating software testing seems to be a wise idea**. We can increase its quality, test all edge cases, decrease possible defects, be sure that it will still work as we continue to change it, and save our own/other people time along the way. But is it really that simple?
 
 ## Ideal Tests
 
-We established that test automation done by writing tests to verify that our code works is a good idea. While discussing that we have touched on an important point: **our tests should resemble, as much as possible, the way our software is used**. This should hold true both for the testing environment (where and how we run our tests) and for the way we write test cases. The more this is true, the more confidence we have that, when deployed to a production, our system/app will work as intended. 
+As we agreed that test automation done by writing tests to verify that our code works is a good idea, we have touched on an important point: **tests should resemble, as much as possible, the way our software is used**. This should hold true both for the testing environment (where and how we run our tests) and for the way we write test cases. The more this is true, the more confidence we can have that, when deployed to a production, our system/application will work as intended. 
 
 Ideally, our tests should:
 * be fast and simple to write
-* be simple to read and understand
-* be easy to change and maintain
-* be fast to run, so we have an efficient feedback loop
-* promote good design of our code and support its evolution, instead of hampering it
-* use the same (as similar as possible) environment and external dependencies as in the production (databases, servers, browsers, mobile devices, pub-sub/queue/messaging systems, files, external API's and so on)
-* be reliable, controllable and deterministic, they should not fail for random reasons and they should not yield false-positives
-* resemble they way our software will be used by the end clients (be it humans or machines)
+* be easy to read and understand
+* be simple to change and maintain
+* be fast to run, so we have an efficient feedback loop when changing code
+* promote good design of our code and support its evolution, instead hampering it
+* use identical/as similar as possible environment and external dependencies as in a production (databases, servers, browsers, mobile devices, pub-sub/queue/messaging systems, files, external APIs and so on)
+* be reliable, controllable and deterministic - they should not fail for random reasons and they should not yield false-positives
+* resemble the way our software will be used by the end clients (be it humans or machines)
 
 \
-**Unfortunately, all of these characteristics are almost never achieved in practice.** That is why we have various test types and each of them gives us a different set of tradeoffs, which also differ depending on the type of software that we are working on. The tradeoffs can be completely different depending on whether we write server-rendered web app, single page application consuming REST API, single-component (monolitic) REST API with multiple clients, microservices-based REST API or a software library/tool that does something very specific and is intended to be used by other machines/software, not humans. Let's then explore different test types and see what exactly they bring to the table.
+**Sadly, all of these characteristics are almost never achieved in practice.** That is why we have various test types and each of them gives us a different set of tradeoffs, which also differ depending on the type of software that we work on. The tradeoffs could be completely different depending on whether we write server-rendered web app, a single page application consuming REST API, monolithic REST API with multiple clients, microservices-based REST API or a software library/tool that does something very specific, and is intended to be used by other machines/software, not humans. Let's then explore different test types and see what exactly they bring to the table.
 
 ## Unit Tests
 
@@ -53,27 +54,28 @@ function sum(a, b) {
 test('should sum two numbers', () => {
   var a = 2;
   var b = 2;
+  
   var c = 4;
 
   assert.equal(sum(a, b), c);
 });
 ```
-We do not have any dependencies here, but if a unit has them, they are usually mocked or faked - either by using a library or creating our own, test-focused implementation of a needed dependency.
+We do not have any dependencies here, but if a unit has them, they are usually mocked or faked. It is done either by using a library or creating test-focused implementation of a needed dependency.
 
-Their main goal is to check whether a function/an object works in isolation, ignoring dependencies (as much as possible). They are fast to write and run, and easy to understand, because we are focused on a small, insulated piece of code. Also because of that, they can promote good design of functions and objects. If our design is bad, it becomes obvious when we try to write a test and see that we can not really, or that it is terribly complicated. **Unit tests keep our code in check - it needs to be testable, which means simple and focused on one specific thing.** 
+Their main goal is to check whether a function/an object works in isolation, ignoring its dependencies (as much as possible). They are fast to write and run, and because we are focused on a small, insulated piece of code - easy to understand. Also because of that, they can promote good design of functions and objects. If our design is bad, it becomes quite obvious when we try to write a test and see that we can not really, or that it is terribly complicated. **Unit tests keep our code in check - it needs to be testable, which means simple and focused on one, specific thing.**
 
-Unfortunately, they do require additional effort to maintain, because they are tightly coupled to the code that they test. We test functions or methods of an object directly assuming that it has/should have a specific behavior and we rely on the implementation details. When we refactor it, we also need to refactor tests. This might not be that bad, but the problem gets worse if we have an object that is a dependency of other object/objects and we do unit tests these dependent objects as well. Let's say that we have an object *A* and we have tested it thoroughly. Also, objects *B*, *C* and *D* use object *A* as a dependency. We have written units tests for all of these objects: *B*, *C* and *D*, where we use fake version of the object *A*. Now, if we refactor object *A*, we not only need to refactor or possibly completely rewrite its tests, but we also need to update tests of all dependent objects: *B*, *C* and *D*. In that context, pure unit testing, where we fake/mock all dependencies and directly control how they should behave can actually hamper refactoring and code evolution, because we know that even the simplest change of an object might mean lots of changes in many other places and tests specifically.
+Unfortunately, they do require additional effort to maintain, because they are tightly coupled to the code they test. In unit tests, we test functions or methods of an object directly assuming that it has/should have a specific behavior and we rely on the implementation details. When we refactor this code, we also need to refactor its tests. This might not be that bad, but the problem gets worse if we have an object that is a dependency of other object/objects, and we unit test these dependent objects as well. Let's say that we have an object A and we have tested it thoroughly. Also, objects *B*, *C* and *D* use object *A* as dependency. We have written units tests for all of these objects: *B*, *C* and *D*, where we use fake version of the object *A*. Now, if we refactor object *A*, we not only need to refactor, or possibly completely rewrite its tests, but we also need to update tests of all dependent objects: *B*, *C* and *D*. In that context, pure unit testing, where we fake/mock all dependencies and directly control how they should behave, can actually hamper refactoring and code evolution, because even the simplest change of an object might mean lots of changes in many other places, tests especially.
 
-Finally, although they are fast to write, run and easy to understand they only test a function/an object in isolation. We can only be sure that this particular unit under test works. If it is used in a collaboration with other functions/methods (which is almost always the case), we do not know if it will work with them or not. **Because of that, I would argue that the usefulness of unit tests is limited to the pieces of code that are reusable and/or complex and focused on one, specific thing.** These can be library functions, reusable components, public clients of a certain protocol, file parsers, algorithms and so on.
+Finally, even though they are fast to run, write and easy to understand they only test a function/an object in isolation. We can only be sure that this particular unit under test works. If it is used in a collaboration with other functions/methods (which is almost always the case), we do not know whether it will work with them or not. **Because of that, I would argue that the usefulness of unit tests is limited to pieces of code that are reusable and/or complex and focused on one, specific thing.** These can be library functions, reusable components, public clients of certain protocols, file parsers, algorithms and so on.
 
 ## Integration Tests
 
 Tests that check whether a few components (units) work together. Components might be functions or objects/classes.
-**The key difference between integration and unit tests is that we do not mock/fake our dependencies, but try to use real ones, and we test multiple units together, not in isolation.**
+**The key difference between integration and unit tests: we do not mock/fake dependencies, but try to use real ones, and we test multiple units together, not in isolation.**
 
-The dependencies/components may make real http requests to a fake server/API (controlled by us) and talk with a real database (also running locally and controlled by us). We do want to test a few components at once, but we should also be able to run all tests locally and have total control over all variables. If there are external dependencies, like other servers or databases, we want to run as similar as possible to our production versions of them, but locally, and control their behavior and state to make our tests deterministic, reliable and robust, not flaky.
+The dependencies/components may make real http requests to a fake server/API, controlled by us, and talk with a real database, which also runs locally and is controlled by us. We do want to test a few components at once, but we should also be able to run all tests locally and have total control over all variables. If there are external dependencies, like other servers or databases, we want to run them in a way as similar as possible to our production, but locally, and control their behavior and state to make our tests deterministic, reliable and robust, not flaky.
 
-The purpose of them is to check whether a few components, be it functions or objects/classes, work together.
+The main purpose of *Integration Tests* is to check whether a few components, be it functions or objects/classes, work together.
 Because of that, they can be slower to write and run, but they require less maintenance and give higher degree of
 confidence, because we test not only single units of work (functions, objects), but also whether and how they work together. This resembles much more the way our software is used in the target environment, in real life.
 
