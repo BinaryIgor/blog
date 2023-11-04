@@ -152,6 +152,9 @@ if (pageToSendEvents) {
 
 if (pageToSendEvents && postPage) {
     const postContainer = document.querySelector("article");
+    
+    let minimumPostPercentageSeen = false;
+    let minimumPostReadTimePassed = false;
 
     function seenPostPercentage() {
         const seenDocument = document.documentElement.scrollTop + document.documentElement.clientHeight;
@@ -176,8 +179,7 @@ if (pageToSendEvents && postPage) {
         sendEvent(sourceUrl, visitorId, READ_EVENT_TYPE);
     }
 
-    let minimumPostPercentageSeen = isMinimumPostPercentageVisible();
-    let minimumPostReadTimePassed = false;
+    minimumPostPercentageSeen = isMinimumPostPercentageVisible();
 
     sendReadEventAfterDelayIfSeen(sourceUrl, visitorId);
 
