@@ -29,7 +29,7 @@ export function postHtmlDescription({ excerpt, htmlDescription }) {
     return htmlDescription ? htmlDescription : excerpt;
 }
 
-//Also used in post.html js, remember to keep in sync!
+// Also used in post.html js, remember to keep in sync!
 export function postPreview(post) {
     const postUrl = `${post.slug}.html`;
     return `
@@ -49,8 +49,9 @@ export function postsPreview({ posts }) {
     </ul>`;
 }
 
+// Remember to change if after we have ~ 7 posts
 export function latestsPostsPreview({ posts }) {
-    let latestsPosts = posts.length > 5 ? posts.slice(0, 5) : posts;
+    let latestsPosts = posts.length > 10 ? posts.slice(0, 10) : posts;
     return postsPreview({ posts: latestsPosts });
 }
 
