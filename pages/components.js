@@ -50,7 +50,7 @@ export function postsPreview({ posts }) {
 }
 
 export function latestsPostsPreview({ posts }) {
-    let latestsPosts = posts.length > 10 ? posts.slice(0, 10) : posts;
+    let latestsPosts = posts.length > 5 ? posts.slice(0, 5) : posts;
     return postsPreview({ posts: latestsPosts });
 }
 
