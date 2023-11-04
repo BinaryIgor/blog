@@ -3,7 +3,7 @@
 
 <head>
     {{ head-tags.html }}
-    <meta name="robots" content="noindex">
+    {{ head-not-indexable-tags.html }}
     <title>Stats</title>
     {{ theme-script.html }}
 </head>
@@ -52,7 +52,7 @@
     function toStatsView(postsByPath, stats) {
         const generalStats = stats.general;
         const pagesStats = stats.pages;
-        
+
         return {
             views: generalStats.views,
             uniqueVisitors: generalStats.uniqueVisitors,
@@ -70,7 +70,8 @@
                         title: post.title,
                         ...p
                     }
-                })
+                }),
+            pages: pagesStats.filter(p => !postsByPath.has(p.path))
         };
     }
 
@@ -88,9 +89,13 @@
                 <h2 class="text-3xl mb-4">Views by source</h2>
                 ${viewsBySourceComponent(stats)}
             </div>
-            <div>
+            <div class="mb-16">
                 <h2 class="text-3xl mb-4">Posts</h2>
                 ${postsStatsComponent(stats)}
+            </div>
+            <div>
+                <h2 class="text-3xl mb-4">Pages</h2>
+                ${pagesStatsComponent(stats)}
             </div>
         `;
     }
@@ -111,9 +116,13 @@
         return `
         <div>
             <div>${views.source}: ${views.views}</div>
-            <div class="delimiter-like">---</div>
+            ${delimiterComponent()}
         </div>
         `;
+    }
+
+    function delimiterComponent() {
+        return `<div class="delimiter-like">---</div>`;
     }
 
     function postsStatsComponent(stats) {
@@ -129,7 +138,22 @@
             <div>Reads: ${post.reads}</div>
             <div>Unique viewers: ${post.uniqueViewers}</div>
             <div>Unique readers: ${post.uniqueReaders}</div>
-            <div class="delimiter-like">---</div>
+            ${delimiterComponent()}
+        </div>
+        `;
+    }
+
+    function pagesStatsComponent(stats) {
+        return `<div class="space-y-8">${stats.pages.map(pageStatsComponent).join('\n')}</div>`;
+    }
+
+    function pageStatsComponent(page) {
+        return `
+        <div>
+            <h3 class="text-xl font-semibold">${page.path}</h3>
+            <div>Views: ${page.views}</div>
+            <div>Unique viewers: ${page.uniqueViewers}</div>
+            ${delimiterComponent()}
         </div>
         `;
     }

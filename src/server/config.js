@@ -31,5 +31,7 @@ function analyticsAllowedPaths() {
         "/index.html",
         "/about.html",
         "/posts.html",
+        "/not-found.html",
+        "/error.html",
         "/stats.html"];
 }
