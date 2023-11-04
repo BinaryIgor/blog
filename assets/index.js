@@ -77,7 +77,7 @@ const VISITOR_ID_KEY = "VISITOR_ID";
 
 const MIN_SEND_VIEW_INTERVAL = 1000 * 60 * 5;
 const MIN_POST_VIEW_TIME = 1000 * 10;
-const MIN_POST_READ_SEEN_PERCENTAGE = 50;
+const MIN_POST_READ_SEEN_PERCENTAGE = 0.5;
 const MIN_POST_READ_TIME = 1000 * 60 * 3;
 
 const MAX_SEND_RETRY_DELAY = 30_000;
@@ -88,7 +88,7 @@ const READ_EVENT_TYPE = "READ";
 const eventsUrl = `${apiDomain()}/analytics/events`;
 
 const postPage = document.body.getAttribute(POST_ATTRIBUTE);
-const pageToSkip = postPage && postPage.includes("draft");
+const pageToSendEvents = !(postPage && postPage.includes("draft"));
 
 const currentPath = location.pathname;
 const sentViewKey = `${SENT_VIEW_KEY_PREFIX}_${currentPath.replace(/\./g, "-")}`;
@@ -135,7 +135,7 @@ function sendEvent(sourceUrl, visitorId, type) {
         .catch(scheduleRetry);
 }
 
-function tryToSendView(sourceUrl, visitorId) {
+function tryToSendViewEvent(sourceUrl, visitorId) {
     if (postPage) {
         setTimeout(() => sendEvent(sourceUrl, visitorId, VIEW_EVENT_TYPE), MIN_POST_VIEW_TIME);
     } else if (lastSentViewExpired()) {
@@ -143,43 +143,52 @@ function tryToSendView(sourceUrl, visitorId) {
     }
 }
 
-function sendReadAfterDelay(sourceUrl, visitorId) {
-    setTimeout(() => sendEvent(sourceUrl, visitorId, READ_EVENT_TYPE), MIN_POST_READ_TIME);
+const sourceUrl = document.referrer ? document.referrer : document.location.href;
+const visitorId = getOrGenerateVisitorId();
+
+if (pageToSendEvents) {
+    tryToSendViewEvent(sourceUrl, visitorId);
 }
 
-if (!pageToSkip) {
-    const sourceUrl = document.referrer ? document.referrer : document.location.href;
-    const visitorId = getOrGenerateVisitorId();
+if (pageToSendEvents && postPage) {
+    const postContainer = document.querySelector("article");
 
-    tryToSendView(sourceUrl, visitorId);
+    function seenPostPercentage() {
+        const seenDocument = document.documentElement.scrollTop + document.documentElement.clientHeight;
+        return seenDocument / postContainer.scrollHeight;
+    }
 
-    if (postPage) {
-        const postContainer = document.querySelector("article");
+    function isMinimumPostPercentageVisible() {
+        return seenPostPercentage() >= MIN_POST_READ_SEEN_PERCENTAGE;
+    }
 
-        function seenPostPercentage() {
-            const seenDocument = document.documentElement.scrollTop + document.documentElement.clientHeight;
-            return seenDocument * 100 / postContainer.scrollHeight;
-        }
+    function sendReadEventAfterDelayIfSeen(sourceUrl, visitorId) {
+        setTimeout(() => {
+            if (minimumPostPercentageSeen) {
+                sendReadEvent(sourceUrl, visitorId);
+            } else {
+                minimumPostReadTimePassed = true;
+            }
+        }, MIN_POST_READ_TIME);
+    }
 
-        function shouldSendPostReadAfterDelay() {
-            return seenPostPercentage() >= MIN_POST_READ_SEEN_PERCENTAGE;
-        }
+    function sendReadEvent(sourceUrl, visitorId) {
+        sendEvent(sourceUrl, visitorId, READ_EVENT_TYPE);
+    }
 
-        let sendPostReadAfterDelay = false;
+    let minimumPostPercentageSeen = isMinimumPostPercentageVisible();
+    let minimumPostReadTimePassed = false;
 
-        if (shouldSendPostReadAfterDelay()) {
-            sendPostReadAfterDelay = true;
-            sendReadAfterDelay(sourceUrl, visitorId);
-        } else {
-            window.addEventListener("scroll", () => {
-                if (sendPostReadAfterDelay) {
-                    return;
+    sendReadEventAfterDelayIfSeen(sourceUrl, visitorId);
+
+    if (!minimumPostPercentageSeen) {
+        window.addEventListener("scroll", () => {
+            if (!minimumPostPercentageSeen) {
+                minimumPostPercentageSeen = isMinimumPostPercentageVisible();
+                if (minimumPostPercentageSeen && minimumPostReadTimePassed) {
+                    sendReadEvent(sourceUrl, visitorId);
                 }
-                if (shouldSendPostReadAfterDelay()) {
-                    sendPostReadAfterDelay = true;
-                    sendReadAfterDelay(sourceUrl, visitorId);
-                }
-            });
-        }
+            }
+        });
     }
 }
