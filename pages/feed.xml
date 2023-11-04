@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">
+    <generator uri="https://github.com/BinaryIgor/blog" version="experimental">BinaryIgor</generator>
+    <link href="https://{{domain}}/feed.xml" rel="self" type="application/atom+xml" />
+    <link href="https://{{domain}}" rel="alternate" type="text/html" hreflang="en"/>
+    <updated>{{ .js: nowDateTime }}</updated>
+    <id>https://{{domain}}</id>
+
+    <title>BinaryIgor</title>
+    <subtitle>BinaryIgor</subtitle>
+
+    <author>
+        <name>Igor Roztropiński</name>
+        <email>{{contactEmail}}</email>
+    </author>
+
+  {{ .js: postsRssFeed }}
+</feed>

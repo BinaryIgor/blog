@@ -55,10 +55,30 @@ export function latestsPostsPreview({ posts }) {
     return postsPreview({ posts: latestsPosts });
 }
 
+export function nowDateTime() {
+    return new Date().toISOString();
+}
+
 export function postsSiteMap({ domain, posts }) {
     return posts.map(p => `
     <url>
         <loc>https://${domain}/${p.slug}.html</loc>
         <lastmod>${p.updatedAt ? p.updatedAt : p.publishedAt}</lastmod>
     </url>`).join("\n");
+}
+
+export function postsRssFeed({ posts }) {
+    function dateToRssFeedDateTime(date) {
+        return `${date}T00:00:00+00:00`;
+    }
+
+    return posts.map(p => `
+    <entry xml:lang="en">
+      <title>${p.title}</title>
+      <id>${p.slug}</id>
+      <link href="/${p.slug}.html" rel="alternate" type="text/html" title="${p.title}"/>
+      <published>${dateToRssFeedDateTime(p.publishedAt)}</published>
+      <updated>${dateToRssFeedDateTime(p.updatedAt ? p.updatedAt : p.publishedAt)}</updated>
+      <summary>${p.excerpt}</summary>
+    </entry>`).join("\n");
 }
