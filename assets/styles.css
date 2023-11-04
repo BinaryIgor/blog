@@ -180,11 +180,11 @@ html {
     }
 
     .post h2 {
-        @apply text-2xl mt-8 mb-8 font-bold text-center cursor-pointer anchor-top-scroll;
+        @apply text-2xl mt-16 mb-8 font-bold text-center cursor-pointer anchor-top-scroll;
     }
 
     .post h3 {
-        @apply text-xl mt-6 mb-6 font-bold text-center cursor-pointer anchor-top-scroll;
+        @apply text-xl mt-12 mb-6 font-bold text-center cursor-pointer anchor-top-scroll;
     }
 
     .post p {
