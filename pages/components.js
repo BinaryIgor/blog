@@ -67,18 +67,25 @@ export function postsSiteMap({ domain, posts }) {
     </url>`).join("\n");
 }
 
-export function postsRssFeed({ posts }) {
-    function dateToRssFeedDateTime(date) {
+export function postsAtomFeed({ domain, posts }) {
+    function dateToAtomFeedDateTime(date) {
         return `${date}T00:00:00+00:00`;
+    }
+
+    function sanitizedSummary(post) {
+        return post.excerpt
+            .replace("</>", "")
+            .replace("<em>", "")
+            .replace("</em>", "");
     }
 
     return posts.map(p => `
     <entry xml:lang="en">
-      <title>${p.title}</title>
-      <id>${p.slug}</id>
-      <link href="/${p.slug}.html" rel="alternate" type="text/html" title="${p.title}"/>
-      <published>${dateToRssFeedDateTime(p.publishedAt)}</published>
-      <updated>${dateToRssFeedDateTime(p.updatedAt ? p.updatedAt : p.publishedAt)}</updated>
-      <summary>${p.excerpt}</summary>
+        <title>${p.title}</title>
+        <id>https://${domain}/${p.slug}</id>
+        <link href="https://${domain}/${p.slug}.html" rel="alternate" type="text/html" />
+        <published>${dateToAtomFeedDateTime(p.publishedAt)}</published>
+        <updated>${dateToAtomFeedDateTime(p.updatedAt ? p.updatedAt : p.publishedAt)}</updated>
+        <summary>${sanitizedSummary(p)}</summary>
     </entry>`).join("\n");
 }
