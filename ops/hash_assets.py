@@ -11,7 +11,7 @@ ASSETS_VERSION = os.environ.get('ASSETS_VERSION',
                                 codecs.encode(os.urandom(8), "hex").decode())
 
 IMAGES_EXTENSIONS = ['jpg', 'jpeg', 'png', 'svg']
-EXCLUDE_PATHS = ["favicon.svg"]
+EXCLUDE_PATHS = ["favicon.svg", "favicon-light.svg"]
 
 LINK_TAG = "link"
 HREF_ATTR = "href"

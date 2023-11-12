@@ -10,10 +10,13 @@ function setupMode() {
 
     const LIGHT_MODE = 'light';
     const DARK_MODE = 'dark';
-    const DARK_MODE_ICON = "0";
     const LIGHT_MODE_ICON = "I";
+    const DARK_MODE_ICON = "0";
+    const LIGHT_FAVICON_LINK = '/assets/favicon-light.svg';
+    const DARK_FAVICON_LINK = '/assets/favicon.svg';
 
     const themeToggle = document.getElementById("theme-toggle");
+    const faviconLink = document.querySelector('link[rel="icon"]');
 
     const currentMode = () => {
         const mode = localStorage.getItem(KEY);
@@ -27,12 +30,14 @@ function setupMode() {
         document.documentElement.classList.add(DARK_MODE);
         localStorage.setItem(KEY, DARK_MODE)
         themeToggle.textContent = DARK_MODE_ICON;
+        faviconLink.setAttribute('href', DARK_FAVICON_LINK);
     };
 
     const setLightMode = () => {
         document.documentElement.classList.remove(DARK_MODE);
         localStorage.setItem(KEY, LIGHT_MODE)
         themeToggle.textContent = LIGHT_MODE_ICON;
+        faviconLink.setAttribute('href', LIGHT_FAVICON_LINK);
     };
 
     if (currentMode() == LIGHT_MODE) {
@@ -41,7 +46,7 @@ function setupMode() {
         setDarkMode();
     }
 
-    themeToggle.onclick = e => {
+    themeToggle.onclick = () => {
         if (currentMode() == LIGHT_MODE) {
             setDarkMode();
         } else {

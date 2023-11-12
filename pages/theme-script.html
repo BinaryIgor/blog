@@ -1,8 +1,12 @@
 <script>
     (function () {
+        const faviconLink = document.querySelector('link[rel="icon"]');
+
         const KEY = "MODE";
         const LIGHT_MODE = 'light';
         const DARK_MODE = 'dark';
+        const LIGHT_FAVICON_LINK = '/assets/favicon-light.svg';
+        const DARK_FAVICON_LINK = '/assets/favicon.svg';
 
         let currentMode = localStorage.getItem(KEY);
         if (!currentMode) {
@@ -11,8 +15,10 @@
 
         if (currentMode == LIGHT_MODE) {
             document.documentElement.classList.remove(DARK_MODE);
+            faviconLink.setAttribute('href', LIGHT_FAVICON_LINK);
         } else {
             document.documentElement.classList.add(DARK_MODE);
+            faviconLink.setAttribute('href', DARK_FAVICON_LINK);
         }
     })();
 </script>
