@@ -1,5 +1,7 @@
 {
     "author": "Igor Roztropiński",
+    "descriptionLine1": "Some things are either 0 or 1.",
+    "descriptionLine2": "Thoughts about managing binary machines (computers), which are controlled by the people called programmers/software engineers/coders/hackers.",
     "domain": "binaryigor.com",
     "pagesToRender": [
         "index.html",
@@ -9,7 +11,8 @@
         "not-found.html",
         "error.html",
         "robots.txt",
-        "sitemap.xml"
+        "sitemap.xml",
+        "feed.xml"
     ],
     "postTemplate": "post.html",
     "devAssetsPathPrefix": "/dist",

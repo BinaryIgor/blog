@@ -55,10 +55,37 @@ export function latestsPostsPreview({ posts }) {
     return postsPreview({ posts: latestsPosts });
 }
 
+export function nowDateTime() {
+    return new Date().toISOString();
+}
+
 export function postsSiteMap({ domain, posts }) {
     return posts.map(p => `
     <url>
         <loc>https://${domain}/${p.slug}.html</loc>
         <lastmod>${p.updatedAt ? p.updatedAt : p.publishedAt}</lastmod>
     </url>`).join("\n");
+}
+
+export function postsAtomFeed({ domain, posts }) {
+    function dateToAtomFeedDateTime(date) {
+        return `${date}T00:00:00+00:00`;
+    }
+
+    function sanitizedSummary(post) {
+        return post.excerpt
+            .replace("</>", "")
+            .replace("<em>", "")
+            .replace("</em>", "");
+    }
+
+    return posts.map(p => `
+    <entry xml:lang="en">
+        <title>${p.title}</title>
+        <id>https://${domain}/${p.slug}</id>
+        <link href="https://${domain}/${p.slug}.html" rel="alternate" type="text/html" />
+        <published>${dateToAtomFeedDateTime(p.publishedAt)}</published>
+        <updated>${dateToAtomFeedDateTime(p.updatedAt ? p.updatedAt : p.publishedAt)}</updated>
+        <summary>${sanitizedSummary(p)}</summary>
+    </entry>`).join("\n");
 }
