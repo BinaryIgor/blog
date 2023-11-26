@@ -11,8 +11,11 @@
 <body>
     {{ navigation.html }}
     <div class="p-6 text-center">
-        <h1 class="text-4xl font-bold mb-12">All posts</h1>
-        {{ .js: postsPreview }}
+        <h1 class="text-4xl font-bold mb-4">All posts</h1>
+        <div class="max-content-width mb-16 m-auto">
+         <p>Collection of all posts published on the blog, ordered from the latest ones.</p>
+        </div>
+        {{ .js: postsPreviewFromOldest }}
     </div>
     {{ footer.html }}
 </body>

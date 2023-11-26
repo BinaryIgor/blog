@@ -1,3 +1,5 @@
+const LATEST_POSTS = 4;
+
 export function postMetadata({ publishedAt, wordsCount, timeToRead, extended = false }) {
     if (!publishedAt) {
         throw new Error("Published at is required, but wasn't supplied!");
@@ -50,11 +52,32 @@ export function postsPreview({ posts }) {
     </ul>`;
 }
 
-// Remember to change if after we have ~ 7 posts
 export function latestsPostsPreview({ posts }) {
-    let latestsPosts = posts.length > 10 ? posts.slice(0, 10) : posts;
-    return postsPreview({ posts: latestsPosts });
+    return postsPreview({ posts: latestsPosts(posts) });
 }
+
+function latestsPosts(posts) {
+    return posts.length > LATEST_POSTS ? posts.slice(0, LATEST_POSTS) : posts;
+}
+
+export function postsPreviewFromOldest({ posts }) {
+    const latests = latestsPosts(posts);
+    
+    let olderPosts;
+    if (posts.length > latests.length) {
+        olderPosts = posts.slice(LATEST_POSTS);
+    } else {
+        olderPosts = [];
+    }
+
+    return `
+        <h2 class="text-3xl font-bold mb-8">Latest</h2>
+        ${postsPreview({ posts: latests })}
+        <h2 id="older" class="text-3xl font-bold mt-24 mb-8 anchor-top-scroll">Older</h2>
+        ${postsPreview({ posts: olderPosts })}
+    `;
+}
+
 
 export function nowDateTime() {
     return new Date().toISOString();
