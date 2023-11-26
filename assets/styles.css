@@ -232,7 +232,7 @@ html {
     }
 
     .post a {
-        @apply font-bold break-words underline;
+        @apply break-words underline;
     }
 
     .delimiter-like {
