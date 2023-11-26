@@ -54,11 +54,9 @@
         const pagesStats = stats.pages;
 
         return {
-            views: generalStats.views,
-            uniqueVisitors: generalStats.uniqueVisitors,
-            ipHashes: generalStats.ipHashes,
-            reads: generalStats.reads,
-            uniqueReaders: generalStats.uniqueReaders,
+            allTime: { ...stats.general },
+            lastThirtyDays: { ...stats.generalForLastThirtyDays },
+            lastNinentyDays: { ...stats.generalForLastNinentyDays },
             viewsBySource: generalStats.viewsBySource.map(v => {
                 return {
                     source: v.source,
@@ -84,31 +82,38 @@
     function renderStats(stats) {
         statsContainer.innerHTML = `
             <div class="mb-16">
-                <h2 class="text-3xl mb-4">Overall</h2>
-                ${generalStatsComponent(stats)}
+                <h2 class="text-3xl mb-4 font-bold">Overall</h2>
+                    ${generalStatsComponent("All time", stats.allTime)}
+                    ${generalStatsComponent("Last 30 days", stats.lastThirtyDays)}
+                    ${generalStatsComponent("Last 90 days", stats.lastNinentyDays)}
+                </div>
             </div>
             <div class="mb-16">
-                <h2 class="text-3xl mb-4">Views by source</h2>
+                <h2 class="text-3xl mb-4 font-bold">Views by source</h2>
                 ${viewsBySourceComponent(stats)}
             </div>
             <div class="mb-16">
-                <h2 class="text-3xl mb-4">Posts</h2>
+                <h2 class="text-3xl mb-4 font-bold">Posts</h2>
                 ${postsStatsComponent(stats)}
             </div>
             <div>
-                <h2 class="text-3xl mb-4">Pages</h2>
+                <h2 class="text-3xl mb-4 font-bold">Pages</h2>
                 ${pagesStatsComponent(stats)}
             </div>
         `;
     }
 
-    function generalStatsComponent(stats) {
+    function generalStatsComponent(title, stats) {
         return `
-            <div>Views: ${stats.views}</div>
-            <div>Unique visitors: ${stats.uniqueVisitors}</div>
-            <div>Ip hashes: ${stats.ipHashes}</div>
-            <div>Reads: ${stats.reads}</div>
-            <div>Unique readers: ${stats.uniqueReaders}</div>
+            <div class="mb-4">
+                <h3 class="text-2xl mb-4">${title}</h3>
+                <div>Views: ${stats.views}</div>
+                <div>Unique visitors: ${stats.uniqueVisitors}</div>
+                <div>Ip hashes: ${stats.ipHashes}</div>
+                <div>Reads: ${stats.reads}</div>
+                <div>Unique readers: ${stats.uniqueReaders}</div>
+            ${delimiterComponent()}
+            </div>
             `;
     }
 

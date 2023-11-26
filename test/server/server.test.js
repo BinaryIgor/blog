@@ -85,11 +85,14 @@ serverIntTestSuite("Server integration tests", () => {
             2);
     });
 
+    // TODO: add time-based events cases
     it('should add events', async () => {
         const ip1 = hashedIp(randomString());
         const ip2 = hashedIp(randomString());
+        const ip3 = hashedIp(randomString());
         const visitor1Id = crypto.randomUUID();
         const visitor2Id = crypto.randomUUID();
+        const visitor3Id = crypto.randomUUID();
 
         const source1Url = "https://google.com?search=sth";
         const source2Url = "https://binaryigor.com";
@@ -142,25 +145,35 @@ serverIntTestSuite("Server integration tests", () => {
             type: READ_EVENT_TYPE
         });
 
+        const ip3View1 = TestObjects.randomEvent({
+            ipHash: ip3,
+            visitorId: visitor3Id,
+            path: "/index.html",
+            source: source1Url,
+            type: VIEW_EVENT_TYPE
+        });
+
         await addEventFromIp(ip1, ip1View1);
         await addEventFromIp(ip1, ip1View2);
         await addEventFromIp(ip1, ip1Read1);
         await addEventFromIp(ip2, ip2View1);
         await addEventFromIp(ip2, ip2View2);
         await addEventFromIp(ip2, ip2Read1);
+        await addEventFromIp(ip3, ip3View1);
 
         await nextScheduledTasksRunDelay();
 
         const statsResponse = await testRequests.getStats();
 
-        const expectedStats = new Stats(
-            new GeneralStats(4, 2, 2,
-                [
-                    new ViewsBySource(source1, 50),
-                    new ViewsBySource(source2, 50),
-                ]),
+        const expectedGeneralStats = new GeneralStats(5, 3, 3, 2, 2,
             [
-                new PageStats("/index.html", 3, 0, 2, 0),
+                new ViewsBySource(source1, 60),
+                new ViewsBySource(source2, 40),
+            ]);
+
+        const expectedStats = new Stats(expectedGeneralStats, expectedGeneralStats, expectedGeneralStats,
+            [
+                new PageStats("/index.html", 4, 0, 3, 0),
                 new PageStats(allowedPostPath, 1, 2, 1, 2)
             ]
         );
@@ -207,7 +220,8 @@ function invalidEvents() {
 
 function assertEmptyStatsResponse(response) {
     assertJsonResponse(response, actualStats => {
-        const emptyStats = new Stats(new GeneralStats(0, 0, 0, []), []);
+        const emptyGeneralStats = new GeneralStats(0, 0, 0, 0, 0, []);
+        const emptyStats = new Stats(emptyGeneralStats, emptyGeneralStats, emptyGeneralStats, []);
         assert.deepEqual(actualStats, emptyStats);
     });
 }
