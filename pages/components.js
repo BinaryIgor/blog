@@ -74,9 +74,9 @@ export function postsAtomFeed({ domain, posts }) {
 
     function sanitizedSummary(post) {
         return post.excerpt
-            .replace("</>", "")
-            .replace("<em>", "")
-            .replace("</em>", "");
+            .replaceAll("</>", "")
+            .replaceAll("<em>", "")
+            .replaceAll("</em>", "");
     }
 
     return posts.map(p => `
