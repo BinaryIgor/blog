@@ -60,7 +60,8 @@ html.dark {
     --primary-color: black;
     --secondary-1-color: #0f172a;
     --secondary-2-color: #1e293b;
-    --primary-text-color: white;
+    --primary-text-color: rgb(255, 255, 255);
+    --primary-text-color-faded: rgba(255, 255, 255, 0.1);
     --secondary-1-text-color: #f1f5f9;
     --secondary-2-text-color: #e2e8f0;
     --secondary-3-text-color: #cbd5e1;
@@ -72,7 +73,8 @@ html {
     --primary-color: white;
     --secondary-1-color: #f1f5f9;
     --secondary-2-color: #e2e8f0;
-    --primary-text-color: black;
+    --primary-text-color: rgb(0, 0, 0);
+    --primary-text-color-faded: rgba(0, 0, 0, 0.05);
     --secondary-1-text-color: #0f172a;
     --secondary-2-text-color: #1e293b;
     --secondary-3-text-color: #334155;
@@ -143,8 +145,8 @@ html {
     border-color: var(--primary-text-color);
 }
 
-.border-text-secondary-2 {
-    border-color: var(--secondary-2-text-color);
+.border-primary-text-faded {
+    border-color: var(--primary-text-color-faded);
 }
 
 .object-position-50 {
