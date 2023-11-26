@@ -102,10 +102,12 @@ export class Event {
 }
 
 export class GeneralStats {
-    constructor(views, uniqueVisitors, ipHashes, viewsBySource) {
+    constructor(views, uniqueVisitors, ipHashes, reads, uniqueReaders, viewsBySource) {
         this.views = views;
-        this.ipHashes = ipHashes;
         this.uniqueVisitors = uniqueVisitors;
+        this.ipHashes = ipHashes;
+        this.reads = reads;
+        this.uniqueReaders = uniqueReaders;
         this.viewsBySource = viewsBySource;
     }
 }
@@ -195,10 +197,12 @@ export class SqliteAnalyticsRepository {
     }
 
     async generalStats() {
-        const viewsVisitorsIpHashesPromise = this._viewsUniqueVisitorsIpHashesStats();
+        const viewsUniqueVisitorsIpHashesPromise = this._viewsUniqueVisitorsIpHashesStats();
+        const readsUiqueReadersPromise = this._readsUniqueReadersStats();
         const viewsBySourcePromise = this._viewsBySourceStats();
 
-        const { views, uniqueVisitors, ipHashes } = await viewsVisitorsIpHashesPromise;
+        const { views, uniqueVisitors, ipHashes } = await viewsUniqueVisitorsIpHashesPromise;
+        const { reads, uniqueReaders } = await readsUiqueReadersPromise;
         const viewsBySourceFromDb = await viewsBySourcePromise;
 
         let viewsBySource;
@@ -208,7 +212,7 @@ export class SqliteAnalyticsRepository {
             viewsBySource = [];
         }
 
-        return new GeneralStats(views, uniqueVisitors, ipHashes, viewsBySource);
+        return new GeneralStats(views, uniqueVisitors, ipHashes, reads, uniqueReaders, viewsBySource);
     }
 
     _viewsUniqueVisitorsIpHashesStats() {
@@ -223,9 +227,22 @@ export class SqliteAnalyticsRepository {
                         views: r['views'],
                         uniqueVisitors: r['unique_visitors'],
                         ipHashes: r['ip_hashes']
-                    }
+                    };
                 }
                 return { views: 0, uniqueVisitors: 0, iphashes: 0 };
+            });
+    }
+
+    _readsUniqueReadersStats() {
+        return this.db.queryOne(`SELECT COUNT(*) as reads, COUNT(DISTINCT visitor_id) as unique_readers FROM read`)
+            .then(r => {
+                if (r) {
+                    return {
+                        reads: r['reads'],
+                        uniqueReaders: r['unique_readers']
+                    };
+                }
+                return { reads: 0, uniqueReaders: 0 };
             });
     }
 
@@ -247,7 +264,7 @@ export class SqliteAnalyticsRepository {
             FROM read 
             GROUP BY path`);
 
-        const viewsPromise =  this.db.query(`SELECT 
+        const viewsPromise = this.db.query(`SELECT 
             path,
             COUNT(*) AS views, 
             COUNT(DISTINCT visitor_id) AS unique_viewers
