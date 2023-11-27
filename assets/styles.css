@@ -61,7 +61,7 @@ html.dark {
     --secondary-1-color: #0f172a;
     --secondary-2-color: #1e293b;
     --primary-text-color: rgb(255, 255, 255);
-    --primary-text-color-faded: rgba(255, 255, 255, 0.1);
+    --primary-text-color-faded: rgba(255, 255, 255, 0.25);
     --secondary-1-text-color: #f1f5f9;
     --secondary-2-text-color: #e2e8f0;
     --secondary-3-text-color: #cbd5e1;
@@ -74,7 +74,7 @@ html {
     --secondary-1-color: #f1f5f9;
     --secondary-2-color: #e2e8f0;
     --primary-text-color: rgb(0, 0, 0);
-    --primary-text-color-faded: rgba(0, 0, 0, 0.05);
+    --primary-text-color-faded: rgba(0, 0, 0, 0.25);
     --secondary-1-text-color: #0f172a;
     --secondary-2-text-color: #1e293b;
     --secondary-3-text-color: #334155;
@@ -141,7 +141,7 @@ html {
     color: var(--secondary-3-text-color);
 }
 
-.border-text-primary {
+.border-primary-text {
     border-color: var(--primary-text-color);
 }
 
@@ -210,11 +210,11 @@ html {
     }
 
     .post pre {
-        @apply bg-secondary-1 p-4 my-4 text-left border-l-[3px] rounded-sm border-text-primary max-content-width overflow-auto;
+        @apply bg-secondary-1 p-4 my-4 text-left border-l-[3px] rounded-sm border-primary-text max-content-width overflow-auto;
     }
 
     .post blockquote {
-        @apply py-2 px-4 my-4 text-left border-l-[3px] rounded-sm border-text-primary italic;
+        @apply py-2 px-4 my-4 text-left border-l-[3px] rounded-sm border-primary-text italic;
     }
 
     .post figure {

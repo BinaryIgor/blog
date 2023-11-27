@@ -35,7 +35,7 @@ export function postHtmlDescription({ excerpt, htmlDescription }) {
 export function postPreview(post) {
     const postUrl = `${post.slug}.html`;
     return `
-   <li class="cursor-pointer border-[3px] border-solid border-primary-text-faded p-6 rounded-sm
+   <li class="cursor-pointer border-[2px] border-solid border-primary-text-faded p-6 rounded
         max-content-width m-auto"
     onclick="location.href='${postUrl}'">
         <a href="${postUrl}" class="text-2xl mb-2 font-semibold">${post.title}</a>
