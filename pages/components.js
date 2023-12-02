@@ -39,7 +39,7 @@ export function postPreview(post) {
    <li class="cursor-pointer border-[2px] border-solid border-primary-text-faded p-6 rounded
         max-content-width m-auto"
     onclick="location.href='${postUrl}'">
-        <a href="${postUrl}" class="text-2xl mb-2 font-semibold">${post.title}</a>
+        <a href="${postUrl}" class="text-2xl mb-2 font-bold">${post.title}</a>
         <div class="text-lg mb-6 text-secondary-3 flex flex-wrap justify-center whitespace-pre-wrap">${postMetadata(post)}</div>
         <div>${post.excerpt}</div>
         
