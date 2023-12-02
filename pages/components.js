@@ -28,7 +28,8 @@ export function extendedPostMetadata({ publishedAt, wordsCount, timeToRead }) {
 }
 
 export function postHtmlDescription({ excerpt, htmlDescription }) {
-    return htmlDescription ? htmlDescription : excerpt;
+    const description = htmlDescription ? htmlDescription : excerpt;
+    return stripHtml(description);
 }
 
 // Also used in post.html js, remember to keep in sync!
@@ -62,7 +63,7 @@ function latestsPosts(posts) {
 
 export function postsPreviewFromOldest({ posts }) {
     const latests = latestsPosts(posts);
-    
+
     let olderPosts;
     if (posts.length > latests.length) {
         olderPosts = posts.slice(LATEST_POSTS);
@@ -91,16 +92,14 @@ export function postsSiteMap({ domain, posts }) {
     </url>`).join("\n");
 }
 
+function stripHtml(text) {
+    return text.replaceAll(/<[a-zA-Z]+>/g, "")
+        .replaceAll(/<\/[a-zA-Z]+>/g, "");
+}
+
 export function postsAtomFeed({ domain, posts }) {
     function dateToAtomFeedDateTime(date) {
         return `${date}T00:00:00+00:00`;
-    }
-
-    function sanitizedSummary(post) {
-        return post.excerpt
-            .replaceAll("</>", "")
-            .replaceAll("<em>", "")
-            .replaceAll("</em>", "");
     }
 
     return posts.map(p => `
@@ -110,6 +109,6 @@ export function postsAtomFeed({ domain, posts }) {
         <link href="https://${domain}/${p.slug}.html" rel="alternate" type="text/html" />
         <published>${dateToAtomFeedDateTime(p.publishedAt)}</published>
         <updated>${dateToAtomFeedDateTime(p.updatedAt ? p.updatedAt : p.publishedAt)}</updated>
-        <summary>${sanitizedSummary(p)}</summary>
+        <summary>${stripHtml(p.excerpt)}</summary>
     </entry>`).join("\n");
 }
