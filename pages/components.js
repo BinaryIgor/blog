@@ -61,7 +61,7 @@ function latestsPosts(posts) {
     return posts.length > LATEST_POSTS ? posts.slice(0, LATEST_POSTS) : posts;
 }
 
-export function postsPreviewFromOldest({ posts }) {
+export function allPostsPreview({ posts }) {
     const latests = latestsPosts(posts);
 
     let olderPosts;
