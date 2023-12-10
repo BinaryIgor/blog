@@ -14,7 +14,7 @@
 
 When we work with a set of (usually persisted somewhere) data, we most likely want our queries to be fast. Whenever I think about optimizing certain data query, be it SQL (mostly) or NoSQL, I find it useful to think about these problems as search space problems. In other words, **how much data need to be scanned/checked in order for my query to be fulfilled?**
 
-Building on that, if our search space is big, large, huge or enormous (we work with tables/collections consisting of 10<sup>6</sup>, 10<sup>9</sup>, 10<sup>12</sup>, 10<sup>15</sup>... of rows/documents for example), **we need to find a way to make our search space small again**. There are a couple ways of doing that, so let's explore them.
+Building on that, if our search space is big, large, huge or enormous (we work with tables/collections consisting of 10<sup>6</sup>, 10<sup>9</sup>, 10<sup>12</sup>, 10<sup>15</sup>... rows/documents for example), **we need to find a way to make our search space small again**. There are a couple ways of doing that, so let's explore them.
 
 ## Changing schema
 
@@ -35,7 +35,7 @@ Now, we will assume that for most of our queries, we only take id and name, and 
 ```
 SELECT id, name FROM account WHERE name = ?;
 ```
-Furthemore (for some arbitrary reason, I know!), we can't index the name column. In that situation, we will need to do full table scan to fulfill this query.
+Furthemore (for some arbitrary reason, I know!), we can not index the name column. In that situation, we will need to do full table scan to fulfill this query.
 
 When our table have 5 columns each row size is about 5n, where n is the average size of a column (approximating of course, size of different columns can vary a lot). Having 10<sup>9</sup> rows in a table, we need to scan something like:
 ```
