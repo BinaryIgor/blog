@@ -170,7 +170,7 @@ html {
     }
 
     .max-content-width {
-        @apply max-w-[800px];
+        @apply max-w-[700px];
     }
 
     .post > * {
@@ -222,11 +222,11 @@ html {
     }
 
     .post img {
-        @apply w-full object-cover object-position-50 rounded-md max-h-[700px];
+        @apply object-contain m-auto rounded max-h-[700px] max-w-[700px] w-full;
     }
 
     #profile-image {
-        @apply max-w-[250px] md:max-w-[350px] object-contain m-auto rounded-md;
+        @apply max-w-[250px] md:max-w-[350px] object-contain m-auto rounded;
     }
 
     .post figcaption {

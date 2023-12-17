@@ -89,11 +89,9 @@ In our approach we will make the following assumptions/have preferences:
 * For styling we will use amazing <a href="https://tailwindcss.com" target="_blank">Tailwindcss</a>. We could have done it without by scoping our CSS, but it easier with Tailwind, and is amazing tool on its own, so why not use it? 
 * easy to work with HTMX
 
-## Examples
+## Code and Context
 
 Repo with all referenced code and more examples can be found <a href="https://github.com/BinaryIgor/code-examples/tree/web-components/flexible-web-components" target="_blank">here</a>.
-
-### Base
 
 To make configuring our components simple I have created *Components* object. Its main function is to make configuring our components easier. To make it more generic I have also devised the following convention to configure our components:
 ```
@@ -193,19 +191,54 @@ Using HTMX is mostly about setting its attributes on our components, in the HTML
 ```
 
 
-### Info Modal
-some code example
+## Confirmable HTMX request Modal
 
-### Input with Error
-some code exmple
+In HTMX we might quite often have a need for certain requests to be confirmed by the user. There is a special attribute that we can use here, which is <a href="https://htmx.org/attributes/hx-confirm/" target="_blank">hx-confirm</a>. Having *confirmable-modal* similar to *info-modal* from one of the previous examples, we can have the following HTML:
+```
+<confirmable-modal title="Delete confirmation" ok-text="Delete">
+</confirmable-modal>
 
-### Form Container
-some code exmple
+<button 
+  hx-delete="/test"
+  hx-confirm="Are you sure to delete this test entity?"
+  hx-target="#delete-result">
+  Try to confirm
+</button>
+```
 
-### List Container
-some code exmplae
+To capture requests and show our custom modal, we need to add the following JavaScript to our page:
+```
+const confirmableModal = document.querySelector("confirmable-modal");
 
-## Closing thoughts
+document.addEventListener("htmx:confirm", e => {
+  console.log("Let's confirm htmx request..", e);
+    
+  // do not issue htmx request
+  e.preventDefault();
+
+  confirmableModal.onOk = () => {
+    e.detail.issueRequest(e);
+    confirmableModal.hide();
+  };
+
+  confirmableModal.show({ message: e.detail.question });
+});
+```
+
+Which will show our modal before issueing an http request which looks like:
+<figure>
+    <img src="{{ imagesPath }}/htmx-and-web-components/confirmable-modal.png">
+</figure>
+
+
+
+
+## Highly elaborate HTMX example
+
+Bulding on previously, shortly shown *input-with-error* example, we can have *form-cotainer* that provides form functionality. As name suggests, it is just a container, so it accepts and can work with any number of inputs. It provides a common form functionality like clearing all inputs after submit or showing generic after failed submit. To make the example more relevant to HTMX context, we will also have *list-container*. We will add items from our *form-container* to it. *List-container*, similarly to *form-container* will be just a container for items. It will host arbtrary number of elements and 
+
+
+## Copyable components collection and closing thoughts
 
 Pretty useful, maybe create simple tools out of it
 

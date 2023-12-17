@@ -74,7 +74,7 @@ export function allPostsPreview({ posts }) {
     return `
         <h2 class="text-3xl font-bold mb-8">Latest</h2>
         ${postsPreview({ posts: latests })}
-        <h2 id="older" class="text-3xl font-bold mt-24 mb-8 anchor-top-scroll">Older</h2>
+        <h2 id="prior" class="text-3xl font-bold mt-24 mb-8 anchor-top-scroll">Prior</h2>
         ${postsPreview({ posts: olderPosts })}
     `;
 }
