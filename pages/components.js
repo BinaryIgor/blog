@@ -40,7 +40,7 @@ export function postPreview(post) {
         max-content-width m-auto"
     onclick="location.href='${postUrl}'">
         <a href="${postUrl}" class="text-2xl mb-2 font-bold">${post.title}</a>
-        <div class="text-lg mb-6 text-secondary-3 flex flex-wrap justify-center whitespace-pre-wrap">${postMetadata(post)}</div>
+        <div class="mb-6 text-secondary-3 flex flex-wrap justify-center whitespace-pre-wrap">${postMetadata(post)}</div>
         <div>${post.excerpt}</div>
         
     </li>`;
@@ -74,7 +74,7 @@ export function allPostsPreview({ posts }) {
     return `
         <h2 class="text-3xl font-bold mb-8">Latest</h2>
         ${postsPreview({ posts: latests })}
-        <h2 id="older" class="text-3xl font-bold mt-24 mb-8 anchor-top-scroll">Older</h2>
+        <h2 id="prior" class="text-3xl font-bold mt-24 mb-8 anchor-top-scroll">Prior</h2>
         ${postsPreview({ posts: olderPosts })}
     `;
 }

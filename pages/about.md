@@ -6,7 +6,7 @@ I am <a target="_blank" href="https://igor.roztropinski.com">Igor Roztropiński<
     <img id="profile-image" src="{{ imagesPath }}/profile.png">
 </figure>
 
-
+\
 If you possess an insatiable curiosity and a relentless desire to dive deep into the very essence of (mostly software-related) subjects, constantly pondering questions like:
 * How does it work, and why exactly does it work that way?
 * Can we simplify this seemingly complicated solution? What is the source of that complexity?

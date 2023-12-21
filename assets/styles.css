@@ -2,7 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-
 @font-face {
     font-family: 'RobotoMono';
     src: url('/assets/fonts/roboto/RobotoMono-Light.ttf');
@@ -166,11 +165,12 @@ html {
 @layer components {
     body {
         /* relative for footer to work properly*/
-        @apply bg-primary text-primary min-h-screen relative;
+        @apply bg-primary text-primary min-h-screen relative text-lg;
     }
 
+    /* keep in sync with img below! */
     .max-content-width {
-        @apply max-w-[700px];
+        @apply max-w-[750px];
     }
 
     .post > * {
@@ -182,19 +182,19 @@ html {
     }
 
     .post h2 {
-        @apply text-2xl mt-16 mb-8 font-bold text-center cursor-pointer anchor-top-scroll;
+        @apply text-3xl mt-16 mb-8 font-bold text-center cursor-pointer anchor-top-scroll;
     }
 
     .post h3 {
-        @apply text-xl mt-12 mb-6 font-bold text-center cursor-pointer anchor-top-scroll;
+        @apply text-2xl mt-12 mb-6 font-bold text-center cursor-pointer anchor-top-scroll;
     }
 
     .post p {
-        @apply my-4;
+        @apply my-6;
     }
 
     .post ul {
-        @apply list-disc list-inside;
+        @apply list-disc list-inside space-y-1;
     }
 
     .post li > ul {
@@ -202,7 +202,7 @@ html {
     }
 
     .post ol {
-        @apply list-decimal list-inside;
+        @apply list-decimal list-inside space-y-1;
     }
 
     .post li > ol {
@@ -210,27 +210,27 @@ html {
     }
 
     .post pre {
-        @apply bg-secondary-1 p-4 my-4 text-left border-l-[3px] rounded-sm border-primary-text max-content-width overflow-auto;
+        @apply bg-secondary-1 p-4 text-left border-l-[3px] rounded-sm border-primary-text max-content-width overflow-auto;
     }
 
     .post blockquote {
-        @apply py-2 px-4 my-4 text-left border-l-[3px] rounded-sm border-primary-text italic;
+        @apply py-2 px-4 text-left border-l-[3px] rounded-sm border-primary-text italic;
     }
 
     .post figure {
-        @apply py-4 w-full;
+        @apply w-full;
     }
 
     .post img {
-        @apply w-full object-cover object-position-50 rounded-md max-h-[700px];
+        @apply object-contain m-auto rounded max-h-[750px] max-w-[750px] w-full;
     }
 
     #profile-image {
-        @apply max-w-[250px] md:max-w-[350px] object-contain m-auto rounded-md;
+        @apply max-w-[300px] md:max-w-[350px] object-contain m-auto rounded;
     }
 
     .post figcaption {
-        @apply italic text-center opacity-90;
+        @apply italic text-center opacity-80 text-base mt-1;
     }
 
     .post a {
@@ -238,7 +238,7 @@ html {
     }
 
     .delimiter-like {
-        @apply text-secondary-2 font-bold text-xl text-center;
+        @apply text-secondary-2 font-bold text-2xl text-center;
     }
 
     .article-delimiter {

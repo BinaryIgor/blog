@@ -10,20 +10,20 @@
 
 <body>
     {{ navigation.html }}
-    <div class="pt-6 px-6 text-center">
+    <div class="pt-6 px-4 text-center">
         <h1 class="text-4xl font-bold">
             <a href="about.html">Binary Igor</a>
         </h1>
-        <div class="mt-4 m-auto max-w-[500px]">
+        <div class="mt-6 m-auto max-w-[600px]">
             <p>{{ descriptionLine1 }}</p>
             <p class="mb-2">{{ descriptionLine2 }}</p>
-            <p class="italic opacity-80 text-md">By Igor Roztropiński</p>
+            <p class="italic opacity-80 text-base">By Igor Roztropiński</p>
         </div>
         <div class="delimiter-like py-8">---</div>
         {{ .js: latestsPostsPreview }}
 
         <div class="py-12">
-            <a class="p-4 text-xl font-bold underline" href="posts.html#older">More</a>
+            <a class="p-4 text-xl font-bold underline" href="posts.html#prior">More</a>
         </div>
     </div>
     {{ footer.html }}
