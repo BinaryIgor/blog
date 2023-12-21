@@ -1,1 +1,62 @@
-<script src="{{ assetsPath }}/index.js"></script>
+<script>
+// Theme mode is embedded here for a better user experience - to avoid 0/I icon blink
+// Navigation/dark mode switch
+const navigation = document.getElementById("navigation");
+
+document.getElementById("navigation-toggle").onclick = () => {
+    navigation.classList.toggle("hidden");
+};
+
+function setupMode() {
+    const KEY = "MODE";
+
+    const LIGHT_MODE = 'light';
+    const DARK_MODE = 'dark';
+    const LIGHT_MODE_ICON = "I";
+    const DARK_MODE_ICON = "0";
+    const LIGHT_FAVICON_LINK = '/assets/favicon-light.svg';
+    const DARK_FAVICON_LINK = '/assets/favicon.svg';
+
+    const themeToggle = document.getElementById("theme-toggle");
+    const faviconLink = document.querySelector('link[rel="icon"]');
+
+    const currentMode = () => {
+        const mode = localStorage.getItem(KEY);
+        if (mode) {
+            return mode;
+        }
+        return DARK_MODE;
+    }
+
+    const setDarkMode = () => {
+        document.documentElement.classList.add(DARK_MODE);
+        localStorage.setItem(KEY, DARK_MODE)
+        themeToggle.textContent = DARK_MODE_ICON;
+        faviconLink.setAttribute('href', DARK_FAVICON_LINK);
+    };
+
+    const setLightMode = () => {
+        document.documentElement.classList.remove(DARK_MODE);
+        localStorage.setItem(KEY, LIGHT_MODE)
+        themeToggle.textContent = LIGHT_MODE_ICON;
+        faviconLink.setAttribute('href', LIGHT_FAVICON_LINK);
+    };
+
+    if (currentMode() == LIGHT_MODE) {
+        setLightMode();
+    } else {
+        setDarkMode();
+    }
+
+    themeToggle.onclick = () => {
+        if (currentMode() == LIGHT_MODE) {
+            setDarkMode();
+        } else {
+            setLightMode();
+        }
+    };
+}
+
+setupMode();
+</script>
+<script src="{{ assetsPath }}/analytics.js"></script>
