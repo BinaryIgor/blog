@@ -2,26 +2,25 @@
 {
     "title": "HTMX and Web Components: a Perfect Match",
     "slug": "htmx-and-web-components-a-perfect-match",
-    "publishedAt": "2023-12-22",
+    "publishedAt": "2023-12-21",
     "startedAt": "2023-12-16",
     "timeToRead": "17 minutes",
-    "wordsCount": 2112,
-    "excerpt": "Web Components are a set of browser APIs that allow us to create custom HTML elements. They are one of the major things that SPA (Single Page Application) frameworks have been giving us for a long time ... HTMX is highly interesting, useful and a promising technology. It simplifies many things and allows us to build <em>SPA</em> or <em>SPA-like</em> applications without any complex tooling, dependencies, frameworks and mostly without writing any application-specific JavaScript code. ",
+    "wordsCount": 2109,
+    "excerpt": "<em>Web Components</em> are a set of browser APIs that allow us to create custom HTML elements. They are one of the major things that SPA (Single Page Application) frameworks have been giving us for a long time ... <em>HTMX</em> is highly interesting, useful and a promising technology. It simplifies many things and allows us to build SPA or SPA-like applications without complex tooling, dependencies, frameworks and mostly without writing application-specific JavaScript code. ",
     "researchLog": [ 2 ],
-    "writingLog": [ 4, 3.5, 1, 3, 6 ],
-    "draft": true
+    "writingLog": [ 4, 3.5, 1, 3, 6 ]
 }
 ---
 
 ## Web Components
 
-Web Components are a set of browser APIs that allow us to create custom HTML elements. **They are one of the major things that SPA (Single Page Application) frameworks have been giving us for a long time.** Frameworks like Vue, React, Angular or Svelte have their own approach and APIs for creating and using reusable, isolated UI components. This framework-specific philosophy is has been widely used for quite a long time right now. It has a few unfortunate consequences:
+Web Components are a set of browser APIs that allow us to create custom HTML elements. **They are one of the major things that SPA (Single Page Application) frameworks have been giving us for a long time.** Frameworks like Vue, React, Angular or Svelte have their own approach and APIs for creating and using reusable, isolated UI components. This framework-specific philosophy has been widely used for quite a long time right now. It has a few unfortunate consequences:
 * It depends on a specific framework 
 * Complexity - to be used productively, most SPA frameworks require complex tooling and host of dependencies
 * Components can be reused only in the context of a specific framework
 * Framework updates often render components not usable anymore (anyone has changed, or tried to, major versions of Vue or React recently?)
 * If we decide to change the framework, we have to throw away our own components or a library we were using, and migrate to another one. This new library might not have everything that we need or may have a completely different API
-* We need to the learn specifics of each framework in order to use and create components. This knowledge is framework-specific and not universal at all
+* We need to learn the specifics of each framework in order to use and create components. This knowledge is framework-specific and not universal at all
 
 \
 Luckily, for quite a long time right now, we have *Web Components*, native to the browser way of creating reusable, custom HTML elements. In a nutshell, **we can encapsulate any behavior we want in the specific JavaScript class. We can then use it in the HTML, in the same way as we use *div*, *p*, *input*, *button* or any other, browser-native element**.
@@ -50,7 +49,7 @@ class CustomMessage extends HTMLElement {
 customElements.define('custom-message', CustomMessage);
 ```
 
-**That is all! No extra tooling and zero dependencies required.** If we add to this an ability to observe attribute values changes and lifecycle callbacks:
+**That is all! No extra tooling and zero dependencies required.** If we add to this the ability to observe attribute values changes and lifecycle callbacks:
 ```
 ...
 
@@ -70,26 +69,26 @@ disconnectedCallback() {
 
 ...
 ```
-...there is virtually no limit to what we can to with *Web Components*. Moreover, **there is also a possibility of creating Shadow (hidden) DOM with scoped CSS, but it is quite complex, has its drawbacks and is frankly not needed in the majority of cases**. Because of that, we will stick with the basics here:
+...there is virtually no limit to what we can do with *Web Components*! Moreover, **there is also a possibility of creating Shadow (hidden) DOM with scoped CSS, but it is quite complex, has its drawbacks and is frankly not needed in the majority of cases**. Because of that, we will stick with the basics here:
 * creating custom elements in JavaScript by extending *HTMLElement* class and registering them in the *customElements* registry
 * consuming custom elements in the HTML
 * using plain old DOM (Document Object Model) and CSS
 * using lifecycle callbacks and attributes change observers
 
-In addition, we shall ask the question: how and why can we utilise *Web Components* in the context of *HTMX*?
+In addition, we shall ask the question: how and why can we utilize *Web Components* in the context of *HTMX*?
 
 ## HTMX
 
-I wrote quite an extensive article about *HTMX* which you can find <a href="/htmx-simpler-web-based-app-or-system.html" target="_blank">here</a>.
+I wrote quite an extensive article about <a href="https://htmx.org/" target="_blank">*HTMX*</a> which you can find <a href="/htmx-simpler-web-based-app-or-system.html" target="_blank">here</a>.
 For the sake of completeness, let's give a short definition: 
 > HTMX is a JavaScript library that allows making arbitrary http requests from any HTML element, not only from forms, links or videos. It expects HTML in response, and renders whole HTML pages or fragments directly in the page section we have specified. We do not need to exchange JSON or any other data format with the server only to then translate it to HTML on the client side, so that it can be rendered. It is done automatically by HTMX, we just need to use its own, custom HTML attributes.
 
 \
-It is highly interesting, useful and a promising technology. It simplifies many things and allows us to build *SPA* or *SPA-like* applications without any complex tooling, dependencies, frameworks and mostly without writing any application-specific JavaScript code. In a way, it is a JavaScript library thanks to which we do not need to write our own JavaScript. We can just have one application, no frontend/backend distinction, and that is it (simplifying a little of course, but it <a href="https://www.ufried.com/blog/simplify_1/" target="_blank">simplifies soo many things</a>). There is one thing that I find missing though. There is no straightforward way to create isolated and reusable components where we can encapsulate HTML templates and JavaScript (if needed) related to a given component. **Wouldn't it be amazing, if we can create a library of reusable, framework-agnostic components that can be then used in all HTMX-based applications?** All of that is perfectly doable with Web Components, so let's dive in!
+It is highly interesting, useful and a promising technology. It simplifies many things and allows us to build *SPA* or *SPA-like* applications without complex tooling, dependencies, frameworks and mostly without writing application-specific JavaScript code. In a way, it is a JavaScript library thanks to which we do not need to write our own JavaScript. We can just have one application, no frontend/backend distinction, and that is it (simplifying a little of course, but <a href="https://www.ufried.com/blog/simplify_1/" target="_blank">it simplifies soo many things</a>). There is one thing that I find missing though. There is no straightforward way to create isolated and reusable components where we can encapsulate HTML templates and JavaScript (if needed) related to a given component. **Wouldn't it be amazing, if we can create a library of reusable, framework-agnostic components that can be then used in all HTMX-based applications?** All of that is perfectly doable with Web Components, so let's dive in!
 
 ## Assumptions
 
-In our solution we make the following assumptions:
+In our solution, we make the following assumptions:
 1. We will not use *Shadow DOM*. HTMX does not work with it and I would argue that it complicates things and is mostly not needed to create useful, isolated and reusable Web Components
 2. We will make our components fully configurable from the outside. This generic approach will allow us to arbitrarily, externally style these components, make using them together with HTMX extremely simple, and at the same time components do not need to know anything about HTMX
 3. For styling, we will use <a href="https://tailwindcss.com" target="_blank">Tailwind CSS</a>. We could also use custom, scoped CSS, but it is significantly easier to do with Tailwind, and it is an amazing and astoundingly simple tool on its own, so why not use it? 
@@ -129,12 +128,13 @@ Basically, *container:\** attributes will be copied without *container:* prefix 
   <!-- style attributes are set internally by the component -->
   <div 
     style="display: none;" 
+    <!-- container has its own non-overridable class, ours is appended -->
     class="fixed z-10 left-0 top-0 w-full h-full overflow-auto bg-black/80">
     <div 
       style="position: relative;" 
       class="bg-amber-300 border-solid border-4 border-black rounded-md m-auto mt-32 px-8 pt-8 pb-32 w-3/5">
-      <!-- close also has its own default class, ours is appended -->
       <span 
+        <!-- close has its own non-overridable class, ours is appended -->
         class="absolute top-0 right-0 text-2xl p-4 cursor-pointer">
           &#10006;
       </span>
@@ -153,7 +153,7 @@ To make it possible, I created a *Components object*, which has the following, m
 ```
 export const Components = {
   // element is a custom element reference,
-  // elementId is a name of a attributes target element,
+  // elementId is a name of atrributes element,
   // like "container", "content", "input" and so on
   mappedAttributes(element, elementId,
     { defaultAttributes = {},
@@ -214,7 +214,7 @@ this.innerHTML = `
 
 As we can see, **this is extremely generic and has nothing to do with HTMX: we just allow to inject arbitrary, external attributes into all elements exposed by a component**.
 
-Using *HTMX* is mostly about setting its attributes on HTML elements. Our generic approach has thus interesting consequences: we can take components created in that way (without any knowledge about HTMX) and use them together with HTMX in the following manner (*InputWithError*):
+**Using HTMX is mostly about setting its attributes on HTML elements.** Our generic approach has thus interesting consequences: we can take components created in that way (without any knowledge about HTMX) and use them together with HTMX in the following manner (*InputWithError*):
 ```
 <input-with-error 
   input:type="text"
@@ -230,11 +230,11 @@ Using *HTMX* is mostly about setting its attributes on HTML elements. Our generi
 
 ## HTMX examples
 
-A few more concrete examples of generic *Web Components* used together with *HTMX*.
+Let's walk through a few concrete examples of *Web Components* used together with *HTMX*.
 
 ### Confirmable Modal
 
-We quite often face a need for certain requests to be confirmed by the user, before actually issuing them. There is a special HTMX attribute that we can use fo that purpose: <a href="https://htmx.org/attributes/hx-confirm/" target="_blank">hx-confirm</a>. Having *confirmable-modal* similar to *info-modal* from one of the previous examples, we can write the following HTML:
+We quite often face a need for certain requests to be confirmed by the user, before actually issuing them. There is a special HTMX attribute that we can use for that purpose: <a href="https://htmx.org/attributes/hx-confirm/" target="_blank">hx-confirm</a>. Having *confirmable-modal* similar to *info-modal* from one of the previous examples, we can write the following HTML:
 ```
 <confirmable-modal 
   title="Delete confirmation"
@@ -278,11 +278,11 @@ This will show our modal before issuing a http request which looks like:
 
 ### Order Form and List
 
-Building on previously shown *input-with-error* and *info-modal*, we can have a *form-container* that provides common form functionalities. As the name suggests, it is just a container, so it accepts and can work with any number of inputs, specification of which is left completely to the client. Common form functionalities include features like enabling/disabling form submission, clearing all inputs after successful submission, or showing generic error after failed submission. In the context of HTMX, having a form element allows us to send all form inputs data in a straightforward way. To make the example more relevant to HTMX, in the form we will be able to specify a new *order* entity. After failed submission, an error will be shown, using *info-modal*. After successful submission, a new *order* will be added to the orders list. Here is the simplified HTML:
+Building on previously shown *input-with-error* and *info-modal*, we can have a *form-container* that provides common form functionalities. As the name suggests, it is just a container, so it accepts and can work with any number of inputs, specification of which is left completely to a client. Common form functionalities include features like enabling/disabling form submission, clearing all inputs after successful submission, or showing generic error after failed submission. In the context of HTMX, having a form element allows us to send all form inputs data in a straightforward way. To make the example more relevant to HTMX, in the form we will be able to specify a new *order* entity. After failed submission, an error will be shown, using *info-modal*. After successful submission, a new *order* will be added to the orders list. Here is the simplified HTML:
 ```
 <info-modal 
   id="error-modal" 
-  <!-- Add additional class to default title class attribute -->
+  <!-- Add value to default title class attribute -->
   title:add:class="text-red-500" 
   title="Something went wrong...">
 </info-modal>
@@ -297,7 +297,7 @@ Building on previously shown *input-with-error* and *info-modal*, we can have a 
 
   <input-with-error 
     container:class="mb-2"
-    <!-- Add additional class to default input class attribute -->
+    <!-- Add value to default input class attribute -->
     input:add:class="w-full"
     input:name="id"
     input:placeholder="Order id"
@@ -342,12 +342,12 @@ const formContainer = document.querySelector("form-container");
 
 formContainer.addEventListener("htmx:afterRequest", e => {
   const form = document.getElementById("order-form");
-  // we only care about requests sent by form,
+  // we only care about requests sent by the form,
   // not other of its many elements (inputs mainly)
   if (e.srcElement == form) {
     // error text response from the server
     const error = e.detail.failed ? e.detail.xhr.response : "";
-    // this will enable form submission,
+    // this will enable form submission again,
     // and clear inputs only if error is empty/undefined
     formContainer.afterSubmit({ error: error });
     // show error only if there is one
@@ -373,9 +373,9 @@ And this how it looks after getting submit error:
 
 ## Flexible and Copyable Web Components collection
 
-With the described approach, it is possible to create a collection of generic, reusable, flexible and framework-agnostic Web Components. **When it comes to UI components, I think white box philosophy is superior: we should have access to the simple source code of components, and they should be designed to be copied and possibly tinker with, and not used as a black box dependency.** This is because, it is often the case that given component *almost* matches our needs, but not exactly - in that situation it is a true lifesaver to have control and ability to change them. <a href="https://tailwindui.com/" target="_blank">Tailwind UI</a> takes a similar approach, but is not open-sourced; it is a paid tool and it focuses on framework-specific components.
+With the described approach, it is possible to create a collection of generic, reusable, flexible and framework-agnostic Web Components. **When it comes to UI components, I think white box philosophy is superior: we should have access to the simple source code of components, they should be designed to be copied and possibly tinker with, and not used as a black box dependency.** This is because, it is often the case that a given component *almost* matches our needs, but not exactly - in that situation it is a true lifesaver to have control and ability to change them. <a href="https://tailwindui.com/" target="_blank">Tailwind UI</a> takes a similar approach, but is not open-sourced; it is a paid tool and it focuses on framework-specific components.
 
-There are a few libraries/collections of Web Components out there, most notably <a href="https://shoelace.style/" target="_blank">Shoelace</a>. This is a step in the right direction, but unfortunately, they also use other tools, dependencies and additional abstractions and take a rather black box approach - they are meant to be used as a dependency, not something to copy, understand and tinker with. Additionally, they mostly use *Shadow DOM* and because of that, they can not be used with *HTMX*. I would love to see a collection of components created with a similar approach to the one described here: without unnecessary abstractions and with different, white box philosophy in mind. These components would have a simple to understand source code with zero/minimal dependencies. Furthermore, they would be completely configurable from the outside, designed to be rather copied and possibly modified - not used as a black box dependency.
+There are a few libraries and collections of Web Components out there, most notably <a href="https://shoelace.style/" target="_blank">Shoelace</a>. This is a step in the right direction, but unfortunately, they also use other tools, dependencies and additional abstractions and take a rather black box approach - they are meant to be used as a closed dependency, not something to copy, understand and tinker with. Additionally, they mostly use *Shadow DOM* and because of that, they can not be used with *HTMX*. I would love to see a collection of components created with a similar approach to the one described here: without unnecessary abstractions and with different, white box philosophy in mind. It means that these components would have a simple to understand source code with zero or minimal dependencies. Furthermore, they would be completely configurable from the outside, designed to be rather copied and possibly modified - not used as a black box dependency.
 
 ## Closing thoughts
 
@@ -421,4 +421,4 @@ Even though they do not know anything about HTMX, it turns out that it is a bree
     3. https://buttondown.email/cascade/archive/006-shadow-dom-is-not-a-good-default
     4. https://aaadaaam.com/notes/step-into-the-light-dom/
     5. https://adactio.com/journal/20618
-8. Code with the solution and examples: https://github.com/BinaryIgor/code-examples/tree/master/flexible-web-components
+8. Code repository: https://github.com/BinaryIgor/code-examples/tree/master/flexible-web-components

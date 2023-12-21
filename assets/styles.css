@@ -226,7 +226,7 @@ html {
     }
 
     #profile-image {
-        @apply max-w-[300px] md:max-w-[350px] object-contain m-auto rounded;
+        @apply max-w-[275px] md:max-w-[350px] object-contain m-auto rounded;
     }
 
     .post figcaption {
