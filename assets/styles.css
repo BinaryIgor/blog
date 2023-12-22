@@ -210,11 +210,11 @@ html {
     }
 
     .post pre {
-        @apply bg-secondary-1 p-4 text-left border-l-[3px] rounded-sm border-primary-text max-content-width overflow-auto;
+        @apply bg-secondary-1 p-4 text-left border-l-[4px] rounded border-primary-text max-content-width overflow-auto;
     }
 
     .post blockquote {
-        @apply py-2 px-4 text-left border-l-[3px] rounded-sm border-primary-text italic;
+        @apply py-2 px-4 text-left border-l-[4px] rounded border-primary-text italic;
     }
 
     .post figure {
@@ -226,7 +226,7 @@ html {
     }
 
     #profile-image {
-        @apply max-w-[275px] md:max-w-[350px] object-contain m-auto rounded;
+        @apply max-w-[275px] sm:max-w-[350px] object-contain m-auto rounded;
     }
 
     .post figcaption {
