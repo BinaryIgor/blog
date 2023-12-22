@@ -16,158 +16,157 @@
             <div id="stats-loader">Loading...</div>
         </div>
     </div>
-</body>
 
-{{ init-script.html }}
-
-<script type="module">
-    const statsContainer = document.getElementById("stats-container");
-    const statsLoader = document.getElementById("stats-loader");
-
-    function fetchPosts() {
-        return fetch("posts.json")
-            .then(r => r.json())
-            .then(posts => {
-                const postsByPath = new Map();
-                posts.forEach(p => {
-                    postsByPath.set(`/${p.slug}.html`, p);
+    {{ init-script.html }}
+    <script type="module">
+        const statsContainer = document.getElementById("stats-container");
+        const statsLoader = document.getElementById("stats-loader");
+    
+        function fetchPosts() {
+            return fetch("posts.json")
+                .then(r => r.json())
+                .then(posts => {
+                    const postsByPath = new Map();
+                    posts.forEach(p => {
+                        postsByPath.set(`/${p.slug}.html`, p);
+                    });
+                    return postsByPath;
+                })
+                .catch(e => {
+                    console.log("Failed to get posts", e);
+                    statsLoader.innerHTML = "Failed to get posts";
                 });
-                return postsByPath;
-            })
-            .catch(e => {
-                console.log("Failed to get posts", e);
-                statsLoader.innerHTML = "Failed to get posts";
-            });
-    }
-
-    function fetchStats() {
-        return fetch(`${apiDomain()}/meta/stats`)
-            .then(r => r.json())
-            .catch(e => {
-                console.log("Failed to get stats", e);
-                statsLoader.innerHTML = "Failed to get stats";
-            });
-    }
-
-    function toStatsView(postsByPath, stats) {
-        const generalStats = stats.general;
-        const pagesStats = stats.pages;
-
-        return {
-            allTime: { ...stats.general },
-            lastThirtyDays: { ...stats.generalForLastThirtyDays },
-            lastNinentyDays: { ...stats.generalForLastNinentyDays },
-            viewsBySource: generalStats.viewsBySource.map(v => {
-                return {
-                    source: v.source,
-                    views: `${Math.round(v.views * 100) / 100}%`
-                }
-            }),
-            posts: pagesStats.filter(p => postsByPath.has(p.path))
-                .map(p => {
-                    const post = postsByPath.get(p.path);
+        }
+    
+        function fetchStats() {
+            return fetch(`${apiDomain()}/meta/stats`)
+                .then(r => r.json())
+                .catch(e => {
+                    console.log("Failed to get stats", e);
+                    statsLoader.innerHTML = "Failed to get stats";
+                });
+        }
+    
+        function toStatsView(postsByPath, stats) {
+            const generalStats = stats.general;
+            const pagesStats = stats.pages;
+    
+            return {
+                allTime: { ...stats.general },
+                lastThirtyDays: { ...stats.generalForLastThirtyDays },
+                lastNinentyDays: { ...stats.generalForLastNinentyDays },
+                viewsBySource: generalStats.viewsBySource.map(v => {
                     return {
-                        title: post.title,
-                        ...p
+                        source: v.source,
+                        views: `${Math.round(v.views * 100) / 100}%`
                     }
                 }),
-            pages: pagesStats.filter(p => !postsByPath.has(p.path))
-        };
-    }
-
-    const postsByPath = await fetchPosts();
-    const stats = await fetchStats();
-    const statsView = toStatsView(postsByPath, stats);
-
-    function renderStats(stats) {
-        statsContainer.innerHTML = `
-            <div class="mb-16">
-                <h2 class="text-3xl mb-4 font-bold">Overall</h2>
-                    ${generalStatsComponent("All time", stats.allTime)}
-                    ${generalStatsComponent("Last 30 days", stats.lastThirtyDays)}
-                    ${generalStatsComponent("Last 90 days", stats.lastNinentyDays)}
+                posts: pagesStats.filter(p => postsByPath.has(p.path))
+                    .map(p => {
+                        const post = postsByPath.get(p.path);
+                        return {
+                            title: post.title,
+                            ...p
+                        }
+                    }),
+                pages: pagesStats.filter(p => !postsByPath.has(p.path))
+            };
+        }
+    
+        const postsByPath = await fetchPosts();
+        const stats = await fetchStats();
+        const statsView = toStatsView(postsByPath, stats);
+    
+        function renderStats(stats) {
+            statsContainer.innerHTML = `
+                <div class="mb-16">
+                    <h2 class="text-3xl mb-4 font-bold">Overall</h2>
+                        ${generalStatsComponent("All time", stats.allTime)}
+                        ${generalStatsComponent("Last 30 days", stats.lastThirtyDays)}
+                        ${generalStatsComponent("Last 90 days", stats.lastNinentyDays)}
+                    </div>
                 </div>
-            </div>
-            <div class="mb-16">
-                <h2 class="text-3xl mb-4 font-bold">Views by source</h2>
-                ${viewsBySourceComponent(stats)}
-            </div>
-            <div class="mb-16">
-                <h2 class="text-3xl mb-4 font-bold">Posts</h2>
-                ${postsStatsComponent(stats)}
-            </div>
+                <div class="mb-16">
+                    <h2 class="text-3xl mb-4 font-bold">Views by source</h2>
+                    ${viewsBySourceComponent(stats)}
+                </div>
+                <div class="mb-16">
+                    <h2 class="text-3xl mb-4 font-bold">Posts</h2>
+                    ${postsStatsComponent(stats)}
+                </div>
+                <div>
+                    <h2 class="text-3xl mb-4 font-bold">Pages</h2>
+                    ${pagesStatsComponent(stats)}
+                </div>
+            `;
+        }
+    
+        function generalStatsComponent(title, stats) {
+            return `
+                <div class="mb-4">
+                    <h3 class="text-2xl mb-4">${title}</h3>
+                    <div>Views: ${stats.views}</div>
+                    <div>Unique visitors: ${stats.uniqueVisitors}</div>
+                    <div>Ip hashes: ${stats.ipHashes}</div>
+                    <div>Reads: ${stats.reads}</div>
+                    <div>Unique readers: ${stats.uniqueReaders}</div>
+                ${delimiterComponent()}
+                </div>
+                `;
+        }
+    
+        function viewsBySourceComponent(stats) {
+            return `<div class="space-y-8">${stats.viewsBySource.map(viewsOfSourceComponent).join('\n')}</div>`;
+        }
+    
+        function viewsOfSourceComponent(views) {
+            return `
             <div>
-                <h2 class="text-3xl mb-4 font-bold">Pages</h2>
-                ${pagesStatsComponent(stats)}
-            </div>
-        `;
-    }
-
-    function generalStatsComponent(title, stats) {
-        return `
-            <div class="mb-4">
-                <h3 class="text-2xl mb-4">${title}</h3>
-                <div>Views: ${stats.views}</div>
-                <div>Unique visitors: ${stats.uniqueVisitors}</div>
-                <div>Ip hashes: ${stats.ipHashes}</div>
-                <div>Reads: ${stats.reads}</div>
-                <div>Unique readers: ${stats.uniqueReaders}</div>
-            ${delimiterComponent()}
+                <div>${views.source}: ${views.views}</div>
+                ${delimiterComponent()}
             </div>
             `;
-    }
-
-    function viewsBySourceComponent(stats) {
-        return `<div class="space-y-8">${stats.viewsBySource.map(viewsOfSourceComponent).join('\n')}</div>`;
-    }
-
-    function viewsOfSourceComponent(views) {
-        return `
-        <div>
-            <div>${views.source}: ${views.views}</div>
-            ${delimiterComponent()}
-        </div>
-        `;
-    }
-
-    function delimiterComponent() {
-        return `<div class="delimiter-like">---</div>`;
-    }
-
-    function postsStatsComponent(stats) {
-        return `<div class="space-y-8">${stats.posts.map(postStatsComponent).join('\n')}</div>`;
-    }
-
-    function postStatsComponent(post) {
-        return `
-        <div>
-            <h3 class="text-xl font-bold">${post.title}</h3>
-            <a class="italic font-bold mb-4" href="${post.path}" target="_blank">${post.path}</a>
-            <div>Views: ${post.views}</div>
-            <div>Reads: ${post.reads}</div>
-            <div>Unique viewers: ${post.uniqueViewers}</div>
-            <div>Unique readers: ${post.uniqueReaders}</div>
-            ${delimiterComponent()}
-        </div>
-        `;
-    }
-
-    function pagesStatsComponent(stats) {
-        return `<div class="space-y-8">${stats.pages.map(pageStatsComponent).join('\n')}</div>`;
-    }
-
-    function pageStatsComponent(page) {
-        return `
-        <div>
-            <h3 class="text-xl font-bold">${page.path}</h3>
-            <div>Views: ${page.views}</div>
-            <div>Unique viewers: ${page.uniqueViewers}</div>
-            ${delimiterComponent()}
-        </div>
-        `;
-    }
-
-    renderStats(statsView);
-</script>
+        }
+    
+        function delimiterComponent() {
+            return `<div class="delimiter-like">---</div>`;
+        }
+    
+        function postsStatsComponent(stats) {
+            return `<div class="space-y-8">${stats.posts.map(postStatsComponent).join('\n')}</div>`;
+        }
+    
+        function postStatsComponent(post) {
+            return `
+            <div>
+                <h3 class="text-xl font-bold">${post.title}</h3>
+                <a class="italic font-bold mb-4" href="${post.path}" target="_blank">${post.path}</a>
+                <div>Views: ${post.views}</div>
+                <div>Reads: ${post.reads}</div>
+                <div>Unique viewers: ${post.uniqueViewers}</div>
+                <div>Unique readers: ${post.uniqueReaders}</div>
+                ${delimiterComponent()}
+            </div>
+            `;
+        }
+    
+        function pagesStatsComponent(stats) {
+            return `<div class="space-y-8">${stats.pages.map(pageStatsComponent).join('\n')}</div>`;
+        }
+    
+        function pageStatsComponent(page) {
+            return `
+            <div>
+                <h3 class="text-xl font-bold">${page.path}</h3>
+                <div>Views: ${page.views}</div>
+                <div>Unique viewers: ${page.uniqueViewers}</div>
+                ${delimiterComponent()}
+            </div>
+            `;
+        }
+    
+        renderStats(statsView);
+    </script>
+</body>
 
 </html>
