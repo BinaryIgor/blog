@@ -216,7 +216,7 @@ export class SqliteAnalyticsRepository {
     async generalStats(fromTimestamp, toTimestamp) {
         const viewsUniqueVisitorsIpHashesPromise = this._viewsUniqueVisitorsIpHashesStats(fromTimestamp, toTimestamp);
         const readsUiqueReadersPromise = this._readsUniqueReadersStats(fromTimestamp, toTimestamp);
-        const viewsBySourcePromise = this._viewsBySourceStats(fromTimestamp, toTimestamp);
+        const viewsBySourcePromise = this._viewsByTopSourceStats(fromTimestamp, toTimestamp, 100);
 
         const { views, uniqueVisitors, ipHashes } = await viewsUniqueVisitorsIpHashesPromise;
         const { reads, uniqueReaders } = await readsUiqueReadersPromise;
@@ -301,11 +301,11 @@ export class SqliteAnalyticsRepository {
             });
     }
 
-    _viewsBySourceStats(fromTimestamp, toTimestamp) {
+    _viewsByTopSourceStats(fromTimestamp, toTimestamp, limit) {
         const query = `${this._queryWithOptionalWhereInTimestampsClause(
             'SELECT source, COUNT(*) as views FROM view',
             fromTimestamp, toTimestamp
-        )} GROUP BY source ORDER BY views DESC`;
+        )} GROUP BY source ORDER BY views DESC LIMIT ${limit}`;
 
         return this.db.query(query)
             .then(rows => rows.map(r => {

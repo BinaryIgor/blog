@@ -19,9 +19,10 @@
 
     {{ init-script.html }}
     <script type="module">
+        const TOP_VIEWS_BY_SOURCE = 10;
         const statsContainer = document.getElementById("stats-container");
         const statsLoader = document.getElementById("stats-loader");
-    
+
         function fetchPosts() {
             return fetch("posts.json")
                 .then(r => r.json())
@@ -37,7 +38,7 @@
                     statsLoader.innerHTML = "Failed to get posts";
                 });
         }
-    
+
         function fetchStats() {
             return fetch(`${apiDomain()}/meta/stats`)
                 .then(r => r.json())
@@ -46,21 +47,25 @@
                     statsLoader.innerHTML = "Failed to get stats";
                 });
         }
-    
+
         function toStatsView(postsByPath, stats) {
             const generalStats = stats.general;
             const pagesStats = stats.pages;
-    
+
+            const limitedViewsBySource = generalStats.viewsBySource.length > TOP_VIEWS_BY_SOURCE ?
+                generalStats.viewsBySource.slice(0, TOP_VIEWS_BY_SOURCE) : generalStats.viewsBySource;
+            const topViewsBySource = limitedViewsBySource.map(v => {
+                return {
+                    source: v.source,
+                    views: `${Math.round(v.views * 100) / 100}%`
+                }
+            });
+
             return {
                 allTime: { ...stats.general },
                 lastThirtyDays: { ...stats.generalForLastThirtyDays },
                 lastNinentyDays: { ...stats.generalForLastNinentyDays },
-                viewsBySource: generalStats.viewsBySource.map(v => {
-                    return {
-                        source: v.source,
-                        views: `${Math.round(v.views * 100) / 100}%`
-                    }
-                }),
+                viewsBySource: topViewsBySource,
                 posts: pagesStats.filter(p => postsByPath.has(p.path))
                     .map(p => {
                         const post = postsByPath.get(p.path);
@@ -72,11 +77,11 @@
                 pages: pagesStats.filter(p => !postsByPath.has(p.path))
             };
         }
-    
+
         const postsByPath = await fetchPosts();
         const stats = await fetchStats();
         const statsView = toStatsView(postsByPath, stats);
-    
+
         function renderStats(stats) {
             statsContainer.innerHTML = `
                 <div class="mb-16">
@@ -87,7 +92,7 @@
                     </div>
                 </div>
                 <div class="mb-16">
-                    <h2 class="text-3xl mb-4 font-bold">Views by source</h2>
+                    <h2 class="text-3xl mb-4 font-bold">Top views sources</h2>
                     ${viewsBySourceComponent(stats)}
                 </div>
                 <div class="mb-16">
@@ -100,7 +105,7 @@
                 </div>
             `;
         }
-    
+
         function generalStatsComponent(title, stats) {
             return `
                 <div class="mb-4">
@@ -114,11 +119,11 @@
                 </div>
                 `;
         }
-    
+
         function viewsBySourceComponent(stats) {
             return `<div class="space-y-8">${stats.viewsBySource.map(viewsOfSourceComponent).join('\n')}</div>`;
         }
-    
+
         function viewsOfSourceComponent(views) {
             return `
             <div>
@@ -127,15 +132,15 @@
             </div>
             `;
         }
-    
+
         function delimiterComponent() {
             return `<div class="delimiter-like">---</div>`;
         }
-    
+
         function postsStatsComponent(stats) {
             return `<div class="space-y-8">${stats.posts.map(postStatsComponent).join('\n')}</div>`;
         }
-    
+
         function postStatsComponent(post) {
             return `
             <div>
@@ -149,11 +154,11 @@
             </div>
             `;
         }
-    
+
         function pagesStatsComponent(stats) {
             return `<div class="space-y-8">${stats.pages.map(pageStatsComponent).join('\n')}</div>`;
         }
-    
+
         function pageStatsComponent(page) {
             return `
             <div>
@@ -164,7 +169,7 @@
             </div>
             `;
         }
-    
+
         renderStats(statsView);
     </script>
 </body>
