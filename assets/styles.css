@@ -82,9 +82,9 @@ html {
 }
 
 :root {
-    /* ==scroll firefox== */
+    /* ==scroll firefox and new chrome: https://developer.chrome.com/blog/new-in-chrome-121== */
     /* "auto" or "thin" */
-    scrollbar-width: auto;
+    scrollbar-width: thin;
     /* scroll thumb and track */
     scrollbar-color: var(--scrollbar-color) var(--primary-color);
     /* ==scroll firefox== */
@@ -92,7 +92,7 @@ html {
     -webkit-tap-highlight-color: transparent;
 }
 
-/* ==chrome,safari scroll== */
+/* ==chrome before 121, safari scroll== */
 ::-webkit-scrollbar {
     width: 6px;
     height: 4px;
@@ -110,7 +110,7 @@ html {
     background: var(--scrollbar-hover-color);
 }
 
-/* ==chrome,safari scroll== */
+/* ==chrome before 121, safari scroll== */
 
 .bg-primary {
     background-color: var(--primary-color);
@@ -210,6 +210,7 @@ html {
     }
 
     .post pre {
+        scrollbar-width: thin;
         @apply bg-secondary-1 p-4 text-left border-l-[4px] rounded-sm border-primary-text max-content-width overflow-auto;
     }
 
