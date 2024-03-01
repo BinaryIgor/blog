@@ -2,194 +2,155 @@
 {
     "title": "Kubernetes: maybe a few Bash/Python scripts is enough",
     "slug": "kubernetes-maybe-a-few-bash-python-scripts-is-enough",
-    "publishedAt": "2024-03-03",
+    "publishedAt": "2024-03-05",
     "startedAt": "2024-02-24",
-    "timeToRead": "29 minutes",
-    "wordsCount": 3636,
-    "excerpt": "Do you really need to deal with all this Kubernetes complexity?",
+    "timeToRead": "26 minutes",
+    "wordsCount": 3240,
+    "excerpt": "When it comes to the infrastructure of a software system, there are some features that are virtually always needed, independently of the project's nature, and some that are additional, optional, or useful only in <em>some projects and contexts</em>. Coming from a position of being aware what we <em>actually</em> need and what our project is about, we can make more informed, rational decisions and reduce the complexity of our system, which is something that we should care about a lot.",
     "researchLog": [ 5, 3, 3 ],
-    "writingLog": [ 2, 1.5, 2, 2.5, 0.5, 4 ]
+    "writingLog": [ 2, 1.5, 2, 2.5, 0.5, 4, 4, 3, 4.5, 3.5 ]
 }
 ---
 
-## What do we want from Infrastructure
+## What do we need from Infrastructure?
 
-When it comes to an infranstructure, there are characteristics that are universally needed, no matter the project nature, and some that are optional, or useful only in *some* projects and contexts. Coming from a posion of knowing what we *actually* need, being aware of our project context, we can make more informed decisions and reduce the complexity of our system, which is something that we should care about a lot.
-
-So, what do we mostly need, when it comes to our system infrastructure?
+When it comes to the infrastructure of a software system, there are some features that are virtually always needed, independently of the project nature, and some that are additional, optional, or useful only in *some projects and contexts*. Coming from a position of being aware of what we *actually need* and what our project is about, we can make more informed and rational decisions, and hopefully reduce the complexity of our system, which is something that we should care about. Simplicity should be one of our highest goals, a top priority, when designing software systems; the simpler a system is, the easier it is to understand, debug, maintain and change. Infrastructure is a crucial component of every software system: what do we need from it?
 
 ### Required, must haves
-1. Fast and reliable builds of our applications/artifacts/libraries
-2. Fast and reliable deployments of applications to various environments (like dev, stage, prod), with zero downtime for some of them, when and if it is needed - including an ability to quickly rollback failed deployment
-3. Trace of at least recent deployments history - what version are we currently running of a given app?
-4. Straightforward way to configure our apps: resources that they need (mostly memory and cpu), configuration parameters/environments variables, static files, secrets, number of instances and so on
-5. Possibility of *manually* scaling our appplications - either through increasing number of instances or just scaling verticaly, by increasing resources of a single instance
-6. Closed, private network (aka Virtual Private Cloud), so that applications can talk to each other in both more secure and performant way (even if we have more than one app, we usually have a database - unless we run everything on a single, big machine of course)
-7. If we have multiple applications running on multiple machines - we need to have some kind of service discovery, where we can call other services by private host/domain, rather that hardcoded ip address (amazing.service.local:8080, not 10.0.2.1:8080)
-8. **As much as possible Infrastructure as Code** - so there is no magic, we have up to date documentation (source code), and most importantly - we can recreate our infrastructure from scratch, at any point, with minimal effort, in mostly automated way
-9. Backups of important data and an simple way to restore them
-10. Easy way to look up application logs - both current and historical (for a reasonable time period)
-11. Basic metrics of all running components and machines: things like memory and cpu usage, load average, used disk space and I/O operations, network bandwidth etc.
-12. Metrics visualization and alerts - to know that something is about to go into a wrong direction, as fast as possible
+1. **Fast and reliable builds** of our applications/artifacts/libraries
+2. **Fast and reliable deployments** of our applications to various environments (like dev, stage, prod) - preferably with zero downtime for some of them, when and if it is needed
+3. **Ability to quickly rollback failed deployment** to the previous working version
+4. Trace of at least recent deployments history -  what version are we currently running of a given app?
+5. **Straightforward way of configuring our apps** - resources that they need (mostly memory and cpu), configuration parameters/environment variables, static files, secrets, number of instances and so on
+6. **Possibility of scaling our applications** - either through increasing the number of instances or just scaling vertically, by increasing resources of a single instance. In most cases, it does not have to be automatic, can be manual, since usually it is not our app that is a bottleneck, but database or other external storage/service
+7. **Closed, private network** (often called *Virtual Private Cloud*) - so that applications can talk to each other in both more secure and performant way. Even if we have just a single app (modular monolith, highly recommended), we usually have a database deployed separately; unless we run everything on a single, big machine
+8. If we have multiple applications, running on multiple machines and they communicate directly with each other a lot - we usually need to have some kind of service discovery, where we can call other services by their private host/name rather that hardcoded ip address (amazing.service.local:8080, not 10.114.0.1:8080)
+9. **As much as possible Infrastructure as Code** - so there is no forgotten magic due to manual processes, we have up to date documentation (source code), and most importantly - we can recreate our infrastructure from scratch, at any point in time, with minimal effort, in a mostly automated way. We do not necessarily need to use tools like <a href="https://www.terraform.io/" target="_blank">Terraform</a> to achieve this - we just need to have everything described in our scripts/config files
+10. **Backups of important data and a known way to restore them**
+11. **Easy way to look up logs of our applications/components** - both current and historical (for a reasonable time period)
+11. **Metrics of all running applications, components and machines** - things like memory and cpu usage, system load average, used disk space and I/O operations, network usage etc.
+12. **Metrics visualizations and alerts** - to know that something is about to go wrong and to react as fast as possible
 
 ### Optional, nice to haves
-1. *Automatic scaling of applicatons* to less/more instances based on current system load or some other, arbitrary criteria (I find that's rarely needed and when it is, it is only for a specific application which can be hand-coded or delegated to external services like AWS lambda + it's not that easy)
-2. Automated application deployment scheduling to whatever machine is the most suitable - in 90%+ cases specyfing machine explicitly is enough, unless you have tens of services and each of them needs automatic, horizontal scaling which is rarely the case
-3. Isolated workspaces/resources per team - if you have more than a few teams
-4. Canary releases - to be honest, in most cases they can be replaced by plain-old feature flags, implemented in application
+1. **Automatic scaling of applications and machines** - to less/more instances based on the current application/system load or some other criteria. I find that it is rarely needed; when this is the case, it is only for a specific application, it is specific to this application (database/other external service being often a bottleneck), must be hand-coded anyways, or can be delegated to an external service of *Serverless Functions* type (AWS Lambda, GCP Cloud Functions or DigitalOcean Functions for example), if our application is really bursty in nature
+2. **Automated application deployment scheduling** - to whatever machine is the most suitable, least loaded or just available. In 90%+ cases, with reasonable system architecture (limited number of services/deployment units), specifying dedicated machine/machines explicitly is good enough, unless we have tens and tens of services and each of them needs automatic, horizontal scaling which is rarely the case.
+3. **Granular isolation of workspaces/resources per team/domain** - needed only if have many, not a few, teams
+4. **Canary releases/deployments** - most of the time, we can just ship new version of the code; in other cases, we can use feature flags, supported by the majority of programming languages/environments, and implemented in the application layer
 
 ### Reasoning and assumptions
-Some of the choices might seem quite arbitrary, so a few words of comment might be useful. I make a few assumptions:
-* <a href="/modular-monolith-and-microservices-modularity-is-what-truly-matters.html">*Most* systems can be built with only one (modular monolith) or just a few deployment units</a> - this significantly simplifies our infrastructure
-* Most systems can be built by one or a few teams - this also simplifies our infrastructure; we do not need to have elaborate resources and workspaces isolation for example
-* Many systems have quite predictable resources requirements - it can vary, but not to a point that would justify a need to have automated horizontal scaling for example. Also, it can be known in advance, where/when and how we can change this resources in manual or semi-automatic way (automatic being actually not that much harded)
-* We should judge system complexity holistically - if applications are simple, but infrastructure is quite complex, we still have a complex system that needs a lot of maintenance; just from a different person/team/departament/company
-* Containers are amazing abstraction: they improve security, dependencies management and processes isolation to a great degree - in most cases that is all we need, we do not need another layer, two or three of abstraction (what is the purpose of this rant exactly?)
-* As will be decribed below, Kubernetes besides being complex, needs a lot of additional to make it usable - custom scripts/tools are often easier to write, understand and maintain 
+Some of the choices might seem arbitrary, so a few words of comment will be helpful. Based on my experience of implementing various systems from scratch, and then maintaining, changing and extending them over the years - these are my observations, assumptions, thoughts and opinions:
+* <a href="/modular-monolith-and-microservices-modularity-is-what-truly-matters.html" target="_blank">**Most systems can be built either as a modular monolith or a few (micro)services**</a> - this significantly simplifies our infrastructure, since we only have one or a few deployment units to deploy
+* **Most systems can be built by a single team or just a few teams** - this also can simplify our infrastructure; we do not need to have elaborate resources and workspaces isolation for example
+* **Most systems have quite predictable resource requirements** - they can vary, but not to a point that justifies a need to have automated horizontal scaling for example. Also, it often is known in advance; we can then increase or decrease resources in a manual or semi-automatic way: either by manually adding/removing instances or scheduling this fact for certain busy hours/periods
+* **Single machine, and certainly a few machines, can handle a lot - do we really need more than 3 x 32 GB memory + 16 CPUs machine?** Do we need Kubernetes to manage one, three or five servers? Is Docker/other container engine not good enough? 
+* Containers are an amazing abstraction: they improve security, system libraries and dependencies management, and processes isolation to a great degree - do we really need <a href="https://en.wikipedia.org/wiki/Fundamental_theorem_of_software_engineering" target="_blank">another two or three abstraction layers</a> built on top of them?
+* **We should judge system complexity holistically - if applications are simple, but infrastructure is complex, we still have a complex system** that needs a lot of maintenance; we have just shifted this responsibility to a different person/team/departament/company
+* **Kubernetes, besides being complex, requires many supplementary tools to make it usable** - custom scripts and tools can often be easier to write, understand and maintain. For honest assessment, we need to compare them with *Kubernetes cluster + plethora of additional tools* that we have to use to make it operational and usable by developers on a daily basis
 
-These are my observations, coming not only from personal, direct experience, but also from talking to others and analyzing their problems and work. In general, I would argue that many, if not most, systems that we create these days are highly overengineered and would benefit greatly from simplification. If you do not share that sentiment, you might come to a different conclusion. Having stated that, let's see how Kubernetes stakes up against these requirements.
+\
+In general, I would argue that many, if not most, systems that we create these days are highly over-engineered and can be greatly simplified without taking away any of their functionality or ability to handle load. I acknowledge that there are edge cases, when we do need nearly infinite scalability and resources, but the reality is that 99.99% of systems are neither Google nor Amazon or Netflix. Keeping that in mind, let's assess how Kubernetes aligns with our infrastructure requirements and needs.
 
 ## Kubernetes - why so much Complexity?
 
-It will soon be clear why Kuberentes is so complex: it tries to solve basically all theoretically possible infrastructure problems in the most abstract and configurable way posssible. But what exactly is Kubernetes?
-> Kubernetes is a container orchestration platform. It allows to automatically deploy, scale and manage containerized applications. 
+Before we can answer this question, let's try to define what Kubernetes is:
+> Kubernetes is a container orchestration platform. It allows us to automatically deploy, scale and manage containerized applications. 
 > 
-> To put it differently: it is a sophisticated container scheduler. You need to set it up on a set of machines (cluster). Once you have it, you can define your application as a set of Kubernetes objects and Kubernetes will take care of the rest. The rest means deploying it to a node (machine) or nodes with enough available resources, scale it to required number of instances, restarting if it is not healthy, making it available to other applications in the cluster or to an external word, if that is what we need.
+> In essence, it is a sophisticated container scheduler. We need to set it up as a cluster, on a set of machines.
+Once established, applications can be defined as collections of Kubernetes objects and Kubernetes will take care of the rest. The rest means lots and lots of details: deploying application to a single or many nodes (machines) that can satisfy its resource requirements, scaling it to required number of instances, restarting, if it is not healthy, and making it available to other applications in the cluster network or to the external world, if that is what we need.
 >
-> Virtually everything is configurable and dynamic. It is possible to have variable numbers of nodes (machines) that make up a Kubernetes cluster, for example; it is also possible to have dynamic number of replicas for some or all applications, depending on their cpu/memory usage or any other criteria. 
+> Virtually everything in Kubernetes is configurable, dynamic and extendable. It is possible to have variable numbers of nodes (machines) that make up a Kubernetes cluster; it is also possible to have dynamic number of replicas for some or all applications, depending on their cpu/memory usage or any other criteria. It has built-in service discovery and load balancing mechanisms and can handle practically all possible network communication use cases.
+>
+> In a nutshell: it handles basically all theoretically possible infrastructure problems in the most abstract and configurable way possible.
 
-For all these features we pay high price: Complexity. Kubernetes is a complex beast. It is mostly so, because it delivers soo many features; to allow for that many, many abstractions are needed. There are many new concepts to be learned. Additionaly, despite the fact that there are many managed Kubernetes services (list them) that make operating a Kubernetes cluster, it still needs to be learned and configured properly. Managed services just easy the burden of setting up the cluster ourselves and make it easy to maintain, but it does not take away the fact that we need to learn it. By we I mean mostly DevOps person/people/team, but also to some extend developers, because they will be the ones who will configure and deploy applications (or at the very least they should be). 
+\
+Kubernetes is a powerful beast, but as they say:
+> No such thing as a free lunch.
 
-// Maybe should give an example of an Kubernetes object/objects defined in yaml
-// What about a note touching on declarative approach complexity?
-To make it less abstract, let's say what we have...
+**For all these features we pay a high price: Complexity**; Kubernetes is also a complex beast. It is mostly so, because it delivers so many features. There are numerous Kubernetes-specific concepts and abstractions that we need to learn. What is more, despite the fact that there are many managed Kubernetes services (Amazon EKS, Google GKE, DigitalOcean Kubernetes) that make setting up and operating a Kubernetes cluster significantly easier, it still needs to be learned and configured properly - **we are not freed from learning and understanding how Kubernetes works**.  By we, I mean mostly person/people/team who operate a cluster, but also to some extent developers, because they will be the ones who will configure and deploy applications (or at least they should be).
 
-Additionally, Kubernetes itself is not enough to solve all our infrastructure problems. We still need to have additonal tools and scripts to build, package and deploy our apps. Once we have a Kubernetes cluster, which itself is not an easy task, we just have *an ability* to deploy something. We then need to at least figure out:
-* Where and how to store our Kubernetes objects? In most cases, the answer is a git repo
+**Is the price of Kubernetes worth it?** As with everything, it depends. If we have multiple teams and dozens of (micro)services then probably yes, but I am biased towards simplicity, so in that case I would ask:
+> Do we really need to have tens and tens of microservices?
+
+Sometimes, the answer will be yes, but we do need to make sure that it is really a *resounding yes*, because it will bring lots of additional complexity that we are far better off avoiding.
+
+Moreover, what is worth emphasizing, **Kubernetes itself is not enough to solve all our infrastructure-related problems**. We still need to have other tools and scripts to build, package and deploy our applications. Once we have a properly set up Kubernetes cluster, which itself is not an easy task, we are only able to deploy something. We then need to at least figure out:
+* Where and how to store our Kubernetes objects? In most cases, the answer is: git repository
 * How to synchronize the state of Kubernetes objects between git repo and a cluster? We need yet another tool for that
-* In the Kubernetes context, an application is just a set of Kubernetes objects. We need to answer: how are we going to package and deploy those objects as a single unit? Unfortunately, we need yet another tool for that
+* In the Kubernetes context, an application is just a set of arbitrarily chosen Kubernetes objects (<a href="https://kubernetes.io/docs/concepts/cluster-administration/manage-deployment/" target="_blank">defined as manifests in yaml or json files</a>). We need to answer: how we are going to package and deploy those objects as a single unit? Unfortunately, we need yet another tool for that. At the time of writing this article, <a href="https://helm.sh" target="_blank">Helm</a> and <a href="https://kustomize.io" target="_blank">Kustomize</a> are the most popular solutions
 
-Unfortunately, Kubernetes is not a complete platform for what it claims to be; we need additional tools to make it easy to use day-to-day. That of course means even more complexity. This is an important factor to keep in mind when evaluating whether a set of custom scripts and tools to build and deploy (Docker) Containers is really that complex.
+Sadly, Kubernetes is not a complete platform; we need additional tools to make it usable and that means even more complexity. This is a very important factor to keep in mind when evaluating the complexity of a set of custom scripts and tools to build, deploy and manage containerized applications.
 
-Is this complexity worth paying the price? As with everything, it depends. If we have tens of tens and hudreds of services, the most likely yes (why we have so many?). In most cases though, our system can be compromised of one or just a few deployment units - if you still do not agree, I encourage you to read <a href="/modular-monolith-and-microservices-modularity-is-what-truly-matters.html">this article and its references</a>.
-Knowing that in 90%+ Kubernetes is an overkill, the question remains: what is the alternative?
+As said, most systems can be composed of one or a few services, each being deployed in one to several instances. If this is our case, Kubernetes is an overkill, it is not needed and we should not use it. The question then remains: what is the alternative?
 
-## Simpler Bash/Python scripts and tools based approach
+## Simple Bash/Python scripts and tools approach
 
-What if our system is just a modular monolith with a single database, or we have a few services with a few databases (as most system can and should be build - <a href="https://en.wikipedia.org/wiki/KISS_principle">KIIS</a>)? In that case, we do not need to have Kubernetes, we can get away with much simpler, and cheaper approach.
+Before discussing *do-it-yourself (DIY)* approach, I wanted to mention a few **managed service alternatives from various Cloud Providers; most notably, there is Amazon Fargate, Google Cloud Run and Azure Container Instances**. They are all similar: they are based on *containers* and give most of the Kubernetes features for the price of vendor lock-in and the additional cost for the service. We give up some control and need to pay a little more for the price of speed and convenience. They run containers for us, *somewhere on their infrastructure* - we do not need to worry about servers; we do need to learn a few abstractions to define services/tasks in their service-specific config file format, but then it is mostly it, it just works. Compared to using Kubernetes, even as a managed service, most things are preconfigured and chosen for us with sensible defaults; we do not need to learn lots of new abstractions. We will still need to write a couple of scripts/pipelines to integrate our builds and deployments with these managed services, but significantly less than in the do-it-yourself approach, plus we do not need to care about infrastructure. Let's also keep in mind that these services have certain limitations and constraints - we do need to make sure that our chosen one covers all our needs; depending on the situation, it might be a tradeoff worth making. Nevertheless, even if we choose this path, I still recommend at least learning a do-it-yourself approach to have a better perspective on this decision and what the real tradeoffs are. Having this in mind, let's discuss a possible solution.
 
-What we fundamentally need is:
-* to have one - few virtual machines, where we can run containerized applications
-* have an easy way to deploy our containerized applications there
-* have a few services/tools to monitor our application/applications, have access to their logs
-* if we have more than one application and they communicate over the network - have some way of allowing it
+**Building our solution from scratch**, most, if not all, of our needs can be covered by:
+* **One to a few virtual machines, where we can run containerized applications.** These machines need to have Docker/other container engine installed and configured + all other needed software/tools, configured *deploy user*, private network, firewalls, volumes and so on
+* **Script or scripts that can create these machines and initialize them on their first start.** For most cloud providers, we can use their rest API or describe these things in a tool like *Terraform*. Even if we do not decide to use Terraform, our script/scripts should be written in a way that it is always reproducible, in case when we need to modify or recreate our infrastructure completely from scratch - it should be doable from the code
+* **Build app script** that will:
+    * Build our application and its container image. It can be stored on our local or a dedicated build machine; we can also push it to the private container registry
+    * Package our containerized application into some self-contained, runnable format - *package/artifact*. It can be just a bash script that wraps *docker run --restart unless-stopped* with all necessary parameters, environment variables, runs pre/post scripts around it, stops previous version and so on. Running it would be just calling *bash run_app.bash* - the initialized docker container (our application) with all needed parameters will be then started
+* **Deploy app script** that will:
+    * *ssh* into the target virtual machine or machines
+    * Copy our app's package from local/build machine or remote repository, if we have uploaded it there
+    * Copy container image of our application from local/build machine or pull it from the private container registry
+    * Once we have the app package + its container image available on the target vitual machine/machines; run this package, which basically means stopping the previous version of an app and starting a new one
+    * If our app requires zero downtime deployment - we need to first run it in two instances, hidden behind some kind of reverse proxy, like Nginx. Once a new version is ready, we just need to update the reverse proxy config - so that it points to a new version of the app - and then kill the previous version
+* **Scripts/tools to monitor our application/applications and have access to their metrics and logs.** For that we can use <a href="https://prometheus.io/" target="_blank">Prometheus</a> + a tool that runs on every machine and collects metrics/logs from all currently running containers. It should then expose collected metrics to Prometheus; logs can be saved in the local file system or a database (<a href="https://github.com/BinaryIgor/code-examples/tree/master/metrics-and-logs-collector" target="_blank">*Metrics and Logs Collector example*</a> does exactly that)
+* **Scripts/tools to generate, store and distribute secrets.** We can store *encrypted* secrets in a git repository - there are ready to be used tools for this like <a href="https://github.com/getsops/sops" target="_blank">SOPS</a> or <a href="https://github.com/StackExchange/blackbox">BlackBox</a>; it is also pretty straightforward to create a script with this functionality in virtually any programming language. The idea here is that we have secrets encrypted in the git repo and then copy them to the machine/machines where our applications are deployed; they sit there *decrypted*, so applications can read them from files or environment variables
+* **Scripts/tools for facilitate communication in the private network.** We can do the following:
+    * Setup private network (VPC) available for all virtual machines that make up our system
+    * Use Docker <a href="https://docs.docker.com/network/network-tutorial-host/" target="_blank">host</a> networking for hosts that need to be available outside a single machine and that need to communicate with containers not available locally; we can then also use a */etc/hosts* mechanism described below
+    * We explicitly specify where each app is deployed, to which machine or machines. Using Linux machines, we can simply update */etc/hosts* file with our apps names and private ip adresses of the machines, where they run. For example, on every machine we would have entries like *10.114.0.1 app-1*, *10.114.0.2 app-2* and so on - that is our service discovery mechanism; we are then able to make requests to *app-1:8080* instead of *10.114.0.1:8080*. As long as the number of our machines and services is reasonable, it is perfectly valid solution
+    * If we do have a larger number of services that can be deployed to any machine and they communicate directly a lot (maybe they do not have to?), we need to have a more generic *service discovery* solution. There are plenty ready to be used solutions; it is also not that hard to implement our own tool, based on simple files, where service name would be a key and the list of machines' private ip addresses would be the value
+* **Scripts/tools for database and other important data backups.** If we use managed database service, which I highly recommend, that is taken care of for us. If we do not or we also have other data that need backing it up, we need to have a scheduled job/task. It should periodically run a set of commands that create a backup and send it to some remote storage/separate machine for future, potential use
 
-Basically what we can do:
-* have a few VPS's (Droplets from Digital Ocean for example) with the same automated setup - same user, ssh access, docker installed, maybe node exporter for Prometheus for example + our tools like Metrics and Logs Collector
+\
+That is a lot, but we have basically covered all infrastructure features and needs for 99% of systems. Additionally, that is really all - let's not forget that with Kubernetes we have to use extra, external tools to cover listed here needs; Kubernetes is not a complete solution. Another benefit of this approach is that **depending on our system's particular needs, we can have a various number of scripts of varying complexity - they will be perfectly tailored towards our requirements**. We will have minimal, essential complexity, there will only be things that we actually need; what is more, we have absolute control over the solution, so we can extend it to accommodate any arbitrary requirements.
 
+## Final thoughts
 
-## Tradeoffs, when to use what
+We have gone over all possible requirements and expectations that a software infrastructure needs to meet. As it turns out, there are quite a lot of them; we need to think about and cover many things when designing our infrastructure.
 
-For many simple project and certainly for Minimal Viable Products, I would argue that in 90%+ cases, we can start with a Single Machine. Especially considering...
+We have found out that **we should evaluate infrastructure complexity similarly to how we judge code or software architecture complexity**. After all, infrastructure is also a part of our software system, arguably one of the most important ones. What is more, its complexity is tied up with our software architecture complexity. The more accidental complexity in our architecture we have, the more it leaks into the infrastructure, making it unnecessary complex also. Same as we do with code and architecture, we should tailor infrastructure to our needs; we should not blindly follow current trends. Always stop and ask: is this really what we need? What are the tradeoffs and hidden costs?
 
-TODO:
-* fast scaling -> load balancer
+We have then learned that Kubernetes is a powerful beast, but also highly complex one; and as we know or will learn in the future: <a href="https://grugbrain.dev/#grug-on-complexity" target="_blank">**Complexity is our Eternal Enemy**</a>.
+If we really, really need to use a complex solution, then yes, we should go for it, but if we can avoid it, we should work hard on avoiding it.
 
+In conclusion: if we have a single or few teams, we should just build a modular monolith or few modular services. In that case, we do not need to use Kubernetes; we can just use managed services like AWS Fargate, Google Cloud Run or any other similar ones, or rollout a few Python/Bash scripts what will build, deploy and manage our containerized applications on a set of virtual private servers. We can also combine the two approaches, to whatever degree we want to be dependent on the particular cloud provider services and to what extent we want to have a provider-independent solution. Of course, **there are instances where it makes sense to use Kubernetes, but in the vast majority of cases, having a reasonable number of services and avoiding Kubernetes, we will greatly simplify our system, make it easier to understand, maintain and extend**. Then, we can focus on delivering next features and value to our users and customers rather and dealing with accidental complexity that we have created for ourselves. 
 
-If you can not any more, with only a few modifications, we can make it work on a few machines that should be enough for a long (forever?) time.
-
-?? Is there an objective case like that ??
-
-## Summing it up
-
-That was an interesting journey!
-
-Maybe here is a good place to extend on things like (if not convered elsewhere):
-* how to generate, store and distribute secrets
-* how to collect logs and metrics; how to have access to them
-* file-based service-discover, if needed
-* accidental vs essential complexity
-* ssh/firewalls/network security
-* bursty requirements - either serveless or custom solution that's extremely elastic in scaling
-
-
-Stay tuned for more!
-
-## TODO
-
-* horizontal auto scaling - something sometimes needed vs always (mostly) needed
-* build/local machine objection
-    * not audible - depends if you needed it
-    * I need to clone all my repos - yeah, but you also need to setup CI/CD pipeline for every repo that you have
-* complexity
-* logs - kubernetes also doesn't solve it by itself, we need to configure it and use external tools
-* tags dates in scripts examples!
-* same with updates/metrics etc - still there a need for quite elaborate configuration
-* what most systems need - simple infra
-* scaling do you always/how need it
-* does kubernetes work out of the box - need for additional tools
-* containers are enough - do we really need to orchestrate them?
-* /etc/hosts is probably enough, we don't need more than a few (3 - 5) machines in most cases (https://superuser.com/questions/750444/difference-between-dns-and-etc-hosts-in-name-resolving-during-an-https-request)
-    * load balancing? Custom tool?
-    * maybe just a map of "emitter": ['machine-1:8089', 'machine-2:9090']
-    * https://www.solo.io/topics/microservices/microservices-service-discovery/
-    * each node -> nginx -> process that updates "upstreams"
-    * dns / ip-tables magic / separate process / client-side logic
-* multi regions?
-* Simple Approach scaling limitations - how to overcome them?
-    * if every app has fixed target (machine) in its config - that's not possible, we need another approach
-    * another approach: how to get available resources and num of containers? Then decide based on that
-* assumptions
-    * a few machines with the same setup on each
-    * manual scheduler in the code (machines has assigned apps)
-    * each app should have limits defined (request also? can build tools around that!)
-* autoscaling/targeting
-  * code as a source of truth
-  * "However, if every machine has a well defined function, and you don't plan to scale arbitrarily, then it can be more trouble than it's worth. Automate with some ansible, terraform, docker compose or anything else you would like."
-* "So when you deploy something to kubernetes, you deploy it to the cluster, and the k8s scheduler will decide which computer to run your containers on (or you can still specify which server should get the container and the scheduler will make sure that happens.)"
-* more on those reverse proxy things
-    * https://prometheus.io/docs/guides/file-sd/
-    * https://prometheus.io/docs/prometheus/latest/storage/
-* modular approach in the article: what features are mostly needed, what we can replaced, what's optional etc.
+So forge ahead and keep simplifying!
 
 <div class="article-delimiter">---</div>
 
 ### Related videos on my <a target="_blank" href="{{ youtubeChannelUrl }}">youtube channel</a>
-1. ?
+1. <a href="https://www.youtube.com/watch?v=68PzQNsuSWc" target="_blank">Collecting metrics and logs from Docker containers</a>
+2. <a href="https://www.youtube.com/watch?v=YGJN8lsiWvk" target="_blank">Visualizing containers metrics in Grafana</a> 
 
 <div class="article-delimiter">---</div>
 
 ### Notes and resources
 
-1. I plan to write/make a video about how much a single machine can handle - stay tuned for that ;)
-1. https://thenewstack.io/how-kubernetes-is-transforming-into-a-universal-scheduler/
-2. https://medium.com/@radenfajrus/simple-canary-deployment-with-openresty-nginx-for-small-application-7aae77aaf97a
-3. https://www.digitalocean.com/community/tutorials/an-introduction-to-haproxy-and-load-balancing-concepts
-4. https://cloudnativenow.com/features/3-ways-to-offset-kubernetes-complexity/
-5. https://cloudplane.org/blog/why-kubernetes-is-so-complex
-6. https://github.com/simplenetes-io/simplenetes
-7. https://www.ufried.com/blog/simplify_15_summing_up/
-8. https://learncloudnative.com/blog/2023-05-31-kubeproxy-iptables
-9. https://docs.digitalocean.com/products/networking/vpc/how-to/configure-droplet-as-gateway/
-10. OSS is not for free: https://www.ufried.com/blog/oss_2_misconceptions/
-11. https://signalvnoise.com/svn3/the-majestic-monolith/
-12. https://www.youtube.com/watch?v=4Wa5DivljOM
-13. https://getdeploying.com/reference/data-egress
-14. https://docs.podman.io/en/stable/markdown/podman-save.1.html
-15. https://www.ufried.com/blog/continuous_amnesia_issue/
-16. https://paperswelove.org/
-17. https://cloudplane.org/blog/why-kubernetes-is-so-complex
-18. https://erkanerol.github.io/post/complexity-of-kubernetes/
-19. https://whyk8s.substack.com/p/why-not-dns
-20. https://www.it-labs.com/why-is-kubernetes-more-than-a-container-orchestration-platform/
-21. Good or bad? https://www.cncf.io/
-22. https://www.reddit.com/r/homelab/comments/ag10jg/haproxy_vs_nginx_vs_others_for_a_reverse_proxy/
-23. https://reverseproxy.com/docs/comparison/nginx-vs-haproxy/
-24. https://romanglushach.medium.com/kubernetes-networking-load-balancing-techniques-and-algorithms-5da85c5c7253
-25. https://docs.nginx.com/nginx/admin-guide/load-balancer/http-load-balancer/
-26. https://www.cloudways.com/blog/horizontal-vs-vertical-scaling/#:~:text=Fewer%20Changes%3A%20Vertical%20scaling%20is,resources%2C%20just%20upgrading%20existing%20ones.
-27. https://docs.gitlab.com/ee/user/packages/generic_packages/index.html
-28. https://endler.dev/2019/maybe-you-dont-need-kubernetes/
-30. https://en.wikipedia.org/wiki/You_aren't_gonna_need_it
-31. https://forum.freecodecamp.org/t/explain-to-me-like-im-five-kubernetes-and-infrastructure-as-code/353222/3
-32. https://www.youtube.com/watch?v=4MEKu2TcEHM
+1. I plan to make a video or write an article where I will check out how much a single machine can handle. I think that a lot, but let's wait and see ;)
+2. Highly valuable series on a need for simplification of our IT systems:
+    1. https://www.ufried.com/blog/simplify_1/
+    2. https://www.ufried.com/blog/simplify_15_summing_up/
+3. The fallacies of microservices: https://www.ufried.com/blog/microservices_fallacy_1/
+4. Virtues of a monolith: https://signalvnoise.com/svn3/the-majestic-monolith
+5. Evergreen article on why you should prefer battle-tested technologies and simple stacks in general: https://boringtechnology.club/
+6. Avoid complexity: https://www.youtube.com/watch?v=4MEKu2TcEHM
+7. On Kubernetes networking:
+    1. https://learncloudnative.com/blog/2023-05-31-kubeproxy-iptables
+    2. https://whyk8s.substack.com/p/why-not-dns
+8. Podman, Docker alternative: https://docs.podman.io
+9. On Kubernetes complexity:
+    1. https://amazic.com/kubernetes-the-most-complicated-simplification-ever/
+    2. https://cloudplane.org/blog/why-kubernetes-is-so-complex
+    3. https://home.robusta.dev/blog/kubernetes-is-complex-because-you-want-complex-things
+
+
+### TODO
+1. Coherent links/italics to external services 
+2. Coherent names like private image registry - captialized/not capitalized? italics?
