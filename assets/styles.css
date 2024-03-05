@@ -60,8 +60,8 @@ html.dark {
     --primary-color: rgb(15, 15, 15);
     --secondary-1-color: rgb(17, 24, 39);
     --secondary-2-color: rgb(31, 41, 55);
-    --primary-text-color: rgb(242, 242, 242);
-    --primary-text-color-faded: rgba(242, 242, 242, 0.25);
+    --primary-text-color: rgb(240, 240, 240);
+    --primary-text-color-faded: rgba(240, 240, 240, 0.25);
     --secondary-1-text-color: rgb(229, 231, 235);
     --secondary-2-text-color: rgb(209, 213, 219);
     --secondary-3-text-color: rgb(156, 163, 175);
@@ -213,6 +213,10 @@ html {
     .post pre {
         scrollbar-width: thin;
         @apply bg-secondary-1 p-4 text-left border-l-[4px] rounded-sm border-primary-text max-content-width overflow-auto;
+    }
+
+    .post :not(pre) > code {
+        @apply bg-secondary-2 p-1 rounded;
     }
 
     .post blockquote {
