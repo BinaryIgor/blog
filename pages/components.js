@@ -42,7 +42,6 @@ export function postPreview(post) {
         <a href="${postUrl}" class="text-2xl mb-2 font-bold">${post.title}</a>
         <div class="mb-6 text-secondary-3 flex flex-wrap justify-center whitespace-pre-wrap">${postMetadata(post)}</div>
         <div>${post.excerpt}</div>
-        
     </li>`;
 }
 

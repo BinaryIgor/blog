@@ -21,6 +21,6 @@ And if you like videos more, **<a target="_blank" href="{{youtubeChannelUrl}}"> 
 
 You can also find me on **<a target="_blank" href="https://www.linkedin.com/in/igroz/">LinkedIn</a>** or check out my code on **<a target="_blank" href="https://github.com/BinaryIgor">GitHub</a>**.
 
-Finally, if you have valuable feedback, correction or extension of my work, or just want to get in touch, shoot me an email at <span id="contact-email" class="font-bold">{{ contactEmail }}</span>. 
+Finally, if you have valuable feedback, questions, corrections or an extension of my work, or just want to get in touch, shoot me an email at <span id="contact-email" class="font-bold">{{ contactEmail }}</span>. 
 
 Enjoy as much as I do!

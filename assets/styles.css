@@ -56,29 +56,29 @@
 }
 
 html.dark {
-    --primary-color: black;
-    --secondary-1-color: #0f172a;
-    --secondary-2-color: #1e293b;
-    --primary-text-color: rgb(255, 255, 255);
-    --primary-text-color-faded: rgba(255, 255, 255, 0.25);
-    --secondary-1-text-color: #f1f5f9;
-    --secondary-2-text-color: #e2e8f0;
-    --secondary-3-text-color: #cbd5e1;
-    --scrollbar-color: white;
-    --scrollbar-hover-color: #cbd5e1;
+    --primary-color: rgb(15, 15, 15);
+    --secondary-1-color: rgb(19, 24, 36);
+    --secondary-2-color: rgb(31, 39, 50);
+    --primary-text-color: rgb(240, 240, 240);
+    --primary-text-color-faded: rgba(240, 240, 240, 0.25);
+    --secondary-1-text-color: rgb(229, 231, 235);
+    --secondary-2-text-color: rgb(209, 213, 219);
+    --secondary-3-text-color: rgb(156, 163, 175);
+    --scrollbar-color: var(--primary-text-color);
+    --scrollbar-hover-color: var(--secondary-3-text-color);
 }
 
 html {
-    --primary-color: white;
-    --secondary-1-color: #f1f5f9;
-    --secondary-2-color: #e2e8f0;
-    --primary-text-color: rgb(0, 0, 0);
-    --primary-text-color-faded: rgba(0, 0, 0, 0.25);
-    --secondary-1-text-color: #0f172a;
-    --secondary-2-text-color: #1e293b;
-    --secondary-3-text-color: #334155;
-    --scrollbar-color: black;
-    --scrollbar-hover-color: #334155;
+    --primary-color: rgb(250, 250, 250);
+    --secondary-1-color: rgb(242, 243, 245);
+    --secondary-2-color: rgb(229, 231, 235);
+    --primary-text-color: rgb(20, 20, 20);
+    --primary-text-color-faded: rgba(20, 20, 20, 0.25);
+    --secondary-1-text-color: rgb(31, 39, 50);
+    --secondary-2-text-color: rgb(55, 64, 76);
+    --secondary-3-text-color: rgb(75, 85, 98);
+    --scrollbar-color: var(--primary-text-color);
+    --scrollbar-hover-color: var(--secondary-3-text-color);
 }
 
 :root {
@@ -212,6 +212,10 @@ html {
     .post pre {
         scrollbar-width: thin;
         @apply bg-secondary-1 p-4 text-left border-l-[4px] rounded-sm border-primary-text max-content-width overflow-auto;
+    }
+
+    .post :not(pre) > code {
+        @apply bg-secondary-2 p-1 rounded;
     }
 
     .post blockquote {
