@@ -57,7 +57,7 @@
 
 html.dark {
     --primary-color: rgb(15, 15, 15);
-    --secondary-1-color: rgb(19, 24, 32);
+    --secondary-1-color: rgb(19, 24, 36);
     --secondary-2-color: rgb(31, 39, 50);
     --primary-text-color: rgb(240, 240, 240);
     --primary-text-color-faded: rgba(240, 240, 240, 0.25);

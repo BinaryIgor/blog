@@ -140,39 +140,3 @@ On a desired machine or machines, we need to:
 * if, for whatever reason, we can not deploy new app version, we need to rollback to a previous version
 
 To do that, we need to have a *deploy script*. This deploy script, can be executed either from our local machine or a build machine. The requirement is that whatever machine will execute this script, it needs to be able to `ssh` into the desired machine or machines. So again, depending on our security needs and/or team size, it might be fine to do this from our local machine, it might not. But regardless of our choice, let's say that we have a *deploy machine* (local machine or build machine from the previous example). As you might also remember, on each machine we have *deploy user*, *simple-stack-system* in our case and the */home/simple-stack-system/deploy* directory, where we store our deployments history. Let's say, that we are about to deploy *some-custom-app* to *machine-1*.
-
-
-## Possible problems / similar section?
-
-
-## Updates
-It this section needed actually?
-
-# Simpler Bash/Python scripts and tools based approach
-
-At this point, we know what we mostly need from an infrastructure. We also know, what might be some optional things that can be added later on. We are also aware of the Kubernetes price, that is not worth paying unless we trully need most of its features.
-
-As we know what non-negotiable things we need, we can try to come up with solutons. 
-
-Before discussing Do-It-Yourself one, I wanted to briefly mention a few alternatives from the Cloud Providers. Most notably, there is Amazon Fargate, Google Cloud Run or Azure Container Instances; there are probably also similar services provided by smaller cloud providers. They are all also based on Containers and give most of the Kubernetes features for the price of vendor lock-in and additional cost for the service. You give up control and need to pay a little more for the price of speed and convenience. Depending on your circumstances, it might be a good tradeoff; as always, it depends. Even if choose this path, I would still recommend at least learning Do-It-Yourself approach to have a better perspective on your decision. Having this in mind, let's discuss possible solution.
-
-For our custom scripts/tools based approach, here are the key assumptions:
-* We will containerize our applications (I prefer Docker, but Podman or any other, similar engine should work)
-* We will have some custom files to configure our applications: specify how much resources they need, environment variables, possibles volumes and so forth
-* We will deploy our applications to one/few Virtual Private Servers - we need to set them up a little
-* We will wrap our `docker load/pull` and `docker run` commands into simple Bash scripts with all necessary, additonal parameters; they will then be deployed to VPS machine/machines
-* Everything will be described in the code (so can be automated or add sth else??)
-* Our application build will just be:
-    * build docker image of an app
-    * wrap it into bash script that parameterizes this image properly
-    * if needed: push image into private docker registry, save script as a package on some remote storage
-* Our application deploy will just be:
-    * ssh into machine, where a given app should be deployed 
-    * depending on where we have stored our image + bash script (more on that below):
-        * pull the app image from Docker registry or just export it to a tar archive and copy it from local/build machine with the help of *scp* command line tool
-        * download the app package (bash script) from some remote storage or just copy it from local/build machine with the help of *scp* command line tool
-        * run the script, it will take care of all details like killing previous app version gracefully or executing zero downtime deployment
-    * if our app needs secrets, we also need to copy them to a target machine - there a couple ways to do that, I will discuss them below
-* For collecting metrics and logs, we will use our simple tool: Metrics and Logs Collector. It is written in Python and collects metrics and logs from all running on a given machine containers
-
-These are only highlights, but we can solve virtually any infrastructure related challenge using this (or similar) approach.
