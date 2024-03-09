@@ -55,11 +55,10 @@
     font-family: "RobotoMono", "Courier New", Courier, monospace;
 }
 
-/* tailwind's slate for fonts and secondary background */
 html.dark {
     --primary-color: rgb(15, 15, 15);
-    --secondary-1-color: rgb(17, 24, 39);
-    --secondary-2-color: rgb(31, 41, 55);
+    --secondary-1-color: rgb(19, 24, 32);
+    --secondary-2-color: rgb(31, 39, 50);
     --primary-text-color: rgb(240, 240, 240);
     --primary-text-color-faded: rgba(240, 240, 240, 0.25);
     --secondary-1-text-color: rgb(229, 231, 235);
@@ -71,13 +70,13 @@ html.dark {
 
 html {
     --primary-color: rgb(250, 250, 250);
-    --secondary-1-color: rgb(243, 244, 246);
+    --secondary-1-color: rgb(242, 243, 245);
     --secondary-2-color: rgb(229, 231, 235);
     --primary-text-color: rgb(20, 20, 20);
     --primary-text-color-faded: rgba(20, 20, 20, 0.25);
-    --secondary-1-text-color: rgb(31, 41, 55);
-    --secondary-2-text-color: rgb(55, 65, 81);
-    --secondary-3-text-color: rgb(75, 85, 99);
+    --secondary-1-text-color: rgb(31, 39, 50);
+    --secondary-2-text-color: rgb(55, 64, 76);
+    --secondary-3-text-color: rgb(75, 85, 98);
     --scrollbar-color: var(--primary-text-color);
     --scrollbar-hover-color: var(--secondary-3-text-color);
 }
