@@ -18,11 +18,11 @@ What is an index? It is a simple idea of having additional data structure that h
 
 ## Index types by structure
 
-Using <a href="https://www.postgresql.org/docs/current/indexes-types.html" target="_blank">PostgreSQL</a> as our reference for various index types.
+Using <a href="https://www.postgresql.org/docs/current/indexes-types.html">PostgreSQL</a> as our reference for various index types.
 
 ### B-tree 
 
-**Most databases (PostgreSQL, MySQL, MongoDB, SQLite) support <a href="https://en.wikipedia.org/wiki/B-tree" target="_blank">B-tree</a> index and it is by far the most commonly used data structure for indexing.** That is because of its good performance characteristics - *O(log<sub>n</sub>)* - for both equality and range search operations. The ability to use range operations means that data needs to be comparable and sortable, which in turn means that this index can be used to support and speed up sorting operations as well. B-tree is a <span class="nowrap">self-balancing</span> tree data structure, with a variable number of children per node (as opposed to 2 children per node <a href="https://en.wikipedia.org/wiki/Binary_tree" target="_blank">binary tree</a>). <a href="https://use-the-index-luke.com/sql/anatomy/the-tree" target="_blank">It looks something like this</a>:
+**Most databases (PostgreSQL, MySQL, MongoDB, SQLite) support <a href="https://en.wikipedia.org/wiki/B-tree">B-tree</a> index and it is by far the most commonly used data structure for indexing.** That is because of its good performance characteristics - *O(log<sub>n</sub>)* - for both equality and range search operations. The ability to use range operations means that data needs to be comparable and sortable, which in turn means that this index can be used to support and speed up sorting operations as well. B-tree is a <span class="nowrap">self-balancing</span> tree data structure, with a variable number of children per node (as opposed to 2 children per node <a href="https://en.wikipedia.org/wiki/Binary_tree">binary tree</a>). <a href="https://use-the-index-luke.com/sql/anatomy/the-tree">It looks something like this</a>:
 ```
              (10|22)
              /     \
@@ -43,7 +43,7 @@ B-tree keeps itself balanced, depth/height is kept low and the number of childre
 2. (22|23|30), 32 is greater, so go the right again
 3. (30|32) - we have it, take associated row ids and read data from the disk
 
-Usually, each value is repeated in the child nodes until the leaf nodes. For example, 10 is in the root, but also in the first node to the left, and then right to the left (leaf node). To optimize certain operations (like range queries) leaf nodes are all connected by a doubly linked list (<a href="https://use-the-index-luke.com/sql/anatomy" target="_blank">for details of the anatomy, check out amazing "Use the Index, Luke!" blog</a>). Then leaf nodes have row ids, which are references (addresses) to the table rows data. 
+Usually, each value is repeated in the child nodes until the leaf nodes. For example, 10 is in the root, but also in the first node to the left, and then right to the left (leaf node). To optimize certain operations (like range queries) leaf nodes are all connected by a doubly linked list (<a href="https://use-the-index-luke.com/sql/anatomy">for details of the anatomy, check out amazing "Use the Index, Luke!" blog</a>). Then leaf nodes have row ids, which are references (addresses) to the table rows data. 
 
 Logarithmic complexity gives us good performance for a very, very long time and for huge datasets. B-tree search complexity is *O(log<sub>b</sub>n)*. Assuming b = 10, which in practice can go up to hundreds or even thousands (making it even faster), the search complexity will be:
 ```
@@ -66,11 +66,11 @@ log(1 000 000 000 000 000) = 15
 
 ### Hash
 
-Hash index is quite useful when we look to support only equality operations. Underneath the hood, as the name suggests, it uses a <a href="https://en.wikipedia.org/wiki/Hash_table" target="_blank">hash map/table</a>. With good implementation, in theory, hash map search complexity is *O(1)*. Sometimes, a hash map needs to be rebalanced, so in practice it is *O(1) + C* (some amortized constant). But still, for equality only operations it is the fastest option. Hence also there are key-value only databases/stores, like Redis or <a href="https://etcd.io" target="_blank">Etcd</a>, which are using this data structure.
+Hash index is quite useful when we look to support only equality operations. Underneath the hood, as the name suggests, it uses a <a href="https://en.wikipedia.org/wiki/Hash_table">hash map/table</a>. With good implementation, in theory, hash map search complexity is *O(1)*. Sometimes, a hash map needs to be rebalanced, so in practice it is *O(1) + C* (some amortized constant). But still, for equality only operations it is the fastest option. Hence also there are key-value only databases/stores, like Redis or <a href="https://etcd.io">Etcd</a>, which are using this data structure.
 
 ### GIN
 
-GIN stands for <a href="https://www.postgresql.org/docs/current/gin-intro.html" target="_blank">Generalized Inverted Index</a>. Why inverted? It comes from the full-text search terminology. There, we work on documents and a *Forward Index* is something like:
+GIN stands for <a href="https://www.postgresql.org/docs/current/gin-intro.html">Generalized Inverted Index</a>. Why inverted? It comes from the full-text search terminology. There, we work on documents and a *Forward Index* is something like:
 ```
 Documents:
 document1: "Let's say something special" 
@@ -89,7 +89,7 @@ xyz -> document2, document3, document4
 ```
 
 \
-In Postgres, it means that **we have a data structure, also B-tree in fact, where each row can appear multiple times and we can index complex/composite types like arrays, json or text documents**. Its structure is similar to the B-tree from the description above, but leaf nodes have a key (word/term from the document for example) and a list of matching tuples (<a href="https://www.crunchydata.com/blog/challenging-postgres-terminology" target="_blank">tuple and record are just other names for a table row</a>). The main difference between *GIN* and a standard B-tree index is that each tuple (row) can appear many times in this index, being associated with a different key, plus, it defines <a href="https://www.postgresql.org/docs/current/gin-builtin-opclasses.html" target="_blank">its own operators for querying</a> that each data type (like array or json/jsonb) needs to support. Let's say that we have the table:
+In Postgres, it means that **we have a data structure, also B-tree in fact, where each row can appear multiple times and we can index complex/composite types like arrays, json or text documents**. Its structure is similar to the B-tree from the description above, but leaf nodes have a key (word/term from the document for example) and a list of matching tuples (<a href="https://www.crunchydata.com/blog/challenging-postgres-terminology">tuple and record are just other names for a table row</a>). The main difference between *GIN* and a standard B-tree index is that each tuple (row) can appear many times in this index, being associated with a different key, plus, it defines <a href="https://www.postgresql.org/docs/current/gin-builtin-opclasses.html">its own operators for querying</a> that each data type (like array or json/jsonb) needs to support. Let's say that we have the table:
 ```
 CREATE TABLE account (
   id UUID PRIMARY KEY,
@@ -116,7 +116,7 @@ Attributes data:
 }
 ```
 
-<a href="https://www.postgresql.org/docs/current/datatype-json.html#JSON-INDEXING" target="_blank">Field names need to be combined with values before inserting them in the B-tree nodes.</a> For example, we might have the following entries in the B-tree:
+<a href="https://www.postgresql.org/docs/current/datatype-json.html#JSON-INDEXING">Field names need to be combined with values before inserting them in the B-tree nodes.</a> For example, we might have the following entries in the B-tree:
 ```
 (value:name)
 
@@ -129,7 +129,7 @@ ACTIVATED:state -> tuple2, tuple3
 
 ### GIST
 
-Generalized Search Tree. In Postgres, **it is just a template for a balanced, search tree based index on top of which we can build our own implementation**. One of its most commonly used instances is <a href="https://en.wikipedia.org/wiki/R-tree" target="_blank"><span class="nowrap">R-tree</span></a> used for searching through multidimensional data, such as rectangles or geographic coordinates. Why is it useful in this context? We can define our own comparison and equality operators (and others, custom ones) to query our data appropriately. Using coordinates, is (0, 1) greater than (1, 0)? Do questions like that even have a place with this data type? We can define these operators as we wish, which allows for new usages of tree-based indexes, like mentioned above R-tree. There is an implementation of it in <a href="https://www.postgresql.org/docs/current/gist-builtin-opclasses.html" target="_blank">PostgreSQL itself</a> and there is also the <a href="https://postgis.net/workshops/postgis-intro/indexing.html" target="_blank">PostGIS project</a> with its own implementation of R-Tree.
+Generalized Search Tree. In Postgres, **it is just a template for a balanced, search tree based index on top of which we can build our own implementation**. One of its most commonly used instances is <a href="https://en.wikipedia.org/wiki/R-tree"><span class="nowrap">R-tree</span></a> used for searching through multidimensional data, such as rectangles or geographic coordinates. Why is it useful in this context? We can define our own comparison and equality operators (and others, custom ones) to query our data appropriately. Using coordinates, is (0, 1) greater than (1, 0)? Do questions like that even have a place with this data type? We can define these operators as we wish, which allows for new usages of tree-based indexes, like mentioned above R-tree. There is an implementation of it in <a href="https://www.postgresql.org/docs/current/gist-builtin-opclasses.html">PostgreSQL itself</a> and there is also the <a href="https://postgis.net/workshops/postgis-intro/indexing.html">PostGIS project</a> with its own implementation of R-Tree.
 
 ### BRIN
 
@@ -183,13 +183,13 @@ values: 2023-10-05T01:30:00 - 2023-10-05T10:11:00
 ```
 If we search for rows with *timestamp=<span class="nowrap">2023-10-05T01:33:00</span>*, they can be anywhere in the page range 1, 2 or 3. We need to scan lots of data to satisfiy our query, because our table does not have an orderly layout. 
 
-**<a href="https://www.postgresql.org/docs/current/storage-page-layout.html" target="_blank">If our table is sorted on the disk, is stored on 100 pages</a> and we have 10 page ranges in the index, for any single value we will only need to check a single page range, which is just 10% of the whole table**. Sounds familiar? It is because the mechanism and performance benefits are quite similar to a *table partitioning*, where the table is divided into smaller, more manageable sections (subtables) for improved query performance. 
+**<a href="https://www.postgresql.org/docs/current/storage-page-layout.html">If our table is sorted on the disk, is stored on 100 pages</a> and we have 10 page ranges in the index, for any single value we will only need to check a single page range, which is just 10% of the whole table**. Sounds familiar? It is because the mechanism and performance benefits are quite similar to a *table partitioning*, where the table is divided into smaller, more manageable sections (subtables) for improved query performance. 
 
 ## Clustered, Primary and Secondary Indexes
 
 There is also a distinction between index types depending on how a particular database decides to store data on the disk.
 
-**<a href="https://dev.mysql.com/doc/refman/8.0/en/innodb-introduction.html" target="_blank">In some databases, like MySQL with the default InnoDB engine, we use something called a *Clustered Index* </a>** (Oracle database calls this concept Index Organized Table). In that model, each table is required to have a primary key/index. Then, table data is stored together with its primary key/index, sorted on the disk, because the B-tree index is sorted. **Primary Index does not point to table data, which is somewhere else on the disk, but it contains it directly.** What is a Secondary Index? Because Primary, Clustered Index is the table in fact, other indexes do not point to a table row ids, but to the Primary Index. In the *Secondary Index*, the key is indexed field(s) and the value is a value of associated row Primary Index. It looks something like this:
+**<a href="https://dev.mysql.com/doc/refman/8.0/en/innodb-introduction.html">In some databases, like MySQL with the default InnoDB engine, we use something called a *Clustered Index* </a>** (Oracle database calls this concept Index Organized Table). In that model, each table is required to have a primary key/index. Then, table data is stored together with its primary key/index, sorted on the disk, because the B-tree index is sorted. **Primary Index does not point to table data, which is somewhere else on the disk, but it contains it directly.** What is a Secondary Index? Because Primary, Clustered Index is the table in fact, other indexes do not point to a table row ids, but to the Primary Index. In the *Secondary Index*, the key is indexed field(s) and the value is a value of associated row Primary Index. It looks something like this:
 ```
 CREATE TABLE user (
   id BIGSERIAL PRIMARY KEY,
@@ -212,7 +212,7 @@ Secondary index on the name field:
 
 The major advantage of this approach is that queries by the primary key are faster, because we can read data directly from the index (index is the table). We also save some space, because data is stored once, in the *Primary/Clustered Index*. Moreover, range queries by the primary index (only by it, not the secondary ones!) are always more efficient, since related data on the disk is not scattered, it is kept close to each other. The main drawback is that all Secondary Index queries are slower. When we search by the Secondary Index value(s), we first need to gather Primary Index values from the Secondary Index and then go again to the Primary Index for table data. Additionally, Primary Index is the table, it is sorted on the disk, so there is additional work involved during writes to keep it that way (sorted on the disk).
 
-**In Postgres, there is no primary versus secondary index differentiation**. In that model, there is a clear distinction between index and the table data. Heap table (called that because it is not ordered) is stored on the disk in the insertion/update order, which can be either random or ordered, and it can move on the disk sometimes (due to processes like <a href="https://www.postgresql.org/docs/current/sql-vacuum.html" target="_blank">vacuum</a> for example). All indexes, without the primary/secondary distinction, are simply data structures (mostly B-trees as described above) which point to row ids/addresses. They do not hold table data, besides the data defined as a part of the index. We there have:
+**In Postgres, there is no primary versus secondary index differentiation**. In that model, there is a clear distinction between index and the table data. Heap table (called that because it is not ordered) is stored on the disk in the insertion/update order, which can be either random or ordered, and it can move on the disk sometimes (due to processes like <a href="https://www.postgresql.org/docs/current/sql-vacuum.html">vacuum</a> for example). All indexes, without the primary/secondary distinction, are simply data structures (mostly B-trees as described above) which point to row ids/addresses. They do not hold table data, besides the data defined as a part of the index. We there have:
 ```
 index1: -> table rows references (addresses on the disk)
 index2: -> table rows references (addresses on the disk)
@@ -304,7 +304,7 @@ CREATE INDEX test_successful ON test (success)
 ```
 It has a few benefits:
 * Index is smaller, since we index only a subset of the table
-* <a href="https://www.postgresql.org/docs/current/storage-hot.html" target="_blank">In more cases</a>, index does not need to be updated when a related row is updated (when we update only not indexed fields) - smaller insert/update/delete penalty
+* <a href="https://www.postgresql.org/docs/current/storage-hot.html">In more cases</a>, index does not need to be updated when a related row is updated (when we update only not indexed fields) - smaller insert/update/delete penalty
 * We can express more elaborate constraints on the table. In our example, we can require the test name to be unique only if *success=true* for instance
 
 Additionally, computed expressions are also possible to index - hence the *Expression Index* name. Using previous *test* table, let's say that we have the index:
@@ -357,7 +357,7 @@ Find all documents containing 'some' or 'title'
 Find all documents containing 'long'
 Find all documents containing 'another' and 'word
 ```
-Without going into too much detail, to search for substrings (parts of words) like 'tit' or 'itle' for title, **we need to build <span class="nowrap">N-grams</span>** (Postgres has a great extension for it, called <a href="https://www.postgresql.org/docs/current/pgtrgm.html" target="_blank">pg_trgm</a>). <span class="nowrap">N-grams</span> are essentially all n-length variations of a given word. For the word 'title', all 3-grams are (adding prefix and postfix variations in " " for better search accuracy):
+Without going into too much detail, to search for substrings (parts of words) like 'tit' or 'itle' for title, **we need to build <span class="nowrap">N-grams</span>** (Postgres has a great extension for it, called <a href="https://www.postgresql.org/docs/current/pgtrgm.html">pg_trgm</a>). <span class="nowrap">N-grams</span> are essentially all n-length variations of a given word. For the word 'title', all 3-grams are (adding prefix and postfix variations in " " for better search accuracy):
 ```
 "  t", " ti", tit, itl, tle, "le ", "e  "
 ```
@@ -429,7 +429,7 @@ delete index3 data
 
 ...
 ```
-Update, in Postgres, is really a delete + insert so it is even worse (in some circumstances, optimizations like <a href="https://www.postgresql.org/docs/current/storage-hot.html" target="_blank">Heap-Only Tuples</a> can be used, but for most cases it is not true). Summing it up, **the more indexes we have, the costlier our data manipulation operations are**.
+Update, in Postgres, is really a delete + insert so it is even worse (in some circumstances, optimizations like <a href="https://www.postgresql.org/docs/current/storage-hot.html">Heap-Only Tuples</a> can be used, but for most cases it is not true). Summing it up, **the more indexes we have, the costlier our data manipulation operations are**.
 
 Secondly, **indexes do take space**. How much - it depends on the type. In most cases, an index on a single field takes less space than the table itself, but if we have a few indexes, some also on more than one field, it does add up. Our table can easily take 2 - 3 times more space than without them.
 
@@ -437,12 +437,12 @@ Lastly, having too many indexes can make our queries slower. **When we issue a q
 
 ## Closing thoughts
 
-As we saw, **Index is a crucial data structure for search performance**. Simple idea of having a separate, optimized strictly for searching data structure allows us to fulfill pretty much any type of query in a timely manner, <a href="/reducing-the-search-space.html" target="_blank">almost irrespectively of our data size</a>. It does have its tradeoffs, mainly when it comes to write performance and additional storage needs, but when used wisely, it can make our queries wonderfully performant.
+As we saw, **Index is a crucial data structure for search performance**. Simple idea of having a separate, optimized strictly for searching data structure allows us to fulfill pretty much any type of query in a timely manner, <a href="/reducing-the-search-space.html">almost irrespectively of our data size</a>. It does have its tradeoffs, mainly when it comes to write performance and additional storage needs, but when used wisely, it can make our queries wonderfully performant.
 
 <div class="article-delimiter">---</div>
 
-### Related videos on my <a target="_blank" href="{{ youtubeChannelUrl }}">youtube channel</a>
-1. <a target="_blank" href="https://www.youtube.com/watch?v=edAvauoS3L0">Index vs Inverted Index performance in Postgres</a>
+### Related videos on my <a href="{{ youtubeChannelUrl }}">youtube channel</a>
+1. <a href="https://www.youtube.com/watch?v=edAvauoS3L0">Index vs Inverted Index performance in Postgres</a>
 
 <div class="article-delimiter">---</div>
 

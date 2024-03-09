@@ -79,24 +79,24 @@ In addition, we shall ask the question: how and why can we utilize *Web Componen
 
 ## HTMX
 
-I wrote quite an extensive article about <a href="https://htmx.org/" target="_blank">*HTMX*</a> which you can find <a href="/htmx-simpler-web-based-app-or-system.html" target="_blank">here</a>.
+I wrote quite an extensive article about <a href="https://htmx.org/">*HTMX*</a> which you can find <a href="/htmx-simpler-web-based-app-or-system.html">here</a>.
 For the sake of completeness, let's give a short definition: 
 > HTMX is a JavaScript library that allows making arbitrary http requests from any HTML element, not only from forms, links or videos. It expects HTML in response, and renders whole HTML pages or fragments directly in the page section we have specified. We do not need to exchange JSON or any other data format with the server only to then translate it to HTML on the client side, so that it can be rendered. It is done automatically by HTMX, we just need to use its own, custom HTML attributes.
 
 \
-It is highly interesting, useful and a promising technology. It simplifies many things and allows us to build *SPA* or *SPA-like* applications without complex tooling, dependencies, frameworks and mostly without writing application-specific JavaScript code. In a way, it is a JavaScript library thanks to which we do not need to write our own JavaScript. We can just have one application, no frontend/backend distinction, and that is it (simplifying a little of course, but <a href="https://www.ufried.com/blog/simplify_1/" target="_blank">it simplifies soo many things</a>). There is one thing that I find missing though. There is no straightforward way to create isolated and reusable components where we can encapsulate HTML templates and JavaScript (if needed) related to a given component. **Wouldn't it be amazing, if we can create a library of reusable, framework-agnostic components that can be then used in all HTMX-based applications?** All of that is perfectly doable with Web Components, so let's dive in!
+It is highly interesting, useful and a promising technology. It simplifies many things and allows us to build *SPA* or *SPA-like* applications without complex tooling, dependencies, frameworks and mostly without writing application-specific JavaScript code. In a way, it is a JavaScript library thanks to which we do not need to write our own JavaScript. We can just have one application, no frontend/backend distinction, and that is it (simplifying a little of course, but <a href="https://www.ufried.com/blog/simplify_1/">it simplifies soo many things</a>). There is one thing that I find missing though. There is no straightforward way to create isolated and reusable components where we can encapsulate HTML templates and JavaScript (if needed) related to a given component. **Wouldn't it be amazing, if we can create a library of reusable, framework-agnostic components that can be then used in all HTMX-based applications?** All of that is perfectly doable with Web Components, so let's dive in!
 
 ## Assumptions
 
 In our solution, we make the following assumptions:
 1. We will not use *Shadow DOM*. HTMX does not work with it and I would argue that it complicates things and is mostly not needed to create useful, isolated and reusable Web Components
 2. We will make our components fully configurable from the outside. This generic approach will allow us to arbitrarily, externally style these components, make using them together with HTMX extremely simple, and at the same time components do not need to know anything about HTMX
-3. For styling, we will use <a href="https://tailwindcss.com" target="_blank">Tailwind CSS</a>. We could also use custom, scoped CSS, but it is significantly easier to do with Tailwind, and it is an amazing and astoundingly simple tool on its own, so why not use it? 
+3. For styling, we will use <a href="https://tailwindcss.com">Tailwind CSS</a>. We could also use custom, scoped CSS, but it is significantly easier to do with Tailwind, and it is an amazing and astoundingly simple tool on its own, so why not use it? 
 4. This is about *Web Components* in the context of *HTMX* afterall, so they need to be easy to use together. Luckily, point *2.* covers us here
 
 ## Solution walkthrough
 
-Repo with referenced code, all and more examples can be found <a href="https://github.com/BinaryIgor/code-examples/tree/master/flexible-web-components" target="_blank">here</a>.
+Repo with referenced code, all and more examples can be found <a href="https://github.com/BinaryIgor/code-examples/tree/master/flexible-web-components">here</a>.
 
 I wanted to be as generic as possible, but at the same time to have as simple API as possible, so to make configuring our components simple (by HTML attributes) I have come up with the following convention:
 ```
@@ -234,7 +234,7 @@ Let's walk through a few concrete examples of *Web Components* used together wit
 
 ### Confirmable Modal
 
-We quite often face a need for certain requests to be confirmed by the user, before actually issuing them. There is a special HTMX attribute that we can use for that purpose: <a href="https://htmx.org/attributes/hx-confirm/" target="_blank">hx-confirm</a>. Having *confirmable-modal* similar to *info-modal* from one of the previous examples, we can write the following HTML:
+We quite often face a need for certain requests to be confirmed by the user, before actually issuing them. There is a special HTMX attribute that we can use for that purpose: <a href="https://htmx.org/attributes/hx-confirm/">hx-confirm</a>. Having *confirmable-modal* similar to *info-modal* from one of the previous examples, we can write the following HTML:
 ```
 <confirmable-modal 
   title="Delete confirmation"
@@ -373,9 +373,9 @@ And this how it looks after getting submit error:
 
 ## Flexible and Copyable Web Components collection
 
-With the described approach, it is possible to create a collection of generic, reusable, flexible and framework-agnostic Web Components. **When it comes to UI components, I think white box philosophy is superior: we should have access to the simple source code of components, they should be designed to be copied and possibly tinker with, and not used as a black box dependency.** This is because, it is often the case that a given component *almost* matches our needs, but not exactly - in that situation it is a true lifesaver to have control and ability to change them. <a href="https://tailwindui.com/" target="_blank">Tailwind UI</a> takes a similar approach, but is not open-sourced; it is a paid tool and it focuses on framework-specific components.
+With the described approach, it is possible to create a collection of generic, reusable, flexible and framework-agnostic Web Components. **When it comes to UI components, I think white box philosophy is superior: we should have access to the simple source code of components, they should be designed to be copied and possibly tinker with, and not used as a black box dependency.** This is because, it is often the case that a given component *almost* matches our needs, but not exactly - in that situation it is a true lifesaver to have control and ability to change them. <a href="https://tailwindui.com/">Tailwind UI</a> takes a similar approach, but is not open-sourced; it is a paid tool and it focuses on framework-specific components.
 
-There are a few libraries and collections of Web Components out there, most notably <a href="https://shoelace.style/" target="_blank">Shoelace</a>. This is a step in the right direction, but unfortunately, they also use other tools, dependencies and additional abstractions and take a rather black box approach - they are meant to be used as a closed dependency, not something to copy, understand and tinker with. Additionally, they mostly use *Shadow DOM* and because of that, they can not be used with *HTMX*. I would love to see a collection of components created with a similar approach to the one described here: without unnecessary abstractions and with different, white box philosophy in mind. It means that these components would have a simple to understand source code with zero or minimal dependencies. Furthermore, they would be completely configurable from the outside, designed to be rather copied and possibly modified - not used as a black box dependency.
+There are a few libraries and collections of Web Components out there, most notably <a href="https://shoelace.style/">Shoelace</a>. This is a step in the right direction, but unfortunately, they also use other tools, dependencies and additional abstractions and take a rather black box approach - they are meant to be used as a closed dependency, not something to copy, understand and tinker with. Additionally, they mostly use *Shadow DOM* and because of that, they can not be used with *HTMX*. I would love to see a collection of components created with a similar approach to the one described here: without unnecessary abstractions and with different, white box philosophy in mind. It means that these components would have a simple to understand source code with zero or minimal dependencies. Furthermore, they would be completely configurable from the outside, designed to be rather copied and possibly modified - not used as a black box dependency.
 
 ## Closing thoughts
 
@@ -399,9 +399,9 @@ Even though they do not know anything about HTMX, it turns out that it is a bree
 
 <div class="article-delimiter">---</div>
 
-### Related videos on my <a target="_blank" href="{{ youtubeChannelUrl }}">youtube channel</a>
-1. <a target="_blank" href="https://www.youtube.com/watch?v=M4i-JQVLgfE">Similar concept, live coded on the video</a>
-2. <a target="_blank" href="https://www.youtube.com/watch?v=A3UB3tyDWa4">Simple index.html with HTMX</a>
+### Related videos on my <a href="{{ youtubeChannelUrl }}">youtube channel</a>
+1. <a href="https://www.youtube.com/watch?v=M4i-JQVLgfE">Similar concept, live coded on the video</a>
+2. <a href="https://www.youtube.com/watch?v=A3UB3tyDWa4">Simple index.html with HTMX</a>
 
 <div class="article-delimiter">---</div>
 
