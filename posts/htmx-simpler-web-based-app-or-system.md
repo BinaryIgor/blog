@@ -13,7 +13,7 @@
 ## Current approach - SPA
 
 Nowadays, when we develop web-based app/system it is most likely built as SPA, which is a single page application.
-In that model, we have a *server*, often called *<a href="https://en.wikipedia.org/wiki/REST" target="_blank">REST API</a>*, which (for the most part) does not know anything about *UI* (User Interface). 
+In that model, we have a *server*, often called *<a href="https://en.wikipedia.org/wiki/REST" >REST API</a>*, which (for the most part) does not know anything about *UI* (User Interface). 
 Then we also have a thick *client* which is a JavaScript application responsible for all things that were (and still can be) the responsibility of a browser. This app needs to:
 * handle routing (going through pages) without doing full page reload
 * make http requests to get data in the JSON format (most popular as of now) from the server and map it to HTML, so the browser can render it and show to the user
@@ -25,7 +25,7 @@ We should ask, why have we done that? **Why have we switched from multi page app
 
 ## Duplication and complexity
 
-As we have established, in the SPA approach, we get some data (mostly, but not necessarily, in the JSON format) from the server and we then transform it to the HTML, so that the browser can render it. To do that, we have to model this data. As we know, we also need to have a server, so it needs to be modeled there as well. It is always easier to work on a concrete example, so **<a href="https://github.com/BinaryIgor/code-examples/tree/master/some-wisdom-htmx-app" target="_blank">let's consider the following system</a>**:
+As we have established, in the SPA approach, we get some data (mostly, but not necessarily, in the JSON format) from the server and we then transform it to the HTML, so that the browser can render it. To do that, we have to model this data. As we know, we also need to have a server, so it needs to be modeled there as well. It is always easier to work on a concrete example, so **<a href="https://github.com/BinaryIgor/code-examples/tree/master/some-wisdom-htmx-app" >let's consider the following system</a>**:
 * there are authors with quotes (assuming that they are in the system, we do not bother with managing them)
 * we can search authors by name, getting back matching authors + random quote for each
 * we can go to a single author page, where there is their bio and a list of quotes
@@ -167,7 +167,7 @@ Page after request:
 ```
 It basically means that **just by adding these two custom HTML attributes, we can update any fragment of our page with the data returned directly from the server, without writing any JavaScript code**. Isn't that amazing? Isn't the problem that most SPA frameworks are trying to solve? Updating the page partially, without reloading it fully?
 
-What about routing? It is simply going to a different page (route), but as with SPA, without doing full page reload. Well, that is also simple. Using HTML fragment from **<a target="_blank" href="https://github.com/BinaryIgor/code-examples/tree/master/some-wisdom-htmx-app">my simple Some Wisdom App</a>**, where we have a list of authors:
+What about routing? It is simply going to a different page (route), but as with SPA, without doing full page reload. Well, that is also simple. Using HTML fragment from **<a  href="https://github.com/BinaryIgor/code-examples/tree/master/some-wisdom-htmx-app">my simple Some Wisdom App</a>**, where we have a list of authors:
 ```
 <div hx-history="false" id="app">
 ...
@@ -200,7 +200,7 @@ What about routing? It is simply going to a different page (route), but as with 
 </div>
 ...
 ```
-Here, besides <a target="_blank" href="https://tailwindcss.com">Tailwind</a> for CSS, we can see lots of HTMX tags/attributes. Let's focus on the div:
+Here, besides <a  href="https://tailwindcss.com">Tailwind</a> for CSS, we can see lots of HTMX tags/attributes. Let's focus on the div:
 ```
 <div class="rounded-lg ..." 
   hx-target="#app" 
@@ -212,7 +212,7 @@ Here, HTMX will swap content of *#app* (almost the entire page, convention taken
 2. User lands on *app-domain.com/authors/Jordan Peterson* without full page reload, just by updating relevant part of the DOM (Document Object Model) with the response from server, which is done entirely by HTMX
 3. User clicks the back button and is on the *app-domain.com* again, again without going through a full page reload. It just happens by the virtue of swapping HTML fragments from the server with the relevant DOM fragment
 
-Concluding all of that, routing can be done in a simple way without using a dedicated library. To handle errors on forms and from http/websockets requests we can use **quite elegant <a href="https://htmx.org/events" target="_blank">HTMX events API</a>**. Let's see how we can handle form validation completely on the server side (in one place), but with as good user experience as we expect from full-fledged SPA. <a href="https://github.com/BinaryIgor/code-examples/blob/master/htmx-single-index-html-page/index.js" target="_blank">Here is the full code</a>:
+Concluding all of that, routing can be done in a simple way without using a dedicated library. To handle errors on forms and from http/websockets requests we can use **quite elegant <a href="https://htmx.org/events" >HTMX events API</a>**. Let's see how we can handle form validation completely on the server side (in one place), but with as good user experience as we expect from full-fledged SPA. <a href="https://github.com/BinaryIgor/code-examples/blob/master/htmx-single-index-html-page/index.js" >Here is the full code</a>:
 ```
 <body>
   <h1>HTMX - single index.html page</h1>
@@ -251,15 +251,15 @@ Getting back to our server. As said, in the SPA approach it would return mostly 
 And as we know, upon clicking it, the server will return an HTML fragment ready to be rendered directly in the browser. 
 Instead of sending and receiving JSON, our server now returns HTML pages and fragments. That does mean a little more code there (on the server side), but we do not have a separate frontend app anymore. We just have a single app, with the server code and UI pages and fragments/components. Server can be written in any language/framework (JavaScript also). Most of our frontend will be defined in HTML pages (with HTMX tags/attributes) + CSS + some custom JS for error handling/representation and whatever else we wish. **The amount of JavaScript that we need to write is minimal and it serves only to enhance our app's behavior, not to constitute its most important part.**
 
-Quite interestingly, because we have a single app with one deployment, **we can easily write end-to-end tests using something like <a href="https://playwright.dev/" target="_blank">Playwright</a> or <a target="_blank" href="https://www.cypress.io/">Cypress</a>**. We can run our app locally, in the same manner as it will be run in the production and have it truly e2e-tested (we can also do this with SPA approach, but there we need to setup backend and frontend separately, which is a little harder to do, not impossible, but harder).
+Quite interestingly, because we have a single app with one deployment, **we can easily write end-to-end tests using something like <a href="https://playwright.dev/" >Playwright</a> or <a  href="https://www.cypress.io/">Cypress</a>**. We can run our app locally, in the same manner as it will be run in the production and have it truly e2e-tested (we can also do this with SPA approach, but there we need to setup backend and frontend separately, which is a little harder to do, not impossible, but harder).
 
 ## Is it really that simple?
 
 Is it really all great and wonderful? **Are there no trade-offs? As with everything, there are. Whether they are worth taking depends completely on the particular case.** As we have shown, HTMX is quite robust. I believe that the majority of UI's can be built using HTMX and the resulting system will be simpler and easier to develop, without sacrificing user experience, than the traditional SPA approach. How much? It depends on the particularities of the project. What are the problems and challenges worth considering before jumping into HTMX?
 
-First of all, it is quite a novel approach. Developers might be scarce and reluctant to use HTMX and it can be harder to find rich libraries of components. That will most likely change with the passage of time and we can get very far with just CSS (Tailwind/other CSS library) and our own custom JavaScript, but depending on the project design and needs, we might have to write more code to have our desired UI components. There are just fewer ready-to-use components, like there are for Vue, React or Svelte (most libraries of components are framework-specific). As said, that will probably be less and less true as HTMX gains popularity, but it is still the case as of now. Moreover, **there already are interesting ideas and initiatives like <a href="https://shoelace.style" target="_blank">shoelace</a>, which is a library based on <a target="_blank" href="https://developer.mozilla.org/en-US/docs/Web/API/Web_components">Web Components</a>**. They are completely framework-agnostic and supported natively by the browsers.
+First of all, it is quite a novel approach. Developers might be scarce and reluctant to use HTMX and it can be harder to find rich libraries of components. That will most likely change with the passage of time and we can get very far with just CSS (Tailwind/other CSS library) and our own custom JavaScript, but depending on the project design and needs, we might have to write more code to have our desired UI components. There are just fewer ready-to-use components, like there are for Vue, React or Svelte (most libraries of components are framework-specific). As said, that will probably be less and less true as HTMX gains popularity, but it is still the case as of now. Moreover, **there already are interesting ideas and initiatives like <a href="https://shoelace.style" >shoelace</a>, which is a library based on <a  href="https://developer.mozilla.org/en-US/docs/Web/API/Web_components">Web Components</a>**. They are completely framework-agnostic and supported natively by the browsers.
 
-Second, there are applications that just are not suitable to write in HTMX. Cases where UI changes are mainly done without any interaction with the server or they need to be real-time fast. <a target="_blank" href="https://en.wikipedia.org/wiki/WebRTC">WebRTC (Web Real-Time Communication)</a> comes to mind here. We probably should not build a virtual conference room in HTMX, because UI changes are dictated by non-HTTP data exchanges (we can still build the rest of the app in HTMX, implementing this one screen using vanilla JS). Another one can be if we have many (many, not one) cases where input from one fragment on the page often causes data in multiple places of the page to change. Realistically though, we would need to have a case similar to an excel spreadsheet, rather than just something like adding an item to the basket + updating items counter in the different parts of the page. **<a target="_blank" href="https://htmx.org/examples/update-other-content">For cases like that, HTMX has elegant solutions</a>**. Yet another example that comes to mind is an application that needs to work offline. Since HTMX depends on the server-side rendering of HTML pages/components it would be quite hard to achieve a truly offline functionality (although it is possible to some extent with <a href="https://developer.mozilla.org/en-US/docs/Web/API/Service_Worker_API" target="_blank">Service Workers</a>).
+Second, there are applications that just are not suitable to write in HTMX. Cases where UI changes are mainly done without any interaction with the server or they need to be real-time fast. <a  href="https://en.wikipedia.org/wiki/WebRTC">WebRTC (Web Real-Time Communication)</a> comes to mind here. We probably should not build a virtual conference room in HTMX, because UI changes are dictated by non-HTTP data exchanges (we can still build the rest of the app in HTMX, implementing this one screen using vanilla JS). Another one can be if we have many (many, not one) cases where input from one fragment on the page often causes data in multiple places of the page to change. Realistically though, we would need to have a case similar to an excel spreadsheet, rather than just something like adding an item to the basket + updating items counter in the different parts of the page. **<a  href="https://htmx.org/examples/update-other-content">For cases like that, HTMX has elegant solutions</a>**. Yet another example that comes to mind is an application that needs to work offline. Since HTMX depends on the server-side rendering of HTML pages/components it would be quite hard to achieve a truly offline functionality (although it is possible to some extent with <a href="https://developer.mozilla.org/en-US/docs/Web/API/Service_Worker_API" >Service Workers</a>).
 
 Third (maybe), possibly scattered logic. For some cases, there is still a need to write client-side JavaScript to achieve certain behaviors, like modal confirmation or dynamic error handling/representation. I am not sure, if we shall call it a logic necessarily, but this is something to keep in mind. As far as validation goes, we can actually move it completely to the server side, where it always should be anyway, which can be viewed as a simplification. Most likely, as time goes on, more and more people will figure out useful patterns for working with HTMX, and some frameworks/libraries on top of HTMX will be created, so this will be less and less of a problem. For now, we need to design our apps properly to avoid those problems.
 
@@ -287,9 +287,9 @@ Let's simplify web development!**
 
 <div class="article-delimiter">---</div>
 
-### Related videos on my <a target="_blank" href="{{ youtubeChannelUrl }}">youtube channel</a>
-1. <a target="_blank" href="https://www.youtube.com/watch?v=A3UB3tyDWa4">HTMX basics, simple index.html page from scratch</a>
-2. <a target="_blank" href="https://www.youtube.com/watch?v=9cu0NbyrNuU">General overview of HTMX, going through Some Wisdom App, which is using it</a>
+### Related videos on my <a  href="{{ youtubeChannelUrl }}">youtube channel</a>
+1. <a  href="https://www.youtube.com/watch?v=A3UB3tyDWa4">HTMX basics, simple index.html page from scratch</a>
+2. <a  href="https://www.youtube.com/watch?v=9cu0NbyrNuU">General overview of HTMX, going through Some Wisdom App, which is using it</a>
 
 <div class="article-delimiter">---</div>
 

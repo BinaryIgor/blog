@@ -70,7 +70,7 @@ We will get to the *partitioning* in a while, but we **can also think about spli
 
 ## Indexing
 
-<a target="_blank" href="https://use-the-index-luke.com/sql/anatomy">Index</a> is just a separate data structure (B-tree most often) that points to specific rows (documents) of a table (collection), and has a particular structure that makes searching fast.
+<a  href="https://use-the-index-luke.com/sql/anatomy">Index</a> is just a separate data structure (B-tree most often) that points to specific rows (documents) of a table (collection), and has a particular structure that makes searching fast.
 
 Using previous example of the account table, we had the query:
 ```
@@ -96,7 +96,7 @@ Additionally, we can take it even further and create composite index like that:
 CREATE INDEX account_name_id ON account(name, id);
 ```
 
-Now, we have all the data we need in the index (name and id columns), so <a target="_blank" href="https://www.postgresql.org/docs/current/indexes-index-only-scans.html">it can be retrieved in a single read operation, directly from the index</a>.
+Now, we have all the data we need in the index (name and id columns), so <a  href="https://www.postgresql.org/docs/current/indexes-index-only-scans.html">it can be retrieved in a single read operation, directly from the index</a>.
 
 ## Partitioning
 
@@ -198,7 +198,7 @@ country_code % 5 = 3 -> db_3
 country_code % 5 = 4 -> db_4,
 where 5 is the number of shards
 ```
-That constitutes our routing to shards. To get proper results (data), we need to know which shard needs to be queried, because, as have been said already, shards are separate, physical databses. Some databases, <a target="_blank" href="https://www.mongodb.com/docs/manual/sharding">Mongo</a> for example, support various sharding strategies out of the box, for others, like PostgreSQL or MySQL, we need to do application-level sharding (there are also some third-party solutions). In that approach, we maintain connections to all databases (shards) in our application and, based on the issued query, decide which one(s) to query. If there is a need to query more than one shard, we also need to assembly the results.
+That constitutes our routing to shards. To get proper results (data), we need to know which shard needs to be queried, because, as have been said already, shards are separate, physical databses. Some databases, <a  href="https://www.mongodb.com/docs/manual/sharding">Mongo</a> for example, support various sharding strategies out of the box, for others, like PostgreSQL or MySQL, we need to do application-level sharding (there are also some third-party solutions). In that approach, we maintain connections to all databases (shards) in our application and, based on the issued query, decide which one(s) to query. If there is a need to query more than one shard, we also need to assembly the results.
 
 Going back to numbers, with 5 shards we have approximately 5-fold improvement (similarly to partitioning, we need to strive for more or less equal distribution of data). Same as with the number of partitions, the more shards we decide to have, the larger improvement we will get. Likewise, it is true only for the queries that can utilize our partitioning/sharding schema. In our example, they (queries) need to have country_code in the where clause. Assuming that we have 5 shards:
 ```
@@ -231,9 +231,9 @@ We just went over most commonly used strategies to reduce the search space of ou
 
 <div class="article-delimiter">---</div>
 
-### Related videos on my <a target="_blank" href="{{ youtubeChannelUrl }}">youtube channel</a>
-1. <a target="_blank" href="https://www.youtube.com/watch?v=xVZsFpYa1Yc">Partitioning</a>
-2. <a target="_blank" href="https://www.youtube.com/watch?v=B5aHDQFDiuw">Sharding</a>
+### Related videos on my <a  href="{{ youtubeChannelUrl }}">youtube channel</a>
+1. <a  href="https://www.youtube.com/watch?v=xVZsFpYa1Yc">Partitioning</a>
+2. <a  href="https://www.youtube.com/watch?v=B5aHDQFDiuw">Sharding</a>
 
 <div class="article-delimiter">---</div>
 
