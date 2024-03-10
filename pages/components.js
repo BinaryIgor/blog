@@ -1,4 +1,4 @@
-const LATEST_POSTS = 4;
+const LATEST_POSTS = 5;
 
 export function postMetadata({ publishedAt, wordsCount, timeToRead, extended = false }) {
     if (!publishedAt) {
