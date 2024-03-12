@@ -56,11 +56,11 @@
 }
 
 html.dark {
-    --primary-color: rgb(0, 0, 0);
+    --primary-color: rgb(15, 15, 15);
     --secondary-1-color: rgb(17, 24, 39);
     --secondary-2-color: rgb(31, 41, 55);
-    --primary-text-color: rgb(255, 255, 255);
-    --primary-text-color-faded: rgba(255, 255, 255, 0.25);
+    --primary-text-color: rgb(245, 245, 245);
+    --primary-text-color-faded: rgba(245, 245, 245, 0.25);
     --secondary-1-text-color: rgb(229, 231, 235);
     --secondary-2-text-color: rgb(209, 213, 219);
     --secondary-3-text-color: rgb(156, 163, 175);
@@ -72,8 +72,8 @@ html {
     --primary-color: rgb(255, 255, 255);
     --secondary-1-color: rgb(243, 244, 246);
     --secondary-2-color: rgb(229, 231, 235);
-    --primary-text-color: rgb(0, 0, 0);
-    --primary-text-color-faded: rgba(0, 0, 0, 0.25);
+    --primary-text-color: rgb(25, 25, 25);
+    --primary-text-color-faded: rgba(25, 25, 25, 0.25);
     --secondary-1-text-color: rgb(31, 41, 55);
     --secondary-2-text-color: rgb(55, 65, 81);
     --secondary-3-text-color: rgb(75, 85, 99);
