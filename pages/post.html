@@ -44,24 +44,24 @@
         function copyToClipboard(email) {
             navigator.clipboard.writeText(email);
         }
-    
+
         const HIDDEN_CLASS = "hidden";
         const RANDOM_POSTS = 2;
         const MIN_POSTS_FOR_RANDOM = 2;
         const MIN_POSTS_FOR_MULTIPLE_RANDOM = 10;
         const currentPostSlug = document.body.getAttribute("data-post-slug");
-    
+
         const randomPostsComponent = document.getElementById("random-posts-component");
         const randomPostsContainer = document.getElementById("random-posts-container");
-    
+
         function randomPostsExceptCurrentOne(posts) {
             if (posts.length < MIN_POSTS_FOR_RANDOM) {
                 return [];
             }
-    
+
             const desiredRandomPosts = posts.length >= MIN_POSTS_FOR_MULTIPLE_RANDOM ? RANDOM_POSTS : 1;
             const randomPosts = [];
-    
+
             while (desiredRandomPosts > randomPosts.length) {
                 const randomIdx = randomNumber(0, posts.length);
                 const randomPost = posts[randomIdx];
@@ -70,14 +70,14 @@
                     randomPosts.push(randomPost);
                 }
             }
-    
+
             return randomPosts;
         }
-    
+
         function randomNumber(min, max) {
             return min + Math.floor(Math.random() * max);
         }
-    
+
         function doRandomPostsIncludePost(randomPosts, post) {
             for (const p of randomPosts) {
                 if (p.slug == post.slug) {
@@ -86,20 +86,20 @@
             }
             return false;
         }
-    
+
         //Also used in pages/components.js, remember to keep in sync!
         function postPreview(post) {
             const postUrl = `${post.slug}.html`;
             return `
             <li class="cursor-pointer border-[2px] border-solid border-primary-text-faded p-6 rounded
                 max-content-width m-auto"
-            onclick="location.href='${postUrl}'">
+                onclick="(function() { const selected = document.getSelection().toString(); if (!selected) location.href='${postUrl}' })()">
                 <a href="${postUrl}" class="text-2xl mb-2 font-bold">${post.title}</a>
                 <div class="mb-6 text-secondary-3 flex flex-wrap justify-center whitespace-pre-wrap">${postMetadata(post)}</div>
                 <div>${post.excerpt}</div>
             </li>`;
         }
-    
+
         function postMetadata({ publishedAt, wordsCount, timeToRead }) {
             let component = `<span>${publishedAt};</span>`;
             if (wordsCount) {
@@ -110,14 +110,14 @@
             }
             return component;
         }
-    
+
         function postsPreview(posts) {
             return `
             <ul class="space-y-6">
                 ${posts.map(p => postPreview(p)).join("\n")}
             </ul>`;
         }
-    
+
         function setupNextPostsProposition() {
             fetch("posts.json")
                 .then(r => r.json())
@@ -130,15 +130,20 @@
                 })
                 .catch(e => console.log("Failed to get posts", e));
         }
-    
+
         function setupHeadersOnClickAnchorLinks() {
             document.querySelectorAll("h2,h3").forEach(h => {
                 if (h.id) {
-                    h.onclick = () => location.href = `#${h.id}`;
+                    h.onclick = () => {
+                        const selected = document.getSelection().toString();
+                        if (!selected) {
+                            location.href = `#${h.id}`;
+                        }
+                    }
                 }
             });
         }
-    
+
         setupNextPostsProposition();
         setupHeadersOnClickAnchorLinks();
     </script>
