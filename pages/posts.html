@@ -4,16 +4,16 @@
 <head>
     {{ head-tags.html }}
     {{ head-default-description-tag.html }}
-    <title>All posts</title>
+    <title>Posts</title>
     {{ theme-script.html }}
 </head>
 
 <body>
     {{ navigation.html }}
     <div class="py-6 px-4 text-center">
-        <h1 class="text-4xl font-bold mb-6">All posts</h1>
+        <h1 class="text-4xl font-bold mb-6">Posts</h1>
         <div class="max-content-width mb-24 m-auto">
-            <p>Collection of all posts published on the blog, ordered from the latest ones.</p>
+            <p>Collection of all posts/articles published on the blog, ordered from the latest ones.</p>
         </div>
         {{ .js: allPostsPreview }}
     </div>
