@@ -128,7 +128,7 @@ So, let's forge ahead and keep simplifying!
 
 <div class="article-delimiter">---</div>
 
-### Related videos on my <a href="{{ youtubeChannelUrl }}">youtube channel</a>
+### Related videos on my [youtube channel]({{ youtubeChannelUrl }})
 1. [Collecting metrics and logs from Docker containers](https://www.youtube.com/watch?v=68PzQNsuSWc)
 2. [Visualizing container metrics in Grafana](https://www.youtube.com/watch?v=YGJN8lsiWvk)
 3. [How many HTTP requests can a Single Machine handle?](https://www.youtube.com/watch?v=NsdDIBll-Lw)

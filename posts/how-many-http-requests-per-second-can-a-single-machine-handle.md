@@ -1,31 +1,31 @@
 ---
 {
-    "title": "Load Testing: how many HTTP requests/second can a Single Machine handle?",
+    "title": "Load Testing: how many HTTP requests per second can a Single Machine handle?",
     "slug": "how-many-http-requests-per-second-can-a-single-machine-handle",
     "publishedAt": "2024-03-28",
-    "timeToRead": "27 minutes",
-    "wordsCount": 3428,
-    "excerpt": "When designing systems and deciding on architecture, I often hear justifying the use of microservices and other complex solutions, because of the predicted performance and scalability needs. Out of curiosity then, let's test the limits of an extremely simple approach, the simplest possible one.",
+    "timeToRead": "25 minutes",
+    "wordsCount": 3152,
+    "excerpt": "When designing systems and deciding on the architecture, I often hear justifying the use of <em>microservices</em> and other complex solutions because of the predicted <em>performance</em> and <em>scalability</em> needs. Out of curiosity then, let's test the limits of an extremely simple approach, the simplest possible one.",
     "researchLog": [ 1.5 ],
-    "writingLog": [ 2, 2, 1, 2, 2.5 ]
+    "writingLog": [ 2, 2, 1, 2, 2.5, 2 ]
 }
 ---
 
-When designing systems and deciding on architecture, I often hear justifying the use of microservices and other complex solutions because of the predicted performance and scalability needs. Out of curiosity then, let's test the limits of an extremely simple approach, the simplest possible one. **Let's test a single instance of an application, with a single instance of a database, deployed to a single machine, and answer the question**:
+When designing systems and deciding on the architecture, I often hear justifying the use of *microservices* and other complex solutions because of the predicted *performance* and *scalability* needs. Out of curiosity then, let's test the limits of an extremely simple approach, the simplest possible one. **Let's test a single instance of an application, with a single instance of a database, deployed to a single machine, and answer the question**:
 > How many HTTP requests per second can a Single Machine handle?
 
 ## Tests setup
 
-To resemble real-world scenarios as much as possible, [we have the following](https://github.com/BinaryIgor/code-examples/tree/master/single-machine-tests):
+To resemble real-world use cases as much as possible, [we have the following](https://github.com/BinaryIgor/code-examples/tree/master/single-machine-tests):
 * Java 21-based REST API built with Spring Boot 3 and using Virtual Threads
 * PostgreSQL as a database, loaded with over one million rows of data
 * External volume for the database - it does not write to the local file system (we use [DigitalOcean Block Storage](https://docs.digitalocean.com/glossary/block-storage/))
-* Realistic load characteristics: tests consist primarily of read requests with approximately 20% of writes. They call our REST API which makes use of a PostgreSQL database with a reasonable amount of data (over one million rows).
+* Realistic load characteristics: tests consist primarily of read requests with approximately 20% of writes. They call our REST API which makes use of the PostgreSQL database with a reasonable amount of data (over one million rows)
 * *Single Machine* in a few versions:
     * 1 CPU, 2 GB of memory
     * 2 CPUs, 4 GB of memory
     * 4 CPUs, 8 GB of memory
-* Single [LoadTest.java](https://github.com/BinaryIgor/code-examples/blob/master/single-machine-tests/load-test/LoadTest.java) file as a testing tool - we run it on *4 test machines*, in parallel, to make tests more realistic, since we usually have many http clients, not just one
+* Single [LoadTest.java](https://github.com/BinaryIgor/code-examples/blob/master/single-machine-tests/load-test/LoadTest.java) file as a testing tool - we run it on *4 test machines*, in parallel, since we usually have many http clients, not just one
 * Everything built and running in Docker
 * [DigitalOcean](https://digitalocean.com) as our infrastructure provider
 
@@ -54,7 +54,6 @@ CREATE INDEX account_name ON account(name);
 ```
 We call `POST: /accounts/generate-test-data` endpoint to generate `random 1_250_000 rows` of it.
 
-\
 `LoadTest` calls the following endpoints:
 ```
 GET: /accounts/{id}
@@ -65,7 +64,7 @@ POST: /accounts/execute-random-write
 For `GET: /accounts/{id}`, we will see some responses with 404 status as we sometimes try to GET nonexistent accounts.
 
 To make it even more realistic, there is a simple security mechanism.
-For all requests, we require a secret value in the query param ([SecurityFilter.java](https://github.com/BinaryIgor/code-examples/blob/master/single-machine-tests/single-app/src/main/java/com/binaryigor/single/app/SecurityFilter.java)):
+For all requests, we require a secret value in the query string ([SecurityFilter.java](https://github.com/BinaryIgor/code-examples/blob/master/single-machine-tests/single-app/src/main/java/com/binaryigor/single/app/SecurityFilter.java)):
 ```
 ...
 // Keep in sync with LoadTest!
@@ -91,7 +90,7 @@ if (authorized) {
 ```
 
 \
-Having these details in mind, let's run some tests and examine the results!
+Having all these details in mind, let's run some tests and examine the results!
 
 ## Test results
 
@@ -103,8 +102,9 @@ Tests were mainly executed in four profiles:
 * **high_load**: 1000 requests per second - 4 machines x 250 RPS
 * **very_high_load**: 4000 requests per second - 4 machines x 1000 RPS
 
-To test *sustained load* and see whether we experience a performance degradation, I have also run a few *long* variations of these profiles for ~ 10 minutes: every second, for 600 seconds, a certain number of requests was issued.
+To test *sustained load* and see whether we experience a performance degradation, I have also run a few *long variations* of these profiles for ~ 10 minutes: every second, for 600 seconds, a certain number of requests was issued.
 
+[All test results](https://github.com/BinaryIgor/code-examples/tree/master/single-machine-tests/load-test-results) shown below come from 1 test machine. Therefore, we need to multiply the request rate by 4, as tests were always run on 4 machines in parallel.
 
 ### Small machine - 1 CPU, 2 GB of memory
 
@@ -163,7 +163,7 @@ Requests by status: {200=288}
 ...
 ```
 
-To check whether performance does not decrease with time, I have also run **average_long_load** test:
+To check whether performance does not decrease over time, I have also run an **average_long_load** test:
 ```
 ...
 
@@ -381,7 +381,7 @@ Requests by status: {200=1521}
 
 ...
 ```
-Again, to see whether we can sustain this load over a longer period of time I have executed **high_long_load** test:
+Again, to see whether we can sustain this load over a longer period of time I have executed a **high_long_load** test:
 ```
 ...
 
@@ -490,7 +490,7 @@ Requests by status: {200=5178}
 
 ### Large machine - 4 CPUs, 8 GB of memory
 
-**very_high_load** - handled it without any issues:
+**very_high_load**:
 ```
 ...
 
@@ -544,7 +544,7 @@ Requests by status: {200=5906}
 ```
 
 \
-These results seemed a little too good to be true, so to double-check, I decided to repeat this test, but for a longer time period. **very_high_long_load** results:
+Last results seemed a little too good to be true, so to double-check, I decided to repeat this test, but for a longer time period. **very_high_long_load** results:
 ```
 ...
 
@@ -597,7 +597,7 @@ Requests by status: {200=233679}
 ...
 ```
 
-As we can see, there is a performance degradation. Times are still very good, but we had more than 1% of timeouts and we only have them in 95 percentile, not 999 as previously. We most likely are on the edge of running out of resources and probably need to reduce this load from 4000 RPS to 2000 - 3000 RPS to make it sustainable for a longer time period. Of course, I did exactly that; **here are the results of 3000 RPS running for 10 minutes**:
+As we can see, there is a performance degradation. Times are still very good, but we had more than 1% of timeouts; we only made it in 95 percentile, not 999 as previously. We most likely are on the edge of running out of resources and probably need to reduce this load from 4000 RPS to 2000 - 3000 RPS to make it sustainable for a longer period of time. Of course, I did exactly that; **here are the results of a 3000 RPS test running for 10 minutes**:
 ```
 ...
 
@@ -649,9 +649,11 @@ Requests by status: {200=179997}
 
 ...
 ```
-No timeouts, 99 percentile below 1 second and 999 below 1.5 - amazing.
-Out of curiosity, I have also pulled out some cpu/memory stats from Docker (remember that we have *4 CPUs, so 400% CPU available*):
+No timeouts, 99 percentile under 1 second and 999 percentile under 1.5, which is amazing.
+Out of curiosity, I have also pulled out some cpu/memory stats from Docker (we have *4 CPUs, so 400% CPU is available*):
 ```
+...
+
 Date: 2024-03-25T16:51:11Z
 CONTAINER ID   NAME         CPU %     MEM USAGE / LIMIT     MEM %     NET I/O   BLOCK I/O     PIDS
 accd79ae0eb8   single-app   77.67%    652.4MiB / 7.763GiB   8.21%     0B / 0B   0B / 6.5MB    38
@@ -662,30 +664,7 @@ CONTAINER ID   NAME         CPU %     MEM USAGE / LIMIT     MEM %     NET I/O   
 accd79ae0eb8   single-app   83.01%    652.7MiB / 7.763GiB   8.21%     0B / 0B   0B / 6.55MB   38
 2dbb4ee8610e   single-db    57.63%    595.5MiB / 7.763GiB   7.49%     0B / 0B   0B / 16.8GB   20
 
-Date: 2024-03-25T16:51:56Z
-CONTAINER ID   NAME         CPU %     MEM USAGE / LIMIT     MEM %     NET I/O   BLOCK I/O     PIDS
-accd79ae0eb8   single-app   110.47%   652.5MiB / 7.763GiB   8.21%     0B / 0B   0B / 6.62MB   38
-2dbb4ee8610e   single-db    61.70%    595.7MiB / 7.763GiB   7.49%     0B / 0B   0B / 16.9GB   20
-
-Date: 2024-03-25T16:52:19Z
-CONTAINER ID   NAME         CPU %     MEM USAGE / LIMIT     MEM %     NET I/O   BLOCK I/O     PIDS
-accd79ae0eb8   single-app   98.12%    652.6MiB / 7.763GiB   8.21%     0B / 0B   0B / 6.66MB   38
-2dbb4ee8610e   single-db    60.22%    598.2MiB / 7.763GiB   7.52%     0B / 0B   0B / 17.1GB   20
-
-Date: 2024-03-25T16:52:42Z
-CONTAINER ID   NAME         CPU %     MEM USAGE / LIMIT     MEM %     NET I/O   BLOCK I/O     PIDS
-accd79ae0eb8   single-app   100.82%   652.5MiB / 7.763GiB   8.21%     0B / 0B   0B / 6.71MB   38
-2dbb4ee8610e   single-db    71.16%    598.4MiB / 7.763GiB   7.53%     0B / 0B   0B / 17.2GB   20
-
-Date: 2024-03-25T16:53:04Z
-CONTAINER ID   NAME         CPU %     MEM USAGE / LIMIT     MEM %     NET I/O   BLOCK I/O     PIDS
-accd79ae0eb8   single-app   85.51%    652.7MiB / 7.763GiB   8.21%     0B / 0B   0B / 6.77MB   38
-2dbb4ee8610e   single-db    68.01%    600MiB / 7.763GiB     7.55%     0B / 0B   0B / 17.4GB   21
-
-Date: 2024-03-25T16:53:27Z
-CONTAINER ID   NAME         CPU %     MEM USAGE / LIMIT     MEM %     NET I/O   BLOCK I/O     PIDS
-accd79ae0eb8   single-app   100.20%   652.6MiB / 7.763GiB   8.21%     0B / 0B   0B / 6.82MB   38
-2dbb4ee8610e   single-db    66.49%    600.2MiB / 7.763GiB   7.55%     0B / 0B   0B / 17.6GB   21
+...
 
 Date: 2024-03-25T16:53:49Z
 CONTAINER ID   NAME         CPU %     MEM USAGE / LIMIT     MEM %     NET I/O   BLOCK I/O     PIDS
@@ -697,6 +676,7 @@ CONTAINER ID   NAME         CPU %     MEM USAGE / LIMIT     MEM %     NET I/O   
 accd79ae0eb8   single-app   53.55%    652.4MiB / 7.763GiB   8.21%     0B / 0B   0B / 6.93MB   38
 2dbb4ee8610e   single-db    37.06%    599.3MiB / 7.763GiB   7.54%     0B / 0B   0B / 17.9GB   20
 
+...
 ```
 
 ## Summing it up
@@ -706,29 +686,28 @@ As we have seen, a single machine, with a single database, can handle *a lot* - 
 1. **Small machine - 1 CPU, 2 GB of memory**
     * Can handle sustained load of *200 - 300 RPS*
     * For 15 seconds, it was able to handle *1000 RPS* with stats:
-    * Min: 0.001 s, Max: 0.2 s, Mean: 0.013 s
-    * Percentile 90: 0.026 s, Percentile 95: 0.034 s
-    * Percentile 99: 0.099 s
+      * Min: 0.001 s, Max: 0.2 s, Mean: 0.013 s
+      * Percentile 90: 0.026 s, Percentile 95: 0.034 s
+      * Percentile 99: 0.099 s
 2. **Medium machine - 2 CPUs, 4 GB of memory**
     * Can handle sustained load of *500 - 1000 RPS*
     * For 15 seconds, it was able to handle *1000 RPS* with stats:
-    * Min: 0.001 s, Max: 0.135 s, Mean: 0.004 s 
-    * Percentile 90: 0.007 s, Percentile 95: 0.01 s
-    * Percentile 99: 0.023 s 
+      * Min: 0.001 s, Max: 0.135 s, Mean: 0.004 s 
+      * Percentile 90: 0.007 s, Percentile 95: 0.01 s
+      * Percentile 99: 0.023 s 
 3. **Large machine - 4 CPUs, 8 GB of memory**
     * Can handle sustained load of *2000 - 3000 RPS*
     * For 15 seconds, it was able to handle *4000 RPS* with stats:
-    * Min: 0.0 s, (less than 1 ms), Max: 1.05 s, Mean: 0.058 s
-    * Percentile 90: 0.124 s, Percentile 95: 0.353 s
-    * Percentile 99: 0.746 s
+      * Min: 0.0 s, (less than 1 ms), Max: 1.05 s, Mean: 0.058 s
+      * Percentile 90: 0.124 s, Percentile 95: 0.353 s
+      * Percentile 99: 0.746 s
 4. **Huge machine - 8 CPUs, 16 GB of memory (not tested)**
     * Most likely can handle sustained load of *4000 - 6000 RPS*
 
 \
-Of course, there are other, non-performance related, reasons to have more than one machine - mostly related to resilience and redundancy in case of failures. Nevertheless, **do keep these results in mind next time somebody is trying to lure you into using a complex solution, architecture and infrastructure, and you develop a system that will need to handle at most 3 requests per second**.
+Of course, there are other, non-performance related, reasons for having more than one machine - mostly associated with resilience and redundancy in case of failures. Nevertheless, **remember these results the next time someone tries to persuade you into implementing a complex solution, architecture and infrastructure, for a system expected to handle at most 5 requests per second**.
 
-Keep keeping things simple!
-
+Keep things simple!
 
 <div class="article-delimiter">---</div>
 
