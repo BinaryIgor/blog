@@ -128,15 +128,16 @@ So, let's forge ahead and keep simplifying!
 
 <div class="article-delimiter">---</div>
 
-### Related videos on my <a href="{{ youtubeChannelUrl }}">youtube channel</a>
-1. <a href="https://www.youtube.com/watch?v=68PzQNsuSWc">Collecting metrics and logs from Docker containers</a>
-2. <a href="https://www.youtube.com/watch?v=YGJN8lsiWvk">Visualizing container metrics in Grafana</a> 
+### Related videos on my [youtube channel]({{ youtubeChannelUrl }})
+1. [Collecting metrics and logs from Docker containers](https://www.youtube.com/watch?v=68PzQNsuSWc)
+2. [Visualizing container metrics in Grafana](https://www.youtube.com/watch?v=YGJN8lsiWvk)
+3. [How many HTTP requests can a Single Machine handle?](https://www.youtube.com/watch?v=NsdDIBll-Lw)
 
 <div class="article-delimiter">---</div>
 
 ### Notes and resources
 
-1. I plan to make a video or write an article where I will check out how much a single machine can handle. I think that a lot, but let's wait and see ;)
+1. I plan to make a video or write an article where I will check out how much a single machine can handle. I think that a lot, but let's wait and see ;) *Update 2024-03-28: [truly a lot](/how-many-http-requests-per-second-can-a-single-machine-handle.html)*
 2. Highly valuable series on a need for simplification of our IT systems:
     1. https://www.ufried.com/blog/simplify_1/
     2. https://www.ufried.com/blog/simplify_15_summing_up/
