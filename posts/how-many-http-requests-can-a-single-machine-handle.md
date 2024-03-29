@@ -1,13 +1,13 @@
 ---
 {
-    "title": "Load Testing: how many HTTP requests per second can a Single Machine handle?",
-    "slug": "how-many-http-requests-per-second-can-a-single-machine-handle",
+    "title": "Load Testing: how many HTTP requests/second can a Single Machine handle?",
+    "slug": "how-many-http-requests-can-a-single-machine-handle",
     "publishedAt": "2024-03-28",
     "timeToRead": "25 minutes",
-    "wordsCount": 3152,
+    "wordsCount": 3123,
     "excerpt": "When designing systems and deciding on the architecture, I often hear justifying the use of <em>microservices</em> and other complex solutions because of the predicted <em>performance</em> and <em>scalability</em> needs. Out of curiosity then, let's test the limits of an extremely simple approach, the simplest possible one.",
     "researchLog": [ 1.5 ],
-    "writingLog": [ 2, 2, 1, 2, 2.5, 2 ]
+    "writingLog": [ 2, 2, 1, 2, 2.5, 2, 1 ]
 }
 ---
 
@@ -114,12 +114,12 @@ To test *sustained load* and see whether we experience a performance degradation
 ```
 ...
 
-750 requests with 50 per second rate, issued on 4 machines, took PT15.303S
+750 requests with 50 per second rate took PT15.303S
 
 ...
 
 Tests executed on: 4 machines, in parallel
-Executed requests: 750, with 50/s rate
+Executed requests on 1 machine: 750, with 50/s rate
 Requests with connect timeout [5000]: 0, as percentage: 0
 Requests with request timeout [5000]: 0, as percentage: 0
 
@@ -167,12 +167,12 @@ To check whether performance does not decrease over time, I have also run an **a
 ```
 ...
 
-30000 requests with 50 per second rate, issued on 4 machines, took PT10M0.605S
+30000 requests with 50 per second rate took PT10M0.605S
 
 ...
 
 Tests executed on: 4 machines, in parallel
-Executed requests: 30000, with 50/s rate
+Executed requests on 1 machine: 30000, with 50/s rate
 Requests with connect timeout [5000]: 0, as percentage: 0
 Requests with request timeout [5000]: 0, as percentage: 0
 
@@ -223,12 +223,12 @@ As we can see, no issues there.
 ```
 ...
 
-3750 requests with 250 per second rate, issued on 4 machines, took PT15.371S
+3750 requests with 250 per second rate took PT15.371S
 
 ...
 
 Tests executed on: 4 machines, in parallel
-Executed requests: 3750, with 250/s rate
+Executed requests on 1 machine: 3750, with 250/s rate
 Requests with connect timeout [5000]: 0, as percentage: 0
 Requests with request timeout [5000]: 0, as percentage: 0
 
@@ -277,12 +277,12 @@ Requests by status: {200=1514}
 ```
 ...
 
-15000 requests with 1000 per second rate, issued on 4 machines, took PT25.557S
+15000 requests with 1000 per second rate took PT25.557S
 
 ...
 
 Tests executed on: 4 machines, in parallel
-Executed requests: 15000, with 1000/s rate
+Executed requests on 1 machine: 15000, with 1000/s rate
 Requests with connect timeout [5000]: 4215, as percentage: 28
 Requests with request timeout [5000]: 7730, as percentage: 51
 
@@ -333,12 +333,12 @@ Requests by status: {200=1263}
 ```
 ...
 
-3750 requests with 250 per second rate, issued on 4 machines, took PT15.336S
+3750 requests with 250 per second rate took PT15.336S
 
 ...
 
 Tests executed on: 4 machines, in parallel
-Executed requests: 3750, with 250/s rate
+Executed requests on 1 machine: 3750, with 250/s rate
 Requests with connect timeout [5000]: 0, as percentage: 0
 Requests with request timeout [5000]: 0, as percentage: 0
 
@@ -385,12 +385,12 @@ Again, to see whether we can sustain this load over a longer period of time I ha
 ```
 ...
 
-150000 requests with 250 per second rate, issued on 4 machines, took PT10M0.701S
+150000 requests with 250 per second rate took PT10M0.701S
 
 ...
 
 Tests executed on: 4 machines, in parallel
-Executed requests: 150000, with 250/s rate
+Executed requests on 1 machine: 150000, with 250/s rate
 Requests with connect timeout [5000]: 0, as percentage: 0
 Requests with request timeout [5000]: 0, as percentage: 0
 
@@ -439,12 +439,12 @@ No problems there.
 ```
 ...
 
-15000 requests with 1000 per second rate, issued on 4 machines, took PT22.588S
+15000 requests with 1000 per second rate took PT22.588S
 
 ...
 
 Tests executed on: 4 machines, in parallel
-Executed requests: 15000, with 1000/s rate
+Executed requests on 1 machine: 15000, with 1000/s rate
 Requests with connect timeout [5000]: 1896, as percentage: 12
 Requests with request timeout [5000]: 68, as percentage: 0
 
@@ -494,12 +494,12 @@ Requests by status: {200=5178}
 ```
 ...
 
-15000 requests with 1000 per second rate, issued on 4 machines, took PT15.32S
+15000 requests with 1000 per second rate took PT15.32S
 
 ...
 
 Tests executed on: 4 machines, in parallel
-Executed requests: 15000, with 1000/s rate
+Executed requests on 1 machine: 15000, with 1000/s rate
 Requests with connect timeout [5000]: 0, as percentage: 0
 Requests with request timeout [5000]: 0, as percentage: 0
 
@@ -548,12 +548,12 @@ Last results seemed a little too good to be true, so to double-check, I decided 
 ```
 ...
 
-600000 requests with 1000 per second rate, issued on 4 machines, took PT10M11.923S
+600000 requests with 1000 per second rate took PT10M11.923S
 
 ...
 
 Tests executed on: 4 machines, in parallel
-Executed requests: 600000, with 1000/s rate
+Executed requests on 1 machine: 600000, with 1000/s rate
 Requests with connect timeout [5000]: 5197, as percentage: 0
 Requests with request timeout [5000]: 10180, as percentage: 1
 
@@ -601,12 +601,12 @@ As we can see, there is a performance degradation. Times are still very good, bu
 ```
 ...
 
-450000 requests with 750 per second rate, issued on 4 machines, took PT10M30.998S
+450000 requests with 750 per second rate took PT10M30.998S
 
 ...
 
 Tests executed on: 4 machines, in parallel
-Executed requests: 450000, with 750/s rate
+Executed requests on 1 machine: 450000, with 750/s rate
 Requests with connect timeout [5000]: 0, as percentage: 0
 Requests with request timeout [5000]: 0, as percentage: 0
 
@@ -686,21 +686,21 @@ As we have seen, a single machine, with a single database, can handle *a lot* - 
 1. **Small machine - 1 CPU, 2 GB of memory**
     * Can handle sustained load of *200 - 300 RPS*
     * For 15 seconds, it was able to handle *1000 RPS* with stats:
-      * Min: 0.001 s, Max: 0.2 s, Mean: 0.013 s
-      * Percentile 90: 0.026 s, Percentile 95: 0.034 s
-      * Percentile 99: 0.099 s
+      * Min: 0.001s, Max: 0.2s, Mean: 0.013s
+      * Percentile 90: 0.026s, Percentile 95: 0.034s
+      * Percentile 99: 0.099s
 2. **Medium machine - 2 CPUs, 4 GB of memory**
     * Can handle sustained load of *500 - 1000 RPS*
     * For 15 seconds, it was able to handle *1000 RPS* with stats:
-      * Min: 0.001 s, Max: 0.135 s, Mean: 0.004 s 
-      * Percentile 90: 0.007 s, Percentile 95: 0.01 s
-      * Percentile 99: 0.023 s 
+      * Min: 0.001s, Max: 0.135s, Mean: 0.004s 
+      * Percentile 90: 0.007s, Percentile 95: 0.01s
+      * Percentile 99: 0.023s 
 3. **Large machine - 4 CPUs, 8 GB of memory**
     * Can handle sustained load of *2000 - 3000 RPS*
     * For 15 seconds, it was able to handle *4000 RPS* with stats:
-      * Min: 0.0 s, (less than 1 ms), Max: 1.05 s, Mean: 0.058 s
-      * Percentile 90: 0.124 s, Percentile 95: 0.353 s
-      * Percentile 99: 0.746 s
+      * Min: 0.0s, (less than 1ms), Max: 1.05s, Mean: 0.058s
+      * Percentile 90: 0.124s, Percentile 95: 0.353s
+      * Percentile 99: 0.746s
 4. **Huge machine - 8 CPUs, 16 GB of memory (not tested)**
     * Most likely can handle sustained load of *4000 - 6000 RPS*
 
