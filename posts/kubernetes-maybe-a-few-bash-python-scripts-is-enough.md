@@ -137,7 +137,7 @@ So, let's forge ahead and keep simplifying!
 
 ### Notes and resources
 
-1. I plan to make a video or write an article where I will check out how much a single machine can handle. I think that a lot, but let's wait and see ;) *Update 2024-03-28: [truly a lot](/how-many-http-requests-per-second-can-a-single-machine-handle.html)*
+1. I plan to make a video or write an article where I will check out how much a single machine can handle. I think that a lot, but let's wait and see ;) *Update 2024-03-28: [truly a lot](/how-many-http-requests-can-a-single-machine-handle.html)*
 2. Highly valuable series on a need for simplification of our IT systems:
     1. https://www.ufried.com/blog/simplify_1/
     2. https://www.ufried.com/blog/simplify_15_summing_up/
