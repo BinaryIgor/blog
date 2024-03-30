@@ -47,6 +47,10 @@ export async function start(clock = new Clock(),
     CREATE VIEW IF NOT EXISTS read AS SELECT * FROM event WHERE type = 'READ';
     `);
 
+    await db.executeRaw(`
+        UPDATE event set path = replace(path, '.html', '/')
+    `);
+
     scheduler = new Scheduler();
 
     new SqliteDbBackuper(db, config.dbBackupPath, scheduler, config.dbBackupDelay);

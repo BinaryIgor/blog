@@ -33,6 +33,7 @@ export class PostsSource {
 
         posts.forEach(p => {
             postsPaths.add(`/${p.slug}.html`);
+            postsPaths.add(`/${p.slug}/`);
         });
 
         this._posts = postsPaths;

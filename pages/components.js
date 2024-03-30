@@ -34,7 +34,7 @@ export function postHtmlDescription({ excerpt, htmlDescription }) {
 
 // Also used in post.html js, remember to keep in sync!
 export function postPreview(post) {
-    const postUrl = `${post.slug}.html`;
+    const postUrl = `/${post.slug}/`;
     return `
    <li class="cursor-pointer border-[2px] border-solid border-primary-text-faded p-6 rounded
         max-content-width m-auto"
@@ -86,7 +86,7 @@ export function nowDateTime() {
 export function postsSiteMap({ domain, posts }) {
     return posts.map(p => `
     <url>
-        <loc>https://${domain}/${p.slug}.html</loc>
+        <loc>https://${domain}/${p.slug}/</loc>
         <lastmod>${p.updatedAt ? p.updatedAt : p.publishedAt}</lastmod>
     </url>`).join("\n");
 }
@@ -105,7 +105,7 @@ export function postsAtomFeed({ domain, posts }) {
     <entry xml:lang="en">
         <title>${p.title}</title>
         <id>https://${domain}/${p.slug}</id>
-        <link href="https://${domain}/${p.slug}.html" rel="alternate" type="text/html" />
+        <link href="https://${domain}/${p.slug}/" rel="alternate" type="text/html" />
         <published>${dateToAtomFeedDateTime(p.publishedAt)}</published>
         <updated>${dateToAtomFeedDateTime(p.updatedAt ? p.updatedAt : p.publishedAt)}</updated>
         <summary>${stripHtml(p.excerpt)}</summary>

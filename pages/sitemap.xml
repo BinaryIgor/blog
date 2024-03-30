@@ -6,6 +6,6 @@
         <loc>https://{{domain}}</loc>
     </url>
     <url>
-        <loc>https://{{domain}}/about.html</loc>
+        <loc>https://{{domain}}/about/</loc>
     </url>
 </urlset>

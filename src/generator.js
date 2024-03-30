@@ -5,12 +5,12 @@ const markedRenderer = {
         const escapedText = text.toLowerCase()
             .replace(/<a(.*?)>(.*?)<\/a>/g, (match, g1, g2) => g2)
             .replace(/[^\w]+/g, (match) => {
-            const trimmedMatch = match.trim();
-            if (trimmedMatch == '?' || trimmedMatch == '.' || trimmedMatch == '!') {
-                return '';
-            }
-            return '-';   
-        });
+                const trimmedMatch = match.trim();
+                if (trimmedMatch == '?' || trimmedMatch == '.' || trimmedMatch == '!') {
+                    return '';
+                }
+                return '-';
+            });
         return `
                 <h${level} id="${escapedText}">
                   ${text}
@@ -51,6 +51,9 @@ if (process.env.ENV == 'dev') {
 const HTML_EXTENSION = ".html";
 const JS_EXTENSION = ".js";
 const MD_EXTENSION = ".md";
+const INDEX_HTML = "index.html"
+const PREVIOUS_POST_URL_SUPPORT_DATE = "2024-03-31";
+const POSTS_TO_HTML_FILES_BATCH = 10;
 
 const jsComponents = await import('../pages/components.js');
 
@@ -216,16 +219,45 @@ await writeFileContent(postsJsonPath, JSON.stringify(withoutDraftsSortedPostsDat
 
 const pages = await allPages(pagesDir, withoutDraftsSortedPostsData);
 
+//TODO: keep only file structure after ~ 2024-05-01
 for (const p of config.pagesToRender) {
     await writeFileContent(path.join(distDir, p), pages[p]);
+
+    if (p.endsWith(HTML_EXTENSION)) {
+        const pageDir = path.join(distDir, p.replace(HTML_EXTENSION, ""));
+        await fs.promises.mkdir(pageDir);
+        await writeFileContent(path.join(pageDir, INDEX_HTML), pages[p]);
+    }
 }
 
 const postTemplate = pages[config.postTemplate];
+const postsSize = posts.size;
+
+const writePostsPromises = [];
+
+async function writePostToHtmlFile(post, postFontMatter) {
+    if (postFontMatter.publishedAt <= PREVIOUS_POST_URL_SUPPORT_DATE) {
+        await writeFileContent(path.join(distDir, `${postFontMatter.slug}${HTML_EXTENSION}`), post);
+    }
+
+    const postDir = path.join(distDir, postFontMatter.slug)
+    await fs.promises.mkdir(postDir)
+    await writeFileContent(path.join(postDir, INDEX_HTML), post);
+}
 
 for (const [k, e] of Object.entries(posts)) {
     const htmlContent = markdownToHtml(e.content);
     const variables = { ...config, ...e.fontMatter, post: htmlContent };
     const post = templateWithReplacedVariables(postTemplate, variables, { skipMissing: false, renderFunctions: true });
 
-    await writeFileContent(path.join(distDir, `${e.fontMatter.slug}.html`), post);
+    writePostsPromises.push(writePostToHtmlFile(post, e.fontMatter));
+    
+    if (writePostsPromises.length >= POSTS_TO_HTML_FILES_BATCH) {
+        await Promise.all(writePostsPromises);
+        writePostsPromises = [];
+    }
+}
+
+if (writePostsPromises.length > 0) {
+    await Promise.all(writePostsPromises);
 }

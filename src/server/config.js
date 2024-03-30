@@ -29,9 +29,13 @@ function analyticsAllowedPaths() {
     }
     return ["/",
         "/index.html",
+        "/index/",
         "/about.html",
+        "/about/",
         "/posts.html",
+        "/posts/",
         "/not-found.html",
-        "/error.html",
-        "/stats.html"];
+        "/not-found/",
+        "/stats.html",
+        "/stats/"];
 }

@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+<meta name="google" content="notranslate">
+<meta id="viewport" name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="/assets/styles.css">
+<link rel="icon" href="/assets/favicon-light.svg" sizes="any" type="image/svg+xml">
+<link rel="alternate" type="application/atom+xml" href="https://binaryigor.com/feed.xml" />
+<link rel="preload" as="font" type="font/ttf" crossorigin="anonymous"
+    href="/assets/fonts/roboto/RobotoMono-Regular.ttf">
+<link rel="preload" as="font" type="font/ttf" crossorigin="anonymous"
+    href="/assets/fonts/roboto/RobotoMono-Bold.ttf">
+<link rel="preload" as="font" type="font/ttf" crossorigin="anonymous"
+    href="/assets/fonts/roboto/RobotoMono-Italic.ttf">
+<meta name="author" content="Igor Roztropiński">
+    <meta name="description" content="Binary Igor is a blog about programming, software engineering, software design, computer science, and the inner workings of binary and digital machines.">
+    <title>Binary Igor</title>
+    <script>
+    (function () {
+        const faviconLink = document.querySelector('link[rel="icon"]');
+
+        const KEY = "MODE";
+        const LIGHT_MODE = 'light';
+        const DARK_MODE = 'dark';
+        const LIGHT_FAVICON_LINK = '/assets/favicon-light.svg';
+        const DARK_FAVICON_LINK = '/assets/favicon.svg';
+
+        let currentMode = localStorage.getItem(KEY);
+        if (!currentMode) {
+            currentMode = DARK_MODE;
+        }
+
+        if (currentMode == LIGHT_MODE) {
+            document.documentElement.classList.remove(DARK_MODE);
+            faviconLink.setAttribute('href', LIGHT_FAVICON_LINK);
+        } else {
+            document.documentElement.classList.add(DARK_MODE);
+            faviconLink.setAttribute('href', DARK_FAVICON_LINK);
+        }
+    })();
+</script>
+</head>
+
+<body>
+    <div class="sticky top-0 pt-4 pb-2 px-4 z-10 bg-primary select-none">
+    <div id="navigation-toggle" class="text-3xl text-center cursor-pointer">I0I</div>
+    <div id="theme-toggle" class="absolute px-4 py-4 top-0 right-0 text-3xl cursor-pointer">0</div>
+    <nav id="navigation" class="hidden p-4
+        m-auto text-center
+        items-center justify-center 
+        max-content-width
+        text-2xl border-[2px] border-t-0 border-solid border-primary-text-faded rounded-b
+        max-h-[400px] overflow-auto">
+        <a class="w-full block" href="/">Main</a>
+        <div class="delimiter-like py-1">---</div>
+        <a class="w-full block" href="/about.html">About</a>
+        <div class="delimiter-like py-1">---</div>
+        <a class="w-full block" href="/posts.html">Posts</a>
+        <div class="delimiter-like py-1">---</div>
+        <a class="w-full block" href="/feed.xml">Atom Feed</a>
+    </nav>
+</div>
+    <div class="pt-6 px-4 text-center">
+        <h1 class="text-4xl font-bold">
+            <a href="about.html">Binary Igor</a>
+        </h1>
+        <div class="mt-6 m-auto max-w-[600px]">
+            <p>Some things are either 0 or I.</p>
+            <p class="mb-2">Thoughts about managing binary machines (computers), which are controlled by the people called: programmers, software engineers, coders, developers, hackers.</p>
+            <p class="italic opacity-80 text-base">By Igor Roztropiński</p>
+        </div>
+        <div class="delimiter-like py-8">---</div>
+        
+    <ul class="space-y-6">
+        
+   <li class="cursor-pointer border-[2px] border-solid border-primary-text-faded p-6 rounded
+        max-content-width m-auto"
+        onclick="(function() { const selected = document.getSelection().toString(); if (!selected) location.href='how-many-http-requests-can-a-single-machine-handle.html' })()">
+        <a href="how-many-http-requests-can-a-single-machine-handle.html" class="text-2xl mb-2 font-bold">Load Testing: how many HTTP requests/second can a Single Machine handle?</a>
+        <div class="mb-6 text-secondary-3 flex flex-wrap justify-center whitespace-pre-wrap"><span>2024-03-28;</span><span> 3123 words;</span><span> 25 minutes to read;</span></div>
+        <div>When designing systems and deciding on the architecture, I often hear justifying the use of <em>microservices</em> and other complex solutions because of the predicted <em>performance</em> and <em>scalability</em> needs. Out of curiosity then, let's test the limits of an extremely simple approach, the simplest possible one.</div>
+    </li>
+
+   <li class="cursor-pointer border-[2px] border-solid border-primary-text-faded p-6 rounded
+        max-content-width m-auto"
+        onclick="(function() { const selected = document.getSelection().toString(); if (!selected) location.href='kubernetes-maybe-a-few-bash-python-scripts-is-enough.html' })()">
+        <a href="kubernetes-maybe-a-few-bash-python-scripts-is-enough.html" class="text-2xl mb-2 font-bold">Kubernetes: maybe a few Bash/Python scripts is enough</a>
+        <div class="mb-6 text-secondary-3 flex flex-wrap justify-center whitespace-pre-wrap"><span>2024-03-09;</span><span> 3208 words;</span><span> 26 minutes to read;</span></div>
+        <div>When it comes to the infrastructure of a software system, there are some features that are virtually always needed, independently of the project nature, and some that are additional, optional, or useful only in <em>some projects and contexts</em> ... Infrastructure is a crucial component of every software system: what do we need from it?</div>
+    </li>
+
+   <li class="cursor-pointer border-[2px] border-solid border-primary-text-faded p-6 rounded
+        max-content-width m-auto"
+        onclick="(function() { const selected = document.getSelection().toString(); if (!selected) location.href='htmx-and-web-components-a-perfect-match.html' })()">
+        <a href="htmx-and-web-components-a-perfect-match.html" class="text-2xl mb-2 font-bold">HTMX and Web Components: a Perfect Match</a>
+        <div class="mb-6 text-secondary-3 flex flex-wrap justify-center whitespace-pre-wrap"><span>2023-12-21;</span><span> 2109 words;</span><span> 17 minutes to read;</span></div>
+        <div><em>Web Components</em> are a set of browser APIs that allow us to create custom HTML elements. They are one of the major things that SPA (Single Page Application) frameworks have been giving us for a long time ... <em>HTMX</em> is highly interesting, useful and a promising technology. It simplifies many things and allows us to build SPA or SPA-like applications without complex tooling, dependencies, frameworks and mostly without writing application-specific JavaScript code.</div>
+    </li>
+
+   <li class="cursor-pointer border-[2px] border-solid border-primary-text-faded p-6 rounded
+        max-content-width m-auto"
+        onclick="(function() { const selected = document.getSelection().toString(); if (!selected) location.href='modular-monolith-and-microservices-modularity-is-what-truly-matters.html' })()">
+        <a href="modular-monolith-and-microservices-modularity-is-what-truly-matters.html" class="text-2xl mb-2 font-bold">Modular Monolith and Microservices: Modularity is what truly matters</a>
+        <div class="mb-6 text-secondary-3 flex flex-wrap justify-center whitespace-pre-wrap"><span>2023-11-26;</span><span> 3468 words;</span><span> 28 minutes to read;</span></div>
+        <div>Modularity is a crucial concept when designing and creating software. Independent of whether our chosen architecture style is to have a single unit of deployment - <em>Monolith</em> or multiple units of deployment - <em>Microservices/Services</em>. It is a quality that should be treated completely independent of how many deployable units of software we choose to have.</div>
+    </li>
+
+   <li class="cursor-pointer border-[2px] border-solid border-primary-text-faded p-6 rounded
+        max-content-width m-auto"
+        onclick="(function() { const selected = document.getSelection().toString(); if (!selected) location.href='unit-integration-e2e-contract-x-tests-what-should-we-focus-on.html' })()">
+        <a href="unit-integration-e2e-contract-x-tests-what-should-we-focus-on.html" class="text-2xl mb-2 font-bold">Unit, Integration, E2E, Contract, X tests: what should we focus on?</a>
+        <div class="mb-6 text-secondary-3 flex flex-wrap justify-center whitespace-pre-wrap"><span>2023-11-04;</span><span> 3014 words;</span><span> 24 minutes to read;</span></div>
+        <div>When we write software, we intend it to be used in some, usually predefined and desirable, way. All software has some specification, either explicitly described or implicitly assumed. How do we know that it (software) works? We can test it manually, using all of its features and functionalities. Unfortunately, this approach breaks down pretty fast.</div>
+    </li>
+    </ul>
+
+        <div class="py-12">
+            <a class="p-4 text-xl font-bold underline" href="posts.html#prior">More posts</a>
+        </div>
+    </div>
+    <div class="h-16"></div>
+<footer class="h-12 absolute left-0 bottom-0 w-full text-center italic opacity-80">
+    <span class="text-xl">&copy;</span> <span class="text-base">Igor Roztropiński</span>
+</footer>
+
+    <script>
+// Theme mode is embedded here for a better user experience - to avoid 0/I icon blink
+// Navigation/dark mode switch
+const navigation = document.getElementById("navigation");
+
+document.getElementById("navigation-toggle").onclick = () => {
+    navigation.classList.toggle("hidden");
+};
+
+function setupMode() {
+    const KEY = "MODE";
+
+    const LIGHT_MODE = 'light';
+    const DARK_MODE = 'dark';
+    const LIGHT_MODE_ICON = "I";
+    const DARK_MODE_ICON = "0";
+    const LIGHT_FAVICON_LINK = '/assets/favicon-light.svg';
+    const DARK_FAVICON_LINK = '/assets/favicon.svg';
+
+    const themeToggle = document.getElementById("theme-toggle");
+    const faviconLink = document.querySelector('link[rel="icon"]');
+
+    const currentMode = () => {
+        const mode = localStorage.getItem(KEY);
+        if (mode) {
+            return mode;
+        }
+        return DARK_MODE;
+    }
+
+    const setDarkMode = () => {
+        document.documentElement.classList.add(DARK_MODE);
+        localStorage.setItem(KEY, DARK_MODE)
+        themeToggle.textContent = DARK_MODE_ICON;
+        faviconLink.setAttribute('href', DARK_FAVICON_LINK);
+    };
+
+    const setLightMode = () => {
+        document.documentElement.classList.remove(DARK_MODE);
+        localStorage.setItem(KEY, LIGHT_MODE)
+        themeToggle.textContent = LIGHT_MODE_ICON;
+        faviconLink.setAttribute('href', LIGHT_FAVICON_LINK);
+    };
+
+    if (currentMode() == LIGHT_MODE) {
+        setLightMode();
+    } else {
+        setDarkMode();
+    }
+
+    themeToggle.onclick = () => {
+        if (currentMode() == LIGHT_MODE) {
+            setDarkMode();
+        } else {
+            setLightMode();
+        }
+    };
+}
+
+setupMode();
+</script>
+<script defer src="/assets/analytics.js"></script>
+</body>
+
+</html>

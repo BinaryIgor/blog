@@ -47,7 +47,16 @@ export class AnalyticsService {
             throw new Error('Unsupported event type!');
         }
 
-        return { ...event, source: sourceUrl.host }
+        return {
+            ...event,
+            path: this._normalizedPath(event.path),
+            source: sourceUrl.host
+        }
+    }
+
+    _normalizedPath(event) {
+        const withoutHtml = event.path.replace(".html", "");
+        return withoutHtml.endsWith("/") ? withoutHtml : withoutHtml + "/";
     }
 
     _validateVisitorId(visitorId) {

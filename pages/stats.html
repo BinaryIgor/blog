@@ -24,12 +24,12 @@
         const statsLoader = document.getElementById("stats-loader");
 
         function fetchPosts() {
-            return fetch("posts.json")
+            return fetch("/posts.json")
                 .then(r => r.json())
                 .then(posts => {
                     const postsByPath = new Map();
                     posts.forEach(p => {
-                        postsByPath.set(`/${p.slug}.html`, p);
+                        postsByPath.set(`/${p.slug}/`, p);
                     });
                     return postsByPath;
                 })
