@@ -216,9 +216,18 @@ await writeFileContent(postsJsonPath, JSON.stringify(withoutDraftsSortedPostsDat
 
 const pages = await allPages(pagesDir, withoutDraftsSortedPostsData);
 
+let notFoundPage;
 for (const p of config.pagesToRender) {
     await writeFileContent(path.join(distDir, p), pages[p]);
+    if (p.includes("not-found")) {
+        notFoundPage = pages[p];
+    }
 }
+
+// Testing pretty urls on DigitalOcean
+const notFoundDir = path.join(distDir, "not-found");
+fs.mkdirSync(notFoundDir);
+await writeFileContent(path.join(notFoundDir, "index.html"), notFoundPage);
 
 const postTemplate = pages[config.postTemplate];
 
