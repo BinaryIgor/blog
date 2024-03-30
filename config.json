@@ -3,6 +3,7 @@
     "descriptionLine1": "Some things are either 0 or I.",
     "descriptionLine2": "Thoughts about managing binary machines (computers), which are controlled by the people called: programmers, software engineers, coders, developers, hackers.",
     "domain": "binaryigor.com",
+    "httpsDomain": "https://binaryigor.com",
     "pagesToRender": [
         "index.html",
         "posts.html",

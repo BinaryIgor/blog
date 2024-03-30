@@ -216,18 +216,9 @@ await writeFileContent(postsJsonPath, JSON.stringify(withoutDraftsSortedPostsDat
 
 const pages = await allPages(pagesDir, withoutDraftsSortedPostsData);
 
-let notFoundPage;
 for (const p of config.pagesToRender) {
     await writeFileContent(path.join(distDir, p), pages[p]);
-    if (p.includes("not-found")) {
-        notFoundPage = pages[p];
-    }
 }
-
-// Testing pretty urls on DigitalOcean
-const notFoundDir = path.join(distDir, "not-found");
-fs.mkdirSync(notFoundDir);
-await writeFileContent(path.join(notFoundDir, "index.html"), notFoundPage);
 
 const postTemplate = pages[config.postTemplate];
 
@@ -236,5 +227,5 @@ for (const [k, e] of Object.entries(posts)) {
     const variables = { ...config, ...e.fontMatter, post: htmlContent };
     const post = templateWithReplacedVariables(postTemplate, variables, { skipMissing: false, renderFunctions: true });
 
-    await writeFileContent(path.join(distDir, `${e.fontMatter.slug}.html`), post);
+    await writeFileContent(path.join(distDir, `${e.fontMatter.slug}${HTML_EXTENSION}`), post);
 }

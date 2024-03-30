@@ -34,7 +34,7 @@ export function postHtmlDescription({ excerpt, htmlDescription }) {
 
 // Also used in post.html js, remember to keep in sync!
 export function postPreview(post) {
-    const postUrl = `${post.slug}.html`;
+    const postUrl = `/${post.slug}.html`;
     return `
    <li class="cursor-pointer border-[2px] border-solid border-primary-text-faded p-6 rounded
         max-content-width m-auto"
@@ -83,10 +83,10 @@ export function nowDateTime() {
     return new Date().toISOString();
 }
 
-export function postsSiteMap({ domain, posts }) {
+export function postsSiteMap({ httpsDomain, posts }) {
     return posts.map(p => `
     <url>
-        <loc>https://${domain}/${p.slug}.html</loc>
+        <loc>${httpsDomain}/${p.slug}.html</loc>
         <lastmod>${p.updatedAt ? p.updatedAt : p.publishedAt}</lastmod>
     </url>`).join("\n");
 }
@@ -96,7 +96,7 @@ function stripHtml(text) {
         .replaceAll(/<\/[a-zA-Z]+>/g, "");
 }
 
-export function postsAtomFeed({ domain, posts }) {
+export function postsAtomFeed({ httpsDomain, posts }) {
     function dateToAtomFeedDateTime(date) {
         return `${date}T00:00:00+00:00`;
     }
@@ -104,8 +104,8 @@ export function postsAtomFeed({ domain, posts }) {
     return posts.map(p => `
     <entry xml:lang="en">
         <title>${p.title}</title>
-        <id>https://${domain}/${p.slug}</id>
-        <link href="https://${domain}/${p.slug}.html" rel="alternate" type="text/html" />
+        <id>${httpsDomain}/${p.slug}</id>
+        <link href="${httpsDomain}/${p.slug}.html" rel="alternate" type="text/html" />
         <published>${dateToAtomFeedDateTime(p.publishedAt)}</published>
         <updated>${dateToAtomFeedDateTime(p.updatedAt ? p.updatedAt : p.publishedAt)}</updated>
         <summary>${stripHtml(p.excerpt)}</summary>
