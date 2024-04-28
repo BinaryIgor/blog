@@ -4,8 +4,8 @@
     "slug": "kubernetes-maybe-a-few-bash-python-scripts-is-enough",
     "publishedAt": "2024-03-09",
     "startedAt": "2024-02-24",
-    "timeToRead": "26 minutes",
-    "wordsCount": 3208,
+    "timeToRead": "29 minutes",
+    "wordsCount": 3607,
     "excerpt": "When it comes to the infrastructure of a software system, there are some features that are virtually always needed, independently of the project nature, and some that are additional, optional, or useful only in <em>some projects and contexts</em> ... Infrastructure is a crucial component of every software system: what do we need from it?",
     "researchLog": [ 5, 3, 3 ],
     "writingLog": [ 2, 1.5, 2, 2.5, 0.5, 4, 4, 3, 4.5, 3.5, 1, 2.5, 2, 1, 3 ]

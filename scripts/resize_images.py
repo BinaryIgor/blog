@@ -2,8 +2,8 @@ import os
 from os import path
 from PIL import Image
 
-MAX_IMAGE_WIDTH = 700
-MAX_IMAGE_HEIGHT = 700
+MAX_IMAGE_WIDTH = 750
+MAX_IMAGE_HEIGHT = 750
 
 IMAGES_DIR = os.path.join(os.getcwd(), "..", "assets", "images")
 
@@ -40,7 +40,7 @@ def resize_images(input_path):
         new_height = int(scale * img.height)
 
         if scale < 1:
-            img = img.resize((new_width, new_height), Image.ANTIALIAS)
+            img = img.resize((new_width, new_height), Image.Resampling.LANCZOS)
 
         img.save(output_path)
 

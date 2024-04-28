@@ -3,8 +3,8 @@
     "title": "Load Testing: how many HTTP requests/second can a Single Machine handle?",
     "slug": "how-many-http-requests-can-a-single-machine-handle",
     "publishedAt": "2024-03-28",
-    "timeToRead": "25 minutes",
-    "wordsCount": 3123,
+    "timeToRead": "22 minutes",
+    "wordsCount": 2760,
     "excerpt": "When designing systems and deciding on the architecture, I often hear justifying the use of <em>microservices</em> and other complex solutions because of the predicted <em>performance</em> and <em>scalability</em> needs. Out of curiosity then, let's test the limits of an extremely simple approach, the simplest possible one.",
     "researchLog": [ 1.5 ],
     "writingLog": [ 2, 2, 1, 2, 2.5, 2, 1 ]

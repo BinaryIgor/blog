@@ -194,7 +194,11 @@ html {
     }
 
     .post ul {
-        @apply list-disc list-inside space-y-1;
+        @apply list-disc list-inside;
+    }
+
+    .post li {
+        @apply my-1;
     }
 
     .post li > ul {
@@ -202,7 +206,7 @@ html {
     }
 
     .post ol {
-        @apply list-decimal list-inside space-y-1;
+        @apply list-decimal list-inside;
     }
 
     .post li > ol {
@@ -223,7 +227,7 @@ html {
     }
 
     .post figure {
-        @apply w-full;
+        @apply w-full my-6;
     }
 
     .post img {
