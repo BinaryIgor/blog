@@ -445,11 +445,8 @@ In case of problems you can rollback to the previous deployment: /home/deploy/de
   * **if *App* is not healthy** - we stop it and rename the previous `app-backup` container back to `app` and fail the deployment; old version was running and used by *Nginx* all this time, so that is all we have to do
   * **if *App* is healthy** - we make *Nginx* use the new *App* container by updating its config; we then wait a few seconds, so that pending http requests have a chance to complete, and then we just stop the old *App* container and remove it
 
-It is all defined in:
-* [scripts/template_run_zero_downtime_app.bash](https://github.com/BinaryIgor/code-examples/blob/master/htmx-production-setup/scripts/template_run_zero_downtime_app.bash) and then in version with specific values `app/dist/run_app.bash`, after building *App*
-* [nginx/template_update_app_url.bash](https://github.com/BinaryIgor/code-examples/blob/master/htmx-production-setup/nginx/template_update_app_url.bash) and its specific `nginx/dist/update_app_url.bash` version, after building *Nginx* 
+It is all defined in [template_run_zero_downtime_app.bash](https://github.com/BinaryIgor/code-examples/blob/master/htmx-production-setup/scripts/template_run_zero_downtime_app.bash) and in [template_update_app_url.bash](https://github.com/BinaryIgor/code-examples/blob/master/htmx-production-setup/nginx/template_update_app_url.bash); versions with specific values are available after building *App* and *Nginx* as `app/dist/run_app.bash` and `nginx/dist/update_app_url.bash` accordingly.
 
-\
 We can right now go to `https://<your-domain>` and sign in as ([DemoDataInitializer.java](https://github.com/BinaryIgor/code-examples/blob/master/htmx-production-setup/app/src/main/java/com/binaryigor/htmxproductionsetup/DemoDataInitializer.java)):
 ```
 igor@gmail.com:ComplexPassword12
