@@ -12,6 +12,7 @@
 <body data-post-slug="{{ slug }}">
     {{ navigation.html }}
 
+    <!-- see POST_TOP_MARGIN dependency below -->
     <article class="post mt-6 mx-4">
         <h1 class="mb-0 max-content-width">{{ title }}</h1>
         <div
@@ -50,10 +51,22 @@
         const RANDOM_POSTS = 2;
         const MIN_POSTS_FOR_RANDOM = 2;
         const MIN_POSTS_FOR_MULTIPLE_RANDOM = 10;
-        const currentPostSlug = document.body.getAttribute("data-post-slug");
+        // needed for precise post scroll position calculation
+        const POST_TOP_MARGIN = 24;
+        const POST_SEEN_PERCENTAGE_CHANGE_EVENT = "post-seen-percentage-change";
 
+        const navigationBar = document.getElementById("navigation-bar");
+        const postContainer = document.querySelector("article");
+
+        const currentPostSlug = document.body.getAttribute("data-post-slug");
         const randomPostsComponent = document.getElementById("random-posts-component");
         const randomPostsContainer = document.getElementById("random-posts-container");
+
+        function seenPostPercentage() {
+            const seenDocument = document.documentElement.scrollTop + document.documentElement.clientHeight;
+            const postWithAllOffsetsHeight =  navigationBar.clientHeight + POST_TOP_MARGIN + postContainer.scrollHeight;
+            return seenDocument / postWithAllOffsetsHeight;
+        }
 
         function randomPostsExceptCurrentOne(posts) {
             if (posts.length < MIN_POSTS_FOR_RANDOM) {
@@ -138,8 +151,40 @@
             });
         }
 
+        function setupPostSeenPercentageObserver() {
+            const navigationToggle = document.getElementById("navigation-toggle");
+            const navigationToggleText = navigationToggle.textContent;
+
+            let navigationOpen = false;
+
+            window.addEventListener("scroll", () => {
+                const postPercentage = seenPostPercentage();
+
+                window.dispatchEvent(new CustomEvent(POST_SEEN_PERCENTAGE_CHANGE_EVENT, { detail: { percentage: postPercentage } }));
+
+                if (navigationOpen) {
+                    return;
+                }
+
+                const scroll = document.documentElement.scrollTop;
+                const postPercentage100 = parseInt(postPercentage * 100);
+
+                if (scroll <= 0 || postPercentage >= 1) {
+                    navigationToggle.textContent = navigationToggleText;
+                } else if (postPercentage100 >= 1) {
+                    navigationToggle.textContent = `${navigationToggleText}/${postPercentage100}%`;
+                }
+            });
+
+            navigationToggle.addEventListener("click", e => {
+                navigationOpen = !navigationOpen;
+                navigationToggle.textContent = navigationToggleText;
+            });
+        }
+
         setupNextPostsProposition();
         setupHeadersOnClickAnchorLinks();
+        setupPostSeenPercentageObserver();
     </script>
 </body>
 
