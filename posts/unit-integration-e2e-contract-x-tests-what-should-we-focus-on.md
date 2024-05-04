@@ -3,8 +3,8 @@
     "title": "Unit, Integration, E2E, Contract, X tests: what should we focus on?",
     "slug": "unit-integration-e2e-contract-x-tests-what-should-we-focus-on",
     "publishedAt": "2023-11-04",
-    "timeToRead": "24 minutes",
-    "wordsCount": 3014,
+    "timeToRead": "32 minutes",
+    "wordsCount": 4015,
     "excerpt": "When we write software, we intend it to be used in some, usually predefined and desirable, way. All software has some specification, either explicitly described or implicitly assumed. How do we know that it (software) works? We can test it manually, using all of its features and functionalities. Unfortunately, this approach breaks down pretty fast.",
     "researchLog": [1, 3, 2],
     "writingLog": [ 1, 3, 5, 3.5, 1.5, 3, 1 ]

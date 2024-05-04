@@ -3,8 +3,6 @@ from os import path
 import re
 import codecs
 
-#TODO: simplify this script using regex
-
 ASSETS_DIRECTORY = os.environ.get('ASSETS_DIRECTORY',  
                                   path.join(os.getcwd(), "..", "dist"))
 ASSETS_VERSION = os.environ.get('ASSETS_VERSION',
