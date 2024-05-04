@@ -4,8 +4,6 @@
     "slug": "htmx-a-setup-ready-for-production",
     "publishedAt": "2024-05-04",
     "startedAt": "2025-04-28",
-    "timeToRead": "29 minutes",
-    "wordsCount": 3569,
     "excerpt": "HTMX is a promising technology that simplifies many things when building web applications/systems ... That is great when it comes to local development and simple experiments, but what about Production?",
     "researchLog": [ ],
     "writingLog": [ 2.5, 1, 1, 8, 8, 3, 4 ]
