@@ -4,8 +4,6 @@
     "slug": "modular-monolith-and-microservices-modularity-is-what-truly-matters",
     "publishedAt": "2023-11-26",
     "startedAt": "2023-11-12",
-    "timeToRead": "42 minutes",
-    "wordsCount": 5275,
     "excerpt": "Modularity is a crucial concept when designing and creating software. Independent of whether our chosen architecture style is to have a single unit of deployment - <em>Monolith</em> or multiple units of deployment - <em>Microservices/Services</em>. It is a quality that should be treated completely independent of how many deployable units of software we choose to have.",
     "researchLog": [0.5, 2, 1.5 ],
     "writingLog": [ 3.5, 1.5, 1.5, 2, 1.5, 3, 3.5, 3.5, 5, 3.5, 4 ]

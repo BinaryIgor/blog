@@ -1,30 +1,10 @@
 const LATEST_POSTS = 5;
 
-export function postMetadata({ publishedAt, wordsCount, timeToRead, extended = false }) {
+export function postMetadata({ publishedAt }) {
     if (!publishedAt) {
         throw new Error("Published at is required, but wasn't supplied!");
     }
-
-    let component = `<span>${publishedAt};</span>`;
-
-    if (wordsCount) {
-        component += `<span> ${wordsCount} words;</span>`;
-    }
-
-    if (timeToRead) {
-        component += `<span> ${timeToRead} to read`;
-        if (extended) {
-            component += ',</span><span> but probably more to ponder and understand;</span>';
-        } else {
-            component += ';</span>';
-        }
-    }
-
-    return component;
-}
-
-export function extendedPostMetadata({ publishedAt, wordsCount, timeToRead }) {
-    return postMetadata({ publishedAt, wordsCount, timeToRead, extended: true });
+    return `<span>${publishedAt}</span>`;
 }
 
 export function postHtmlDescription({ excerpt, htmlDescription }) {

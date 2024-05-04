@@ -15,8 +15,8 @@
     <article class="post mt-6 mx-4">
         <h1 class="mb-0 max-content-width">{{ title }}</h1>
         <div
-            class="mt-2 my-0 text-xl text-center text-secondary-3 max-content-width m-auto flex flex-wrap justify-center whitespace-pre-wrap">
-            {{ .js: extendedPostMetadata() }}
+            class="mt-2 my-0 text-2xl text-center text-secondary-3 max-content-width m-auto flex flex-wrap justify-center whitespace-pre-wrap">
+            {{ .js: postMetadata() }}
         </div>
         <div class="mt-16 mb-16 max-content-width">
             {{ post }}
@@ -101,15 +101,8 @@
             </li>`;
         }
 
-        function postMetadata({ publishedAt, wordsCount, timeToRead }) {
-            let component = `<span>${publishedAt};</span>`;
-            if (wordsCount) {
-                component += `<span> ${wordsCount} words;</span>`;
-            }
-            if (timeToRead) {
-                component += `<span> ${timeToRead} to read;</span>`;
-            }
-            return component;
+        function postMetadata({ publishedAt }) {
+            return `<span>${publishedAt}</span>`;
         }
 
         function postsPreview(posts) {
