@@ -64,7 +64,7 @@
 
         function seenPostPercentage() {
             const seenDocument = document.documentElement.scrollTop + document.documentElement.clientHeight;
-            const postWithAllOffsetsHeight =  navigationBar.clientHeight + POST_TOP_MARGIN + postContainer.scrollHeight;
+            const postWithAllOffsetsHeight = navigationBar.clientHeight + POST_TOP_MARGIN + postContainer.scrollHeight;
             return seenDocument / postWithAllOffsetsHeight;
         }
 
@@ -155,24 +155,27 @@
             const navigationToggle = document.getElementById("navigation-toggle");
             const navigationToggleText = navigationToggle.textContent;
 
+            let previousPostPercentage = -1;
             let navigationOpen = false;
 
             function onPostSeenPercentageChange() {
-                const postPercentage = seenPostPercentage();
+                const postPercentage = parseInt(seenPostPercentage() * 100);
 
-                window.dispatchEvent(new CustomEvent(POST_SEEN_PERCENTAGE_CHANGE_EVENT, { detail: { percentage: postPercentage } }));
+                if (previousPostPercentage != postPercentage) {
+                    previousPostPercentage = postPercentage;
+                    window.dispatchEvent(new CustomEvent(POST_SEEN_PERCENTAGE_CHANGE_EVENT, { detail: { percentage: postPercentage } }));
+                }
 
                 if (navigationOpen) {
                     return;
                 }
 
                 const scroll = document.documentElement.scrollTop;
-                const postPercentage100 = parseInt(postPercentage * 100);
 
-                if (scroll <= 0 || postPercentage >= 1) {
+                if (scroll <= 0 || postPercentage >= 100) {
                     navigationToggle.textContent = navigationToggleText;
-                } else if (postPercentage100 >= 1) {
-                    navigationToggle.textContent = `${navigationToggleText}/${postPercentage100}%`;
+                } else if (postPercentage >= 1) {
+                    navigationToggle.textContent = `${navigationToggleText}/${postPercentage}%`;
                 }
             }
 
@@ -181,7 +184,9 @@
 
             navigationToggle.addEventListener("click", e => {
                 navigationOpen = !navigationOpen;
-                navigationToggle.textContent = navigationToggleText;
+                if (navigationOpen) {
+                    navigationToggle.textContent = navigationToggleText;
+                }
             });
         }
 
