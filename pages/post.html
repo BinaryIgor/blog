@@ -157,7 +157,7 @@
 
             let navigationOpen = false;
 
-            window.addEventListener("scroll", () => {
+            function onPostSeenPercentageChange() {
                 const postPercentage = seenPostPercentage();
 
                 window.dispatchEvent(new CustomEvent(POST_SEEN_PERCENTAGE_CHANGE_EVENT, { detail: { percentage: postPercentage } }));
@@ -174,7 +174,10 @@
                 } else if (postPercentage100 >= 1) {
                     navigationToggle.textContent = `${navigationToggleText}/${postPercentage100}%`;
                 }
-            });
+            }
+
+            window.addEventListener("scroll", onPostSeenPercentageChange);
+            window.addEventListener("resize", onPostSeenPercentageChange);
 
             navigationToggle.addEventListener("click", e => {
                 navigationOpen = !navigationOpen;
