@@ -97,19 +97,8 @@ if (pageToSendEvents) {
 }
 
 if (pageToSendEvents && postPage) {
-    const postContainer = document.querySelector("article");
-    
     let minimumPostPercentageSeen = false;
     let minimumPostReadTimePassed = false;
-
-    function seenPostPercentage() {
-        const seenDocument = document.documentElement.scrollTop + document.documentElement.clientHeight;
-        return seenDocument / postContainer.scrollHeight;
-    }
-
-    function isMinimumPostPercentageVisible() {
-        return seenPostPercentage() >= MIN_POST_READ_SEEN_PERCENTAGE;
-    }
 
     function sendReadEventAfterDelayIfSeen(sourceUrl, visitorId) {
         setTimeout(() => {
@@ -125,18 +114,15 @@ if (pageToSendEvents && postPage) {
         sendEvent(sourceUrl, visitorId, READ_EVENT_TYPE);
     }
 
-    minimumPostPercentageSeen = isMinimumPostPercentageVisible();
-
     sendReadEventAfterDelayIfSeen(sourceUrl, visitorId);
 
-    if (!minimumPostPercentageSeen) {
-        window.addEventListener("scroll", () => {
-            if (!minimumPostPercentageSeen) {
-                minimumPostPercentageSeen = isMinimumPostPercentageVisible();
-                if (minimumPostPercentageSeen && minimumPostReadTimePassed) {
-                    sendReadEvent(sourceUrl, visitorId);
-                }
+    window.addEventListener("post-seen-percentage-change", e => {
+        if (!minimumPostPercentageSeen) {
+            const postPercentage = e.detail.percentage;
+            minimumPostPercentageSeen = postPercentage >= MIN_POST_READ_SEEN_PERCENTAGE;
+            if (minimumPostPercentageSeen && minimumPostReadTimePassed) {
+                sendReadEvent(sourceUrl, visitorId);
             }
-        });
-    }
+        }
+    });
 }
