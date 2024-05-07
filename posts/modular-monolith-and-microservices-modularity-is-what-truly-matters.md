@@ -173,13 +173,14 @@ We have delved deep into modularity: its importance, its various consequences on
 
 We should thoughtfully consider which strategy meets our particular requirements and only then go for it. We can always transition to a more complex approach, so it is better to err on the side of simplicity. **Design and architecture are art in the end, there are no final and absolute solutions, only tradeoffs, so weigh them and choose wisely!**
 
-<div class="article-delimiter">---</div>
+<div id="post-extras">
 
-### Related videos on my <a href="{{ youtubeChannelUrl }}">youtube channel</a>
-1. <a href="https://www.youtube.com/watch?v=onV4449vs1g">Modular Monolith with Independently Deployable Modules in Java</a>
+<div class="post-delimiter">---</div>
 
-<div class="article-delimiter">---</div>
+### Related videos on my [youtube channel]({{ youtubeChannelUrl }})
+1. [Modular Monolith with Independently Deployable Modules in Java](https://www.youtube.com/watch?v=onV4449vs1g)
 
+<div class="post-delimiter">---</div>
 
 ### Notes and resources
 1. Excellent article about the consequences of different cohesion and coupling degrees in software architecture: https://codeopinion.com/solid-nope-just-coupling-and-cohesion/
@@ -200,3 +201,5 @@ We should thoughtfully consider which strategy meets our particular requirements
     1. https://martinfowler.com/articles/micro-frontends.html
     2. https://frontendmastery.com/posts/understanding-micro-frontends/
     3. https://micro-frontends.org
+
+</div>

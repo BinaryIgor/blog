@@ -250,7 +250,12 @@ html {
         @apply text-secondary-2 font-bold text-2xl text-center;
     }
 
-    .article-delimiter {
+    /* there is a post progress dependency on this margin size - see post.html js */
+    .post-delimiter {
         @apply delimiter-like my-16;
+    }
+
+    #post-extras {
+        @apply m-0 p-0;
     }
 }

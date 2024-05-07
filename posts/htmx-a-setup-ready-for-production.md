@@ -462,17 +462,19 @@ As we have seen, HTMX is absolutely ready to be used in Production:
 
 **Taking it all into consideration, I highly recommend using HTMX in production, as a tool to build simpler and more maintainable systems.**
 
-<div class="article-delimiter">---</div>
+<div id="post-extras">
+  <div class="post-delimiter">---</div>
 
-### Notes and resources
-1. Code repo: https://github.com/BinaryIgor/code-examples/tree/master/htmx-production-setup
-2. Same concept, presentend on the video: https://www.youtube.com/watch?v=eO6bVRH-jT0
-3. My other HTMX articles/posts:
-    1. [HTMX: simpler web-based app/system](/htmx-simpler-web-based-app-or-system.html)
-    2. [HTMX and Web Components: a Perfect Match](/htmx-and-web-components-a-perfect-match.html)
-4. To make this post more digestible, I have skipped a few, non-HTMX specific things like:
-    1. backing up the database - I have made a video about that: https://www.youtube.com/watch?v=l46yS2G4kkg
-    2. informing users about a new app version - we should have something like a *version.json* file with the current version of the app, poll it from the client (browser) side and refresh the page, or rather ask the user to refresh it, if a new version is available
-    3. collecting metrics and logs from Docker containers - I have also made a video about that: https://www.youtube.com/watch?v=68PzQNsuSWc
-5. DigitalOcean: https://www.digitalocean.com
-6. Getting started with glorious Tailwind CSS: https://tailwindcss.com/docs/installation
+  ### Notes and resources
+  1. Code repo: https://github.com/BinaryIgor/code-examples/tree/master/htmx-production-setup
+  2. Same concept, presentend on the video: https://www.youtube.com/watch?v=eO6bVRH-jT0
+  3. My other HTMX articles/posts:
+      1. [HTMX: simpler web-based app/system](/htmx-simpler-web-based-app-or-system.html)
+      2. [HTMX and Web Components: a Perfect Match](/htmx-and-web-components-a-perfect-match.html)
+  4. To make this post more digestible, I have skipped a few, non-HTMX specific things like:
+      1. backing up the database - I have made a video about that: https://www.youtube.com/watch?v=l46yS2G4kkg
+      2. informing users about a new app version - we should have something like a *version.json* file with the current version of the app, poll it from the client (browser) side and refresh the page, or rather ask the user to refresh it, if a new version is available
+      3. collecting metrics and logs from Docker containers - I have also made a video about that: https://www.youtube.com/watch?v=68PzQNsuSWc
+  5. DigitalOcean: https://www.digitalocean.com
+  6. Getting started with glorious Tailwind CSS: https://tailwindcss.com/docs/installation
+</div>

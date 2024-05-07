@@ -707,8 +707,11 @@ Of course, there are other, non-performance related, reasons for having more tha
 
 Keep things simple!
 
-<div class="article-delimiter">---</div>
+<div id="post-extras">
+<div class="post-delimiter">---</div>
 
 ### Links
 1. Related video on my youtube channel: https://www.youtube.com/watch?v=NsdDIBll-Lw
 2. Source code, so you can experiment and run tests on your own: https://github.com/BinaryIgor/code-examples/tree/master/single-machine-tests
+
+</div>
