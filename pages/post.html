@@ -25,7 +25,7 @@
     </article>
 
     <div class="mb-8 mx-4">
-        <div class="article-delimiter">---</div>
+        <div class="post-delimiter">---</div>
         <p class="italic max-content-width m-auto">
             If you have valuable feedback, questions, comments, or you just want to get in touch, shoot me an email at
             <span id="contact-email" class="font-bold cursor-pointer" onclick="copyToClipboard('{{ contactEmail }}')">
@@ -57,6 +57,7 @@
 
         const navigationBar = document.getElementById("navigation-bar");
         const postContainer = document.querySelector("article");
+        const postExtras = document.getElementById("post-extras");
 
         const currentPostSlug = document.body.getAttribute("data-post-slug");
         const randomPostsComponent = document.getElementById("random-posts-component");
@@ -64,7 +65,10 @@
 
         function seenPostPercentage() {
             const seenDocument = document.documentElement.scrollTop + document.documentElement.clientHeight;
-            const postWithAllOffsetsHeight = navigationBar.clientHeight + POST_TOP_MARGIN + postContainer.scrollHeight;
+            let postWithAllOffsetsHeight = navigationBar.clientHeight + POST_TOP_MARGIN + postContainer.scrollHeight;
+            if (postExtras) {
+                postWithAllOffsetsHeight = postWithAllOffsetsHeight - postExtras.clientHeight;
+            }
             return seenDocument / postWithAllOffsetsHeight;
         }
 

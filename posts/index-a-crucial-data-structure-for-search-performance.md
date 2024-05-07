@@ -437,12 +437,14 @@ Lastly, having too many indexes can make our queries slower. **When we issue a q
 
 As we saw, **Index is a crucial data structure for search performance**. Simple idea of having a separate, optimized strictly for searching data structure allows us to fulfill pretty much any type of query in a timely manner, <a href="/reducing-the-search-space.html">almost irrespectively of our data size</a>. It does have its tradeoffs, mainly when it comes to write performance and additional storage needs, but when used wisely, it can make our queries wonderfully performant.
 
-<div class="article-delimiter">---</div>
+<div id="post-extras">
+
+<div class="post-delimiter">---</div>
 
 ### Related videos on my <a href="{{ youtubeChannelUrl }}">youtube channel</a>
 1. <a href="https://www.youtube.com/watch?v=edAvauoS3L0">Index vs Inverted Index performance in Postgres</a>
 
-<div class="article-delimiter">---</div>
+<div class="post-delimiter">---</div>
 
 ### Notes and resources
 
@@ -469,3 +471,5 @@ As we saw, **Index is a crucial data structure for search performance**. Simple 
 10. More details about BRIN index: https://www.crunchydata.com/blog/postgres-indexing-when-does-brin-win
 11. Full-text search in Postgres: https://www.postgresql.org/docs/current/textsearch-indexes.html
 12. Inverted Index in <a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/elasticsearch-intro.html">Elasticsearch</a>: https://www.elastic.co/blog/found-elasticsearch-from-the-bottom-up
+
+</div>

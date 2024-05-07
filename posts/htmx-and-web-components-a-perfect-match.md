@@ -395,13 +395,15 @@ As we saw, Web Components are extremely easy to create and use with HTMX. **They
 ```
 Even though they do not know anything about HTMX, it turns out that it is a breeze to connect these two technologies!
 
-<div class="article-delimiter">---</div>
+<div id="post-extras">
+
+<div class="post-delimiter">---</div>
 
 ### Related videos on my <a href="{{ youtubeChannelUrl }}">youtube channel</a>
 1. <a href="https://www.youtube.com/watch?v=M4i-JQVLgfE">Similar concept, live coded on the video</a>
 2. <a href="https://www.youtube.com/watch?v=A3UB3tyDWa4">Simple index.html with HTMX</a>
 
-<div class="article-delimiter">---</div>
+<div class="post-delimiter">---</div>
 
 ### Notes and resources
 
@@ -420,3 +422,5 @@ Even though they do not know anything about HTMX, it turns out that it is a bree
     4. https://aaadaaam.com/notes/step-into-the-light-dom/
     5. https://adactio.com/journal/20618
 8. Code repository: https://github.com/BinaryIgor/code-examples/tree/master/flexible-web-components
+
+</div>

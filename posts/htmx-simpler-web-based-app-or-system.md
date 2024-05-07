@@ -283,13 +283,15 @@ Let's summarize the most important consequences of taking HTMX versus traditiona
 Overall, HTMX looks like a great technology and an interesting paradigm that we can use to write our web-based apps/systems faster while making them simpler, thus easier to change and maintain. **As said, there are few caveats, and cases where it is just not a good fit, but I highly, highly recommend trying it out. 
 Let's simplify web development!**
 
-<div class="article-delimiter">---</div>
+<div id="post-extras">
 
-### Related videos on my <a href="{{ youtubeChannelUrl }}">youtube channel</a>
-1. <a href="https://www.youtube.com/watch?v=A3UB3tyDWa4">HTMX basics, simple index.html page from scratch</a>
-2. <a href="https://www.youtube.com/watch?v=9cu0NbyrNuU">General overview of HTMX, going through Some Wisdom App, which is using it</a>
+<div class="post-delimiter">---</div>
 
-<div class="article-delimiter">---</div>
+### Related videos on my [youtube channel]({{ youtubeChannelUrl }})
+1. [HTMX basics, simple index.html page from scratch](https://www.youtube.com/watch?v=A3UB3tyDWa4)
+2. [General overview of HTMX, going through Some Wisdom App, which is using it](https://www.youtube.com/watch?v=9cu0NbyrNuU)
+
+<div class="post-delimiter">---</div>
 
 ### Notes and resources
 1. HTMX: https://htmx.org
@@ -303,3 +305,5 @@ Let's simplify web development!**
     1. https://www.youtube.com/watch?v=u2rjnLJ1M98
     2. https://www.youtube.com/watch?v=LRrrxQXWdhI
 8. Some Wisdom App code mentioned in the article: https://github.com/BinaryIgor/code-examples/tree/master/some-wisdom-htmx-app
+
+</div>

@@ -227,13 +227,15 @@ Usually (when we deal with large and stil growing data) it will go something lik
 
 We just went over most commonly used strategies to reduce the search space of our data. Now we know how to have, regardless of how big the data is, a small search space. **And as we know, working with small set of data is always fast**.
 
-<div class="article-delimiter">---</div>
+<div id="post-extras">
 
-### Related videos on my <a href="{{ youtubeChannelUrl }}">youtube channel</a>
-1. <a href="https://www.youtube.com/watch?v=xVZsFpYa1Yc">Partitioning</a>
-2. <a href="https://www.youtube.com/watch?v=B5aHDQFDiuw">Sharding</a>
+<div class="post-delimiter">---</div>
 
-<div class="article-delimiter">---</div>
+### Related videos on my [youtube channel]({{ youtubeChannelUrl }})
+1. [Partitioning](https://www.youtube.com/watch?v=xVZsFpYa1Yc)
+2. [Sharding](https://www.youtube.com/watch?v=B5aHDQFDiuw)
+
+<div class="post-delimiter">---</div>
 
 ### Notes and resources
 
@@ -246,3 +248,5 @@ We just went over most commonly used strategies to reduce the search space of ou
 7. Mongo sharding: https://www.mongodb.com/docs/manual/sharding
 8. How guys at Notion partitioned their Postgres: https://www.notion.so/blog/sharding-postgres-at-notion
 9. Third-party, open-source solution to shard MySQL db: https://vitess.io
+
+</div>

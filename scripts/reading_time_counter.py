@@ -19,7 +19,7 @@ def replace_a_link_pattern(match):
     return match.group(2)
 
 def is_line_to_skip(line):
-    return '<div class="article-delimiter">' in line or "<div class='article-delimiter'>" in line \
+    return '<div class="post-delimiter">' in line or "<div class='post-delimiter'>" in line \
         or has_html_tag('figure', line) or has_html_tag('figcaption', line) or has_html_tag('img', line) 
 
 def has_html_tag(tag, line):

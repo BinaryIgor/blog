@@ -176,13 +176,15 @@ If they are used mostly in isolation, it makes tremendous sense to unit test the
 
 As we have learned, tests are a crucial component of the software development process. They secure the present and future correctness of our code, help us understand it, promote good design of the codebase and support its evolution as the requirements change, if done correctly. If done badly, they give us a false impression of correctness and hamper future changes and evolution. Let's then do them correctly, by focusing on how our software is used in reality, and not on vanity metrics like *90%+ code coverage*. If we succeed at that, we can rest assured that our software works right now and will work in the future as we continue to change it.
 
-<div class="article-delimiter">---</div>
+<div id="post-extras">
 
-### Related videos on my <a href="{{ youtubeChannelUrl }}">youtube channel</a>
-1. <a href="https://www.youtube.com/watch?v=rBoZfQ3z3gU">Integration tests of REST API in Java 21</a>
-2. <a href="https://www.youtube.com/watch?v=o9vj0dLf3f4">E2E tests of the UI in Playwright</a>
+<div class="post-delimiter">---</div>
 
-<div class="article-delimiter">---</div>
+### Related videos on my [youtube channel]({{ youtubeChannelUrl }})
+1. [Integration tests of REST API in Java 21](https://www.youtube.com/watch?v=rBoZfQ3z3gU)
+2. [E2E tests of the UI in Playwright](https://www.youtube.com/watch?v=o9vj0dLf3f4)
+
+<div class="post-delimiter">---</div>
 
 ### Notes and resources
 
@@ -206,3 +208,5 @@ As we have learned, tests are a crucial component of the software development pr
     3. Testcontainers: https://testcontainers.com
     4. WireMock: https://wiremock.org
     5. Mocks Server: https://www.mocks-server.org
+
+</div>
