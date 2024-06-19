@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    {{ head-tags.html }}
+    <link rel="canonical" href="{{httpsDomain}}/about.html">
+    {{ head-default-description-tag.html }}
+    <title>Newsletter</title>
+</head>
+
+<body>
+    {{ navigation.html }}
+    <div class="post py-6 px-4">
+        <div class="max-content-width">
+            <h1 class="text-4xl font-bold mb-6">Newsletter</h1>
+            <p> Sign up for less structured, more speculative and exploring thoughts, what I am up to at the moment, updates on what have been published recently, what will be published soon and so on.
+             I usually publish once to thrice peer month and try to keep it concise and valuable as I like it myself - no noise, pure signal.</p>
+            <input class="rounded bg-primary p-2 border-[2px] border-solid border-primary-text-faded outline-none placeholder-opacity-70" type="email" placeholder="Your email">
+            <button class="font-bold underline text-xl">Let's start</button>
+
+            <h1 class="text-3xl font-bold mt-24 mb-8">Published so far</h1>
+
+            <a href="newsletter-one.html" class="text-2xl mb-2 font-bold block">2024-06-01: First Newsletter</a>
+            <a href="newsletter-one.html" class="text-2xl mb-2 font-bold">2024-05-11: That was not expected</a>
+        </div>
+    </div>
+
+    {{ footer.html }}
+
+    {{ init-script.html }}
+</body>
+
+</html>

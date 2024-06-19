@@ -19,7 +19,7 @@ If you possess an insatiable curiosity and a relentless desire to dive deep into
 
 And if you like videos more, **<a href="{{youtubeChannelUrl}}"> I also run a youtube channel under the same name (Binary Igor)</a>**.
 
-You can also find me on **<a href="https://www.linkedin.com/in/igroz/">LinkedIn</a>** or check out my code on **<a href="https://github.com/BinaryIgor">GitHub</a>**.
+You can also find me on **<a href="https://www.linkedin.com/in/igroz/">LinkedIn</a>**, join my **[newsletter](newsletter.html)** or check out my code on **<a href="https://github.com/BinaryIgor">GitHub</a>**.
 
 Finally, if you have valuable feedback, questions, corrections or an extension of my work, or just want to get in touch, shoot me an email at <span id="contact-email" class="font-bold">{{ contactEmail }}</span>. 
 
