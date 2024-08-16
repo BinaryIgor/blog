@@ -1,20 +1,20 @@
 import { marked } from 'marked';
 
 const markedRenderer = {
-    heading(text, level) {
+    heading({ text, depth }) {
         const escapedText = text.toLowerCase()
             .replace(/<a(.*?)>(.*?)<\/a>/g, (match, g1, g2) => g2)
             .replace(/[^\w]+/g, (match) => {
-            const trimmedMatch = match.trim();
-            if (trimmedMatch == '?' || trimmedMatch == '.' || trimmedMatch == '!') {
-                return '';
-            }
-            return '-';   
-        });
+                const trimmedMatch = match.trim();
+                if (trimmedMatch == '?' || trimmedMatch == '.' || trimmedMatch == '!') {
+                    return '';
+                }
+                return '-';
+            });
         return `
-                <h${level} id="${escapedText}">
-                  ${text}
-                </h${level}>`;
+        <h${depth} id="${escapedText}">
+            ${text}
+        </h${depth}>`;
     }
 };
 

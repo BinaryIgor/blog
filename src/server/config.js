@@ -1,6 +1,6 @@
 import { envVarOrDefault } from "../shared/env.js";
 
-//3 hours
+// 3 hours
 const DEFAULT_DB_BACKUP_DELAY = 3 * 60 * 60 * 1000;
 
 export function read() {
