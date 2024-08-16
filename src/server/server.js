@@ -57,7 +57,7 @@ export async function start(clock = new Clock(),
         schedulePosts ? config.postsReadDelay : null);
 
     const analyticsRepository = new SqliteAnalyticsRepository(db);
-    const eventsSaver = new DeferredEventsSaver(analyticsRepository, scheduler, config.viewsWriteDelay);
+    const eventsSaver = new DeferredEventsSaver(analyticsRepository, scheduler, config.eventsWriteDelay);
     const analylitcsService = new AnalyticsService(analyticsRepository, eventsSaver, postsSource, config.analyticsAllowedPaths, clock);
 
     const app = express();

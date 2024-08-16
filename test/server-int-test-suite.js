@@ -54,7 +54,7 @@ export const serverIntTestSuite = (testsDescription, testsCallback) => {
             process.env['POSTS_HOST'] = MOCK_SERVER_URL;
 
             process.env["POSTS_READ_DELAY"] = SCHEDULED_TASKS_DELAY;
-            process.env["VIEWS_WRITE_DELAY"] = SCHEDULED_TASKS_DELAY;
+            process.env["EVENTS_WRITE_DELAY"] = SCHEDULED_TASKS_DELAY;
 
             MockServer.start({
                 port: MOCK_SERVER_PORT, getRoutes: [{

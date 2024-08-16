@@ -18,7 +18,7 @@ export function read() {
         analyticsAllowedPaths: analyticsAllowedPaths(),
         postsPath: `${postsHost}/posts.json`,
         postsReadDelay: envVarOrDefault("POSTS_READ_DELAY", 60 * 60_000),
-        viewsWriteDelay: envVarOrDefault("VIEWS_WRITE_DELAY", 1000)
+        eventsWriteDelay: envVarOrDefault("EVENTS_WRITE_DELAY", 1000)
     }
 }
 

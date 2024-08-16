@@ -4,6 +4,7 @@ import * as Dates from "../shared/dates.js";
 export const MAX_VISITOR_ID_LENGTH = 50;
 export const MAX_PATH_LENGTH = 500;
 export const DAY_SECONDS = 24 * 60 * 60;
+export const SEVEN_DAYS_SECONDS = DAY_SECONDS * 7;
 export const THIRTY_DAYS_SECONDS = DAY_SECONDS * 30;
 export const NINENTY_DAYS_SECONDS = DAY_SECONDS * 90;
 export const MAX_IP_HASH_VISITOR_IDS_IN_LAST_DAY = 25;
@@ -86,19 +87,28 @@ export class AnalyticsService {
     }
 
     async stats() {
-        const general = await this.analyticsRepository.generalStats();
-
         const now = this.clock.nowTimestamp();
 
+        const timestampDayAgo = Dates.timestampSecondsAgo(now, DAY_SECONDS);
+        const lastDayStats = await this.analyticsRepository.generalStats(timestampDayAgo);
+
+        const timestampSevenDaysAgo = Dates.timestampSecondsAgo(now, SEVEN_DAYS_SECONDS);
+        const lastSevenDaysStats = await this.analyticsRepository.generalStats(timestampSevenDaysAgo);
+
         const timestampThirtyDaysAgo = Dates.timestampSecondsAgo(now, THIRTY_DAYS_SECONDS);
-        const generalForLastThirtyDays = await this.analyticsRepository.generalStats(timestampThirtyDaysAgo);
+        const lastThirtyDaysStats = await this.analyticsRepository.generalStats(timestampThirtyDaysAgo);
 
         const timestampNinentyDaysAgo = Dates.timestampSecondsAgo(now, NINENTY_DAYS_SECONDS);
-        const generalForLastNinentyDays = await this.analyticsRepository.generalStats(timestampNinentyDaysAgo);
+        const lastNinentyDaysStats = await this.analyticsRepository.generalStats(timestampNinentyDaysAgo);
+
+        const allTimeStats = await this.analyticsRepository.generalStats();
 
         const pagesStats = await this.analyticsRepository.pagesStats();
 
-        return new Stats(general, generalForLastThirtyDays, generalForLastNinentyDays, pagesStats);
+        const periodsStats = new PeriodsStats(lastDayStats, lastSevenDaysStats, lastThirtyDaysStats,
+            lastNinentyDaysStats, allTimeStats);
+
+        return new Stats(periodsStats, pagesStats);
     }
 }
 
@@ -110,6 +120,16 @@ export class Event {
         this.source = source;
         this.path = path;
         this.type = type;
+    }
+}
+
+export class PeriodsStats {
+    constructor(lastDay, last7Days, last30Days, last90Days, allTime) {
+        this.lastDay = lastDay;
+        this.last7Days = last7Days;
+        this.last30Days = last30Days;
+        this.last90Days = last90Days;
+        this.allTime = allTime;
     }
 }
 
@@ -142,13 +162,8 @@ export class PageStats {
 }
 
 export class Stats {
-    constructor(general,
-        generalForLastThirtyDays,
-        generalForLastNinentyDays,
-        pages) {
-        this.general = general;
-        this.generalForLastThirtyDays = generalForLastThirtyDays;
-        this.generalForLastNinentyDays = generalForLastNinentyDays;
+    constructor(periods, pages) {
+        this.periods = periods;
         this.pages = pages;
     }
 }
@@ -216,7 +231,7 @@ export class SqliteAnalyticsRepository {
     async generalStats(fromTimestamp, toTimestamp) {
         const viewsUniqueVisitorsIpHashesPromise = this._viewsUniqueVisitorsIpHashesStats(fromTimestamp, toTimestamp);
         const readsUiqueReadersPromise = this._readsUniqueReadersStats(fromTimestamp, toTimestamp);
-        const viewsBySourcePromise = this._viewsByTopSourceStats(fromTimestamp, toTimestamp, 100);
+        const viewsBySourcePromise = this._viewsByTopSourceStats(fromTimestamp, toTimestamp, 50);
 
         const { views, uniqueVisitors, ipHashes } = await viewsUniqueVisitorsIpHashesPromise;
         const { reads, uniqueReaders } = await readsUiqueReadersPromise;
