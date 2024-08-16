@@ -11,7 +11,7 @@
 <body>
     {{ navigation.html }}
     <div class="p-6 text-center">
-        <h1 class="text-4xl font-bold mb-16">Stats</h1>
+        <h1 class="text-4xl font-bold">Stats</h1>
         <div id="stats-container" class="max-content-width m-auto">
             <div id="stats-loader">Loading...</div>
         </div>
@@ -49,23 +49,31 @@
         }
 
         function toStatsView(postsByPath, stats) {
-            const generalStats = stats.general;
+            const lastDayStats = stats.periods.lastDay;
+            lastDayStats.topViewsBySource = statsTopViewsBySource(lastDayStats);
+
+            const last7DaysStats = stats.periods.last7Days;
+            last7DaysStats.topViewsBySource = statsTopViewsBySource(last7DaysStats);
+
+            const last30DaysStats = stats.periods.last30Days;
+            last30DaysStats.topViewsBySource = statsTopViewsBySource(last30DaysStats);
+
+            const last90DaysStats = stats.periods.last30Days;
+            last90DaysStats.topViewsBySource = statsTopViewsBySource(last90DaysStats);
+
+            const allTimeStats = stats.periods.allTime;
+            allTimeStats.topViewsBySource = statsTopViewsBySource(allTimeStats);
+
             const pagesStats = stats.pages;
 
-            const limitedViewsBySource = generalStats.viewsBySource.length > TOP_VIEWS_BY_SOURCE ?
-                generalStats.viewsBySource.slice(0, TOP_VIEWS_BY_SOURCE) : generalStats.viewsBySource;
-            const topViewsBySource = limitedViewsBySource.map(v => {
-                return {
-                    source: v.source,
-                    views: `${Math.round(v.views * 100) / 100}%`
-                }
-            });
-
             return {
-                allTime: { ...stats.general },
-                lastThirtyDays: { ...stats.generalForLastThirtyDays },
-                lastNinentyDays: { ...stats.generalForLastNinentyDays },
-                viewsBySource: topViewsBySource,
+                periods: {
+                    lastDay: lastDayStats,
+                    last7Days: last7DaysStats,
+                    last30Days: last30DaysStats,
+                    last90Days: last90DaysStats,
+                    allTime: allTimeStats
+                },
                 posts: pagesStats.filter(p => postsByPath.has(p.path))
                     .map(p => {
                         const post = postsByPath.get(p.path);
@@ -78,22 +86,30 @@
             };
         }
 
+        function statsTopViewsBySource(stats) {
+            const limitedViewsBySource = stats.viewsBySource.length > TOP_VIEWS_BY_SOURCE ?
+                stats.viewsBySource.slice(0, TOP_VIEWS_BY_SOURCE) : stats.viewsBySource;
+            return limitedViewsBySource.map(v => {
+                return {
+                    source: v.source,
+                    views: `${Math.round(v.views * 100) / 100}%`
+                }
+            });
+        }
+
         const postsByPath = await fetchPosts();
         const stats = await fetchStats();
         const statsView = toStatsView(postsByPath, stats);
 
         function renderStats(stats) {
+            const periods = stats.periods;
             statsContainer.innerHTML = `
                 <div class="mb-16">
-                    <h2 class="text-3xl mb-4 font-bold">Overall</h2>
-                        ${generalStatsComponent("All time", stats.allTime)}
-                        ${generalStatsComponent("Last 30 days", stats.lastThirtyDays)}
-                        ${generalStatsComponent("Last 90 days", stats.lastNinentyDays)}
-                    </div>
-                </div>
-                <div class="mb-16">
-                    <h2 class="text-3xl mb-4 font-bold">Top views sources</h2>
-                    ${viewsBySourceComponent(stats)}
+                    ${periodStatsComponent("Last day", periods.lastDay)}
+                    ${periodStatsComponent("Last 7 days", periods.last7Days)}
+                    ${periodStatsComponent("Last 30 days", periods.last30Days)}
+                    ${periodStatsComponent("Last 90 days", periods.last90Days)}
+                    ${periodStatsComponent("All time", periods.allTime)}
                 </div>
                 <div class="mb-16">
                     <h2 class="text-3xl mb-4 font-bold">Posts</h2>
@@ -106,25 +122,28 @@
             `;
         }
 
-        function generalStatsComponent(title, stats) {
+        function periodStatsComponent(title, stats) {
             return `
-                <div class="mb-4">
-                    <h3 class="text-2xl mb-4">${title}</h3>
+                <div class="my-16">
+                    <h2 class="text-3xl my-4 font-bold">${title}</h2>
                     <div>Views: ${stats.views}</div>
                     <div>Unique visitors: ${stats.uniqueVisitors}</div>
                     <div>Ip hashes: ${stats.ipHashes}</div>
                     <div>Reads: ${stats.reads}</div>
                     <div>Unique readers: ${stats.uniqueReaders}</div>
-                ${delimiterComponent()}
+                    <div>
+                        <h3 class="text-xl mt-4 mb-4 font-bold">View sources</h3>
+                        ${viewsBySourceComponent(stats.topViewsBySource)}
+                    </div>
                 </div>
                 `;
         }
 
-        function viewsBySourceComponent(stats) {
-            return `<div class="space-y-8">${stats.viewsBySource.map(viewsOfSourceComponent).join('\n')}</div>`;
+        function viewsBySourceComponent(viewsBySource) {
+            return `<div class="space-y-8">${viewsBySource.map(viewsOfSourceComponent).join('\n')}</div>`;
         }
 
-        function viewsOfSourceComponent(views) {
+        function viewsOfSourceComponent(views, idx) {
             return `
             <div>
                 <div>${views.source}: ${views.views}</div>
