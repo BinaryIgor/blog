@@ -1,7 +1,7 @@
 import bodyParser from "body-parser";
 import express from "express";
 import cors from "cors";
-import { AnalyticsService, DeferredEventsSaver, SqliteAnalyticsRepository, Event } from "./analytics.js";
+import { AnalyticsService, DeferredEventsSaver, StatsViews, SqliteAnalyticsRepository, Event } from "./analytics.js";
 import { Scheduler } from "./scheduler.js";
 import * as Logger from "../shared/logger.js";
 
@@ -45,6 +45,12 @@ export async function start(clock = new Clock(),
 
     CREATE VIEW IF NOT EXISTS view AS SELECT * FROM event WHERE type = 'VIEW';
     CREATE VIEW IF NOT EXISTS read AS SELECT * FROM event WHERE type = 'READ';
+
+    CREATE TABLE IF NOT EXISTS stats_view (
+        period TEXT PRIMARY KEY,
+        stats JSONB NOT NULL,
+        calculated_at INTEGER(8) NOT NULL
+    );
     `);
 
     scheduler = new Scheduler();
@@ -57,8 +63,10 @@ export async function start(clock = new Clock(),
         schedulePosts ? config.postsReadDelay : null);
 
     const analyticsRepository = new SqliteAnalyticsRepository(db);
+    const statsViews = new StatsViews(analyticsRepository, db, clock, scheduler,
+        config.statsViewsShorterPeriodsDelay, config.statsViewsLongerPeriodsDelay);
     const eventsSaver = new DeferredEventsSaver(analyticsRepository, scheduler, config.eventsWriteDelay);
-    const analylitcsService = new AnalyticsService(analyticsRepository, eventsSaver, postsSource, config.analyticsAllowedPaths, clock);
+    const analyticsService = new AnalyticsService(analyticsRepository, statsViews, eventsSaver, postsSource, config.analyticsAllowedPaths, clock);
 
     const app = express();
 
@@ -75,7 +83,7 @@ export async function start(clock = new Clock(),
             const ipHash = Web.hashedIp(ip);
             const reqBody = req.body;
             const event = new Event(clock.nowTimestamp(), reqBody.visitorId, ipHash, reqBody.source, reqBody.path, reqBody.type);
-            await analylitcsService.addEvent(event);
+            await analyticsService.addEvent(event);
         } catch (e) {
             Logger.logError(`Failed to add event ${JSON.stringify(req.body)}, ignoring the result`, e);
         }
@@ -85,7 +93,7 @@ export async function start(clock = new Clock(),
 
     app.get("/meta/stats", async (req, res) => {
         try {
-            const stats = await analylitcsService.stats();
+            const stats = await analyticsService.stats();
             res.send(stats);
         } catch (e) {
             Logger.logError("Problem while getting stats...", e);

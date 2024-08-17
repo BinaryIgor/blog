@@ -9,6 +9,11 @@ export const THIRTY_DAYS_SECONDS = DAY_SECONDS * 30;
 export const NINENTY_DAYS_SECONDS = DAY_SECONDS * 90;
 export const MAX_IP_HASH_VISITOR_IDS_IN_LAST_DAY = 25;
 
+export const LAST_DAY_STATS_VIEW = "lastDay";
+export const LAST_7_DAYS_STATS_VIEW = "last7Days";
+export const LAST_30_DAYS_STATS_VIEW = "last30Days";
+export const LAST_90_DAYS_STATS_VIEW = "last90Days";
+export const ALL_TIME_STATS_VIEW = "allTime";
 
 const UUID_REGEX = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
 
@@ -17,8 +22,9 @@ const READ_TYPE = 'READ';
 
 export class AnalyticsService {
 
-    constructor(analyticsRepository, eventsSaver, postsSource, allowedPaths, clock) {
+    constructor(analyticsRepository, statsViews, eventsSaver, postsSource, allowedPaths, clock) {
         this.analyticsRepository = analyticsRepository;
+        this.statsViews = statsViews;
         this.eventsSaver = eventsSaver;
         this.postsSource = postsSource;
         this.clock = clock;
@@ -86,26 +92,15 @@ export class AnalyticsService {
         }
     }
 
-    // TODO: cached
     async stats() {
-        const now = this.clock.nowTimestamp();
-
-        const timestampDayAgo = Dates.timestampSecondsAgo(now, DAY_SECONDS);
-        const lastDayStats = await this.analyticsRepository.stats(timestampDayAgo);
-
-        const timestampSevenDaysAgo = Dates.timestampSecondsAgo(now, SEVEN_DAYS_SECONDS);
-        const lastSevenDaysStats = await this.analyticsRepository.stats(timestampSevenDaysAgo);
-
-        const timestampThirtyDaysAgo = Dates.timestampSecondsAgo(now, THIRTY_DAYS_SECONDS);
-        const lastThirtyDaysStats = await this.analyticsRepository.stats(timestampThirtyDaysAgo);
-
-        const timestampNinentyDaysAgo = Dates.timestampSecondsAgo(now, NINENTY_DAYS_SECONDS);
-        const lastNinentyDaysStats = await this.analyticsRepository.stats(timestampNinentyDaysAgo);
-
-        const allTimeStats = await this.analyticsRepository.stats();
-
-        return new PeriodsStats(lastDayStats, lastSevenDaysStats, lastThirtyDaysStats,
-            lastNinentyDaysStats, allTimeStats);
+        const views = await this.statsViews.views();
+        return new PeriodsStats(
+            views[LAST_DAY_STATS_VIEW],
+            views[LAST_7_DAYS_STATS_VIEW],
+            views[LAST_30_DAYS_STATS_VIEW],
+            views[LAST_90_DAYS_STATS_VIEW],
+            views[ALL_TIME_STATS_VIEW]
+        );
     }
 }
 
@@ -159,6 +154,15 @@ export class PageStats {
     }
 }
 
+export class StatsView {
+    constructor(period, stats, calculatedAt) {
+        this.period = period;
+        this.stats = stats;
+        this.calculatedAt = calculatedAt;
+    }
+}
+
+// TODO: max events if as well!
 export class DeferredEventsSaver {
     constructor(analyticsRepository, scheduler, writeDelay) {
         this.analyticsRepository = analyticsRepository;
@@ -183,6 +187,62 @@ export class DeferredEventsSaver {
 
     addEvent(event) {
         this.eventsToSave.push(event);
+    }
+}
+
+export class StatsViews {
+    constructor(analyticsRepository, db, clock, scheduler, shorterPeriodsViewsDelay, longerPeriodsViewsDelay) {
+        this.analyticsRepository = analyticsRepository;
+        this.db = db;
+        this.clock = clock;
+
+        scheduler.schedule(async () => this._saveViewsForShorterPeriods, shorterPeriodsViewsDelay);
+        scheduler.schedule(async () => this._saveViewsForLongerPeriods, longerPeriodsViewsDelay);
+    }
+
+    async _saveViewsForShorterPeriods() {
+        const now = this.clock.nowTimestamp();
+
+        const timestampDayAgo = Dates.timestampSecondsAgo(now, DAY_SECONDS);
+        const lastDayStats = await this.analyticsRepository.stats(timestampDayAgo);
+
+        const timestampSevenDaysAgo = Dates.timestampSecondsAgo(now, SEVEN_DAYS_SECONDS);
+        const lastSevenDaysStats = await this.analyticsRepository.stats(timestampSevenDaysAgo);
+
+        await this._saveView(new StatsView(LAST_DAY_STATS_VIEW, lastDayStats, now));
+        await this._saveView(new StatsView(LAST_7_DAYS_STATS_VIEW, lastSevenDaysStats, now));
+    }
+
+    async _saveViewsForLongerPeriods() {
+        const now = this.clock.nowTimestamp();
+
+        const timestampThirtyDaysAgo = Dates.timestampSecondsAgo(now, THIRTY_DAYS_SECONDS);
+        const lastThirtyDaysStats = await this.analyticsRepository.stats(timestampThirtyDaysAgo);
+
+        const timestampNinentyDaysAgo = Dates.timestampSecondsAgo(now, NINENTY_DAYS_SECONDS);
+        const lastNinentyDaysStats = await this.analyticsRepository.stats(timestampNinentyDaysAgo);
+
+        const allTimeStats = await this.analyticsRepository.stats();
+
+        await this._saveView(new StatsView(LAST_30_DAYS_STATS_VIEW, lastThirtyDaysStats, now));
+        await this._saveView(new StatsView(LAST_90_DAYS_STATS_VIEW, lastNinentyDaysStats, now));
+        await this._saveView(new StatsView(allTimeStats, allTimeStats, now));
+    }
+
+    _saveView(statsView) {
+        return this.db.execute(`
+            INSERT INTO stats_view (period, stats, calculated_at)
+            VALUES (?, ?, ?)
+            ON CONFLICT (period) 
+            DO UPDATE SET 
+            stats = EXCLUDED.stats,
+            calculated_at = EXCLUDED.calculated_at
+            `, [statsView.period, statsView.stats, statsView.calculatedAt]);
+    }
+
+    views() {
+        return this.db.query("SELECT * FROM stats_view")
+            .then(rows => rows.map(r => new StatsView(r["period"], r["stats"], r["calculated_at"])));
     }
 }
 

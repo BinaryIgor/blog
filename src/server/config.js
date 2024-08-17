@@ -2,6 +2,10 @@ import { envVarOrDefault } from "../shared/env.js";
 
 // 3 hours
 const DEFAULT_DB_BACKUP_DELAY = 3 * 60 * 60 * 1000;
+// 5 minutes
+const DEFAULT_STATS_VIEWS_SHORTER_PERIODS_DELAY = 5 * 60 * 1000;
+// 1 hour
+const DEFAULT_STATS_VIEWS_LONGER_PERIODS_DELAY = 60 * 60 * 1000;
 
 export function read() {
     const postsHost = envVarOrDefault("POSTS_HOST", "https://localhost");
@@ -18,7 +22,11 @@ export function read() {
         analyticsAllowedPaths: analyticsAllowedPaths(),
         postsPath: `${postsHost}/posts.json`,
         postsReadDelay: envVarOrDefault("POSTS_READ_DELAY", 60 * 60_000),
-        eventsWriteDelay: envVarOrDefault("EVENTS_WRITE_DELAY", 1000)
+        eventsWriteDelay: envVarOrDefault("EVENTS_WRITE_DELAY", 1000),
+        statsViewsShorterPeriodsDelay: envVarOrDefault("STATS_VIEWS_SHORTER_PERIODS_DELAY",
+            DEFAULT_STATS_VIEWS_SHORTER_PERIODS_DELAY),
+        statsViewsLongerPeriodsDelay: envVarOrDefault("STATS_VIEWS_LONGER_PERIODS_DELAY",
+            DEFAULT_STATS_VIEWS_LONGER_PERIODS_DELAY)
     }
 }
 
