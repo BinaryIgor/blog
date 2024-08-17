@@ -86,29 +86,26 @@ export class AnalyticsService {
         }
     }
 
+    // TODO: cached
     async stats() {
         const now = this.clock.nowTimestamp();
 
         const timestampDayAgo = Dates.timestampSecondsAgo(now, DAY_SECONDS);
-        const lastDayStats = await this.analyticsRepository.generalStats(timestampDayAgo);
+        const lastDayStats = await this.analyticsRepository.stats(timestampDayAgo);
 
         const timestampSevenDaysAgo = Dates.timestampSecondsAgo(now, SEVEN_DAYS_SECONDS);
-        const lastSevenDaysStats = await this.analyticsRepository.generalStats(timestampSevenDaysAgo);
+        const lastSevenDaysStats = await this.analyticsRepository.stats(timestampSevenDaysAgo);
 
         const timestampThirtyDaysAgo = Dates.timestampSecondsAgo(now, THIRTY_DAYS_SECONDS);
-        const lastThirtyDaysStats = await this.analyticsRepository.generalStats(timestampThirtyDaysAgo);
+        const lastThirtyDaysStats = await this.analyticsRepository.stats(timestampThirtyDaysAgo);
 
         const timestampNinentyDaysAgo = Dates.timestampSecondsAgo(now, NINENTY_DAYS_SECONDS);
-        const lastNinentyDaysStats = await this.analyticsRepository.generalStats(timestampNinentyDaysAgo);
+        const lastNinentyDaysStats = await this.analyticsRepository.stats(timestampNinentyDaysAgo);
 
-        const allTimeStats = await this.analyticsRepository.generalStats();
+        const allTimeStats = await this.analyticsRepository.stats();
 
-        const pagesStats = await this.analyticsRepository.pagesStats();
-
-        const periodsStats = new PeriodsStats(lastDayStats, lastSevenDaysStats, lastThirtyDaysStats,
+        return new PeriodsStats(lastDayStats, lastSevenDaysStats, lastThirtyDaysStats,
             lastNinentyDaysStats, allTimeStats);
-
-        return new Stats(periodsStats, pagesStats);
     }
 }
 
@@ -133,14 +130,15 @@ export class PeriodsStats {
     }
 }
 
-export class GeneralStats {
-    constructor(views, uniqueVisitors, ipHashes, reads, uniqueReaders, viewsBySource) {
+export class Stats {
+    constructor(views, uniqueVisitors, ipHashes, reads, uniqueReaders, viewsBySource, pages) {
         this.views = views;
         this.uniqueVisitors = uniqueVisitors;
         this.ipHashes = ipHashes;
         this.reads = reads;
         this.uniqueReaders = uniqueReaders;
         this.viewsBySource = viewsBySource;
+        this.pages = pages;
     }
 }
 
@@ -158,13 +156,6 @@ export class PageStats {
         this.reads = reads;
         this.uniqueViewers = uniqueViewers;
         this.uniqueReaders = uniqueReaders;
-    }
-}
-
-export class Stats {
-    constructor(periods, pages) {
-        this.periods = periods;
-        this.pages = pages;
     }
 }
 
@@ -228,14 +219,16 @@ export class SqliteAnalyticsRepository {
             });
     }
 
-    async generalStats(fromTimestamp, toTimestamp) {
+    async stats(fromTimestamp, toTimestamp) {
         const viewsUniqueVisitorsIpHashesPromise = this._viewsUniqueVisitorsIpHashesStats(fromTimestamp, toTimestamp);
         const readsUiqueReadersPromise = this._readsUniqueReadersStats(fromTimestamp, toTimestamp);
         const viewsBySourcePromise = this._viewsByTopSourceStats(fromTimestamp, toTimestamp, 50);
+        const pagesPromise = this._pagesStats(fromTimestamp, toTimestamp);
 
         const { views, uniqueVisitors, ipHashes } = await viewsUniqueVisitorsIpHashesPromise;
         const { reads, uniqueReaders } = await readsUiqueReadersPromise;
         const viewsBySourceFromDb = await viewsBySourcePromise;
+        const pages = await pagesPromise;
 
         let viewsBySource;
         if (views > 0) {
@@ -244,7 +237,7 @@ export class SqliteAnalyticsRepository {
             viewsBySource = [];
         }
 
-        return new GeneralStats(views, uniqueVisitors, ipHashes, reads, uniqueReaders, viewsBySource);
+        return new Stats(views, uniqueVisitors, ipHashes, reads, uniqueReaders, viewsBySource, pages);
     }
 
     _viewsUniqueVisitorsIpHashesStats(fromTimestamp, toTimestamp) {
@@ -331,21 +324,29 @@ export class SqliteAnalyticsRepository {
             }));
     }
 
-    async pagesStats() {
-        const readsPromise = this.db.query(`SELECT path, 
+    async _pagesStats(fromTimestamp, toTimestamp) {
+        const readsQuery = `${this._queryWithOptionalWhereInTimestampsClause(
+            `SELECT 
+            path, 
             COUNT(*) AS reads,
             COUNT(DISTINCT visitor_id) AS unique_readers 
-            FROM read 
-            GROUP BY path`);
+            FROM read`,
+            fromTimestamp, toTimestamp
+        )} GROUP BY path`;
+        const readsPromise = this.db.query(readsQuery);
 
-        const viewsPromise = this.db.query(`SELECT 
+
+        const viewsQuery = `${this._queryWithOptionalWhereInTimestampsClause(
+            `SELECT 
             path,
             COUNT(*) AS views, 
             COUNT(DISTINCT visitor_id) AS unique_viewers
-            FROM view
-            GROUP BY path
-            ORDER BY views DESC
-        `);
+            FROM view`,
+            fromTimestamp, toTimestamp
+        )}
+        GROUP BY path
+        ORDER BY views DESC`;
+        const viewsPromise = this.db.query(viewsQuery);
 
         const reads = new Map();
         (await readsPromise).forEach(r => {
