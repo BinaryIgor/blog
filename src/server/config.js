@@ -23,6 +23,7 @@ export function read() {
         postsPath: `${postsHost}/posts.json`,
         postsReadDelay: envVarOrDefault("POSTS_READ_DELAY", 60 * 60_000),
         eventsWriteDelay: envVarOrDefault("EVENTS_WRITE_DELAY", 1000),
+        eventsMaxInMemory: envVarOrDefault("EVENTS_MAX_IN_MEMORY", 250),
         statsViewsShorterPeriodsDelay: envVarOrDefault("STATS_VIEWS_SHORTER_PERIODS_DELAY",
             DEFAULT_STATS_VIEWS_SHORTER_PERIODS_DELAY),
         statsViewsLongerPeriodsDelay: envVarOrDefault("STATS_VIEWS_LONGER_PERIODS_DELAY",

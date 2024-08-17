@@ -9,7 +9,7 @@ import * as Web from "./web.js"
 
 import * as Config from "./config.js";
 
-import { SqliteDb, SqliteDbBackuper } from "./db.js";
+import { initSchema, SqliteDb, SqliteDbBackuper } from "./db.js";
 
 import { Clock } from "../shared/dates.js";
 import { PostsSource } from "./posts.js";
@@ -31,31 +31,12 @@ export async function start(clock = new Clock(),
 
     db = new SqliteDb(config.dbPath);
 
-    await db.executeRaw(`
-    CREATE TABLE IF NOT EXISTS event (
-        timestamp INTEGER(8) NOT NULL,
-        visitor_id TEXT NOT NULL,
-        ip_hash TEXT NOT NULL,
-        source TEXT NOT NULL,
-        path TEXT NOT NULL,
-        type TEXT NOT NULL
-    );
-
-    CREATE INDEX IF NOT EXISTS event_timestamp ON event(timestamp);
-
-    CREATE VIEW IF NOT EXISTS view AS SELECT * FROM event WHERE type = 'VIEW';
-    CREATE VIEW IF NOT EXISTS read AS SELECT * FROM event WHERE type = 'READ';
-
-    CREATE TABLE IF NOT EXISTS stats_view (
-        period TEXT PRIMARY KEY,
-        stats JSONB NOT NULL,
-        calculated_at INTEGER(8) NOT NULL
-    );
-    `);
+    await initSchema(db);
 
     scheduler = new Scheduler();
 
-    new SqliteDbBackuper(db, config.dbBackupPath, scheduler, config.dbBackupDelay);
+    const dbBackuper = new SqliteDbBackuper(db, config.dbBackupPath);
+    dbBackuper.schedule(scheduler, config.dbBackupDelay);
 
     const postsSource = new PostsSource(config.postsPath,
         postsRetryConfig,
@@ -63,9 +44,13 @@ export async function start(clock = new Clock(),
         schedulePosts ? config.postsReadDelay : null);
 
     const analyticsRepository = new SqliteAnalyticsRepository(db);
-    const statsViews = new StatsViews(analyticsRepository, db, clock, scheduler,
-        config.statsViewsShorterPeriodsDelay, config.statsViewsLongerPeriodsDelay);
-    const eventsSaver = new DeferredEventsSaver(analyticsRepository, scheduler, config.eventsWriteDelay);
+
+    const statsViews = new StatsViews(analyticsRepository, db, clock);
+    statsViews.schedule(scheduler, config.statsViewsShorterPeriodsDelay, config.statsViewsLongerPeriodsDelay);
+
+    const eventsSaver = new DeferredEventsSaver(analyticsRepository, config.eventsMaxInMemory, clock);
+    eventsSaver.schedule(scheduler, config.eventsWriteDelay);
+
     const analyticsService = new AnalyticsService(analyticsRepository, statsViews, eventsSaver, postsSource, config.analyticsAllowedPaths, clock);
 
     const app = express();

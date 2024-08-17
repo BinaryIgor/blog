@@ -1,5 +1,4 @@
 export class Clock {
-
     nowTimestamp() {
         return Date.now();
     }

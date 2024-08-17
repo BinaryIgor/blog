@@ -3,7 +3,10 @@ import { assert } from "chai";
 const CHARACTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 
 export function randomNumber(from, to) {
-    return from + Math.floor(Math.random() * to);
+    if (from >= to) {
+        throw new Error(`From must be grater that to! From: ${from}, to: ${to}`);
+    }
+    return from + Math.floor(Math.random() * (to - from));
 }
 
 export function randomString(length = 10) {
@@ -31,6 +34,11 @@ export async function assertThrowsException(func, type, containsMessage = null) 
 export class TestClock {
 
     _now = new Date();
+    _initialTime = new Date(this._now.getTime());
+
+    setInitialTime() {
+        this._now.setTime(this._initialTime.getTime());
+    }
 
     setTime(now) {
         this._now = now;
@@ -38,6 +46,10 @@ export class TestClock {
 
     moveTimeBy(seconds) {
         this._now.setTime(this._now.getTime() + (seconds * 1000));
+    }
+
+    moveTimeByResonableAmount() {
+        this.moveTimeBy(10);
     }
 
     now() {

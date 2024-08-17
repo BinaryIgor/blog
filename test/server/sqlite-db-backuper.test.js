@@ -8,6 +8,7 @@ import { assert } from "chai";
 import fs from "fs";
 import crypto from 'crypto';
 import path from 'path';
+import { TestClock } from "../test-utils.js";
 
 const DB_PATH = path.join("/tmp", `${crypto.randomUUID()}.db`);
 const DB_BACKUP_PATH = path.join("/tmp", `${crypto.randomUUID()}_backup.db`);
@@ -18,6 +19,8 @@ const BACKUP_DELAY_AWAIT = 5;
 const scheduler = new Scheduler();
 
 const db = new SqliteDb(DB_PATH);
+
+const clock = new TestClock();
 
 describe("SqliteDbBackuper tests", () => {
     before(async () => {
@@ -33,27 +36,34 @@ describe("SqliteDbBackuper tests", () => {
         fs.rmSync(DB_BACKUP_PATH);
     });
 
-    it(`should backup db`, async () => {
+    it(`backups db`, async () => {
+        const backuper = new SqliteDbBackuper(db, DB_BACKUP_PATH, clock);
+
         await insertTestTableRow();
         await insertTestTableRow();
 
         assert.equal(await countTestTableRows(db), 2);
 
-        await initSingleBackup();
+        await initSingleBackup(backuper);
+        const lastBackupTimestamp1 = clock.nowTimestamp();
 
         const dbBackup = fromBackupDb();
 
         assert.equal(await countTestTableRows(db), 2);
         assert.equal(await countTestTableRows(dbBackup), 2);
+        assertLastBackupTimestampEqual(backuper, lastBackupTimestamp1);
 
         await insertTestTableRow();
 
         assert.equal(await countTestTableRows(db), 3);
         assert.equal(await countTestTableRows(dbBackup), 2);
 
-        await initSingleBackup();
+        clock.moveTimeByResonableAmount();
+        await initSingleBackup(backuper);
+        const lastBackupTimestamp2 = clock.nowTimestamp();
 
         assert.equal(await countTestTableRows(dbBackup), 3);
+        assertLastBackupTimestampEqual(backuper, lastBackupTimestamp2);
     });
 })
 
@@ -81,8 +91,12 @@ function fromBackupDb() {
     return new SqliteDb(DB_BACKUP_PATH);
 }
 
-async function initSingleBackup() {
-    new SqliteDbBackuper(db, DB_BACKUP_PATH, scheduler, BACKUP_DELAY);
+async function initSingleBackup(backuper) {
+    backuper.schedule(scheduler, BACKUP_DELAY);
     await nextBackupDelay();
     scheduler.close();
+}
+
+function assertLastBackupTimestampEqual(backuper, expectedTimestamp) {
+    assert.equal(backuper.lastBackupTimestamp, expectedTimestamp);
 }

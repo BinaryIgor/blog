@@ -2,12 +2,16 @@ import { Scheduler } from "../../src/server/scheduler.js";
 import { delay } from "../../src/shared/promises.js";
 import { TestObjects } from "../test-objects.js";
 import { DeferredEventsSaver } from "../../src/server/analytics.js";
-import { expect } from "chai";
+import { assert, expect } from "chai";
+import { TestClock } from "../test-utils.js";
 
 const WRITE_DELAY = 1;
 const WRITE_DELAY_AWAIT = 5;
+const MAX_EVENTS_IN_MEMORY = 3;
 
 const scheduler = new Scheduler();
+
+const clock = new TestClock();
 
 let repository;
 let saver;
@@ -15,10 +19,16 @@ let saver;
 describe("DeferredEventsSaver tests", () => {
     beforeEach(() => {
         repository = new FakeAnalyticsRepository();
-        saver = new DeferredEventsSaver(repository, scheduler, WRITE_DELAY);
+        saver = new DeferredEventsSaver(repository, MAX_EVENTS_IN_MEMORY, clock);
     });
 
-    it('should retry failed events save', async () => {
+    afterEach(() => {
+        scheduler.close();
+    });
+
+    it('retries failed events save', async () => {
+        saver.schedule(scheduler, WRITE_DELAY);
+
         repository.error = new Error("Fail to save events");
 
         saver.addEvent(TestObjects.randomEvent());
@@ -26,7 +36,8 @@ describe("DeferredEventsSaver tests", () => {
 
         await nextWriteDelay();
 
-        expect(repository.savedEvents).to.have.length(0);
+        assert.lengthOf(repository.savedEvents, 0);
+        assertSaveTimestampEqual(null);
 
         repository.error = null;
 
@@ -34,16 +45,30 @@ describe("DeferredEventsSaver tests", () => {
 
         await nextWriteDelay();
 
-        expect(repository.savedEvents).to.have.length(3);
+        assert.lengthOf(repository.savedEvents, 3);
+        assertSaveTimestampEqual(clock.nowTimestamp());
     });
 
-    afterEach(() => {
-        scheduler.close();
+    it('saves events immediately after reaching configured in-memory limits', async () => {
+        await saver.addEvent(TestObjects.randomEvent());
+        await saver.addEvent(TestObjects.randomEvent());
+
+        assert.lengthOf(repository.savedEvents, 0);
+        assertSaveTimestampEqual(null);
+
+        await saver.addEvent(TestObjects.randomEvent());
+
+        assert.lengthOf(repository.savedEvents, 3);
+        assertSaveTimestampEqual(clock.nowTimestamp());
     });
 })
 
 function nextWriteDelay() {
     return delay(WRITE_DELAY_AWAIT);
+}
+
+function assertSaveTimestampEqual(expectedTimestamp) {
+    assert.equal(saver.lastSaveTimestamp, expectedTimestamp);
 }
 
 export class FakeAnalyticsRepository {
