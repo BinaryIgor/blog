@@ -23,9 +23,8 @@ const READ_TYPE = 'READ';
 
 export class AnalyticsService {
 
-    constructor(analyticsRepository, statsViews, eventsSaver, postsSource, allowedPaths, clock) {
+    constructor(analyticsRepository, eventsSaver, postsSource, allowedPaths, clock) {
         this.analyticsRepository = analyticsRepository;
-        this.statsViews = statsViews;
         this.eventsSaver = eventsSaver;
         this.postsSource = postsSource;
         this.clock = clock;
@@ -92,17 +91,6 @@ export class AnalyticsService {
             throw new Error(`Path: ${event.path} is neither allowed nor it has associated post`);
         }
     }
-
-    async stats() {
-        const views = await this.statsViews.views();
-        return new PeriodsStats(
-            views[LAST_DAY_STATS_VIEW],
-            views[LAST_7_DAYS_STATS_VIEW],
-            views[LAST_30_DAYS_STATS_VIEW],
-            views[LAST_90_DAYS_STATS_VIEW],
-            views[ALL_TIME_STATS_VIEW]
-        );
-    }
 }
 
 export class Event {
@@ -113,16 +101,6 @@ export class Event {
         this.source = source;
         this.path = path;
         this.type = type;
-    }
-}
-
-export class PeriodsStats {
-    constructor(lastDay, last7Days, last30Days, last90Days, allTime) {
-        this.lastDay = lastDay;
-        this.last7Days = last7Days;
-        this.last30Days = last30Days;
-        this.last90Days = last90Days;
-        this.allTime = allTime;
     }
 }
 
@@ -174,10 +152,10 @@ export class DeferredEventsSaver {
     }
 
     schedule(scheduler, writeDelay) {
-        scheduler.schedule(async () => this._saveEvents(), writeDelay);
+        scheduler.schedule(async () => this.saveEvents(), writeDelay);
     }
 
-    async _saveEvents() {
+    async saveEvents() {
         const toSave = [...this.eventsToSave];
 
         if (toSave.length > 0) {
@@ -197,7 +175,7 @@ export class DeferredEventsSaver {
     async addEvent(event) {
         this.eventsToSave.push(event);
         if (this.eventsToSave.length >= this.maxInMemoryEvents) {
-            await this._saveEvents();
+            await this.saveEvents();
         }
     }
 }
@@ -364,7 +342,7 @@ export class SqliteAnalyticsRepository {
 
     _whereInTimestampsClause(fromTimestamp, toTimestamp) {
         let fromClause = fromTimestamp ? `timestamp >= ${fromTimestamp}` : '';
-        let toClause = toTimestamp ? `timestamp < ${toTimestamp}` : '';
+        let toClause = toTimestamp ? `timestamp <= ${toTimestamp}` : '';
 
         if (!fromClause && !toClause) {
             return '';
@@ -408,7 +386,7 @@ export class SqliteAnalyticsRepository {
             fromTimestamp, toTimestamp
         )} GROUP BY source ORDER BY views DESC LIMIT ${limit}`;
 
-        return this.db.query(query).then(rows => rows.map(r =>  new ViewsBySource(r['source'], r['views'])));
+        return this.db.query(query).then(rows => rows.map(r => new ViewsBySource(r['source'], r['views'])));
     }
 
     async _pagesStats(fromTimestamp, toTimestamp) {

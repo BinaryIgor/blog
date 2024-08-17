@@ -1,5 +1,3 @@
-import { Scheduler } from "../../src/server/scheduler.js";
-
 import { initSchema, SqliteDb } from "../../src/server/db.js";
 
 import { assert } from "chai";
@@ -17,18 +15,13 @@ import { Event } from "../../src/server/analytics.js";
 
 const DB_PATH = path.join("/tmp", `${crypto.randomUUID()}.db`);
 
-const VIEWS_DELAY = 1;
-const VIEWS_DELAY_AWAIT = 5;
-
-const scheduler = new Scheduler();
-
 const db = new SqliteDb(DB_PATH);
 
 const analyticsRepository = new SqliteAnalyticsRepository(db);
 
 const clock = new TestClock();
 
-const statsViews = new StatsViews(analyticsRepository, db, clock, scheduler, VIEWS_DELAY, VIEWS_DELAY);
+const statsViews = new StatsViews(analyticsRepository, db, clock);
 
 const DAY_SECONDS = 24 * 60 * 60;
 const SEVEN_DAYS_SECONDS = DAY_SECONDS * 7;
@@ -42,9 +35,7 @@ describe("StatsViews tests", () => {
     });
 
     afterEach(async () => {
-        // scheduler.close();
         await deleteEvents();
-        // clock.setInitialTime();
     });
 
     after(() => {

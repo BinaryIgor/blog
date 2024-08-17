@@ -3,25 +3,25 @@ import * as Promises from "../shared/promises.js";
 
 export class PostsSource {
 
-    constructor(postsUrl, retryConfig, scheduler, readDelay) {
+    constructor(postsUrl, retryConfig) {
         this._postsUrl = postsUrl;
         this._posts = new Set();
 
         this._retryConfig = retryConfig;
 
         this._lastReload = undefined;
+    }
 
-        if (scheduler && readDelay) {
-            this.reload();
+    schedule(scheduler, readDelay) {
+        this.reload();
 
-            scheduler.schedule(async () => {
-                try {
-                    this.reload();
-                } catch (e) {
-                    Logger.logError("Problem while fetching/reading posts...", e);
-                }
-            }, readDelay);
-        }
+        scheduler.schedule(async () => {
+            try {
+                this.reload();
+            } catch (e) {
+                Logger.logError("Problem while fetching/reading posts...", e);
+            }
+        }, readDelay);
     }
 
     async reload() {

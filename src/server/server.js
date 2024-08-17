@@ -21,7 +21,7 @@ let scheduler;
 let db;
 
 export async function start(clock = new Clock(),
-    schedulePosts = true,
+    scheduler = new Scheduler(),
     postsRetryConfig = {
         retries: 5,
         initialDelay: 500,
@@ -33,15 +33,11 @@ export async function start(clock = new Clock(),
 
     await initSchema(db);
 
-    scheduler = new Scheduler();
-
     const dbBackuper = new SqliteDbBackuper(db, config.dbBackupPath);
     dbBackuper.schedule(scheduler, config.dbBackupDelay);
 
-    const postsSource = new PostsSource(config.postsPath,
-        postsRetryConfig,
-        schedulePosts ? scheduler : null,
-        schedulePosts ? config.postsReadDelay : null);
+    const postsSource = new PostsSource(config.postsPath, postsRetryConfig);
+    postsSource.schedule(scheduler, config.postsReadDelay);
 
     const analyticsRepository = new SqliteAnalyticsRepository(db);
 
@@ -51,7 +47,7 @@ export async function start(clock = new Clock(),
     const eventsSaver = new DeferredEventsSaver(analyticsRepository, config.eventsMaxInMemory, clock);
     eventsSaver.schedule(scheduler, config.eventsWriteDelay);
 
-    const analyticsService = new AnalyticsService(analyticsRepository, statsViews, eventsSaver, postsSource, config.analyticsAllowedPaths, clock);
+    const analyticsService = new AnalyticsService(analyticsRepository, eventsSaver, postsSource, config.analyticsAllowedPaths, clock);
 
     const app = express();
 
@@ -62,6 +58,7 @@ export async function start(clock = new Clock(),
     };
     app.use(cors(corsOptions));
 
+    // TODO: some metrics + diagnostics endpoint!
     app.post("/analytics/events", async (req, res) => {
         try {
             const ip = req.header(REAL_IP_HEADER) || req.socket.remoteAddress;
@@ -78,7 +75,7 @@ export async function start(clock = new Clock(),
 
     app.get("/meta/stats", async (req, res) => {
         try {
-            const stats = await analyticsService.stats();
+            const stats = await statsViews.views();
             res.send(stats);
         } catch (e) {
             Logger.logError("Problem while getting stats...", e);
@@ -101,6 +98,19 @@ export async function start(clock = new Clock(),
             res.send(postsSource.knownPosts());
         } catch (e) {
             Logger.logError("Problem while reloading posts...", e);
+            res.sendStatus(500);
+        }
+    });
+
+    app.post("/internal/calculate-stats-views", async (req, res) => {
+        try {
+            await statsViews.saveViewsForShorterPeriods();
+            await statsViews.saveViewsForLongerPeriods();
+
+            const newViews = await statsViews.views();
+            res.send(newViews);
+        } catch (e) {
+            Logger.logError("Problem while calculating stats views...", e);
             res.sendStatus(500);
         }
     });
@@ -133,6 +143,8 @@ export async function start(clock = new Clock(),
         stop();
         process.exit();
     });
+
+    return { eventsSaver, statsViews };
 }
 
 export function stop() {

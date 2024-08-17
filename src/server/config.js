@@ -1,11 +1,12 @@
 import { envVarOrDefault } from "../shared/env.js";
 
-// 3 hours
-const DEFAULT_DB_BACKUP_DELAY = 3 * 60 * 60 * 1000;
-// 5 minutes
-const DEFAULT_STATS_VIEWS_SHORTER_PERIODS_DELAY = 5 * 60 * 1000;
-// 1 hour
-const DEFAULT_STATS_VIEWS_LONGER_PERIODS_DELAY = 60 * 60 * 1000;
+const MINUTE_MILLIS = 60 * 1000;
+// 10 minutes
+const DEFAULT_STATS_VIEWS_SHORTER_PERIODS_DELAY = 10 * MINUTE_MILLIS;
+// 1 hour + slight delay not to conflict with shorter period stats (2 minutes)
+const DEFAULT_STATS_VIEWS_LONGER_PERIODS_DELAY = 60 * MINUTE_MILLIS + 2 * MINUTE_MILLIS;
+// 3 hours + slight delay not to conflict with longer period stats (5 minutes)
+const DEFAULT_DB_BACKUP_DELAY = 3 * 60 * MINUTE_MILLIS + 5 * MINUTE_MILLIS;
 
 export function read() {
     const postsHost = envVarOrDefault("POSTS_HOST", "https://localhost");
