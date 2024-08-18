@@ -10,9 +10,9 @@
 
 <body>
     {{ navigation.html }}
-    <div class="p-6 text-center">
+    <div class="mx-4 my-6 text-center">
         <h1 class="text-4xl mb-8 font-bold">Stats</h1>
-        <div id="stats-container" class="max-content-width m-auto">
+        <div id="stats-container" class="m-auto">
             <div id="stats-loader">Loading...</div>
         </div>
     </div>
@@ -20,7 +20,6 @@
     {{ init-script.html }}
     <script type="module">
         const TOP_VIEWS_BY_SOURCE = 10;
-
         const statsContainer = document.getElementById("stats-container");
         const statsLoader = document.getElementById("stats-loader");
 

@@ -2,11 +2,11 @@ import { Scheduler } from "../../src/server/scheduler.js";
 import { delay } from "../../src/shared/promises.js";
 import { TestObjects } from "../test-objects.js";
 import { DeferredEventsSaver } from "../../src/server/analytics.js";
-import { assert, expect } from "chai";
+import { assert } from "chai";
 import { TestClock } from "../test-utils.js";
 
-const WRITE_DELAY = 1;
-const WRITE_DELAY_AWAIT = 5;
+const WRITE_INTERVAl = 1;
+const WRITE_INTERVAL_AWAIT = 5;
 const MAX_EVENTS_IN_MEMORY = 3;
 
 const scheduler = new Scheduler();
@@ -27,14 +27,14 @@ describe("DeferredEventsSaver tests", () => {
     });
 
     it('retries failed events save', async () => {
-        saver.schedule(scheduler, WRITE_DELAY);
+        saver.schedule(scheduler, WRITE_INTERVAl);
 
         repository.error = new Error("Fail to save events");
 
         saver.addEvent(TestObjects.randomEvent());
         saver.addEvent(TestObjects.randomEvent());
 
-        await nextWriteDelay();
+        await nextWriteInterval();
 
         assert.lengthOf(repository.savedEvents, 0);
         assertSaveTimestampEqual(null);
@@ -43,7 +43,7 @@ describe("DeferredEventsSaver tests", () => {
 
         saver.addEvent(TestObjects.randomEvent());
 
-        await nextWriteDelay();
+        await nextWriteInterval();
 
         assert.lengthOf(repository.savedEvents, 3);
         assertSaveTimestampEqual(clock.nowTimestamp());
@@ -63,8 +63,8 @@ describe("DeferredEventsSaver tests", () => {
     });
 })
 
-function nextWriteDelay() {
-    return delay(WRITE_DELAY_AWAIT);
+function nextWriteInterval() {
+    return delay(WRITE_INTERVAL_AWAIT);
 }
 
 function assertSaveTimestampEqual(expectedTimestamp) {

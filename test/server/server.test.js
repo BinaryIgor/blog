@@ -83,7 +83,7 @@ serverIntTestSuite("Server integration tests", () => {
             2);
     });
 
-    // for more detailed, time-based test-cases checkout stats-views.test
+    // for more detailed, time-based test-cases, check out stats-views.test
     it('adds various events', async () => {
         const ip1 = hashedIp(randomString());
         const ip2 = hashedIp(randomString());
@@ -180,7 +180,7 @@ serverIntTestSuite("Server integration tests", () => {
     });
 
     it(`allows to trigger post reload, retrying if necessary`, async function () {
-        //3 retries in test config. Next reload tests eventually successful reload
+        // 3 retries in test config. Next reload tests eventually successful reload
         failNextNPostsFetches(5);
 
         const failedReload = await testRequests.reloadPosts();

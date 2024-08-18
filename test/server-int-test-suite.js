@@ -18,8 +18,6 @@ const DB_PATH = path.join(TMP_DIR, "analytics.db");
 export const testClock = new TestClock();
 export const testRequests = new TestRequests(SERVER_URL);
 
-const SCHEDULED_TASKS_DELAY = 1;
-
 const POSTS = [
     {
         slug: "about-postgres"
@@ -59,9 +57,6 @@ export const serverIntTestSuite = (testsDescription, testsCallback) => {
             process.env['DB_BACKUP_PATH'] = path.join(TMP_DIR, "analytics_backup.db");
 
             process.env['POSTS_HOST'] = MOCK_SERVER_URL;
-
-            process.env["POSTS_READ_DELAY"] = SCHEDULED_TASKS_DELAY;
-            process.env["EVENTS_WRITE_DELAY"] = SCHEDULED_TASKS_DELAY;
 
             MockServer.start({
                 port: MOCK_SERVER_PORT, getRoutes: [{

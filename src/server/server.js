@@ -34,18 +34,18 @@ export async function start(clock = new Clock(),
     await initSchema(db);
 
     const dbBackuper = new SqliteDbBackuper(db, config.dbBackupPath);
-    dbBackuper.schedule(scheduler, config.dbBackupDelay);
+    dbBackuper.schedule(scheduler, config.dbBackupInterval);
 
     const postsSource = new PostsSource(config.postsPath, postsRetryConfig);
-    postsSource.schedule(scheduler, config.postsReadDelay);
+    postsSource.schedule(scheduler, config.postsReadInterval);
 
     const analyticsRepository = new SqliteAnalyticsRepository(db);
 
     const statsViews = new StatsViews(analyticsRepository, db, clock);
-    statsViews.schedule(scheduler, config.statsViewsShorterPeriodsDelay, config.statsViewsLongerPeriodsDelay);
+    statsViews.schedule(scheduler, config.statsViewsCalculateShorterPeriodsInterval, config.statsViewsCalculateLongerPeriodsInterval);
 
     const eventsSaver = new DeferredEventsSaver(analyticsRepository, config.eventsMaxInMemory, clock);
-    eventsSaver.schedule(scheduler, config.eventsWriteDelay);
+    eventsSaver.schedule(scheduler, config.eventsWriteInterval);
 
     const analyticsService = new AnalyticsService(analyticsRepository, eventsSaver, postsSource, config.analyticsAllowedPaths, clock);
 

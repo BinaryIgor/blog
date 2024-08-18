@@ -13,8 +13,8 @@ import { TestClock } from "../test-utils.js";
 const DB_PATH = path.join("/tmp", `${crypto.randomUUID()}.db`);
 const DB_BACKUP_PATH = path.join("/tmp", `${crypto.randomUUID()}_backup.db`);
 
-const BACKUP_DELAY = 1;
-const BACKUP_DELAY_AWAIT = 5;
+const BACKUP_INTERVAL = 1;
+const BACKUP_INTERVAL_AWAIT = 5;
 
 const scheduler = new Scheduler();
 
@@ -83,8 +83,8 @@ function countTestTableRows(db) {
     return db.queryOne("SELECT COUNT(*) AS rows FROM test_table").then(r => r['rows']);
 }
 
-function nextBackupDelay() {
-    return delay(BACKUP_DELAY_AWAIT);
+function nextBackupInterval() {
+    return delay(BACKUP_INTERVAL_AWAIT);
 }
 
 function fromBackupDb() {
@@ -92,8 +92,8 @@ function fromBackupDb() {
 }
 
 async function initSingleBackup(backuper) {
-    backuper.schedule(scheduler, BACKUP_DELAY);
-    await nextBackupDelay();
+    backuper.schedule(scheduler, BACKUP_INTERVAL);
+    await nextBackupInterval();
     scheduler.close();
 }
 

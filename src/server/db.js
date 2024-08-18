@@ -18,7 +18,7 @@ export function initSchema(db) {
         CREATE VIEW IF NOT EXISTS read AS SELECT * FROM event WHERE type = 'READ';
     
         CREATE TABLE IF NOT EXISTS stats_view (
-            period TEXT PRIMARY KEY,
+            period TEXT PRIMARY KEY NOT NULL,
             -- json --
             stats TEXT NOT NULL,
             calculated_at INTEGER(8) NOT NULL

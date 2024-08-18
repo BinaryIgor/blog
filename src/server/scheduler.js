@@ -4,8 +4,8 @@ export class Scheduler {
         this._scheduled = [];
     }
 
-    schedule(func, delay) {
-        const intervalId = setInterval(func, delay);
+    schedule(func, interval) {
+        const intervalId = setInterval(func, interval);
         this._scheduled.push(intervalId);
     }
 
