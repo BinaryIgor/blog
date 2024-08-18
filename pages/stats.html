@@ -13,7 +13,7 @@
     <div class="mx-4 my-6 text-center">
         <h1 class="text-4xl font-bold">Stats</h1>
         <div id="stats-container" class="m-auto">
-            <div id="stats-loader">Loading...</div>
+            <div class="my-8" id="stats-loader">Loading...</div>
         </div>
     </div>
 
@@ -35,7 +35,7 @@
                 })
                 .catch(e => {
                     console.log("Failed to get posts", e);
-                    statsLoader.innerHTML = "Failed to get posts";
+                    statsLoader.innerHTML = "Failed to get posts.";
                 });
         }
 
@@ -44,7 +44,7 @@
                 .then(r => r.json())
                 .catch(e => {
                     console.log("Failed to get stats", e);
-                    statsLoader.innerHTML = "Failed to get stats";
+                    statsLoader.innerHTML = "Failed to get stats.";
                 });
         }
 
@@ -212,7 +212,8 @@
             `;
         }
 
-        renderStats(statsView);
+        // on purpose, for better "Loading..." UX
+        setTimeout(() => renderStats(statsView), 500);
     </script>
 </body>
 
