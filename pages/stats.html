@@ -11,7 +11,7 @@
 <body>
     {{ navigation.html }}
     <div class="mx-4 my-6 text-center">
-        <h1 class="text-4xl mb-8 font-bold">Stats</h1>
+        <h1 class="text-4xl font-bold">Stats</h1>
         <div id="stats-container" class="m-auto">
             <div id="stats-loader">Loading...</div>
         </div>
@@ -92,7 +92,8 @@
                 topViewsBySource: limitedViewsBySource.map(v => {
                     return {
                         source: v.source,
-                        views: `${Math.round(v.views * 100 / allViews)}%`
+                        // single decimal place trick
+                        views: `${Math.round(v.views * 100 / allViews * 10) / 10}%`
                     }
                 }),
                 posts: stats.pages.filter(p => postsByPath.has(p.path))
@@ -155,13 +156,13 @@
                     ${postsStatsComponent(stats.posts)}
                     <h3 class="text-2xl mt-16 mb-4 font-bold">Pages</h3>
                     ${pagesStatsComponent(stats.pages)}
-                    <p class="my-16 italic">Calculated at: ${stats.calculatedAt}</p>
+                    <p class="my-16 italic">${stats.calculatedAt}</p>
                 </div>`;
             } else {
                 body = `<div>No stats for this period</div>`;
             }
             return `
-                <div class="my-16">
+                <div class="my-12">
                     <h2 class="text-3xl my-8 font-bold cursor-pointer underline" id="${id}">${title}</h2>
                     ${body}
                 </div>
