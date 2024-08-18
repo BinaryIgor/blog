@@ -1,27 +1,25 @@
 import { assert, expect } from "chai";
 import {
-    serverIntTestSuite, nextScheduledTasksRunDelay, randomAllowedPostPath,
-    testClock, testRequests, failNextNPostsFetches, addPosts
+    serverIntTestSuite, randomAllowedPostPath,
+    testClock, testRequests, failNextNPostsFetches, addPosts,
+    assertAnalyticsEventsSavedStatsViewCalculated
 } from "../server-int-test-suite.js";
 import { assertJsonResponse, assertOkResponseCode, assertResponseCode } from "../web-tests.js";
-import { Stats, GeneralStats, ViewsBySource, PageStats } from "../../src/server/analytics.js";
+import { Stats, ViewsBySource, PageStats, ALL_TIME_STATS_VIEW } from "../../src/server/analytics.js";
 import { randomNumber, randomString } from "../test-utils.js";
 import { MAX_PATH_LENGTH, MAX_IP_HASH_VISITOR_IDS_IN_LAST_DAY, DAY_SECONDS } from "../../src/server/analytics.js";
-import { TestObjects } from "../test-objects.js";
+import { TestObjects, VIEW_EVENT_TYPE, READ_EVENT_TYPE } from "../test-objects.js";
 import { hashedIp } from "../../src/server/web.js";
 import crypto from 'crypto';
 
-const VIEW_EVENT_TYPE = 'VIEW';
-const READ_EVENT_TYPE = 'READ';
-
 serverIntTestSuite("Server integration tests", () => {
     invalidEvents().forEach(v => {
-        it('should ignore invalid event and return 200', async () => {
+        it('ignores invalid event and returns 200', async () => {
             const addEventResponse = await testRequests.addEventRequest(v);
 
-            assertOkResponseCode(addEventResponse);
+            await assertAnalyticsEventsSavedStatsViewCalculated();
 
-            await nextScheduledTasksRunDelay();
+            assertOkResponseCode(addEventResponse);
 
             const statsResponse = await testRequests.getStats();
 
@@ -29,7 +27,7 @@ serverIntTestSuite("Server integration tests", () => {
         });
     })
 
-    it('should ignore not allowed path events and return 200', async () => {
+    it('ignores not allowed path events and return 200', async () => {
         const view = TestObjects.randomEvent({ path: "/not-allowed.html", type: VIEW_EVENT_TYPE });
         const read = TestObjects.randomEvent({ path: "/not-allowed.html", type: READ_EVENT_TYPE });
 
@@ -39,14 +37,14 @@ serverIntTestSuite("Server integration tests", () => {
         assertOkResponseCode(addViewResponse);
         assertOkResponseCode(addReadResponse);
 
-        await nextScheduledTasksRunDelay();
+        await assertAnalyticsEventsSavedStatsViewCalculated();
 
         const statsResponse = await testRequests.getStats();
 
         assertEmptyStatsResponse(statsResponse);
     });
 
-    it('should reject too many visitor ids per ip hash in a day', async () => {
+    it('rejects too many visitor ids per ip hash in a day', async () => {
         const ip = randomString();
         const anotherIp = randomString();
         const anotherIpViews = 3;
@@ -54,7 +52,7 @@ serverIntTestSuite("Server integration tests", () => {
 
         await addViewsFromIp(ip, MAX_IP_HASH_VISITOR_IDS_IN_LAST_DAY);
 
-        await nextScheduledTasksRunDelay();
+        await assertAnalyticsEventsSavedStatsViewCalculated();
 
         await assertStatsHaveViewsUniqueVisitorsAndIpHashes(
             MAX_IP_HASH_VISITOR_IDS_IN_LAST_DAY,
@@ -64,7 +62,7 @@ serverIntTestSuite("Server integration tests", () => {
         await addViewsFromIp(anotherIp, anotherIpViews);
         await addViewsFromIp(ip, overLimitViews);
 
-        await nextScheduledTasksRunDelay();
+        await assertAnalyticsEventsSavedStatsViewCalculated();
 
         await assertStatsHaveViewsUniqueVisitorsAndIpHashes(
             MAX_IP_HASH_VISITOR_IDS_IN_LAST_DAY + anotherIpViews,
@@ -77,7 +75,7 @@ serverIntTestSuite("Server integration tests", () => {
 
         await addViewsFromIp(ip, limitExpiredViews);
 
-        await nextScheduledTasksRunDelay();
+        await assertAnalyticsEventsSavedStatsViewCalculated();
 
         await assertStatsHaveViewsUniqueVisitorsAndIpHashes(
             MAX_IP_HASH_VISITOR_IDS_IN_LAST_DAY + anotherIpViews + limitExpiredViews,
@@ -85,8 +83,8 @@ serverIntTestSuite("Server integration tests", () => {
             2);
     });
 
-    // TODO: add time-based events cases
-    it('should add events', async () => {
+    // for more detailed, time-based test-cases, check out stats-views.test
+    it('adds various events', async () => {
         const ip1 = hashedIp(randomString());
         const ip2 = hashedIp(randomString());
         const ip3 = hashedIp(randomString());
@@ -161,30 +159,28 @@ serverIntTestSuite("Server integration tests", () => {
         await addEventFromIp(ip2, ip2Read1);
         await addEventFromIp(ip3, ip3View1);
 
-        await nextScheduledTasksRunDelay();
+        await assertAnalyticsEventsSavedStatsViewCalculated();
 
         const statsResponse = await testRequests.getStats();
 
-        const expectedGeneralStats = new GeneralStats(5, 3, 3, 2, 2,
+        const expectedAllTimeStats = new Stats(5, 3, 3, 2, 2,
             [
-                new ViewsBySource(source1, 60),
-                new ViewsBySource(source2, 40),
-            ]);
-
-        const expectedStats = new Stats(expectedGeneralStats, expectedGeneralStats, expectedGeneralStats,
+                new ViewsBySource(source1, 3),
+                new ViewsBySource(source2, 2),
+            ],
             [
                 new PageStats("/index.html", 4, 0, 3, 0),
                 new PageStats(allowedPostPath, 1, 2, 1, 2)
-            ]
-        );
+            ]);
 
         assertJsonResponse(statsResponse, actualStats => {
-            assert.deepEqual(actualStats, expectedStats);
+            const actualAllTimeStats = allTimeStatsView(actualStats).stats;
+            assert.deepEqual(actualAllTimeStats, expectedAllTimeStats);
         });
     });
 
-    it(`should allow to trigger post reload, retrying if necessary`, async function () {
-        //3 retries in test config. Next reload tests eventually successful reload
+    it(`allows to trigger post reload, retrying if necessary`, async function () {
+        // 3 retries in test config. Next reload tests eventually successful reload
         failNextNPostsFetches(5);
 
         const failedReload = await testRequests.reloadPosts();
@@ -220,17 +216,19 @@ function invalidEvents() {
 
 function assertEmptyStatsResponse(response) {
     assertJsonResponse(response, actualStats => {
-        const emptyGeneralStats = new GeneralStats(0, 0, 0, 0, 0, []);
-        const emptyStats = new Stats(emptyGeneralStats, emptyGeneralStats, emptyGeneralStats, []);
-        assert.deepEqual(actualStats, emptyStats);
+        const emptyStats = new Stats(0, 0, 0, 0, 0, [], []);
+        actualStats.forEach(as => {
+            assert.deepEqual(as.stats, emptyStats);
+        });
     });
 }
 
 async function assertStatsHaveViewsUniqueVisitorsAndIpHashes(views, visitors, iphashes) {
     assertJsonResponse(await testRequests.getStats(), actualStats => {
-        assert.deepEqual(actualStats.general.views, views);
-        assert.deepEqual(actualStats.general.uniqueVisitors, visitors);
-        assert.deepEqual(actualStats.general.ipHashes, iphashes);
+        const allTimeStats = allTimeStatsView(actualStats).stats;
+        assert.deepEqual(allTimeStats.views, views);
+        assert.deepEqual(allTimeStats.uniqueVisitors, visitors);
+        assert.deepEqual(allTimeStats.ipHashes, iphashes);
     });
 }
 
@@ -250,4 +248,12 @@ async function addEventFromIp(ip, event = null) {
     }
     const response = await testRequests.addEventRequest(event, { "X-Real-Ip": ip });
     assertOkResponseCode(response);
+}
+
+function statsViewOfPeriod(statsViews, period) {
+    return statsViews.find(sv => sv.period == period);
+}
+
+function allTimeStatsView(statsView) {
+    return statsViewOfPeriod(statsView, ALL_TIME_STATS_VIEW);
 }

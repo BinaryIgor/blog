@@ -1,13 +1,20 @@
 import { URL } from "url";
 import * as Dates from "../shared/dates.js";
+import * as Logger from "../shared/logger.js";
 
 export const MAX_VISITOR_ID_LENGTH = 50;
 export const MAX_PATH_LENGTH = 500;
 export const DAY_SECONDS = 24 * 60 * 60;
+export const SEVEN_DAYS_SECONDS = DAY_SECONDS * 7;
 export const THIRTY_DAYS_SECONDS = DAY_SECONDS * 30;
 export const NINENTY_DAYS_SECONDS = DAY_SECONDS * 90;
 export const MAX_IP_HASH_VISITOR_IDS_IN_LAST_DAY = 25;
 
+export const LAST_DAY_STATS_VIEW = "lastDay";
+export const LAST_7_DAYS_STATS_VIEW = "last7Days";
+export const LAST_30_DAYS_STATS_VIEW = "last30Days";
+export const LAST_90_DAYS_STATS_VIEW = "last90Days";
+export const ALL_TIME_STATS_VIEW = "allTime";
 
 const UUID_REGEX = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
 
@@ -31,7 +38,7 @@ export class AnalyticsService {
 
         await this._validateIpHashUniqueVisitorsLimit(event);
 
-        this.eventsSaver.addEvent(validatedEvent);
+        await this.eventsSaver.addEvent(validatedEvent);
     }
 
     _validatedEvent(event) {
@@ -84,22 +91,6 @@ export class AnalyticsService {
             throw new Error(`Path: ${event.path} is neither allowed nor it has associated post`);
         }
     }
-
-    async stats() {
-        const general = await this.analyticsRepository.generalStats();
-
-        const now = this.clock.nowTimestamp();
-
-        const timestampThirtyDaysAgo = Dates.timestampSecondsAgo(now, THIRTY_DAYS_SECONDS);
-        const generalForLastThirtyDays = await this.analyticsRepository.generalStats(timestampThirtyDaysAgo);
-
-        const timestampNinentyDaysAgo = Dates.timestampSecondsAgo(now, NINENTY_DAYS_SECONDS);
-        const generalForLastNinentyDays = await this.analyticsRepository.generalStats(timestampNinentyDaysAgo);
-
-        const pagesStats = await this.analyticsRepository.pagesStats();
-
-        return new Stats(general, generalForLastThirtyDays, generalForLastNinentyDays, pagesStats);
-    }
 }
 
 export class Event {
@@ -113,14 +104,15 @@ export class Event {
     }
 }
 
-export class GeneralStats {
-    constructor(views, uniqueVisitors, ipHashes, reads, uniqueReaders, viewsBySource) {
+export class Stats {
+    constructor(views, uniqueVisitors, ipHashes, reads, uniqueReaders, viewsBySource, pages) {
         this.views = views;
         this.uniqueVisitors = uniqueVisitors;
         this.ipHashes = ipHashes;
         this.reads = reads;
         this.uniqueReaders = uniqueReaders;
         this.viewsBySource = viewsBySource;
+        this.pages = pages;
     }
 }
 
@@ -141,42 +133,134 @@ export class PageStats {
     }
 }
 
-export class Stats {
-    constructor(general,
-        generalForLastThirtyDays,
-        generalForLastNinentyDays,
-        pages) {
-        this.general = general;
-        this.generalForLastThirtyDays = generalForLastThirtyDays;
-        this.generalForLastNinentyDays = generalForLastNinentyDays;
-        this.pages = pages;
+export class StatsView {
+    constructor(period, stats, calculatedAt) {
+        this.period = period;
+        this.stats = stats;
+        this.calculatedAt = calculatedAt;
     }
 }
 
+// TODO: diagnostics endpoint
 export class DeferredEventsSaver {
-    constructor(analyticsRepository, scheduler, writeDelay) {
+    constructor(analyticsRepository, maxInMemoryEvents, clock) {
         this.analyticsRepository = analyticsRepository;
+        this.maxInMemoryEvents = maxInMemoryEvents;
         this.eventsToSave = [];
-
-        scheduler.schedule(async () => this._saveEvents(), writeDelay);
+        this.clock = clock;
+        this.lastSaveTimestamp = null;
     }
 
-    async _saveEvents() {
+    schedule(scheduler, writeDelay) {
+        scheduler.schedule(async () => this.saveEvents(), writeDelay);
+    }
+
+    async saveEvents() {
         const toSave = [...this.eventsToSave];
 
         if (toSave.length > 0) {
             try {
                 this.eventsToSave = [];
                 await this.analyticsRepository.saveEvents(toSave);
+                this.lastSaveTimestamp = this.clock.nowTimestamp();
             } catch (e) {
                 console.error("Failed to save events:", e);
                 this.eventsToSave.push(...toSave);
             }
+        } else {
+            this.lastSaveTimestamp = this.clock.nowTimestamp();
         }
     }
 
-    addEvent(event) {
+    async addEvent(event) {
         this.eventsToSave.push(event);
+        if (this.eventsToSave.length >= this.maxInMemoryEvents) {
+            await this.saveEvents();
+        }
+    }
+}
+
+export class StatsViews {
+    constructor(analyticsRepository, db, clock) {
+        this.analyticsRepository = analyticsRepository;
+        this.db = db;
+        this.clock = clock;
+        this.lastShorterPeriodsViewsSaveTimestamp = null;
+        this.lastLongerPeriodsViewsSaveTimestamp = null;
+    }
+
+    schedule(scheduler, shorterPeriodsViewsDelay, longerPeriodsViewsDelay) {
+        scheduler.schedule(async () => {
+            try {
+                Logger.logInfo("Calculating shorter periods stats view...");
+                await this.saveViewsForShorterPeriods();
+                Logger.logInfo("Shorter periods stats views calculated");
+            } catch (e) {
+                Logger.logError("Failed to calculate shorter periods stats view", e);
+            }
+        }, shorterPeriodsViewsDelay);
+
+        scheduler.schedule(async () => {
+            try {
+                Logger.logInfo("Calculating longer periods stats view...");
+                await this.saveViewsForLongerPeriods();
+                Logger.logInfo("Longer periods stats views calculated");
+            } catch (e) {
+                Logger.logError("Failed to calculate longer periods stats view", e);
+            }
+        }, longerPeriodsViewsDelay);
+    }
+
+    async saveViewsForShorterPeriods() {
+        const now = this.clock.nowTimestamp();
+
+        const timestampDayAgo = Dates.timestampSecondsAgo(now, DAY_SECONDS);
+        const lastDayStats = await this.analyticsRepository.stats(timestampDayAgo, now);
+
+        const timestampSevenDaysAgo = Dates.timestampSecondsAgo(now, SEVEN_DAYS_SECONDS);
+        const lastSevenDaysStats = await this.analyticsRepository.stats(timestampSevenDaysAgo, now);
+
+        await this._saveView(new StatsView(LAST_DAY_STATS_VIEW, lastDayStats, now));
+        await this._saveView(new StatsView(LAST_7_DAYS_STATS_VIEW, lastSevenDaysStats, now));
+
+        this.lastShorterPeriodsViewsSaveTimestamp = now;
+    }
+
+    async saveViewsForLongerPeriods() {
+        const now = this.clock.nowTimestamp();
+
+        const timestampThirtyDaysAgo = Dates.timestampSecondsAgo(now, THIRTY_DAYS_SECONDS);
+        const lastThirtyDaysStats = await this.analyticsRepository.stats(timestampThirtyDaysAgo, now);
+
+        const timestampNinentyDaysAgo = Dates.timestampSecondsAgo(now, NINENTY_DAYS_SECONDS);
+        const lastNinentyDaysStats = await this.analyticsRepository.stats(timestampNinentyDaysAgo, now);
+
+        const allTimeStats = await this.analyticsRepository.stats(null, now);
+
+        await this._saveView(new StatsView(LAST_30_DAYS_STATS_VIEW, lastThirtyDaysStats, now));
+        await this._saveView(new StatsView(LAST_90_DAYS_STATS_VIEW, lastNinentyDaysStats, now));
+        await this._saveView(new StatsView(ALL_TIME_STATS_VIEW, allTimeStats, now));
+
+        this.lastLongerPeriodsViewsSaveTimestamp = now;
+    }
+
+    _saveView(statsView) {
+        return this.db.execute(`
+            INSERT INTO stats_view (period, stats, calculated_at)
+            VALUES (?, ?, json(?))
+            ON CONFLICT (period) 
+            DO UPDATE SET 
+            stats = EXCLUDED.stats,
+            calculated_at = EXCLUDED.calculated_at
+            `, [statsView.period, JSON.stringify(statsView.stats), statsView.calculatedAt]);
+    }
+
+    views() {
+        return this.db.query("SELECT * FROM stats_view")
+            .then(rows => rows.map(r => {
+                const stats = JSON.parse(r["stats"]);
+                return new StatsView(r["period"], stats, r["calculated_at"]);
+            }));
     }
 }
 
@@ -213,23 +297,18 @@ export class SqliteAnalyticsRepository {
             });
     }
 
-    async generalStats(fromTimestamp, toTimestamp) {
+    async stats(fromTimestamp, toTimestamp) {
         const viewsUniqueVisitorsIpHashesPromise = this._viewsUniqueVisitorsIpHashesStats(fromTimestamp, toTimestamp);
         const readsUiqueReadersPromise = this._readsUniqueReadersStats(fromTimestamp, toTimestamp);
-        const viewsBySourcePromise = this._viewsByTopSourceStats(fromTimestamp, toTimestamp, 100);
+        const viewsBySourcePromise = this._viewsByTopSourceStats(fromTimestamp, toTimestamp, 25);
+        const pagesPromise = this._pagesStats(fromTimestamp, toTimestamp);
 
         const { views, uniqueVisitors, ipHashes } = await viewsUniqueVisitorsIpHashesPromise;
         const { reads, uniqueReaders } = await readsUiqueReadersPromise;
-        const viewsBySourceFromDb = await viewsBySourcePromise;
+        const viewsBySource = await viewsBySourcePromise;
+        const pages = await pagesPromise;
 
-        let viewsBySource;
-        if (views > 0) {
-            viewsBySource = viewsBySourceFromDb.map(v => new ViewsBySource(v.source, v.views * 100 / views));
-        } else {
-            viewsBySource = [];
-        }
-
-        return new GeneralStats(views, uniqueVisitors, ipHashes, reads, uniqueReaders, viewsBySource);
+        return new Stats(views, uniqueVisitors, ipHashes, reads, uniqueReaders, viewsBySource, pages);
     }
 
     _viewsUniqueVisitorsIpHashesStats(fromTimestamp, toTimestamp) {
@@ -263,7 +342,7 @@ export class SqliteAnalyticsRepository {
 
     _whereInTimestampsClause(fromTimestamp, toTimestamp) {
         let fromClause = fromTimestamp ? `timestamp >= ${fromTimestamp}` : '';
-        let toClause = toTimestamp ? `timestamp < ${toTimestamp}` : '';
+        let toClause = toTimestamp ? `timestamp <= ${toTimestamp}` : '';
 
         if (!fromClause && !toClause) {
             return '';
@@ -307,30 +386,31 @@ export class SqliteAnalyticsRepository {
             fromTimestamp, toTimestamp
         )} GROUP BY source ORDER BY views DESC LIMIT ${limit}`;
 
-        return this.db.query(query)
-            .then(rows => rows.map(r => {
-                return {
-                    source: r['source'],
-                    views: r['views']
-                };
-            }));
+        return this.db.query(query).then(rows => rows.map(r => new ViewsBySource(r['source'], r['views'])));
     }
 
-    async pagesStats() {
-        const readsPromise = this.db.query(`SELECT path, 
+    async _pagesStats(fromTimestamp, toTimestamp) {
+        const readsQuery = `${this._queryWithOptionalWhereInTimestampsClause(
+            `SELECT 
+            path, 
             COUNT(*) AS reads,
             COUNT(DISTINCT visitor_id) AS unique_readers 
-            FROM read 
-            GROUP BY path`);
+            FROM read`,
+            fromTimestamp, toTimestamp
+        )} GROUP BY path`;
+        const readsPromise = this.db.query(readsQuery);
 
-        const viewsPromise = this.db.query(`SELECT 
+        const viewsQuery = `${this._queryWithOptionalWhereInTimestampsClause(
+            `SELECT 
             path,
             COUNT(*) AS views, 
             COUNT(DISTINCT visitor_id) AS unique_viewers
-            FROM view
-            GROUP BY path
-            ORDER BY views DESC
-        `);
+            FROM view`,
+            fromTimestamp, toTimestamp
+        )}
+        GROUP BY path
+        ORDER BY views DESC`;
+        const viewsPromise = this.db.query(viewsQuery);
 
         const reads = new Map();
         (await readsPromise).forEach(r => {

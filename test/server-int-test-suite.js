@@ -18,9 +18,6 @@ const DB_PATH = path.join(TMP_DIR, "analytics.db");
 export const testClock = new TestClock();
 export const testRequests = new TestRequests(SERVER_URL);
 
-const SCHEDULED_TASKS_DELAY = 1;
-const SCHEDULED_TASKS_DELAY_AWAIT = 5;
-
 const POSTS = [
     {
         slug: "about-postgres"
@@ -33,6 +30,9 @@ let additionalPosts = [];
 
 let postsFetchesToFail = 0;
 
+let eventsSaver = null;
+let statsViews = null;
+
 function postsHandler(req, res) {
     if (postsFetchesToFail > 0) {
         res.sendStatus(500);
@@ -41,6 +41,11 @@ function postsHandler(req, res) {
         res.send([...POSTS, ...additionalPosts]);
     }
 }
+
+const NoOpScheduler = {
+    schedule() { },
+    close() { }
+};
 
 export const serverIntTestSuite = (testsDescription, testsCallback) => {
     describe(testsDescription, () => {
@@ -53,9 +58,6 @@ export const serverIntTestSuite = (testsDescription, testsCallback) => {
 
             process.env['POSTS_HOST'] = MOCK_SERVER_URL;
 
-            process.env["POSTS_READ_DELAY"] = SCHEDULED_TASKS_DELAY;
-            process.env["VIEWS_WRITE_DELAY"] = SCHEDULED_TASKS_DELAY;
-
             MockServer.start({
                 port: MOCK_SERVER_PORT, getRoutes: [{
                     path: "/posts.json",
@@ -63,7 +65,8 @@ export const serverIntTestSuite = (testsDescription, testsCallback) => {
                 }
                 ]
             });
-            Server.start(testClock, false, { retries: 3, initialDelay: 50, backoffMultiplier: 2 });
+            const app = await Server.start(testClock, NoOpScheduler, { retries: 3, initialDelay: 10, backoffMultiplier: 2 });
+            ({ eventsSaver, statsViews } = app);
 
             // Currently good enough hack to wait for MockServer and Server readiness
             await delay(500);
@@ -86,10 +89,6 @@ export const serverIntTestSuite = (testsDescription, testsCallback) => {
     })
 };
 
-export function nextScheduledTasksRunDelay() {
-    return delay(SCHEDULED_TASKS_DELAY_AWAIT);
-}
-
 export function randomAllowedPostPath() {
     const post = POSTS[randomNumber(0, POSTS.length)];
     return `/${post.slug}.html`;
@@ -101,4 +100,19 @@ export function failNextNPostsFetches(n) {
 
 export function addPosts(posts) {
     additionalPosts = posts.map(p => { return { slug: p }; });
+}
+
+export async function assertAnalyticsEventsSaved() {
+    await eventsSaver.saveEvents();
+}
+
+export async function assertStatsViewsCalculated() {
+    await statsViews.saveViewsForShorterPeriods();
+    await statsViews.saveViewsForLongerPeriods();
+}
+
+export async function assertAnalyticsEventsSavedStatsViewCalculated() {
+    await assertAnalyticsEventsSaved();
+    testClock.moveTimeByResonableAmount();
+    await assertStatsViewsCalculated();
 }

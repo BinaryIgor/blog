@@ -10,9 +10,9 @@
 
 <body>
     {{ navigation.html }}
-    <div class="p-6 text-center">
-        <h1 class="text-4xl font-bold mb-16">Stats</h1>
-        <div id="stats-container" class="max-content-width m-auto">
+    <div class="mx-4 my-6 text-center">
+        <h1 class="text-4xl mb-8 font-bold">Stats</h1>
+        <div id="stats-container" class="m-auto">
             <div id="stats-loader">Loading...</div>
         </div>
     </div>
@@ -48,25 +48,54 @@
                 });
         }
 
-        function toStatsView(postsByPath, stats) {
-            const generalStats = stats.general;
-            const pagesStats = stats.pages;
+        function toStatsView(stats, postsByPath) {
+            let lastDayStats = null;
+            let last7DaysStats = null;
+            let last30DaysStats = null;
+            let last90DaysStats = null;
+            let allTimeStats = null;
 
-            const limitedViewsBySource = generalStats.viewsBySource.length > TOP_VIEWS_BY_SOURCE ?
-                generalStats.viewsBySource.slice(0, TOP_VIEWS_BY_SOURCE) : generalStats.viewsBySource;
-            const topViewsBySource = limitedViewsBySource.map(v => {
-                return {
-                    source: v.source,
-                    views: `${Math.round(v.views * 100) / 100}%`
+            for (const s of stats) {
+                if (s.period == "lastDay") {
+                    lastDayStats = statsOfPeriodView(s.stats, s.calculatedAt, postsByPath);
+                } else if (s.period == "last7Days") {
+                    last7DaysStats = statsOfPeriodView(s.stats, s.calculatedAt, postsByPath);
+                } else if (s.period == "last30Days") {
+                    last30DaysStats = statsOfPeriodView(s.stats, s.calculatedAt, postsByPath);
+                } else if (s.period == "last90Days") {
+                    last90DaysStats = statsOfPeriodView(s.stats, s.calculatedAt, postsByPath);
+                } else if (s.period == "allTime") {
+                    allTimeStats = statsOfPeriodView(s.stats, s.calculatedAt, postsByPath);
+                } else {
+                    console.log("Got stats for unsupported period, ignoring them: ", s);
                 }
-            });
+            }
 
             return {
-                allTime: { ...stats.general },
-                lastThirtyDays: { ...stats.generalForLastThirtyDays },
-                lastNinentyDays: { ...stats.generalForLastNinentyDays },
-                viewsBySource: topViewsBySource,
-                posts: pagesStats.filter(p => postsByPath.has(p.path))
+                lastDay: lastDayStats,
+                last7Days: last7DaysStats,
+                last30Days: last30DaysStats,
+                last90Days: last90DaysStats,
+                allTime: allTimeStats
+            };
+        }
+
+        function statsOfPeriodView(stats, calculatedAtTimestamp, postsByPath) {
+            const allViews = stats.views;
+
+            const limitedViewsBySource = stats.viewsBySource.length > TOP_VIEWS_BY_SOURCE ?
+                stats.viewsBySource.slice(0, TOP_VIEWS_BY_SOURCE) : stats.viewsBySource;
+
+            return {
+                ...stats,
+                calculatedAt: new Date(calculatedAtTimestamp).toISOString(),
+                topViewsBySource: limitedViewsBySource.map(v => {
+                    return {
+                        source: v.source,
+                        views: `${Math.round(v.views * 100 / allViews)}%`
+                    }
+                }),
+                posts: stats.pages.filter(p => postsByPath.has(p.path))
                     .map(p => {
                         const post = postsByPath.get(p.path);
                         return {
@@ -74,57 +103,76 @@
                             ...p
                         }
                     }),
-                pages: pagesStats.filter(p => !postsByPath.has(p.path))
+                pages: stats.pages.filter(p => !postsByPath.has(p.path))
             };
         }
 
         const postsByPath = await fetchPosts();
         const stats = await fetchStats();
-        const statsView = toStatsView(postsByPath, stats);
+        const statsView = toStatsView(stats, postsByPath);
 
         function renderStats(stats) {
+            const lastDayComponentId = "last-day";
+            const last7DaysComponentId = "last-7-days";
+            const last30DaysComponentId = "last-30-days";
+            const last90DaysComponentId = "last-90-days";
+            const allTimeComponentId = "all-time";
+            const componentIds = [lastDayComponentId, last7DaysComponentId, last30DaysComponentId,
+                last90DaysComponentId, allTimeComponentId];
+
             statsContainer.innerHTML = `
-                <div class="mb-16">
-                    <h2 class="text-3xl mb-4 font-bold">Overall</h2>
-                        ${generalStatsComponent("All time", stats.allTime)}
-                        ${generalStatsComponent("Last 30 days", stats.lastThirtyDays)}
-                        ${generalStatsComponent("Last 90 days", stats.lastNinentyDays)}
-                    </div>
-                </div>
-                <div class="mb-16">
-                    <h2 class="text-3xl mb-4 font-bold">Top views sources</h2>
-                    ${viewsBySourceComponent(stats)}
-                </div>
-                <div class="mb-16">
-                    <h2 class="text-3xl mb-4 font-bold">Posts</h2>
-                    ${postsStatsComponent(stats)}
-                </div>
-                <div>
-                    <h2 class="text-3xl mb-4 font-bold">Pages</h2>
-                    ${pagesStatsComponent(stats)}
-                </div>
-            `;
+            ${statsOfPeriodComponent("Last day", lastDayComponentId, stats.lastDay)}
+            ${statsOfPeriodComponent("Last 7 days", last7DaysComponentId, stats.last7Days)}
+            ${statsOfPeriodComponent("Last 30 days", last30DaysComponentId, stats.last30Days)}
+            ${statsOfPeriodComponent("Last 90 days", last90DaysComponentId, stats.last90Days)}
+            ${statsOfPeriodComponent("All time", allTimeComponentId, stats.allTime)}`;
+
+            componentIds.forEach(cid => {
+                const component = document.getElementById(cid);
+                toggleElementVisibility(component.nextElementSibling);
+                component.onclick = () => toggleElementVisibility(component.nextElementSibling);
+            });
         }
 
-        function generalStatsComponent(title, stats) {
-            return `
-                <div class="mb-4">
-                    <h3 class="text-2xl mb-4">${title}</h3>
+        function toggleElementVisibility(element) {
+            element.classList.toggle("hidden");
+        }
+
+        function statsOfPeriodComponent(title, id, stats) {
+            let body;
+            if (stats) {
+                body = `
+                <div>
+                    <h3 class="text-2xl mt-16 mb-4 font-bold">Overall</h3>
                     <div>Views: ${stats.views}</div>
                     <div>Unique visitors: ${stats.uniqueVisitors}</div>
                     <div>Ip hashes: ${stats.ipHashes}</div>
                     <div>Reads: ${stats.reads}</div>
                     <div>Unique readers: ${stats.uniqueReaders}</div>
-                ${delimiterComponent()}
+                    <h3 class="text-2xl mt-16 mb-4 font-bold">View sources</h3>
+                    ${viewsBySourceComponent(stats.topViewsBySource)}
+                    <h3 class="text-2xl mt-16 mb-4 font-bold">Posts</h3>
+                    ${postsStatsComponent(stats.posts)}
+                    <h3 class="text-2xl mt-16 mb-4 font-bold">Pages</h3>
+                    ${pagesStatsComponent(stats.pages)}
+                    <p class="my-16 italic">Calculated at: ${stats.calculatedAt}</p>
+                </div>`;
+            } else {
+                body = `<div>No stats for this period</div>`;
+            }
+            return `
+                <div class="my-16">
+                    <h2 class="text-3xl my-8 font-bold cursor-pointer underline" id="${id}">${title}</h2>
+                    ${body}
                 </div>
                 `;
         }
 
-        function viewsBySourceComponent(stats) {
-            return `<div class="space-y-8">${stats.viewsBySource.map(viewsOfSourceComponent).join('\n')}</div>`;
+        function viewsBySourceComponent(viewsBySource) {
+            return `<div class="space-y-8">${viewsBySource.map(viewsOfSourceComponent).join('\n')}</div>`;
         }
 
-        function viewsOfSourceComponent(views) {
+        function viewsOfSourceComponent(views, idx) {
             return `
             <div>
                 <div>${views.source}: ${views.views}</div>
@@ -137,8 +185,8 @@
             return `<div class="delimiter-like">---</div>`;
         }
 
-        function postsStatsComponent(stats) {
-            return `<div class="space-y-8">${stats.posts.map(postStatsComponent).join('\n')}</div>`;
+        function postsStatsComponent(posts) {
+            return `<div class="space-y-8">${posts.map(postStatsComponent).join('\n')}</div>`;
         }
 
         function postStatsComponent(post) {
@@ -155,8 +203,8 @@
             `;
         }
 
-        function pagesStatsComponent(stats) {
-            return `<div class="space-y-8">${stats.pages.map(pageStatsComponent).join('\n')}</div>`;
+        function pagesStatsComponent(pages) {
+            return `<div class="space-y-8">${pages.map(pageStatsComponent).join('\n')}</div>`;
         }
 
         function pageStatsComponent(page) {

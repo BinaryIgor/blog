@@ -1,6 +1,31 @@
 import sqlite3 from "sqlite3";
 import * as Logger from "../shared/logger.js";
 
+export function initSchema(db) {
+    return db.executeRaw(`
+        CREATE TABLE IF NOT EXISTS event (
+            timestamp INTEGER(8) NOT NULL,
+            visitor_id TEXT NOT NULL,
+            ip_hash TEXT NOT NULL,
+            source TEXT NOT NULL,
+            path TEXT NOT NULL,
+            type TEXT NOT NULL
+        );
+    
+        CREATE INDEX IF NOT EXISTS event_timestamp ON event(timestamp);
+    
+        CREATE VIEW IF NOT EXISTS view AS SELECT * FROM event WHERE type = 'VIEW';
+        CREATE VIEW IF NOT EXISTS read AS SELECT * FROM event WHERE type = 'READ';
+    
+        CREATE TABLE IF NOT EXISTS stats_view (
+            period TEXT PRIMARY KEY NOT NULL,
+            -- json --
+            stats TEXT NOT NULL,
+            calculated_at INTEGER(8) NOT NULL
+        );
+        `);
+}
+
 export class SqliteDb {
 
     constructor(filePath) {
@@ -86,15 +111,25 @@ export class SqliteDb {
 }
 
 export class SqliteDbBackuper {
-    constructor(db, backupPath, scheduler, backupDelay) {
-        scheduler.schedule(async () => {
-            try {
-                Logger.logInfo(`Backing up db to ${backupPath}...`);
-                await db.backup(backupPath);
-                Logger.logInfo(`Backup is done and could be found under ${backupPath} path`);
-            } catch (e) {
-                Logger.logError(`Fail to backup db to ${backupPath}`, e);
-            }
-        }, backupDelay);
+    constructor(db, backupPath, clock) {
+        this.db = db;
+        this.backupPath = backupPath;
+        this.clock = clock;
+        this.lastBackupTimestamp = null;
+    }
+
+    schedule(scheduler, backupDelay) {
+        scheduler.schedule(async () => this.backup(), backupDelay);
+    }
+
+    async backup() {
+        try {
+            Logger.logInfo(`Backing up db to ${this.backupPath}...`);
+            await this.db.backup(this.backupPath);
+            Logger.logInfo(`Backup is done and could be found under ${this.backupPath} path`);
+            this.lastBackupTimestamp = this.clock.nowTimestamp();
+        } catch (e) {
+            Logger.logError(`Fail to backup db to ${this.backupPath}`, e);
+        }
     }
 }

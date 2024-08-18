@@ -1,20 +1,28 @@
 import { marked } from 'marked';
 
 const markedRenderer = {
-    heading(text, level) {
-        const escapedText = text.toLowerCase()
-            .replace(/<a(.*?)>(.*?)<\/a>/g, (match, g1, g2) => g2)
+    heading({ text, depth, tokens }) {
+        const allText = tokens.filter(t => t.type != 'html').map(t => t.text).join("");
+        const escapedText = allText.toLowerCase()
             .replace(/[^\w]+/g, (match) => {
-            const trimmedMatch = match.trim();
-            if (trimmedMatch == '?' || trimmedMatch == '.' || trimmedMatch == '!') {
-                return '';
-            }
-            return '-';   
-        });
-        return `
-                <h${level} id="${escapedText}">
-                  ${text}
-                </h${level}>`;
+                const trimmedMatch = match.trim();
+                if (trimmedMatch == '?' || trimmedMatch == '.' || trimmedMatch == '!') {
+                    return '';
+                }
+                return '-';
+            });
+
+        // header with markdown link case
+        const link = tokens.find(t => t.type == 'link');
+        let headerBody;
+        if (link) {
+            const withoutLinkText = tokens.filter(t => t.type == "text").map(t => t.text).join("");
+            headerBody = withoutLinkText + `<a href="${link.href}">${link.text}</a>`;
+        } else {
+            headerBody = text;
+        }
+
+        return `<h${depth} id="${escapedText}">${headerBody}</h${depth}>`;
     }
 };
 

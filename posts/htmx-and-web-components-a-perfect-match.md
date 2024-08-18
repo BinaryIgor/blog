@@ -399,7 +399,7 @@ Even though they do not know anything about HTMX, it turns out that it is a bree
 
 <div class="post-delimiter">---</div>
 
-### Related videos on my <a href="{{ youtubeChannelUrl }}">youtube channel</a>
+### Related videos on my [youtube channel]({{ youtubeChannelUrl }})
 1. <a href="https://www.youtube.com/watch?v=M4i-JQVLgfE">Similar concept, live coded on the video</a>
 2. <a href="https://www.youtube.com/watch?v=A3UB3tyDWa4">Simple index.html with HTMX</a>
 
