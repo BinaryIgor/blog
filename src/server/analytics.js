@@ -192,21 +192,21 @@ export class StatsViews {
     schedule(scheduler, shorterPeriodsViewsInterval, longerPeriodsViewsInterval, longerPeriodsViewsScheduleDelay) {
         scheduler.schedule(async () => {
             try {
-                Logger.logInfo("Calculating shorter periods stats view...");
+                Logger.logInfo("Calculating shorter periods stats views...");
                 await this.saveViewsForShorterPeriods();
                 Logger.logInfo("Shorter periods stats views calculated");
             } catch (e) {
-                Logger.logError("Failed to calculate shorter periods stats view", e);
+                Logger.logError("Failed to calculate shorter periods stats views", e);
             }
         }, shorterPeriodsViewsInterval);
 
         scheduler.schedule(async () => {
             try {
-                Logger.logInfo("Calculating longer periods stats view...");
+                Logger.logInfo("Calculating longer periods stats views...");
                 await this.saveViewsForLongerPeriods();
                 Logger.logInfo("Longer periods stats views calculated");
             } catch (e) {
-                Logger.logError("Failed to calculate longer periods stats view", e);
+                Logger.logError("Failed to calculate longer periods stats views", e);
             }
         }, longerPeriodsViewsInterval, longerPeriodsViewsScheduleDelay);
     }
