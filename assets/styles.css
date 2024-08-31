@@ -213,6 +213,10 @@ html {
         @apply ml-4;
     }
 
+    .post .list-like > p {
+        @apply my-1;
+    }
+
     .post pre {
         scrollbar-width: thin;
         @apply bg-secondary-1 p-4 text-left border-l-[4px] rounded-sm border-primary-text max-content-width overflow-auto;

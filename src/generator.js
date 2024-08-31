@@ -22,7 +22,9 @@ const markedRenderer = {
             headerBody = text;
         }
 
-        return `<h${depth} id="${escapedText}">${headerBody}</h${depth}>`;
+        const headerId = escapedText.endsWith("-") ? escapedText.substring(0, escapedText.length - 1) : escapedText;
+
+        return `<h${depth} id="${headerId}">${headerBody}</h${depth}>`;
     }
 };
 
