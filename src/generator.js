@@ -1,6 +1,5 @@
 import { marked } from 'marked';
 
-let lastH2Header = null;
 const markedRenderer = {
     heading({ text, depth, tokens }) {
         const allText = tokens.filter(t => t.type != 'html').map(t => t.text).join("");
@@ -23,13 +22,8 @@ const markedRenderer = {
             headerBody = text;
         }
 
-        let headerId = escapedText.endsWith("-") ? escapedText.substring(0, escapedText.length - 1) : escapedText;
-        if (depth == 2) {
-            lastH2Header = headerId;
-        } else if (depth > 2 && lastH2Header) {
-            headerId = `${lastH2Header}-${headerId}`;
-        }
-
+        const headerId = escapedText.endsWith("-") ? escapedText.substring(0, escapedText.length - 1) : escapedText;
+        
         return `<h${depth} id="${headerId}">${headerBody}</h${depth}>`;
     }
 };

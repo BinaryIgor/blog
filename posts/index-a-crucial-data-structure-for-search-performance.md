@@ -463,7 +463,7 @@ As we saw, **Index is a crucial data structure for search performance**. Simple 
     2. *CLUSTER* keyword in Postgres: https://www.postgresql.org/docs/current/sql-cluster.html
     3. Clustering tradeoffs: https://use-the-index-luke.com/sql/clustering/index-organized-clustered-index
 7. Postgres GIN index
-    1. Docs: https://www.postgresql.org/docs/current/gin-intro.html
+    1. Docs: https://www.postgresql.org/docs/current/gin.html
     2. In-depth analysis 1: https://pganalyze.com/blog/gin-index
     3. In-depth analysis 2: https://www.cybertec-postgresql.com/en/gin-just-an-index-type
 8. Different Postgres (applicable also to other databases) query handling strategies, based on available indexes and other criteria: https://www.cybertec-postgresql.com/en/postgresql-indexing-index-scan-vs-bitmap-scan-vs-sequential-scan-basics/
