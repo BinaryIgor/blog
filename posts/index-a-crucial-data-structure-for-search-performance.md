@@ -127,7 +127,7 @@ ACTIVATED:state -> tuple2, tuple3
 
 ### GIST
 
-Generalized Search Tree. In Postgres, **it is just a template for a balanced, search tree based index on top of which we can build our own implementation**. One of its most commonly used instances is <a href="https://en.wikipedia.org/wiki/R-tree"><span class="nowrap">R-tree</span></a> used for searching through multidimensional data, such as rectangles or geographic coordinates. Why is it useful in this context? We can define our own comparison and equality operators (and others, custom ones) to query our data appropriately. Using coordinates, is (0, 1) greater than (1, 0)? Do questions like that even have a place with this data type? We can define these operators as we wish, which allows for new usages of tree-based indexes, like mentioned above R-tree. There is an implementation of it in <a href="https://www.postgresql.org/docs/current/gist-builtin-opclasses.html">PostgreSQL itself</a> and there is also the <a href="https://postgis.net/workshops/postgis-intro/indexing.html">PostGIS project</a> with its own implementation of R-Tree.
+Generalized Search Tree. In Postgres, **it is just a template for a balanced, search tree based index on top of which we can build our own implementation**. One of its most commonly used instances is <a href="https://en.wikipedia.org/wiki/R-tree"><span class="nowrap">R-tree</span></a> used for searching through multidimensional data, such as rectangles or geographic coordinates. Why is it useful in this context? We can define our own comparison and equality operators (and others, custom ones) to query our data appropriately. Using coordinates, is (0, 1) greater than (1, 0)? Do questions like that even have a place with this data type? We can define these operators as we wish, which allows for new usages of tree-based indexes, like mentioned above R-tree. There is an implementation of it in <a href="https://www.postgresql.org/docs/current/gist.html#GIST-BUILTIN-OPCLASSES">PostgreSQL itself</a> and there is also the <a href="https://postgis.net/workshops/postgis-intro/indexing.html">PostGIS project</a> with its own implementation of R-Tree.
 
 ### BRIN
 
@@ -451,7 +451,7 @@ As we saw, **Index is a crucial data structure for search performance**. Simple 
 1. PostgreSQL indexes
     1. Docs: https://www.postgresql.org/docs/current/indexes-types.html
     2. Interesting article: https://devcenter.heroku.com/articles/postgresql-indexes
-    3. About Postgres B-tree implementation: https://www.postgresql.org/docs/current/btree-implementation.html
+    3. About Postgres B-tree implementation: https://www.postgresql.org/docs/16/btree-implementation.html
 2. MySQL indexes
     1. Docs: https://dev.mysql.com/doc/refman/8.0/en/innodb-index-types.html 
     2. Interesting article: https://orangematter.solarwinds.com/2022/10/26/mysql-indexes-tutorial

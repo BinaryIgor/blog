@@ -9,7 +9,7 @@
 }
 ---
 
-As we [already know](/htmx-and-web-components-a-perfect-match.html), HTMX pairs really nicely with Web Components. [Shoelace](https://shoelace.style) is a popular and mature collection of configurable Web Components, which by definition are framework agnostic. Since writing our own components library is a ton of work, we should rather prefer using something ready and battle tested. Let's then see how this library plays with HTMX by building a real application! Other things we will use in an [example Books App](https://github.com/BinaryIgor/code-examples/tree/master/htmx-with-shoelace-app) are:
+As [we already know](/htmx-and-web-components-a-perfect-match.html), HTMX pairs really nicely with Web Components. [Shoelace](https://shoelace.style) is a popular and mature collection of configurable Web Components, which by definition are framework agnostic. Since writing our own components library is a ton of work, we should rather prefer using something ready and battle tested. Let's then see how this library plays with HTMX by building a real application! Other things we will use in an [example Books App](https://github.com/BinaryIgor/code-examples/tree/master/htmx-with-shoelace-app) are:
 * Tailwind CSS for styling
 * Node.js with Express.js as a server/just app - it is HTMX after all, there is no frontend/backend distinction
 
