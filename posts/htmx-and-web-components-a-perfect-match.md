@@ -269,7 +269,7 @@ document.addEventListener("htmx:confirm", e => {
 
 This will show our modal before issuing a http request which looks like:
 <figure>
-    <img src="{{ imagesPath }}/htmx-and-web-components/confirmable-modal.png">
+    <img src="{{ imagesPath }}/htmx-and-web-components/confirmable-modal.png" loading="lazy">
     <figcaption>ConfirmableModal after calling show() method</figcaption>
 </figure>
 
@@ -359,13 +359,13 @@ formContainer.addEventListener("htmx:afterRequest", e => {
 \
 This how it looks with input errors:
 <figure>
-    <img src="{{ imagesPath }}/htmx-and-web-components/form-container-1.png">
+    <img src="{{ imagesPath }}/htmx-and-web-components/form-container-1.png" loading="lazy">
     <figcaption>FormContainer with input errors</figcaption>
 </figure>
 
 And this how it looks after getting submit error:
 <figure>
-    <img src="{{ imagesPath }}/htmx-and-web-components/form-container-2.png">
+    <img src="{{ imagesPath }}/htmx-and-web-components/form-container-2.png" loading="lazy">
     <figcaption>FormContainer with InfoModal showing submit error</figcaption>
 </figure>
 

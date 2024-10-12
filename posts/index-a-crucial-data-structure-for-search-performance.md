@@ -68,7 +68,7 @@ Hash index is quite useful when we look to support only equality operations. Und
 
 ### GIN
 
-GIN stands for <a href="https://www.postgresql.org/docs/current/gin-intro.html">Generalized Inverted Index</a>. Why inverted? It comes from the full-text search terminology. There, we work on documents and a *Forward Index* is something like:
+GIN stands for <a href="https://www.postgresql.org/docs/current/gin.html">Generalized Inverted Index</a>. Why inverted? It comes from the full-text search terminology. There, we work on documents and a *Forward Index* is something like:
 ```
 Documents:
 document1: "Let's say something special" 
@@ -87,7 +87,7 @@ xyz -> document2, document3, document4
 ```
 
 \
-In Postgres, it means that **we have a data structure, also B-tree in fact, where each row can appear multiple times and we can index complex/composite types like arrays, json or text documents**. Its structure is similar to the B-tree from the description above, but leaf nodes have a key (word/term from the document for example) and a list of matching tuples (<a href="https://www.crunchydata.com/blog/challenging-postgres-terminology">tuple and record are just other names for a table row</a>). The main difference between *GIN* and a standard B-tree index is that each tuple (row) can appear many times in this index, being associated with a different key, plus, it defines <a href="https://www.postgresql.org/docs/current/gin-builtin-opclasses.html">its own operators for querying</a> that each data type (like array or json/jsonb) needs to support. Let's say that we have the table:
+In Postgres, it means that **we have a data structure, also B-tree in fact, where each row can appear multiple times and we can index complex/composite types like arrays, json or text documents**. Its structure is similar to the B-tree from the description above, but leaf nodes have a key (word/term from the document for example) and a list of matching tuples (<a href="https://www.crunchydata.com/blog/challenging-postgres-terminology">tuple and record are just other names for a table row</a>). The main difference between *GIN* and a standard B-tree index is that each tuple (row) can appear many times in this index, being associated with a different key, plus, it defines <a href="https://www.postgresql.org/docs/current/gin.html#GIN-BUILTIN-OPCLASSES">its own operators for querying</a> that each data type (like array or json/jsonb) needs to support. Let's say that we have the table:
 ```
 CREATE TABLE account (
   id UUID PRIMARY KEY,
@@ -463,7 +463,7 @@ As we saw, **Index is a crucial data structure for search performance**. Simple 
     2. *CLUSTER* keyword in Postgres: https://www.postgresql.org/docs/current/sql-cluster.html
     3. Clustering tradeoffs: https://use-the-index-luke.com/sql/clustering/index-organized-clustered-index
 7. Postgres GIN index
-    1. Docs: https://www.postgresql.org/docs/current/gin-intro.html
+    1. Docs: https://www.postgresql.org/docs/current/gin.html
     2. In-depth analysis 1: https://pganalyze.com/blog/gin-index
     3. In-depth analysis 2: https://www.cybertec-postgresql.com/en/gin-just-an-index-type
 8. Different Postgres (applicable also to other databases) query handling strategies, based on available indexes and other criteria: https://www.cybertec-postgresql.com/en/postgresql-indexing-index-scan-vs-bitmap-scan-vs-sequential-scan-basics/
