@@ -50,7 +50,8 @@
     font-display: swap;
 }
 
-* {
+/* Tailwind overrides code fonts */
+*, code {
     /* Fallback only for a swap period */
     font-family: "RobotoMono", "Courier New", Courier, monospace;
 }
