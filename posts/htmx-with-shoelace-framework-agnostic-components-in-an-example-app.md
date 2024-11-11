@@ -5,7 +5,8 @@
     "publishedAt": "2024-10-12",
     "excerpt": "As we already know, HTMX pairs really nicely with Web Components. Shoelace is a popular and mature collection of configurable Web Components, which by definition are framework agnostic. Since writing our own components library is a ton of work, we should rather prefer using something ready and battle tested. Let's then see how this library plays with HTMX by building a real application!",
     "researchLog": [ 1, 1.5, 2, 1, 3, 4.5, 3, 2],
-    "writingLog": [ 1, 1, 2, 7, 4, 2, 2.5 ]
+    "writingLog": [ 1, 1, 2, 7, 4, 2, 2.5 ],
+    "tags": ["htmx"]
 }
 ---
 

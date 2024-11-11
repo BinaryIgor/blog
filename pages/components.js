@@ -58,6 +58,26 @@ export function allPostsPreview({ posts }) {
     `;
 }
 
+export function postTagsPreview({posts}) {
+    const tagsCount = new Map();
+    posts.forEach(p => {
+        const tags = p.tags || [];
+        tags.forEach(t => {
+            const tNormalized = t.toLowerCase();
+            const tPosts = tagsCount.get(tNormalized) || 0;
+            tagsCount.set(tNormalized, tPosts + 1);
+        });
+    });
+
+    const htmxPosts = tagsCount.get("htmx") | 0;
+
+    return `
+    <ul>
+        <li><a href="/htmx-posts.html">HTMX (${htmxPosts})</a></li>
+        <li><a href="/modularity-posts.html">Modularity (2)</a></li>
+        <li><a href="/databases-posts.html">Databases (3)</a></li>
+    </ul>`;
+}
 
 export function nowDateTime() {
     return new Date().toISOString();

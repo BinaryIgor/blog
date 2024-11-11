@@ -13,8 +13,12 @@
     {{ navigation.html }}
     <div class="py-6 px-4 text-center">
         <h1 class="text-4xl font-bold mb-6">Posts</h1>
-        <div class="max-content-width mb-24 m-auto">
-            <p>Collection of all posts/articles published on the blog, ordered from the latest ones.</p>
+        <div class="max-content-width mb-24 m-auto post text-left">
+            <p> Collection of all posts/articles published on the blog.</p>
+            <p>Some of the most revisited topics include:</p>
+            {{ .js: postTagsPreview }}
+            </p>  
+            <p>Besides that, below are all of them, ordered from the latest ones.</p>
         </div>
         {{ .js: allPostsPreview }}
     </div>
