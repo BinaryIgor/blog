@@ -180,7 +180,7 @@ As we have learned, tests are a crucial component of the software development pr
 
 <div class="post-delimiter">---</div>
 
-### Related videos on my [youtube channel]({{ youtubeChannelUrl }})
+### Related videos on my [YouTube channel]({{ youtubeChannelUrl }})
 1. [Integration tests of REST API in Java 21](https://www.youtube.com/watch?v=rBoZfQ3z3gU)
 2. [E2E tests of the UI in Playwright](https://www.youtube.com/watch?v=o9vj0dLf3f4)
 

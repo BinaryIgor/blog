@@ -398,7 +398,7 @@ In conclusion, as of now, *Shoelace Library* is the best and most comprehensive 
 
 <div class="post-delimiter">---</div>
 
-### Related videos on my [youtube channel]({{ youtubeChannelUrl }})
+### Related videos on my [YouTube channel]({{ youtubeChannelUrl }})
 1. [HTMX + Web Components](https://www.youtube.com/watch?v=M4i-JQVLgfE)
 2. [Flexible Web Components: Modal Container example](https://www.youtube.com/watch?v=eUQ5ne292Rk)
 3. [Extension of this blog post](https://www.youtube.com/watch?v=E9fRUi_kZyc) *(2024-10-19 update)*

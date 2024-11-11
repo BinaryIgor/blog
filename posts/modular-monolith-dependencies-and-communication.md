@@ -324,7 +324,7 @@ Having great module design and applying communication patterns wisely, will not 
 ### Notes and resources 
 
 1. My more in-depth article, arguing why modularity is far more important than the number of deployable units (applications): [Modular Monolith and Microservices: Modularity is what truly matters](/modular-monolith-and-microservices-modularity-is-what-truly-matters.html)
-2. A strategy to have a *Modular Monolith* with independently deployable modules, on my youtube channel: https://www.youtube.com/watch?v=onV4449vs1g
+2. A strategy to have a *Modular Monolith* with independently deployable modules, on my YouTube channel: https://www.youtube.com/watch?v=onV4449vs1g
 3. Regarding the *Outbox Pattern*, it is important to mention that it requires more resources at multiple levels. Every database change that triggers event publishing now requires additional db operation - we have to save the event also. What is more, we must have a scheduled process that also takes resources; then, successfully published events need to be deleted, which of course triggers yet another db operation. That is quite a few additional operations, but this pattern does have significant advantages of decoupling modules and guaranteeing events/messages delivery, so I think it is often worth its price - we just need to use it wisely, it does not fit everywhere
 4. *Background Data Synchronization* approach was inspired by the *Microliths* idea, described by Uwe Friedrichsen. Thanks for the inspiration Uwe! https://www.ufried.com/blog/microservices_fallacy_10_microliths/
 

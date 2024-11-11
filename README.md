@@ -1,9 +1,9 @@
 # Blog
 
-Experimental blog with self-made static site generator, analytics and other tools. Simple, yet powerful!
+A blog with self-made static site generator, analytics and other tools. Simple, yet powerful!
 
 Requirements:
- * node 19+
+ * node 20+
  * Docker
 
 Init:
@@ -33,5 +33,4 @@ npm run build:run:blog
 
 For the rest, checkout package.json scripts and ops, and scripts folders!
 
-
-For now, blog is deployed on the Digital Ocean's amazing App Platform and the server (for analytics) is on the separate droplet (also Digital Ocean's).
+For now, the blog is deployed on the Digital Ocean's amazing App Platform and the server (for analytics) is on the separate droplet (also Digital Ocean's).
