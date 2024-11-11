@@ -31,7 +31,7 @@ We have three main components:
 
 **They are built and run in Docker.** We deploy them all to a single Virtual Machine - Droplet, on the DigitalOcean infrastructure, generate required secrets (database passwords and JSON Web Token secret key) and set up a certificate to have HTTPS. It is all automated by a few, simple Bash/Python scripts.
 
-### App
+### App {#setup-overview-app}
 
 Simple app that has users and allows them to add notes to every day, and also to browse their history. This is how it looks:
 
@@ -69,7 +69,7 @@ Getting back to our app implementation, for frontend-related things we have:
 \
 **For authentication/authorization, we generate a single JSON Web Token, for every user login, valid for 48 hours** (configurable). We store it in the *HTTP cookie* and regenerate automatically every hour (also configurable). If there is no cookie with a valid token or it has expired, we just redirect users to the `/sign-in` page (check out [SecurityFilter.java](https://github.com/BinaryIgor/code-examples/blob/master/htmx-production-setup/app/src/main/java/com/binaryigor/htmxproductionsetup/auth/SecurityFilter.java) for more details). Thanks to this approach, we do not need to write any client-side JavaScript code to handle auth flow nor configure anything in *HTMX*; and when signing out, we just remove this cookie and the token is gone. 
 
-### Db
+### Db {#setup-overview-db}
 
 PostgreSQL - simple, good relational database. One thing worth mentioning here is that the app is a *modular monolith*; as a consequence, every module has its own database schema to have proper module separation. Schemas are created and managed by *App*, but essentially we just have two tables:
 ```
@@ -95,7 +95,7 @@ CREATE TABLE day.day (
 );
 ```
 
-### Nginx
+### Nginx {#setup-overview-nginx}
 
 Reverse proxy for the app. From the outside, it supports only HTTPS communication and it runs on the same machine as *App*, so the communication between these two components is always on the localhost. It has the following functions:
 1. **HTTPS communication** -  we have a certificate issued by [Let's Encrypt](https://letsencrypt.org/) with the help of [Certbot](https://certbot.eff.org/) tool that allows to set up auto-renewable certificates 
@@ -108,7 +108,7 @@ Reverse proxy for the app. From the outside, it supports only HTTPS communicatio
     4. to have zero downtime, when deploying a new *App* version, we temporarily run it in two instances - each on a different, random port; once the new instance is up and ready, we switch *Nginx* config to this new instance, wait a few seconds, and kill the previous one
 
 
-### Infrastructure
+### Infrastructure {#setup-overview-infrastructure}
 
 We have a Droplet (Virtual Machine), running on DigitalOcean's infrastructure. This setup is not DigitalOcean-specific though; **all we need is a linux-based machine with**:
 * SSH access
@@ -164,7 +164,7 @@ That is all - it will make *App* serve static resources from `static` directory 
 
 As said, to follow through and have everything automated by a few scripts, you need to have a DigitalOcean account and a domain. If you do not have the former, you need to prepare a compatible Virtual Machine that is mostly described by [prepare_infra.py](https://github.com/BinaryIgor/code-examples/blob/master/htmx-production-setup/scripts/prepare_infra.py) and [init_machine.bash](https://github.com/BinaryIgor/code-examples/blob/master/htmx-production-setup/scripts/init_machine.bash) scripts. Assuming that we have a DigitalOcean account and a domain, let's prepare the infrastructure!
 
-### Droplet/Virtual Machine
+### Droplet/Virtual Machine {#infrastructure-setup-droplet-virtual-machine}
 
 From `scripts` directory, run:
 ```
@@ -178,7 +178,7 @@ python3 prepare_infra.py
 
 This will create our machine and prepare it by installing Docker, creating the *deploy* user with required permissions, mostly passwordless sudo and Docker access, and setting up the firewall. After all of that is done, which should take just a few minutes, we are able to *ssh* into this new machine, deploy our applications and scripts, and perform any needed operation there.
 
-### HTTPS and Nginx
+### HTTPS and Nginx {#infrastructure-setup-https-and-nginx}
 
 First and foremost, set up a `DNS A` record - it should point to the IP address of previously created Droplet/Virtual Machine. 
 
@@ -284,7 +284,7 @@ docker exec ${nginx_container} nginx -s reload 2>&1
 
 We right now have *Nginx* with HTTPS setup. Before deploying the app, let's take care of two last pieces of our infrastructure - database and secrets.
 
-### Database and secrets
+### Database and secrets {#infrastructure-setup-database-and-secrets}
 
 Let's build *Db*; from `scripts`:
 ```

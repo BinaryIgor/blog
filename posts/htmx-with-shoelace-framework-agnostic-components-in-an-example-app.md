@@ -30,7 +30,7 @@ It is a really well-made and maintained collection of a huge number of Web Compo
 
 **Every component is built with Shadow DOM, which has some advantages, but a few disadvantages as well.** Because of that, styling and customization works differently to what we are accustomed to in the classic HTML/CSS/JS world. Let's talk about the Shadow DOM to understand why it is the case.
 
-### Shadow DOM: is complexity worth the benefits?
+### Shadow DOM: is complexity worth the benefits? {#shoelace-library-shadow-dom-is-complexity-worth-the-benefits}
 
 What the Shadow DOM even is?
 > Shadow DOM is a scoped, separate part of the Document Object Model that can be created within the standard DOM, isolated in both style and structure.
@@ -129,7 +129,7 @@ We must override a few shoelace-specific variables to have consistent colors acr
 
 ## An example Books App
 
-### Setup
+### Setup {#an-example-books-app-setup}
 
 [It](https://github.com/BinaryIgor/code-examples/tree/master/htmx-with-shoelace-app) consists of two main parts:
 * static
@@ -197,7 +197,7 @@ npm start
 Server has started on port 8080!
 ```
 
-### Walkthrough
+### Walkthrough {#an-example-books-app-walkthrough}
 
 As we are now running the app locally on http://localhost:8080, we can see its main page:
 <figure>

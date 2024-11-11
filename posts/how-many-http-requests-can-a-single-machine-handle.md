@@ -104,7 +104,7 @@ To test *sustained load* and see whether we experience a performance degradation
 
 [All test results](https://github.com/BinaryIgor/code-examples/tree/master/single-machine-tests/load-test-results) shown below come from 1 test machine. Therefore, we need to multiply the request rate by 4, as tests were always run on 4 machines in parallel.
 
-### Small machine - 1 CPU, 2 GB of memory
+### Small machine - 1 CPU, 2 GB of memory {#test-results-small-machine-1-cpu-2-gb-of-memory}
 
 **low_load**: not worth showing, since average load performed so well.
 
@@ -325,7 +325,7 @@ Requests by status: {200=1263}
 ```
 
 
-### Medium machine - 2 CPUs, 4 GB of memory
+### Medium machine - 2 CPUs, 4 GB of memory {#test-results-medium-machine-2-cpus-4-gb-of-memory}
 
 **high_load**:
 ```
@@ -486,7 +486,7 @@ Requests by status: {200=5178}
 ...
 ```
 
-### Large machine - 4 CPUs, 8 GB of memory
+### Large machine - 4 CPUs, 8 GB of memory {#test-results-large-machine-4-cpus-8-gb-of-memory}
 
 **very_high_load**:
 ```

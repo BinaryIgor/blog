@@ -198,7 +198,7 @@ What about routing? It is simply going to a different page (route), but as with 
 </div>
 ...
 ```
-Here, besides <a href="https://tailwindcss.com">Tailwind</a> for CSS, we can see lots of HTMX tags/attributes. Let's focus on the div:
+Here, besides [Tailwind](https://tailwindcss.com) for CSS, we can see lots of HTMX tags/attributes. Let's focus on the div:
 ```
 <div class="rounded-lg ..." 
   hx-target="#app" 

@@ -1,5 +1,8 @@
 import { marked } from 'marked';
 
+const customHeaderIdStart = "{#";
+const customHeaderIdEnd = "}";
+
 const markedRenderer = {
     heading({ text, depth, tokens }) {
         const allText = tokens.filter(t => t.type != 'html').map(t => t.text).join("");
@@ -22,8 +25,18 @@ const markedRenderer = {
             headerBody = text;
         }
 
-        const headerId = escapedText.endsWith("-") ? escapedText.substring(0, escapedText.length - 1) : escapedText;
-        
+        let headerId;
+        const headerCustomHeaderId = text.split(customHeaderIdStart, 2);
+        if (headerCustomHeaderId.length == 2 && headerCustomHeaderId[1].endsWith(customHeaderIdEnd)) {
+            headerId = headerCustomHeaderId[1].replace(customHeaderIdEnd, "").trim();
+            headerBody = headerBody.replace(customHeaderIdStart, "")
+                .replace(headerId, "")
+                .replace(customHeaderIdEnd, "")
+                .trim();
+        } else {
+            headerId = escapedText.endsWith("-") ? escapedText.substring(0, escapedText.length - 1) : escapedText;
+        }
+
         return `<h${depth} id="${headerId}">${headerBody}</h${depth}>`;
     }
 };

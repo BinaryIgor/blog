@@ -34,7 +34,7 @@ and what is more, I am always deeply curious *how things really work* and see a 
 
 ## Solution
 
-### High-level overview
+### High-level overview {#solution-high-level-overview}
 
 1. There is a backend: example implementation is in Java but it is a secondary concern, it can be rewritten to any programming language
 2. Backend needs to have just one endpoint: `POST: /analytics/events` that accepts semi-structured events data; it means that there are a few required fields, like *deviceId, browser, operatingSystem* or *device*, but arbitrary *data json*, without any schema, can be sent as well
@@ -48,7 +48,7 @@ and what is more, I am always deeply curious *how things really work* and see a 
     * *save all events*
 7. In the example implementation, we mostly take device data from the `userAgent` property on the frontend (client) side but it can be done on the backend as well
 
-### Detailed walkthrough
+### Detailed walkthrough {#solution-detailed-walkthrough}
 
 **[As an example is worth a thousand words](https://github.com/BinaryIgor/code-examples/tree/master/simple-web-analytics), I have implemented and tested this approach in Java with Postgres.**
 
@@ -173,7 +173,7 @@ As we now know how it works, let's generate some data and run analytical queries
 
 ## Example data and analytics
 
-### Data
+### Data {#example-data-and-analytics-data}
 
 How can we get some example data? 
 
@@ -194,7 +194,7 @@ bash generate_random_analytics_events.bash
 It will generate random *100 000 events for the last month* - it should take no more than 15 to 30 seconds.
 Once it is done, we can query the data.
 
-### Analytics
+### Analytics {#example-data-and-analytics-analytics}
 
 Simple events count in various periods:
 ```
