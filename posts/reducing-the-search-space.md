@@ -21,11 +21,11 @@ Size of our search space is also related to the size of each row that a database
 We have the following schema in the SQL database (Postgres syntax): 
 ```
 CREATE TABLE account (
-    id UUID PRIMARY KEY,
-    name TEXT NOT NULL,
-    state TEXT NOT NULL
-    description TEXT NOT NULL,
-    created_at TIMESTAMP NOT NULL
+  id UUID PRIMARY KEY,
+  name TEXT NOT NULL,
+  state TEXT NOT NULL
+  description TEXT NOT NULL,
+  created_at TIMESTAMP NOT NULL
 );
 ```
 
@@ -46,15 +46,15 @@ where n is the average size of a column
 To optimize this case, we can simply change our schema to contain two tables, instead of one:
 ```
 CREATE TABLE account (
-    id UUID PRIMARY KEY,
-    name TEXT NOT NULL
+  id UUID PRIMARY KEY,
+  name TEXT NOT NULL
 );
 
 CREATE TABLE account_details (
-    id UUID PRIMARY KEY REFERENCES account(id),
-    state TEXT NOT NULL,
-    description TEXT NOT NULL,
-    created_at TIMESTAMP NOT NULL
+  id UUID PRIMARY KEY REFERENCES account(id),
+  state TEXT NOT NULL,
+  description TEXT NOT NULL,
+  created_at TIMESTAMP NOT NULL
 );
 ```
 As we have stated, we are interested only in two columns for the most frequently used query (id, name). Our search space is thus reduced to: 
@@ -68,7 +68,7 @@ We will get to the *partitioning* in a while, but we **can also think about spli
 
 ## Indexing
 
-<a href="https://use-the-index-luke.com/sql/anatomy">Index</a> is just a separate data structure (B-tree most often) that points to specific rows (documents) of a table (collection), and has a particular structure that makes searching fast.
+[Index](https://use-the-index-luke.com/sql/anatomy) is just a separate data structure (B-tree most often) that points to specific rows (documents) of a table (collection), and has a particular structure that makes searching fast.
 
 Using previous example of the account table, we had the query:
 ```
@@ -78,14 +78,14 @@ To make it faster, we can create the following B-tree index:
 ```
 CREATE INDEX account_name ON account(name);
 ```
-**B-tree search complexity is equal to O(log<sub>b</sub>n)**. B is the branching factor, and in practice its value depends on the particular database implementation. For the sake of analysis, we assume *b=10*, but in reality it is often much larger (hundreds or even thousands), making it even more efficient. So now, instead of searching linearly through 5n * 1 000 000 000 rows of data, as we would need with one, five-column table, our search space is reduced to:
+**B-tree search complexity is equal to O(log<sub>b</sub>n)**. B is the branching factor and in practice its value depends on the particular database implementation. For the sake of analysis, we assume *b=10* but in reality it is often much larger (hundreds or even thousands), making it even more efficient. So now, instead of searching linearly through 5n * 1 000 000 000 rows of data, as we would need with one, five-column table, our search space is reduced to:
 ```
 log(1 000 000 000) = 9
 ```
 
 Which is a tremendous improvement! We went from 5 * 10<sup>9</sup> to 9, which is over 555 555 555-fold faster (5 * 10<sup>9</sup> / 9). But, as said earlier, index is a separate data structure, so we need to add some constant time to this number, since database needs to:
-* read the index and find matching rows pointers/addresses
-* having matching rows pointers/addresses, read the data (actual columns) from the disk
+* read the index and find matching row pointers/addresses
+* having matching row pointers/addresses, read the data (actual columns) from the disk
 
 ...but still, this is usually the greatest improvement we can make to speed up our queries (~555 555 555 + n improvement in our case). 
 
@@ -94,7 +94,7 @@ Additionally, we can take it even further and create composite index like that:
 CREATE INDEX account_name_id ON account(name, id);
 ```
 
-Now, we have all the data we need in the index (name and id columns), so <a href="https://www.postgresql.org/docs/current/indexes-index-only-scans.html">it can be retrieved in a single read operation, directly from the index</a>.
+Now, we have all the data we need in the index (name and id columns), so [it can be retrieved in a single read operation, directly from the index](https://www.postgresql.org/docs/current/indexes-index-only-scans.html).
 
 ## Partitioning
 
@@ -130,13 +130,13 @@ WHERE country_code = ? (AND ...);
 We always (almost) attach country_code to the where clause. That is a pretty good case to partition this table by list(country_code):
 ```
 CREATE TABLE account (
-    id UUID PRIMARY KEY,
-    name TEXT NOT NULL,
-    state TEXT NOT NULL
-    description TEXT NOT NULL,
-    created_at TIMESTAMP NOT NULL,
-    --new column--
-    country_code INTEGER NOT NULL
+  id UUID PRIMARY KEY,
+  name TEXT NOT NULL,
+  state TEXT NOT NULL
+  description TEXT NOT NULL,
+  created_at TIMESTAMP NOT NULL,
+  -- new column --
+  country_code INTEGER NOT NULL
 ) PARTITION BY LIST(country_code);
 ```
 
@@ -156,16 +156,16 @@ Our next assumptions are that we have 10 country codes in the account table, the
 ...which is 10-fold improvement. Of course, improvement is directly proportional to the number of partitions that we decide to have:
 ```
 10 partitions: 
-    ~ 10% of data in each partition, 
-    10 times smaller search space
+  ~ 10% of data in each partition, 
+  10 times smaller search space
 
 100 partitions: 
-    ~ 1% of data in each partition, 
-    100 times smaller search space
+  ~ 1% of data in each partition, 
+  100 times smaller search space
 
 1000 partitions:
-    ~ 0.1% of data in each partition,
-    1000 times smaller search space
+  ~ 0.1% of data in each partition,
+  1000 times smaller search space
 ```
 
 \
@@ -179,12 +179,12 @@ Yet another, last to be used, strategy to reduce the search space is *sharding*.
 Similarly to partitioning, we can have as many physical databases (shards) as our performance improvement target is. **Consequently, each shard, a separate physical database, contains only a (small) subset of our data**. Let's suppose that, as previously, our table is:
 ```
 CREATE TABLE account (
-    id UUID PRIMARY KEY,
-    name TEXT NOT NULL,
-    state TEXT NOT NULL
-    description TEXT NOT NULL,
-    created_at TIMESTAMP NOT NULL,
-    country_code INTEGER NOT NULL
+  id UUID PRIMARY KEY,
+  name TEXT NOT NULL,
+  state TEXT NOT NULL
+  description TEXT NOT NULL,
+  created_at TIMESTAMP NOT NULL,
+  country_code INTEGER NOT NULL
 );
 ```
 I assume that we will have 5 shards, which simply means 5 databases. We surely can have more country codes than shards, they are independent variables, so we can do:
@@ -196,7 +196,7 @@ country_code % 5 = 3 -> db_3
 country_code % 5 = 4 -> db_4,
 where 5 is the number of shards
 ```
-That constitutes our routing to shards. To get proper results (data), we need to know which shard needs to be queried, because, as have been said already, shards are separate, physical databses. Some databases, <a href="https://www.mongodb.com/docs/manual/sharding">Mongo</a> for example, support various sharding strategies out of the box, for others, like PostgreSQL or MySQL, we need to do application-level sharding (there are also some third-party solutions). In that approach, we maintain connections to all databases (shards) in our application and, based on the issued query, decide which one(s) to query. If there is a need to query more than one shard, we also need to assembly the results.
+That constitutes our routing to shards. To get proper results (data), we need to know which shard needs to be queried, because, as have been said already, shards are separate, physical databses. Some databases, [Mongo](https://www.mongodb.com/docs/manual/sharding/) for example, support various sharding strategies out of the box, for others, like PostgreSQL or MySQL, we need to do application-level sharding (there are also some third-party solutions). In that approach, we maintain connections to all databases (shards) in our application and, based on the issued query, decide which one(s) to query. If there is a need to query more than one shard, we also need to assembly the results.
 
 Going back to numbers, with 5 shards we have approximately 5-fold improvement (similarly to partitioning, we need to strive for more or less equal distribution of data). Same as with the number of partitions, the more shards we decide to have, the larger improvement we will get. Likewise, it is true only for the queries that can utilize our partitioning/sharding schema. In our example, they (queries) need to have country_code in the where clause. Assuming that we have 5 shards:
 ```
@@ -225,7 +225,7 @@ Usually (when we deal with large and stil growing data) it will go something lik
 
 ## Closing thoughts
 
-We just went over most commonly used strategies to reduce the search space of our data. Now we know how to have, regardless of how big the data is, a small search space. **And as we know, working with small set of data is always fast**.
+We just went over most commonly used strategies to reduce the search space of our data. Now we know how to have, regardless of how big the data is, a small search space. **And as we know, working with a small set of data is always fast**.
 
 <div id="post-extras">
 
