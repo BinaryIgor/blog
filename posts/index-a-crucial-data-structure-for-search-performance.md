@@ -441,7 +441,7 @@ As we saw, **Index is a crucial data structure for search performance**. Simple 
 
 <div class="post-delimiter">---</div>
 
-### Related videos on my [youtube channel]({{ youtubeChannelUrl }})
+### Related videos on my [YouTube channel]({{ youtubeChannelUrl }})
 1. <a href="https://www.youtube.com/watch?v=edAvauoS3L0">Index vs Inverted Index performance in Postgres</a>
 
 <div class="post-delimiter">---</div>

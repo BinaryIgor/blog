@@ -231,7 +231,7 @@ We just went over most commonly used strategies to reduce the search space of ou
 
 <div class="post-delimiter">---</div>
 
-### Related videos on my [youtube channel]({{ youtubeChannelUrl }})
+### Related videos on my [YouTube channel]({{ youtubeChannelUrl }})
 1. [Partitioning](https://www.youtube.com/watch?v=xVZsFpYa1Yc)
 2. [Sharding](https://www.youtube.com/watch?v=B5aHDQFDiuw)
 

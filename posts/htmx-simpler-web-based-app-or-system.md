@@ -287,7 +287,7 @@ Let's simplify web development!**
 
 <div class="post-delimiter">---</div>
 
-### Related videos on my [youtube channel]({{ youtubeChannelUrl }})
+### Related videos on my [YouTube channel]({{ youtubeChannelUrl }})
 1. [HTMX basics, simple index.html page from scratch](https://www.youtube.com/watch?v=A3UB3tyDWa4)
 2. [General overview of HTMX, going through Some Wisdom App, which is using it](https://www.youtube.com/watch?v=9cu0NbyrNuU)
 
