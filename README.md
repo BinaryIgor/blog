@@ -1,6 +1,6 @@
 # Blog
 
-A blog with self-made static site generator, analytics and other tools. Simple, yet powerful!
+A blog with self-made static site generator, analytics and other tools. Simple yet powerful!
 
 Requirements:
  * node 20+
