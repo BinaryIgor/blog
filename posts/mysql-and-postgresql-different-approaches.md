@@ -508,6 +508,6 @@ Knowing that in theory there are some advantages to the MySQL model but they fai
 8. https://www.percona.com/blog/innodb-page-merging-and-page-splitting/
 9. Code repo with performance tests: https://github.com/BinaryIgor/code-examples/tree/master/mysql-and-postgresql-differences
 10. Write-Ahead Logging (WAL): https://www.postgresql.org/docs/current/wal-intro.html
-11. Some interesting Postgres internals that combined with its fantastic WAL implementation make it so performant: https://www.postgresql.org/docs/current/runtime-config-resource.html
+11. Some interesting Postgres internals that combined with a fantastic WAL implementation make it so performant: https://www.postgresql.org/docs/current/runtime-config-resource.html
 
 </div>
