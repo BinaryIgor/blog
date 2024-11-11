@@ -77,7 +77,7 @@ In addition, we shall ask the question: how and why can we utilize *Web Componen
 
 ## HTMX
 
-I wrote quite an extensive article about <a href="https://htmx.org/">*HTMX*</a> which you can find <a href="/htmx-simpler-web-based-app-or-system.html">here</a>.
+I wrote quite an extensive article about *[HTMX](https://htmx.org/)* which you can find [here](/htmx-simpler-web-based-app-or-system.html).
 For the sake of completeness, let's give a short definition: 
 > HTMX is a JavaScript library that allows making arbitrary http requests from any HTML element, not only from forms, links or videos. It expects HTML in response, and renders whole HTML pages or fragments directly in the page section we have specified. We do not need to exchange JSON or any other data format with the server only to then translate it to HTML on the client side, so that it can be rendered. It is done automatically by HTMX, we just need to use its own, custom HTML attributes.
 
@@ -230,7 +230,7 @@ As we can see, **this is extremely generic and has nothing to do with HTMX: we j
 
 Let's walk through a few concrete examples of *Web Components* used together with *HTMX*.
 
-### Confirmable Modal
+### Confirmable Modal {#htmx-examples-confirmable-model}
 
 We quite often face a need for certain requests to be confirmed by the user, before actually issuing them. There is a special HTMX attribute that we can use for that purpose: <a href="https://htmx.org/attributes/hx-confirm/">hx-confirm</a>. Having *confirmable-modal* similar to *info-modal* from one of the previous examples, we can write the following HTML:
 ```
@@ -274,7 +274,7 @@ This will show our modal before issuing a http request which looks like:
 </figure>
 
 
-### Order Form and List
+### Order Form and List {#htmx-examples-order-form-and-list}
 
 Building on previously shown *input-with-error* and *info-modal*, we can have a *form-container* that provides common form functionalities. As the name suggests, it is just a container, so it accepts and can work with any number of inputs, specification of which is left completely to a client. Common form functionalities include features like enabling/disabling form submission, clearing all inputs after successful submission, or showing generic error after failed submission. In the context of HTMX, having a form element allows us to send all form inputs data in a straightforward way. To make the example more relevant to HTMX, in the form we will be able to specify a new *order* entity. After failed submission, an error will be shown, using *info-modal*. After successful submission, a new *order* will be added to the orders list. Here is the simplified HTML:
 ```
@@ -400,8 +400,8 @@ Even though they do not know anything about HTMX, it turns out that it is a bree
 <div class="post-delimiter">---</div>
 
 ### Related videos on my [YouTube channel]({{ youtubeChannelUrl }})
-1. <a href="https://www.youtube.com/watch?v=M4i-JQVLgfE">Similar concept, live coded on the video</a>
-2. <a href="https://www.youtube.com/watch?v=A3UB3tyDWa4">Simple index.html with HTMX</a>
+1. [Similar concept, live coded on the video](https://www.youtube.com/watch?v=M4i-JQVLgfE)
+2. [Simple index.html with HTMX](https://www.youtube.com/watch?v=A3UB3tyDWa4)
 
 <div class="post-delimiter">---</div>
 

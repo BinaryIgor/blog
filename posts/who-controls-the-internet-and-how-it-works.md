@@ -40,7 +40,7 @@ The *Internet Assigned Numbers Authority* is responsible for IP address allocati
 
 Do understand this process better, let's go over each step.
 
-### Regional Internet Registries
+### Regional Internet Registries {#identity-ip-addresses-regional-internet-registries}
 
 As of now, there are *five RIRs*, each responsible for a specific region:
 1. **ARIN (American Registry for Internet Numbers)** - Canada, USA and some Caribbean Islands
@@ -53,7 +53,7 @@ Every *Regional Internet Registry* is an independent, nonprofit organization man
 
 As said, **they receive large IP address blocks from IANA but they do not use them directly**. They assign parts of this address space to the *Local Internet Registries*, which do use them directly.
 
-### Local Internet Registries
+### Local Internet Registries {#identity-ip-addresses-local-internet-registries}
 
 They are *mostly Internet Service Providers (ISPs)* but also Telecom Operators, Cloud Service Providers, Data Centers and other large entities which need to own and manage IP addresses directly. 
 
@@ -84,7 +84,7 @@ Examples:
 In the first example, since `AA` and `AB` are in the same network, the Internet Service Provider (ISP) can find and connect them directly. However, in the next examples we encounter **a routing problem:**
 > How can we efficiently locate a device outside our own network and reliably exchange data with it?
 
-### Solution: Border Gateway Protocol (BGP)
+### Solution: Border Gateway Protocol (BGP) {#routing-solution-border-gateway-protocol-bgp}
 
 The problem of connecting independent networks is solved by the Border Gateway Protocol. How does it work?
 
@@ -132,7 +132,7 @@ Once we have an IP address, we interact with it as we have been describing in th
 
 **Working and coordination of the whole DNS protocol is a responsibility of the Internet Corporation for Assigned Names and Numbers (ICANN).** *But, who controls and sets up all of these different DNS servers?*
 
-### Root Name Servers
+### Root Name Servers {#domain-name-system-dns-root-name-servers}
 
 **There are thirteen logical DNS Root Name Servers, named from A to M.** They are controlled by twelve entities:
 
@@ -157,7 +157,7 @@ As said, Root Name Servers do not return IP addresses directly but return addres
 
 **The Root Zone File is a crucial file that contains information about the IP addresses of Top Level Domain Name Servers and the domain name extensions they support.** Responsibility for managing this critical file, without which DNS cannot function, is on the previously mentioned *Internet Assigned Numbers Authority (IANA)*. *Verisign* - which operates two of the root name servers, among other things - acts as the Root Zone Maintainer, playing a key role in the implementation and distribution of the Root Zone File.
 
-### Top Level Domain Name Servers
+### Top Level Domain Name Servers {#domain-name-system-dns-top-level-domain-name-servers}
 
 Root Name Servers delegate DNS queries to Top Level Domain Name Servers (TLDs); each of them is responsible for a single domain name extension.
 
@@ -182,7 +182,7 @@ Country-code Top Level Domain Name Servers (ccTLDs) for some countries' extensio
 \
 As we have learned, these servers receive DNS queries from the Root Name Servers but they do not return IP addresses directly; instead, they delegate these queries further to Authoritative Name Servers.
 
-### Authoritative Name Servers
+### Authoritative Name Servers {#domain-name-system-dns-authoritative-name-servers}
 
 Finally, at the end of the DNS query chain we have Authoritative Name Servers: **they take a Domain Name and return an IP address**. Who manages them?
 

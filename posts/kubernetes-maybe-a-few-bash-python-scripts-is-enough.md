@@ -14,7 +14,7 @@
 
 When it comes to the infrastructure of a software system, there are some features that are virtually always needed, independently of the project nature, and some that are additional, optional, or useful only in *some projects and contexts*. Coming from a position of being aware of what we *actually need* and what our project is about, we can make more informed and rational decisions; hopefully reducing the complexity of our system, which is something that we should care about. Simplicity should be one of our most important goals, when designing software systems, because simple systems are easy to understand, debug, maintain and change. Infrastructure is a crucial component of every software system: what do we need from it?
 
-### Required, must haves
+### Required, must haves {#what-do-we-need-from-infrastructure-required-must-haves}
 1. **Fast and reliable builds** of our applications
 2. **Fast and reliable deployments** of our applications to various environments (like dev, stage, prod) - preferably with zero downtime for some of them
 3. **Ability to quickly rollback failed deployments** to the previous working version
@@ -29,13 +29,13 @@ When it comes to the infrastructure of a software system, there are some feature
 11. **Metrics of all running applications, components and machines** - things like memory and cpu usage, system load average, used disk space and I/O operations, network usage etc.
 12. **Metrics visualizations and alerts** - to know that something is about to go wrong, troubleshoot issues and to react as fast as possible
 
-### Optional, nice to haves
+### Optional, nice to haves {#what-do-we-need-from-infrastructure-optional-nice-to-haves}
 1. **Automatic scaling of applications and machines** - to less/more instances based on the current application/system load. I find it rarely needed and when it is, it is only for a specific application and it is specific to this application (database or other external service being often a true bottleneck), so it must be customized anyways. Moreover, for applications that are really bursty in nature, their resource requirements *vary a lot*, we should probably delegate them to an external service of *Serverless Functions* kind (AWS Lambda, Google Cloud Functions or DigitalOcean Functions for example)
 2. **Automated application deployment scheduling** - to machine/machines most suitable, least loaded or just available. In the majority of cases, with reasonable system architecture, having a limited number of services, specifying machine or machines explicitly is good enough; unless we have tens and tens of services and most of them need automatic, horizontal scaling, which is rarely the case
 3. **Granular isolation of workspaces/resources per team/domain** - needed only if there are many, not a few, teams
 4. **Canary releases/deployments** -  most of the time, we can just ship a new version of the code. In other cases, we can use *feature flags*, in the application layer, which are supported by the majority of programming languages and environments
 
-### Reasoning and assumptions
+### Reasoning and assumptions {#what-do-we-need-from-infrastructure-reasoning-and-assumptions}
 
 Some of my choices might seem arbitrary, so a few words of comment might be helpful. Here are my observations, assumptions, thoughts and opinions - based on the experience of implementing various systems from scratch and then maintaining, changing and extending them over the years:
 * **<a href="/modular-monolith-and-microservices-modularity-is-what-truly-matters.html">Most systems can be built either as a modular monolith or few (micro)services</a>** - this significantly simplifies our infrastructure, since we only have one or few deployment units

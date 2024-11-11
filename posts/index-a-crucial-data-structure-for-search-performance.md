@@ -16,11 +16,11 @@ What is an index? It is a simple idea of having additional data structure that h
 
 ## Index types by structure
 
-Using <a href="https://www.postgresql.org/docs/current/indexes-types.html">PostgreSQL</a> as our reference for various index types.
+Using [PostgreSQL](https://www.postgresql.org/docs/current/indexes-types.html) as our reference for various index types.
 
-### B-tree 
+### B-tree {#index-types-by-structure-b-tree}
 
-**Most databases (PostgreSQL, MySQL, MongoDB, SQLite) support <a href="https://en.wikipedia.org/wiki/B-tree">B-tree</a> index and it is by far the most commonly used data structure for indexing.** That is because of its good performance characteristics - *O(log<sub>n</sub>)* - for both equality and range search operations. The ability to use range operations means that data needs to be comparable and sortable, which in turn means that this index can be used to support and speed up sorting operations as well. B-tree is a <span class="nowrap">self-balancing</span> tree data structure, with a variable number of children per node (as opposed to 2 children per node <a href="https://en.wikipedia.org/wiki/Binary_tree">binary tree</a>). <a href="https://use-the-index-luke.com/sql/anatomy/the-tree">It looks something like this</a>:
+**Most databases (PostgreSQL, MySQL, MongoDB, SQLite) support [B-tree](https://en.wikipedia.org/wiki/B-tree) index and it is by far the most commonly used data structure for indexing.** That is because of its good performance characteristics - *O(log<sub>n</sub>)* - for both equality and range search operations. The ability to use range operations means that data needs to be comparable and sortable, which in turn means that this index can be used to support and speed up sorting operations as well. B-tree is a <span class="nowrap">self-balancing</span> tree data structure, with a variable number of children per node (as opposed to 2 children per node [binary tree](https://en.wikipedia.org/wiki/Binary_tree)). [It looks something like this](https://use-the-index-luke.com/sql/anatomy/the-tree):
 ```
              (10|22)
              /     \
@@ -41,7 +41,7 @@ B-tree keeps itself balanced, depth/height is kept low and the number of childre
 2. (22|23|30), 32 is greater, so go the right again
 3. (30|32) - we have it, take associated row ids and read data from the disk
 
-Usually, each value is repeated in the child nodes until the leaf nodes. For example, 10 is in the root, but also in the first node to the left, and then right to the left (leaf node). To optimize certain operations (like range queries) leaf nodes are all connected by a doubly linked list (<a href="https://use-the-index-luke.com/sql/anatomy">for details of the anatomy, check out amazing "Use the Index, Luke!" blog</a>). Then leaf nodes have row ids, which are references (addresses) to the table rows data. 
+Usually, each value is repeated in the child nodes until the leaf nodes. For example, 10 is in the root, but also in the first node to the left, and then right to the left (leaf node). To optimize certain operations (like range queries) leaf nodes are all connected by a doubly linked list ([for details of the anatomy, check out amazing "Use the Index, Luke!" blog](https://use-the-index-luke.com/sql/anatomy)). Then leaf nodes have row ids, which are references (addresses) to the table rows data. 
 
 Logarithmic complexity gives us good performance for a very, very long time and for huge datasets. B-tree search complexity is *O(log<sub>b</sub>n)*. Assuming b = 10, which in practice can go up to hundreds or even thousands (making it even faster), the search complexity will be:
 ```
@@ -62,13 +62,13 @@ log(1 000 000 000 000 000) = 15
 ```
 ...giving us great performance as our data continues to grow. 
 
-### Hash
+### Hash {#index-types-by-structure-hash}
 
-Hash index is quite useful when we look to support only equality operations. Underneath the hood, as the name suggests, it uses a <a href="https://en.wikipedia.org/wiki/Hash_table">hash map/table</a>. With good implementation, in theory, hash map search complexity is *O(1)*. Sometimes, a hash map needs to be rebalanced, so in practice it is *O(1) + C* (some amortized constant). But still, for equality only operations it is the fastest option. Hence also there are key-value only databases/stores, like Redis or <a href="https://etcd.io">Etcd</a>, which are using this data structure.
+Hash index is quite useful when we look to support only equality operations. Underneath the hood, as the name suggests, it uses a [hash map/table](https://en.wikipedia.org/wiki/Hash_table). With good implementation, in theory, hash map search complexity is *O(1)*. Sometimes, a hash map needs to be rebalanced, so in practice it is *O(1) + C* (some amortized constant). But still, for equality only operations it is the fastest option. Hence also there are key-value only databases/stores, like Redis or [Etcd](https://etcd.io), which are using this data structure.
 
-### GIN
+### GIN {#index-types-by-structure-gin}
 
-GIN stands for <a href="https://www.postgresql.org/docs/current/gin.html">Generalized Inverted Index</a>. Why inverted? It comes from the full-text search terminology. There, we work on documents and a *Forward Index* is something like:
+GIN stands for [Generalized Inverted Index](https://www.postgresql.org/docs/current/gin.html). Why inverted? It comes from the full-text search terminology. There, we work on documents and a *Forward Index* is something like:
 ```
 Documents:
 document1: "Let's say something special" 
@@ -125,11 +125,11 @@ ACTIVATED:state -> tuple2, tuple3
 ```
 ...thanks to that approach, we can use B-tree structure to search through custom, complex types (with more than one value). 
 
-### GIST
+### GIST {#index-types-by-structure-gist}
 
 Generalized Search Tree. In Postgres, **it is just a template for a balanced, search tree based index on top of which we can build our own implementation**. One of its most commonly used instances is <a href="https://en.wikipedia.org/wiki/R-tree"><span class="nowrap">R-tree</span></a> used for searching through multidimensional data, such as rectangles or geographic coordinates. Why is it useful in this context? We can define our own comparison and equality operators (and others, custom ones) to query our data appropriately. Using coordinates, is (0, 1) greater than (1, 0)? Do questions like that even have a place with this data type? We can define these operators as we wish, which allows for new usages of tree-based indexes, like mentioned above R-tree. There is an implementation of it in <a href="https://www.postgresql.org/docs/current/gist.html#GIST-BUILTIN-OPCLASSES">PostgreSQL itself</a> and there is also the <a href="https://postgis.net/workshops/postgis-intro/indexing.html">PostGIS project</a> with its own implementation of R-Tree.
 
-### BRIN
+### BRIN {#index-types-by-structure-brin}
 
 Its name stands for Block Range INdex. **The more *orderly* our inserts are, the more useful this index is. The more naturally incremental/decremental the indexed field is, the more efficient this index becomes.** It is then helpful for fields that have some natural correlation with their physical location within the table. By natural correlation I mean something like date/timestamp/version fields where we always/almost always insert new records (according to this field), thus they are sorted on the disk  according to the insertion order. Let's say that we have the table:
 ```
@@ -327,7 +327,7 @@ Index is also relevant when it comes to searching for arbitrary terms in text do
 3. we store the *terms -> documents* mapping in the *Inverse Index* to make searching fast
 
 \
-As mentioned above (<a href="#gin">describing GIN index</a>), Inverse Index name comes from full-text search terminology, where Forward Index is just a mapping between documents and their terms. Repeating myself a little, for the noble sake of clarity, let's say that we have the following documents:
+As mentioned above (<a href="#index-types-by-structure-gin">describing GIN index</a>), Inverse Index name comes from full-text search terminology, where Forward Index is just a mapping between documents and their terms. Repeating myself a little, for the noble sake of clarity, let's say that we have the following documents:
 ```
 doc1: {
   "title": "Some title 1",
