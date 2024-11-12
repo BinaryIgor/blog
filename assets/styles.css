@@ -52,7 +52,11 @@
 
 * {
     /* Fallback only for a swap period */
-    font-family: "RobotoMono", "Courier New", Courier, monospace;
+    font-family: "RobotoMono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 }
 
 html.dark {
