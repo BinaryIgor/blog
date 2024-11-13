@@ -50,19 +50,18 @@
     font-display: swap;
 }
 
-* {
+/* Tailwind overrides code font */
+*,
+code {
     /* Fallback only for a swap period */
     font-family: "RobotoMono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-}
-
-code {
-    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 }
 
 html.dark {
     --primary-color: rgb(15, 15, 15);
     --secondary-1-color: rgb(17, 24, 39);
     --secondary-2-color: rgb(31, 41, 55);
+    --primary-text-color-0: rgb(251, 253, 255);
     --primary-text-color: rgb(240, 240, 240);
     --primary-text-color-faded: rgba(240, 240, 240, 0.25);
     --secondary-1-text-color: rgb(229, 231, 235);
@@ -76,6 +75,7 @@ html {
     --primary-color: rgb(250, 250, 250);
     --secondary-1-color: rgb(242, 243, 245);
     --secondary-2-color: rgb(229, 231, 235);
+    --primary-text-color-0: rgb(11, 13, 15);
     --primary-text-color: rgb(25, 25, 25);
     --primary-text-color-faded: rgba(25, 25, 25, 0.25);
     --secondary-1-text-color: rgb(31, 41, 55);
@@ -159,11 +159,12 @@ html {
 /* to make anchor links work: https://css-tricks.com/hash-tag-links-padding/ */
 .anchor-top-scroll {
     scroll-margin-top: 75px;
-    scroll-snap-margin-top: 75px; /* iOS 11 and older */
+    scroll-snap-margin-top: 75px;
+    /* iOS 11 and older */
 }
 
 .nowrap {
-  white-space: nowrap;
+    white-space: nowrap;
 }
 
 @layer components {
@@ -177,7 +178,7 @@ html {
         @apply max-w-[750px];
     }
 
-    .post > * {
+    .post>* {
         @apply m-auto;
     }
 
@@ -205,7 +206,7 @@ html {
         @apply my-1;
     }
 
-    .post li > ul {
+    .post li>ul {
         @apply ml-4;
     }
 
@@ -213,11 +214,11 @@ html {
         @apply list-decimal list-inside;
     }
 
-    .post li > ol {
+    .post li>ol {
         @apply ml-4;
     }
 
-    .post .list-like > p {
+    .post .list-like>p {
         @apply my-1;
     }
 
@@ -226,8 +227,12 @@ html {
         @apply bg-secondary-1 p-4 text-left border-l-[4px] rounded-sm border-primary-text max-content-width overflow-auto;
     }
 
-    .post :not(pre) > code {
+    .post :not(pre)>code {
         @apply bg-secondary-2 p-1 rounded;
+    }
+
+    .post code {
+        color: var(--primary-text-color-0);
     }
 
     .post blockquote {
