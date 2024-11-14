@@ -41,7 +41,7 @@ def walk_dir_recursively(root_dir, files_data=None):
                 set_files_data_tuple(files_data, JS_KEY, JS_KEY, root_dir, f_path, f)
             elif f.endswith(".css"):
                 set_files_data_tuple(files_data, CSS_KEY, CSS_KEY, root_dir, f_path, f)
-            elif f.endswith(".html") or f.endswith(".xml") or "." not in f:
+            elif f.endswith(".html") or f.endswith(".xml"):
                 htmls = files_data.get(HTML_KEY, [])
                 htmls.append(f_path)
                 files_data[HTML_KEY] = htmls

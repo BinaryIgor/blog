@@ -241,9 +241,6 @@ const pages = await allPages(pagesDir, withoutDraftsSortedPostsData);
 
 for (const p of config.pagesToRender) {
     await writeFileContent(path.join(distDir, p), pages[p]);
-    if (p.endsWith(HTML_EXTENSION)) {
-        await writeFileContent(path.join(distDir, p.replace(HTML_EXTENSION, "")), pages[p]);
-    }
 }
 
 const postTemplate = pages[config.postTemplate];
@@ -254,5 +251,4 @@ for (const [k, e] of Object.entries(posts)) {
     const post = templateWithReplacedVariables(postTemplate, variables, { skipMissing: false, renderFunctions: true });
 
     await writeFileContent(path.join(distDir, `${e.fontMatter.slug}${HTML_EXTENSION}`), post);
-    await writeFileContent(path.join(distDir, `${e.fontMatter.slug}`), post);
 }
