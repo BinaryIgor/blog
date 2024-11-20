@@ -5,9 +5,17 @@ import crypto from 'crypto';
 
 export const VIEW_EVENT_TYPE = "VIEW";
 export const READ_EVENT_TYPE = "READ";
+export const SCROLL_EVENT_TYPE = "SCROLL";
 
 function randomEventType() {
-    return Math.random < 0.5 ? VIEW_EVENT_TYPE : READ_EVENT_TYPE;
+    const random = Math.random();
+    if (random <= 0.33) {
+        return VIEW_EVENT_TYPE;
+    }
+    if (random <= 0.66) {
+        return READ_EVENT_TYPE;
+    }
+    return SCROLL_EVENT_TYPE;
 }
 
 export const TestObjects = {

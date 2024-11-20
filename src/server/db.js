@@ -16,6 +16,7 @@ export function initSchema(db) {
     
         CREATE VIEW IF NOT EXISTS view AS SELECT * FROM event WHERE type = 'VIEW';
         CREATE VIEW IF NOT EXISTS read AS SELECT * FROM event WHERE type = 'READ';
+        CREATE VIEW IF NOT EXISTS scroll AS SELECT * FROM event WHERE type = 'SCROLL';
     
         CREATE TABLE IF NOT EXISTS stats_view (
             period TEXT PRIMARY KEY NOT NULL,
