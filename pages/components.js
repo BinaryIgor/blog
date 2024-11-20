@@ -58,7 +58,7 @@ export function allPostsPreview({ posts }) {
     `;
 }
 
-
+// TODO: mark it with last post date instead of now (incorrectly) - for sitemap.xml & feed.xml
 export function nowDateTime() {
     return new Date().toISOString();
 }
