@@ -8,12 +8,16 @@ export const DAY_SECONDS = 24 * 60 * 60;
 export const SEVEN_DAYS_SECONDS = DAY_SECONDS * 7;
 export const THIRTY_DAYS_SECONDS = DAY_SECONDS * 30;
 export const NINENTY_DAYS_SECONDS = DAY_SECONDS * 90;
+export const ONE_HUNDRED_EIGHTY_DAYS_SECONDS = DAY_SECONDS * 180;
+export const THREE_HUNDRED_SIXTY_FIVE_DAYS_SECONDS = DAY_SECONDS * 365;
 export const MAX_IP_HASH_VISITOR_IDS_IN_LAST_DAY = 25;
 
 export const LAST_DAY_STATS_VIEW = "lastDay";
 export const LAST_7_DAYS_STATS_VIEW = "last7Days";
 export const LAST_30_DAYS_STATS_VIEW = "last30Days";
 export const LAST_90_DAYS_STATS_VIEW = "last90Days";
+export const LAST_180_DAYS_STATS_VIEW = "last180Days";
+export const LAST_365_DAYS_STATS_VIEW = "last365Days";
 export const ALL_TIME_STATS_VIEW = "allTime";
 
 const UUID_REGEX = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
@@ -243,10 +247,18 @@ export class StatsViews {
         const timestampNinentyDaysAgo = Dates.timestampSecondsAgo(now, NINENTY_DAYS_SECONDS);
         const lastNinentyDaysStats = await this.analyticsRepository.stats(timestampNinentyDaysAgo, now);
 
+        const timestampOneHundredEightyDaysAgo = Dates.timestampSecondsAgo(now, ONE_HUNDRED_EIGHTY_DAYS_SECONDS);
+        const lastOneHundredEightyDaysStats = await this.analyticsRepository.stats(timestampOneHundredEightyDaysAgo, now);
+
+        const timestampThreeHundredSixtyFiveDaysAgo = Dates.timestampSecondsAgo(now, THREE_HUNDRED_SIXTY_FIVE_DAYS_SECONDS);
+        const lastThreeHundredSixtyFiveDaysStats = await this.analyticsRepository.stats(timestampThreeHundredSixtyFiveDaysAgo, now);
+
         const allTimeStats = await this.analyticsRepository.stats(null, now);
 
         await this._saveView(new StatsView(LAST_30_DAYS_STATS_VIEW, lastThirtyDaysStats, now));
         await this._saveView(new StatsView(LAST_90_DAYS_STATS_VIEW, lastNinentyDaysStats, now));
+        await this._saveView(new StatsView(LAST_180_DAYS_STATS_VIEW, lastOneHundredEightyDaysStats, now));
+        await this._saveView(new StatsView(LAST_365_DAYS_STATS_VIEW, lastThreeHundredSixtyFiveDaysStats, now));
         await this._saveView(new StatsView(ALL_TIME_STATS_VIEW, allTimeStats, now));
 
         this.lastLongerPeriodsViewsSaveTimestamp = now;
