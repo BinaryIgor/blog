@@ -8,18 +8,23 @@ export const DAY_SECONDS = 24 * 60 * 60;
 export const SEVEN_DAYS_SECONDS = DAY_SECONDS * 7;
 export const THIRTY_DAYS_SECONDS = DAY_SECONDS * 30;
 export const NINENTY_DAYS_SECONDS = DAY_SECONDS * 90;
+export const ONE_HUNDRED_EIGHTY_DAYS_SECONDS = DAY_SECONDS * 180;
+export const THREE_HUNDRED_SIXTY_FIVE_DAYS_SECONDS = DAY_SECONDS * 365;
 export const MAX_IP_HASH_VISITOR_IDS_IN_LAST_DAY = 25;
 
 export const LAST_DAY_STATS_VIEW = "lastDay";
 export const LAST_7_DAYS_STATS_VIEW = "last7Days";
 export const LAST_30_DAYS_STATS_VIEW = "last30Days";
 export const LAST_90_DAYS_STATS_VIEW = "last90Days";
+export const LAST_180_DAYS_STATS_VIEW = "last180Days";
+export const LAST_365_DAYS_STATS_VIEW = "last365Days";
 export const ALL_TIME_STATS_VIEW = "allTime";
 
 const UUID_REGEX = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
 
 const VIEW_TYPE = 'VIEW';
 const READ_TYPE = 'READ';
+const SCROLL_TYPE = 'SCROLL';
 
 export class AnalyticsService {
 
@@ -50,7 +55,7 @@ export class AnalyticsService {
             throw new Error(`Path can't be empty and must be less than ${MAX_PATH_LENGTH} of length, but was: ${event.path}`);
         }
 
-        if (event.type != VIEW_TYPE && event.type != READ_TYPE) {
+        if (event.type != VIEW_TYPE && event.type != READ_TYPE && event.type != SCROLL_TYPE) {
             throw new Error('Unsupported event type!');
         }
 
@@ -105,12 +110,17 @@ export class Event {
 }
 
 export class Stats {
-    constructor(views, uniqueVisitors, ipHashes, reads, uniqueReaders, viewsBySource, pages) {
+    constructor(views, uniqueVisitors, ipHashes,
+        reads, uniqueReaders,
+        scrolls, uniqueScrollers,
+        viewsBySource, pages) {
         this.views = views;
         this.uniqueVisitors = uniqueVisitors;
         this.ipHashes = ipHashes;
         this.reads = reads;
         this.uniqueReaders = uniqueReaders;
+        this.scrolls = scrolls;
+        this.uniqueScrollers = uniqueScrollers;
         this.viewsBySource = viewsBySource;
         this.pages = pages;
     }
@@ -124,12 +134,14 @@ export class ViewsBySource {
 }
 
 export class PageStats {
-    constructor(path, views, reads, uniqueViewers, uniqueReaders) {
+    constructor(path, views, reads, scrolls, uniqueViewers, uniqueReaders, uniqueScrollers) {
         this.path = path;
         this.views = views;
         this.reads = reads;
+        this.scrolls = scrolls;
         this.uniqueViewers = uniqueViewers;
         this.uniqueReaders = uniqueReaders;
+        this.uniqueScrollers = uniqueScrollers;
     }
 }
 
@@ -235,10 +247,18 @@ export class StatsViews {
         const timestampNinentyDaysAgo = Dates.timestampSecondsAgo(now, NINENTY_DAYS_SECONDS);
         const lastNinentyDaysStats = await this.analyticsRepository.stats(timestampNinentyDaysAgo, now);
 
+        const timestampOneHundredEightyDaysAgo = Dates.timestampSecondsAgo(now, ONE_HUNDRED_EIGHTY_DAYS_SECONDS);
+        const lastOneHundredEightyDaysStats = await this.analyticsRepository.stats(timestampOneHundredEightyDaysAgo, now);
+
+        const timestampThreeHundredSixtyFiveDaysAgo = Dates.timestampSecondsAgo(now, THREE_HUNDRED_SIXTY_FIVE_DAYS_SECONDS);
+        const lastThreeHundredSixtyFiveDaysStats = await this.analyticsRepository.stats(timestampThreeHundredSixtyFiveDaysAgo, now);
+
         const allTimeStats = await this.analyticsRepository.stats(null, now);
 
         await this._saveView(new StatsView(LAST_30_DAYS_STATS_VIEW, lastThirtyDaysStats, now));
         await this._saveView(new StatsView(LAST_90_DAYS_STATS_VIEW, lastNinentyDaysStats, now));
+        await this._saveView(new StatsView(LAST_180_DAYS_STATS_VIEW, lastOneHundredEightyDaysStats, now));
+        await this._saveView(new StatsView(LAST_365_DAYS_STATS_VIEW, lastThreeHundredSixtyFiveDaysStats, now));
         await this._saveView(new StatsView(ALL_TIME_STATS_VIEW, allTimeStats, now));
 
         this.lastLongerPeriodsViewsSaveTimestamp = now;
@@ -299,24 +319,28 @@ export class SqliteAnalyticsRepository {
 
     async stats(fromTimestamp, toTimestamp) {
         const viewsUniqueVisitorsIpHashesPromise = this._viewsUniqueVisitorsIpHashesStats(fromTimestamp, toTimestamp);
-        const readsUiqueReadersPromise = this._readsUniqueReadersStats(fromTimestamp, toTimestamp);
+        const readsUniqueReadersPromise = this._readsUniqueReadersStats(fromTimestamp, toTimestamp);
+        const scrollsUniqueScrollersPromise = this._scrollsUniqueScrollersStats(fromTimestamp, toTimestamp);
         const viewsBySourcePromise = this._viewsByTopSourceStats(fromTimestamp, toTimestamp, 25);
         const pagesPromise = this._pagesStats(fromTimestamp, toTimestamp);
 
         const { views, uniqueVisitors, ipHashes } = await viewsUniqueVisitorsIpHashesPromise;
-        const { reads, uniqueReaders } = await readsUiqueReadersPromise;
+        const { reads, uniqueReaders } = await readsUniqueReadersPromise;
+        const { scrolls, uniqueScrollers } = await scrollsUniqueScrollersPromise;
         const viewsBySource = await viewsBySourcePromise;
         const pages = await pagesPromise;
 
-        return new Stats(views, uniqueVisitors, ipHashes, reads, uniqueReaders, viewsBySource, pages);
+        return new Stats(views, uniqueVisitors, ipHashes,
+            reads, uniqueReaders, scrolls, uniqueScrollers,
+            viewsBySource, pages);
     }
 
     _viewsUniqueVisitorsIpHashesStats(fromTimestamp, toTimestamp) {
         const query = this._queryWithOptionalWhereInTimestampsClause(`
         SELECT 
-            COUNT(*) as views, 
-            COUNT(DISTINCT visitor_id) as unique_visitors,
-            COUNT(DISTINCT ip_hash) as ip_hashes
+            COUNT(*) AS views, 
+            COUNT(DISTINCT visitor_id) AS unique_visitors,
+            COUNT(DISTINCT ip_hash) AS ip_hashes
         FROM view`, fromTimestamp, toTimestamp);
 
         return this.db.queryOne(query)
@@ -364,7 +388,7 @@ export class SqliteAnalyticsRepository {
 
     _readsUniqueReadersStats(fromTimestamp, toTimestamp) {
         const query = this._queryWithOptionalWhereInTimestampsClause(
-            `SELECT COUNT(*) as reads, COUNT(DISTINCT visitor_id) as unique_readers FROM read`,
+            `SELECT COUNT(*) AS reads, COUNT(DISTINCT visitor_id) AS unique_readers FROM read`,
             fromTimestamp, toTimestamp
         );
 
@@ -380,9 +404,27 @@ export class SqliteAnalyticsRepository {
             });
     }
 
+    _scrollsUniqueScrollersStats(fromTimestamp, toTimestamp) {
+        const query = this._queryWithOptionalWhereInTimestampsClause(
+            `SELECT COUNT(*) AS scrolls, COUNT(DISTINCT visitor_id) AS unique_scrollers FROM scroll`,
+            fromTimestamp, toTimestamp
+        );
+
+        return this.db.queryOne(query)
+            .then(r => {
+                if (r) {
+                    return {
+                        scrolls: r['scrolls'],
+                        uniqueScrollers: r['unique_scrollers']
+                    };
+                }
+                return { scrolls: 0, uniqueScrollers: 0 };
+            });
+    }
+
     _viewsByTopSourceStats(fromTimestamp, toTimestamp, limit) {
         const query = `${this._queryWithOptionalWhereInTimestampsClause(
-            'SELECT source, COUNT(*) as views FROM view',
+            'SELECT source, COUNT(*) AS views FROM view',
             fromTimestamp, toTimestamp
         )} GROUP BY source ORDER BY views DESC LIMIT ${limit}`;
 
@@ -390,6 +432,16 @@ export class SqliteAnalyticsRepository {
     }
 
     async _pagesStats(fromTimestamp, toTimestamp) {
+        const scrollsQuery = `${this._queryWithOptionalWhereInTimestampsClause(
+            `SELECT 
+            path, 
+            COUNT(*) AS scrolls,
+            COUNT(DISTINCT visitor_id) AS unique_scrollers 
+            FROM scroll`,
+            fromTimestamp, toTimestamp
+        )} GROUP BY path`;
+        const scrollsPromise = this.db.query(scrollsQuery);
+
         const readsQuery = `${this._queryWithOptionalWhereInTimestampsClause(
             `SELECT 
             path, 
@@ -412,6 +464,14 @@ export class SqliteAnalyticsRepository {
         ORDER BY views DESC`;
         const viewsPromise = this.db.query(viewsQuery);
 
+        const scrolls = new Map();
+        (await scrollsPromise).forEach(r => {
+            scrolls.set(r['path'], {
+                scrolls: r['scrolls'],
+                scrollers: r['unique_scrollers']
+            });
+        });
+
         const reads = new Map();
         (await readsPromise).forEach(r => {
             reads.set(r['path'], {
@@ -423,11 +483,14 @@ export class SqliteAnalyticsRepository {
         return (await viewsPromise).map(r => {
             const path = r['path'];
             const pReads = reads.get(path);
+            const pScrolls = scrolls.get(path);
             return new PageStats(path,
                 r["views"],
                 pReads ? pReads.reads : 0,
+                pScrolls ? pScrolls.scrolls : 0,
                 r["unique_viewers"],
-                pReads ? pReads.readers : 0)
+                pReads ? pReads.readers : 0,
+                pScrolls ? pScrolls.scrollers : 0)
         });
     }
 }
