@@ -9,7 +9,8 @@ export function initSchema(db) {
             ip_hash TEXT NOT NULL,
             source TEXT NOT NULL,
             path TEXT NOT NULL,
-            type TEXT NOT NULL
+            type TEXT NOT NULL,
+            data TEXT
         );
     
         CREATE INDEX IF NOT EXISTS event_timestamp ON event(timestamp);
@@ -17,6 +18,7 @@ export function initSchema(db) {
         CREATE VIEW IF NOT EXISTS view AS SELECT * FROM event WHERE type = 'VIEW';
         CREATE VIEW IF NOT EXISTS read AS SELECT * FROM event WHERE type = 'READ';
         CREATE VIEW IF NOT EXISTS scroll AS SELECT * FROM event WHERE type = 'SCROLL';
+        CREATE VIEW IF NOT EXISTS ping AS SELECT * FROM event WHERE type = 'PING';
     
         CREATE TABLE IF NOT EXISTS stats_view (
             period TEXT PRIMARY KEY NOT NULL,

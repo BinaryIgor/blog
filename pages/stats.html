@@ -175,7 +175,7 @@
                 const pingsComponent = document.getElementById(`${cd.id}-pings`);
                 toggleElementVisibility(pingsComponent.nextElementSibling);
                 pingsComponent.onclick = () => toggleElementVisibility(pingsComponent.nextElementSibling);
-            
+
                 cd.stats.posts.forEach(p => {
                     const pcid = `${cd.id}${p.path}`
 
@@ -201,11 +201,11 @@
                 <div>
                     <h3 class="text-2xl mt-16 mb-4 font-bold">Overall</h3>
                     <div>Views: ${stats.views}</div>
-                    <div>Visitors: ${stats.uniqueVisitors}</div>
+                    <div>Visitors: ${stats.visitors}</div>
                     <div>Ip hashes: ${stats.ipHashes}</div>
-                    <div>Reads/Readers: ${stats.reads}/${stats.uniqueReaders}</div>
-                    ${scrollsComponent(stats, `${id}-scrolls`)}
-                    ${pingsComponent(stats, `${id}-pings`)}
+                    <div>Reads/Readers: ${eventsIdsString(stats.reads)}</div>
+                    ${scrollsComponent(stats.scrolls, `${id}-scrolls`)}
+                    ${pingsComponent(stats.pings, `${id}-pings`)}
                     <h3 class="text-2xl mt-16 mb-4 font-bold">View Sources</h3>
                     ${viewsBySourceComponent(stats.topViewsBySource)}
                     <h3 class="text-2xl mt-16 mb-4 font-bold">Posts</h3>
@@ -225,29 +225,39 @@
                 `;
         }
 
+        function eventsIdsString(stats) {
+            return `${stats.events}/${stats.ids}`
+        }
+
         function scrollsComponent(stats, id) {
+            const byPositionsElements = stats.byPosition.map(s => `<div>${s.position}%: ${s.events}/${s.ids}</div>`).join("\n");
             return `
-            <div id="${id}"><span class="cursor-pointer underline">Scrolls/Scrollers:</span> ${stats.scrolls}/${stats.uniqueScrollers}</div>
+            <div id="${id}"><span class="cursor-pointer underline">Scrolls/Scrollers:</span> ${eventsIdsString(stats.all)}</div>
             <div>
-                <div>5%: 10, 11</div>
-                <div>25%: 10, 12</div>
-                <div>50%: 10, 15</div>
-                <div>75%: 10, 15</div>
-                <div>100%: 10, 15</div>
+            ${byPositionsElements}
             </div>`;
         }
 
-        // TODO: take ping values
         function pingsComponent(stats, id) {
+            const byPositionsElements = stats.byPosition.map(s => {
+                let positionText;
+                if (s.position < 25) {
+                    positionText = "<25%";
+                } else if (s.position < 50) {
+                    positionText = "25<50%";
+                } else if (s.position < 75) {
+                    positionText = "50<75%";
+                } else if (s.position < 100) {
+                    positionText = "75<100%";
+                } else {
+                    positionText = ">=100%";
+                }
+                return `<div>${positionText}: ${eventsIdsString(s)}</div>`
+            }).join("\n");
             return `
-            <div id="${id}"><span class="cursor-pointer underline">Pings/Pingers:</span> ${stats.scrolls}/${stats.uniqueScrollers}</div>
+            <div id="${id}"><span class="cursor-pointer underline">Pings/Pingers:</span> ${eventsIdsString(stats.all)}</div>
             <div>
-                <div>0%: 10, 11</div>
-                <div>5%: 10, 11</div>
-                <div>25%: 10, 12</div>
-                <div>50%: 10, 15</div>
-                <div>75%: 10, 15</div>
-                <div>100%: 10, 15</div>
+            ${byPositionsElements}
             </div>`;
         }
 
@@ -272,10 +282,10 @@
             <div id="${id}">
                 <h3 class="text-xl font-bold">${post.title}</h3>
                 <a class="italic font-bold mb-4" href="${post.path}">${post.path}</a>
-                <div>Views/Viewers: ${post.views}/${post.uniqueViewers}</div>
-                <div>Reads/Readers: ${post.reads}/${post.uniqueReaders}</div>
-                ${scrollsComponent(post, `${id}-scrolls`)}
-                ${pingsComponent(post, `${id}-pings`)}
+                <div>Views/Viewers: ${eventsIdsString(post.views)}</div>
+                <div>Reads/Readers: ${eventsIdsString(post.reads)}</div>
+                ${scrollsComponent(post.scrolls, `${id}-scrolls`)}
+                ${pingsComponent(post.pings, `${id}-pings`)}
             </div>
             `;
         }
@@ -288,7 +298,7 @@
             return `
             <div>
                 <h3 class="text-xl font-bold">${page.path}</h3>
-                <div>Views/Viewers: ${page.views}/${page.uniqueViewers}</div>
+                <div>Views/Viewers: ${eventsIdsString(page.views)}</div>
             </div>
             `;
         }

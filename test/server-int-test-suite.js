@@ -48,7 +48,9 @@ const NoOpScheduler = {
 };
 
 export const serverIntTestSuite = (testsDescription, testsCallback) => {
-    describe(testsDescription, () => {
+    describe(testsDescription, function () {
+        this.slow(250);
+
         before(async function () {
             fs.mkdirSync(TMP_DIR);
 
