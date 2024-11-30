@@ -21,16 +21,20 @@ const POST_ATTRIBUTE = "data-post-slug";
 const SENT_VIEW_KEY_PREFIX = "SENT_VIEW";
 const VISITOR_ID_KEY = "VISITOR_ID";
 
-const MIN_SEND_VIEW_INTERVAL = 1000 * 60 * 5;
+const MIN_SEND_VIEW_INTERVAL = 1000 * 60;
 const MIN_POST_VIEW_TIME = 1000 * 5;
 const MIN_POST_READ_SEEN_PERCENTAGE = 50;
 const MIN_POST_READ_TIME = 1000 * 60 * 3;
+const SEND_PING_INTERVAL = 1000 * 15;
+// a few minutes (4 pings per minute)
+const MAX_PINGS_TO_SEND_WITHOUT_SCROLL_CHANGE = 4 * 5;
 
 const MAX_SEND_RETRY_DELAY = 15_000;
 
 const VIEW_EVENT_TYPE = "VIEW";
 const READ_EVENT_TYPE = "READ";
 const SCROLL_EVENT_TYPE = "SCROLL";
+const PING_EVENT_TYPE = "PING";
 
 const eventsUrl = `${apiDomain()}/analytics/events`;
 
@@ -41,7 +45,12 @@ const currentPath = location.pathname;
 const sentViewKey = `${SENT_VIEW_KEY_PREFIX}_${currentPath.replace(/\./g, "-")}`;
 
 let minimumPostViewTimePassed = false;
-let postScrolled = false;
+let postScrolled25 = false;
+let postScrolled50 = false;
+let postScrolled75 = false;
+let postScrolled100 = false;
+
+let postScrolledPercentage = 0;
 
 function lastSentViewExpired() {
     const viewSent = localStorage.getItem(sentViewKey);
@@ -68,13 +77,13 @@ function postRequest(url, body) {
     });
 }
 
-function sendEvent(sourceUrl, visitorId, type) {
+function sendEvent(sourceUrl, visitorId, type, data = null) {
     function scheduleRetry() {
         const nextSendEventDelay = Math.random() * MAX_SEND_RETRY_DELAY;
-        setTimeout(() => sendEvent(sourceUrl, visitorId, type), nextSendEventDelay);
+        setTimeout(() => sendEvent(sourceUrl, visitorId, type, data), nextSendEventDelay);
     }
 
-    postRequest(eventsUrl, { source: sourceUrl, visitorId: visitorId, path: currentPath, type: type })
+    postRequest(eventsUrl, { source: sourceUrl, visitorId: visitorId, path: currentPath, type: type, data: data })
         .then(r => {
             if (!r.ok) {
                 scheduleRetry();
@@ -89,14 +98,27 @@ function tryToSendViewEvent(sourceUrl, visitorId) {
     if (postPage) {
         setTimeout(() => {
             sendEvent(sourceUrl, visitorId, VIEW_EVENT_TYPE);
-            if (postScrolled) {
-                sendEvent(sourceUrl, visitorId, SCROLL_EVENT_TYPE);
+            if (postScrolled25) {
+                sendScrollEvent(sourceUrl, visitorId, 25);
+            }
+            if (postScrolled50) {
+                sendScrollEvent(sourceUrl, visitorId, 50);
+            }
+            if (postScrolled75) {
+                sendScrollEvent(sourceUrl, visitorId, 75);
+            }
+            if (postScrolled100) {
+                sendScrollEvent(sourceUrl, visitorId, 100);
             }
             minimumPostViewTimePassed = true;
         }, MIN_POST_VIEW_TIME);
     } else if (lastSentViewExpired()) {
         sendEvent(sourceUrl, visitorId, VIEW_EVENT_TYPE);
     }
+}
+
+function sendScrollEvent(sourceUrl, visitorId, data = postScrolledPercentage) {
+    sendEvent(sourceUrl, visitorId, SCROLL_EVENT_TYPE, data);
 }
 
 const sourceUrl = document.referrer ? document.referrer : document.location.href;
@@ -126,18 +148,59 @@ if (pageToSendEvents && postPage) {
 
     sendReadEventAfterDelayIfSeen(sourceUrl, visitorId);
 
+    let lastPostScrollChangeTimestamp = -1;
     window.addEventListener("post-seen-percentage-change", e => {
+        postScrolledPercentage = e.detail.percentage;
+        lastPostScrollChangeTimestamp = Date.now();
+
         if (!minimumPostPercentageSeen) {
-            minimumPostPercentageSeen = e.detail.percentage >= MIN_POST_READ_SEEN_PERCENTAGE;
+            minimumPostPercentageSeen = postScrolledPercentage >= MIN_POST_READ_SEEN_PERCENTAGE;
             if (minimumPostPercentageSeen && minimumPostReadTimePassed) {
                 sendReadEvent(sourceUrl, visitorId);
             }
         }
-        if (!postScrolled) {
-            postScrolled = e.detail.percentage >= 100;
-            if (postScrolled && minimumPostViewTimePassed) {
-                sendEvent(sourceUrl, visitorId, SCROLL_EVENT_TYPE);
+
+        if (!postScrolled25) {
+            postScrolled25 = postScrolledPercentage >= 25;
+            if (postScrolled25 && minimumPostViewTimePassed) {
+                sendScrollEvent(sourceUrl, visitorId);
+            }
+        }
+        if (!postScrolled50) {
+            postScrolled50 = postScrolledPercentage >= 50;
+            if (postScrolled50 && minimumPostViewTimePassed) {
+                sendScrollEvent(sourceUrl, visitorId);
+            }
+        }
+        if (!postScrolled75) {
+            postScrolled75 = postScrolledPercentage >= 75;
+            if (postScrolled75 && minimumPostViewTimePassed) {
+                sendScrollEvent(sourceUrl, visitorId);
+            }
+        }
+        if (!postScrolled100) {
+            postScrolled100 = postScrolledPercentage >= 100;
+            if (postScrolled100 && minimumPostViewTimePassed) {
+                sendScrollEvent(sourceUrl, visitorId);
             }
         }
     });
+
+    let sameScrollPositionPings = 0;
+    let lastPingSentTimestamp = -1;
+    setInterval(() => {
+        const pageHidden = document.visibilityState == 'hidden' || document.hidden;
+        if (pageHidden) {
+            return;
+        }
+        if (lastPingSentTimestamp > 0 && lastPingSentTimestamp > lastPostScrollChangeTimestamp) {
+            sameScrollPositionPings++;
+        } else {
+            sameScrollPositionPings = 0;
+        }
+        if (sameScrollPositionPings < MAX_PINGS_TO_SEND_WITHOUT_SCROLL_CHANGE) {
+            sendEvent(sourceUrl, visitorId, PING_EVENT_TYPE, postScrolledPercentage);
+            lastPingSentTimestamp = Date.now();
+        }
+    }, SEND_PING_INTERVAL);
 }

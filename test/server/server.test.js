@@ -8,14 +8,15 @@ import { assertJsonResponse, assertOkResponseCode, assertResponseCode } from "..
 import { Stats, ViewsBySource, PageStats, ALL_TIME_STATS_VIEW } from "../../src/server/analytics.js";
 import { randomNumber, randomString } from "../test-utils.js";
 import { MAX_PATH_LENGTH, MAX_IP_HASH_VISITOR_IDS_IN_LAST_DAY, DAY_SECONDS } from "../../src/server/analytics.js";
-import { TestObjects, VIEW_EVENT_TYPE, READ_EVENT_TYPE, SCROLL_EVENT_TYPE } from "../test-objects.js";
+import { TestObjects, VIEW_EVENT_TYPE, READ_EVENT_TYPE, SCROLL_EVENT_TYPE, PING_EVENT_TYPE } from "../test-objects.js";
+import { StatsTestFixture } from "../stats-test-fixture.js";
 import { hashedIp } from "../../src/server/web.js";
 import crypto from 'crypto';
 
 serverIntTestSuite("Server integration tests", () => {
-    invalidEvents().forEach(v => {
+    invalidEvents().forEach(e => {
         it('ignores invalid event and returns 200', async () => {
-            const addEventResponse = await testRequests.addEventRequest(v);
+            const addEventResponse = await testRequests.addEventRequest(e);
 
             await assertAnalyticsEventsSavedStatsViewCalculated();
 
@@ -54,7 +55,7 @@ serverIntTestSuite("Server integration tests", () => {
 
         await assertAnalyticsEventsSavedStatsViewCalculated();
 
-        await assertStatsHaveViewsUniqueVisitorsAndIpHashes(
+        await assertStatsHaveViewsVisitorsAndIpHashes(
             MAX_IP_HASH_VISITOR_IDS_IN_LAST_DAY,
             MAX_IP_HASH_VISITOR_IDS_IN_LAST_DAY,
             1);
@@ -64,7 +65,7 @@ serverIntTestSuite("Server integration tests", () => {
 
         await assertAnalyticsEventsSavedStatsViewCalculated();
 
-        await assertStatsHaveViewsUniqueVisitorsAndIpHashes(
+        await assertStatsHaveViewsVisitorsAndIpHashes(
             MAX_IP_HASH_VISITOR_IDS_IN_LAST_DAY + anotherIpViews,
             MAX_IP_HASH_VISITOR_IDS_IN_LAST_DAY + anotherIpViews,
             2);
@@ -77,7 +78,7 @@ serverIntTestSuite("Server integration tests", () => {
 
         await assertAnalyticsEventsSavedStatsViewCalculated();
 
-        await assertStatsHaveViewsUniqueVisitorsAndIpHashes(
+        await assertStatsHaveViewsVisitorsAndIpHashes(
             MAX_IP_HASH_VISITOR_IDS_IN_LAST_DAY + anotherIpViews + limitExpiredViews,
             MAX_IP_HASH_VISITOR_IDS_IN_LAST_DAY + anotherIpViews + limitExpiredViews,
             2);
@@ -94,8 +95,6 @@ serverIntTestSuite("Server integration tests", () => {
 
         const source1Url = "https://google.com?search=sth";
         const source2Url = "https://binaryigor.com";
-        const source1 = "google.com";
-        const source2 = "binaryigor.com";
 
         const allowedPostPath = randomAllowedPostPath();
 
@@ -144,6 +143,7 @@ serverIntTestSuite("Server integration tests", () => {
         });
         const ip2Scroll1 = { ...ip2Read1 };
         ip2Scroll1.type = SCROLL_EVENT_TYPE;
+        ip2Scroll1.data = 50;
 
         const ip3View1 = TestObjects.randomEvent({
             ipHash: ip3,
@@ -152,6 +152,9 @@ serverIntTestSuite("Server integration tests", () => {
             source: source1Url,
             type: VIEW_EVENT_TYPE
         });
+        const ip3Ping1 = { ...ip3View1 };
+        ip3Ping1.type = PING_EVENT_TYPE;
+        ip3Ping1.data = 11;
 
         await addEventFromIp(ip1, ip1View1);
         await addEventFromIp(ip1, ip1View2);
@@ -161,20 +164,19 @@ serverIntTestSuite("Server integration tests", () => {
         await addEventFromIp(ip2, ip2Read1);
         await addEventFromIp(ip2, ip2Scroll1);
         await addEventFromIp(ip3, ip3View1);
+        await addEventFromIp(ip3, ip3Ping1);
 
         await assertAnalyticsEventsSavedStatsViewCalculated();
 
         const statsResponse = await testRequests.getStats();
 
-        const expectedAllTimeStats = new Stats(5, 3, 3, 2, 2, 1, 1,
-            [
-                new ViewsBySource(source1, 3),
-                new ViewsBySource(source2, 2),
-            ],
-            [
-                new PageStats("/index.html", 4, 0, 0, 3, 0, 0),
-                new PageStats(allowedPostPath, 1, 2, 1, 1, 2, 1)
-            ]);
+        const expectedAllTimeStats = StatsTestFixture.eventsToExpectedStats({
+            views: [ip1View1, ip1View2, ip2View1, ip2View2, ip3View1],
+            reads: [ip1Read1, ip2Read1],
+            scrolls: [ip2Scroll1],
+            pings: [ip3Ping1],
+            normalizeSourceUrls: true
+        });
 
         assertJsonResponse(statsResponse, actualStats => {
             const actualAllTimeStats = allTimeStatsView(actualStats).stats;
@@ -203,6 +205,14 @@ serverIntTestSuite("Server integration tests", () => {
 });
 
 function invalidEvents() {
+    const scrollPingInvalidData = [
+        null,
+        " ",
+        "should be an integer",
+        -1,
+        151
+    ];
+
     return [
         {
 
@@ -213,24 +223,27 @@ function invalidEvents() {
         TestObjects.randomEvent({ visitorId: "" }),
         TestObjects.randomEvent({ visitorId: randomString() }),
         TestObjects.randomEvent({ path: "" }),
-        TestObjects.randomEvent({ path: MAX_PATH_LENGTH + 1 })
+        TestObjects.randomEvent({ path: MAX_PATH_LENGTH + 1 }),
+        ...scrollPingInvalidData.flatMap(data => [
+            TestObjects.randomEvent({ type: SCROLL_EVENT_TYPE, data }),
+            TestObjects.randomEvent({ type: PING_EVENT_TYPE, data })
+        ]),
     ]
 }
 
 function assertEmptyStatsResponse(response) {
     assertJsonResponse(response, actualStats => {
-        const emptyStats = new Stats(0, 0, 0, 0, 0, 0, 0, [], []);
         actualStats.forEach(as => {
-            assert.deepEqual(as.stats, emptyStats);
+            assert.deepEqual(as.stats, Stats.empty());
         });
     });
 }
 
-async function assertStatsHaveViewsUniqueVisitorsAndIpHashes(views, visitors, iphashes) {
+async function assertStatsHaveViewsVisitorsAndIpHashes(views, visitors, iphashes) {
     assertJsonResponse(await testRequests.getStats(), actualStats => {
         const allTimeStats = allTimeStatsView(actualStats).stats;
         assert.deepEqual(allTimeStats.views, views);
-        assert.deepEqual(allTimeStats.uniqueVisitors, visitors);
+        assert.deepEqual(allTimeStats.visitors, visitors);
         assert.deepEqual(allTimeStats.ipHashes, iphashes);
     });
 }

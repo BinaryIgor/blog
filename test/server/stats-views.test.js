@@ -6,14 +6,14 @@ import fs from "fs";
 import crypto from 'crypto';
 import path from 'path';
 import {
-    SqliteAnalyticsRepository, StatsView, StatsViews, Stats, ViewsBySource, PageStats,
-    LAST_DAY_STATS_VIEW, LAST_7_DAYS_STATS_VIEW, LAST_30_DAYS_STATS_VIEW, 
-    LAST_90_DAYS_STATS_VIEW, LAST_180_DAYS_STATS_VIEW, LAST_365_DAYS_STATS_VIEW, 
+    SqliteAnalyticsRepository, StatsView, StatsViews,
+    LAST_DAY_STATS_VIEW, LAST_7_DAYS_STATS_VIEW, LAST_30_DAYS_STATS_VIEW,
+    LAST_90_DAYS_STATS_VIEW, LAST_180_DAYS_STATS_VIEW, LAST_365_DAYS_STATS_VIEW,
     ALL_TIME_STATS_VIEW,
 } from "../../src/server/analytics.js";
 import { TestClock, randomNumber } from "../test-utils.js";
-import { TestObjects, VIEW_EVENT_TYPE, READ_EVENT_TYPE, SCROLL_EVENT_TYPE } from "../test-objects.js";
-import { Event } from "../../src/server/analytics.js";
+import { TestObjects, VIEW_EVENT_TYPE, READ_EVENT_TYPE, SCROLL_EVENT_TYPE, PING_EVENT_TYPE } from "../test-objects.js";
+import { StatsTestFixture } from "../stats-test-fixture.js";
 
 const DB_PATH = path.join("/tmp", `${crypto.randomUUID()}.db`);
 
@@ -33,7 +33,9 @@ const ONE_HUNDRED_EIGHTY_DAYS_SECONDS = DAY_SECONDS * 180;
 const THREE_HUNDRED_SIXTY_FIVE_DAYS_SECONDS = DAY_SECONDS * 365;
 const ALL_TIME_STATS_DAYS_SECONDS = THREE_HUNDRED_SIXTY_FIVE_DAYS_SECONDS * 5;
 
-describe("StatsViews tests", () => {
+describe("StatsViews tests", function () {
+    this.slow(250);
+
     before(async () => {
         await initSchema(db);
     });
@@ -121,84 +123,50 @@ async function triggerViewsSave() {
 }
 
 async function prepareEventsReturningExpectedStats(fromTimestamp, toTimestamp, allTimeStats = false) {
-    const visitor1Id = crypto.randomUUID();
-    const visitor2Id = crypto.randomUUID();
-    const visitor3Id = crypto.randomUUID();
+    const visitorIds = [
+        crypto.randomUUID(),
+        crypto.randomUUID(),
+        crypto.randomUUID()
+    ];
+    const ipHashes = [
+        "ip-hash-1",
+        "ip-hash-2"
+    ];
+    const sources = [
+        "binaryigor.com",
+        "google.com"
+    ];
+    const paths = [
+        "index.html",
+        "/post-1.html",
+        "/post-2.html"
+    ];
 
-    const ipHash1 = "ip-hash-1";
-    const ipHash2 = "ip-hash-2";
+    const views = StatsTestFixture.prepareRandomEvents({
+        fromTimestamp, toTimestamp, visitorIds, ipHashes, sources, paths,
+        eventType: VIEW_EVENT_TYPE, count: 20
+    });
+    const reads = StatsTestFixture.prepareRandomEvents({
+        fromTimestamp, toTimestamp, visitorIds, ipHashes, sources, paths,
+        eventType: READ_EVENT_TYPE, count: 7
+    });
+    const scrolls = StatsTestFixture.prepareRandomEvents({
+        fromTimestamp, toTimestamp, visitorIds, ipHashes, sources, paths,
+        eventType: SCROLL_EVENT_TYPE, count: 12
+    });
+    const pings = StatsTestFixture.prepareRandomEvents({
+        fromTimestamp, toTimestamp, visitorIds, ipHashes, sources, paths,
+        eventType: PING_EVENT_TYPE, count: 15
+    });
 
-    const source1 = "binaryigor.com";
-    const source2 = "google.com";
-
-    const path1 = "/index.html";
-    const path2 = "/post-1.html";
-    const path3 = "/post-2.html";
-
-    const visitor1Ip1Source1Path1_view1 = new Event(randomNumber(fromTimestamp, toTimestamp),
-        visitor1Id, ipHash1, source1, path1, VIEW_EVENT_TYPE);
-    const visitor1Ip1Source1Path1_view2 = new Event(randomNumber(fromTimestamp, toTimestamp),
-        visitor1Id, ipHash1, source1, path1, VIEW_EVENT_TYPE);
-    const visitor1Ip2Source1Path2_view1 = new Event(randomNumber(fromTimestamp, toTimestamp),
-        visitor1Id, ipHash2, source1, path2, VIEW_EVENT_TYPE);
-    const visitor1Ip1Source1Path1_read1 = { ...visitor1Ip1Source1Path1_view1 };
-    visitor1Ip1Source1Path1_read1.type = READ_EVENT_TYPE;
-    const visitor1Ip1Source1Path1_read2 = { ...visitor1Ip1Source1Path1_view2 };
-    visitor1Ip1Source1Path1_read2.type = READ_EVENT_TYPE;
-    const visitor1Ip1Source1Path1_scroll1 = { ...visitor1Ip1Source1Path1_view1 };
-    visitor1Ip1Source1Path1_scroll1.type = SCROLL_EVENT_TYPE;
-
-    const visitor2Ip2Source1Path1_view = new Event(randomNumber(fromTimestamp, toTimestamp),
-        visitor2Id, ipHash2, source1, path1, VIEW_EVENT_TYPE);
-    const visitor2Ip2Source1Path1_read = { ...visitor2Ip2Source1Path1_view }
-    visitor2Ip2Source1Path1_view.type = READ_EVENT_TYPE;
-    const visitor2Ip2Source2Path2_view = new Event(randomNumber(fromTimestamp, toTimestamp),
-        visitor2Id, ipHash2, source2, path2, VIEW_EVENT_TYPE);
-    const visitor2Ip2Source2Path2_read = { ...visitor2Ip2Source2Path2_view };
-    visitor2Ip2Source2Path2_read.type = READ_EVENT_TYPE;
-
-    const visitor3Ip2Source2Path3_view = new Event(randomNumber(fromTimestamp, toTimestamp),
-        visitor3Id, ipHash2, source2, path3, VIEW_EVENT_TYPE);
-    const visitor3Ip2Source2Path3_scroll = { ...visitor3Ip2Source2Path3_view };
-    visitor3Ip2Source2Path3_scroll.type = SCROLL_EVENT_TYPE
-
-    await analyticsRepository.saveEvents([
-        visitor1Ip1Source1Path1_view1,
-        visitor1Ip1Source1Path1_view2,
-        visitor1Ip2Source1Path2_view1,
-        visitor1Ip1Source1Path1_read1,
-        visitor1Ip1Source1Path1_read2,
-        visitor1Ip1Source1Path1_scroll1,
-        visitor2Ip2Source1Path1_view,
-        visitor2Ip2Source1Path1_read,
-        visitor2Ip2Source2Path2_view,
-        visitor2Ip2Source2Path2_read,
-        visitor3Ip2Source2Path3_view,
-        visitor3Ip2Source2Path3_scroll
-    ]);
+    const allEvents = [...views, ...reads, ...scrolls, ...pings];
+    await analyticsRepository.saveEvents(allEvents);
 
     if (!allTimeStats) {
         await analyticsRepository.saveEvents(outsideTimePeriodRandomEvents(fromTimestamp, toTimestamp));
     }
 
-    const views = 6;
-    const uniqueVisitors = 3;
-    const ipHashes = 2;
-    const reads = 4;
-    const uniqueReaders = 2;
-    const scrolls = 2;
-    const uniqueScrollers = 2;
-
-    return new Stats(views, uniqueVisitors, ipHashes, reads, uniqueReaders, scrolls, uniqueScrollers,
-        [
-            new ViewsBySource(source1, 4),
-            new ViewsBySource(source2, 2),
-        ],
-        [
-            new PageStats(path1, 3, 3, 1, 2, 2, 1),
-            new PageStats(path2, 2, 1, 0, 2, 1, 0),
-            new PageStats(path3, 1, 0, 1, 1, 0, 1)
-        ]);
+    return StatsTestFixture.eventsToExpectedStats({ views, reads, scrolls, pings });
 }
 
 function timestampMovedBySeconds(timestamp, seconds) {

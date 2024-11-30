@@ -65,7 +65,7 @@ export async function start(clock = new Clock(),
             const ip = req.header(REAL_IP_HEADER) || req.socket.remoteAddress;
             const ipHash = Web.hashedIp(ip);
             const reqBody = req.body;
-            const event = new Event(clock.nowTimestamp(), reqBody.visitorId, ipHash, reqBody.source, reqBody.path, reqBody.type);
+            const event = new Event(clock.nowTimestamp(), reqBody.visitorId, ipHash, reqBody.source, reqBody.path, reqBody.type, reqBody.data);
             await analyticsService.addEvent(event);
         } catch (e) {
             Logger.logError(`Failed to add event ${JSON.stringify(req.body)}, ignoring the result`, e);
@@ -112,6 +112,16 @@ export async function start(clock = new Clock(),
             res.send(newViews);
         } catch (e) {
             Logger.logError("Problem while calculating stats views...", e);
+            res.sendStatus(500);
+        }
+    });
+
+    app.post("/internal/execute-db-query", async (req, res) => {
+        try {
+            await db.executeRaw(req.body.query);
+            res.sendStatus(200);
+        } catch (e) {
+            Logger.logError(`Problem while executing arbitrary db query...`, req.body, e);
             res.sendStatus(500);
         }
     });
