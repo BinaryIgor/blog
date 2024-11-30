@@ -26,9 +26,9 @@ const MIN_POST_VIEW_TIME = 1000 * 5;
 const MIN_POST_READ_SEEN_PERCENTAGE = 50;
 const MIN_POST_READ_TIME = 1000 * 60 * 3;
 const POST_READ_RETRY_DELAY_IF_NOT_ACTIVE = 1000 * 5;
-const SEND_PING_INTERVAL = 1000 * 15;
-// a few minutes (4 pings per minute)
-const MAX_PINGS_TO_SEND_WITHOUT_SCROLL_CHANGE = 4 * 5;
+const SEND_PING_INTERVAL = 1000 * 30;
+// a few minutes (2 pings per minute)
+const MAX_PINGS_TO_SEND_WITHOUT_SCROLL_CHANGE = 2 * 5;
 
 const MAX_SEND_RETRY_DELAY = 15_000;
 
