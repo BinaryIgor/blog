@@ -26,6 +26,8 @@ const MIN_POST_VIEW_TIME = 1000 * 5;
 const MIN_POST_READ_SEEN_PERCENTAGE = 50;
 const MIN_POST_READ_TIME = 1000 * 60 * 3;
 const SEND_PING_INTERVAL = 1000 * 15;
+// a few minutes (4 pings per minute)
+const MAX_PINGS_TO_SEND_WITHOUT_SCROLL_CHANGE = 4 * 5;
 
 const MAX_SEND_RETRY_DELAY = 15_000;
 
@@ -146,8 +148,10 @@ if (pageToSendEvents && postPage) {
 
     sendReadEventAfterDelayIfSeen(sourceUrl, visitorId);
 
+    let lastPostScrollChangeTimestamp = -1;
     window.addEventListener("post-seen-percentage-change", e => {
         postScrolledPercentage = e.detail.percentage;
+        lastPostScrollChangeTimestamp = Date.now();
 
         if (!minimumPostPercentageSeen) {
             minimumPostPercentageSeen = postScrolledPercentage >= MIN_POST_READ_SEEN_PERCENTAGE;
@@ -182,10 +186,21 @@ if (pageToSendEvents && postPage) {
         }
     });
 
+    let sameScrollPositionPings = 0;
+    let lastPingSentTimestamp = -1;
     setInterval(() => {
         const pageHidden = document.visibilityState == 'hidden' || document.hidden;
-        if (!pageHidden) {
+        if (pageHidden) {
+            return;
+        }
+        if (lastPingSentTimestamp > 0 && lastPingSentTimestamp > lastPostScrollChangeTimestamp) {
+            sameScrollPositionPings++;
+        } else {
+            sameScrollPositionPings = 0;
+        }
+        if (sameScrollPositionPings < MAX_PINGS_TO_SEND_WITHOUT_SCROLL_CHANGE) {
             sendEvent(sourceUrl, visitorId, PING_EVENT_TYPE, postScrolledPercentage);
+            lastPingSentTimestamp = Date.now();
         }
     }, SEND_PING_INTERVAL);
 }
