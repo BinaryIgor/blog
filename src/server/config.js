@@ -19,6 +19,7 @@ export function read() {
     return {
         serverPort: envVarOrDefault("SERVER_PORT", 8080),
         corsAllowedOrigin: envVarOrDefault("CORS_ALLOWED_ORIGIN", "https://binaryigor.com"),
+        corsMaxAgeSeconds: envVarOrDefault("CORS_MAX_AGE_SECONDS", 3600),
         dbPath: envVarOrDefault("DB_PATH", "/tmp/analytics.db"),
         dbBackupPath: envVarOrDefault("DB_BACKUP_PATH", "/tmp/analytics_backup.db"),
         dbBackupScheduleDelay: envVarOrDefault("DB_BACKUP_SCHEDULE_DELAY", DEFAULT_DB_BACKUP_SCHEDULE_DELAY),

@@ -55,7 +55,8 @@ export async function start(clock = new Clock(),
     app.use(bodyParser.json());
 
     const corsOptions = {
-        origin: config.corsAllowedOrigin
+        origin: config.corsAllowedOrigin,
+        maxAge: config.corsMaxAgeSeconds
     };
     app.use(cors(corsOptions));
 
