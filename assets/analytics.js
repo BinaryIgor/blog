@@ -25,6 +25,7 @@ const MIN_SEND_VIEW_INTERVAL = 1000 * 60;
 const MIN_POST_VIEW_TIME = 1000 * 5;
 const MIN_POST_READ_SEEN_PERCENTAGE = 50;
 const MIN_POST_READ_TIME = 1000 * 60 * 3;
+const POST_READ_RETRY_DELAY_IF_NOT_ACTIVE = 1000 * 5;
 const SEND_PING_INTERVAL = 1000 * 15;
 // a few minutes (4 pings per minute)
 const MAX_PINGS_TO_SEND_WITHOUT_SCROLL_CHANGE = 4 * 5;
@@ -132,14 +133,24 @@ if (pageToSendEvents && postPage) {
     let minimumPostPercentageSeen = false;
     let minimumPostReadTimePassed = false;
 
+    function isPageActive() {
+        return !(document.visibilityState == 'hidden' || document.hidden);
+    }
+
     function sendReadEventAfterDelayIfSeen(sourceUrl, visitorId) {
-        setTimeout(() => {
-            if (minimumPostPercentageSeen) {
+        function sendReadEventIf() {
+            if (!minimumPostPercentageSeen) {
+                minimumPostReadTimePassed = true;
+                return;
+            }
+            if (isPageActive()) {
                 sendReadEvent(sourceUrl, visitorId);
             } else {
-                minimumPostReadTimePassed = true;
+                setTimeout(sendReadEventIf, POST_READ_RETRY_DELAY_IF_NOT_ACTIVE);
             }
-        }, MIN_POST_READ_TIME);
+        }
+
+        setTimeout(sendReadEventIf, MIN_POST_READ_TIME);
     }
 
     function sendReadEvent(sourceUrl, visitorId) {
@@ -189,8 +200,7 @@ if (pageToSendEvents && postPage) {
     let sameScrollPositionPings = 0;
     let lastPingSentTimestamp = -1;
     setInterval(() => {
-        const pageHidden = document.visibilityState == 'hidden' || document.hidden;
-        if (pageHidden) {
+        if (!isPageActive()) {
             return;
         }
         if (lastPingSentTimestamp > 0 && lastPingSentTimestamp > lastPostScrollChangeTimestamp) {
