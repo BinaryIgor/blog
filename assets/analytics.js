@@ -25,7 +25,7 @@ const MIN_SEND_VIEW_INTERVAL = 1000 * 60;
 const MIN_POST_VIEW_TIME = 1000 * 5;
 const MIN_POST_READ_SEEN_PERCENTAGE = 50;
 const MIN_POST_READ_TIME = 1000 * 60 * 3;
-const SEND_PING_INTERVAL = 1000 * 30;
+const SEND_PING_INTERVAL = 1000 * 15;
 
 const MAX_SEND_RETRY_DELAY = 15_000;
 
@@ -75,13 +75,13 @@ function postRequest(url, body) {
     });
 }
 
-function sendEvent(sourceUrl, visitorId, type, data=null) {
+function sendEvent(sourceUrl, visitorId, type, data = null) {
     function scheduleRetry() {
         const nextSendEventDelay = Math.random() * MAX_SEND_RETRY_DELAY;
         setTimeout(() => sendEvent(sourceUrl, visitorId, type, data), nextSendEventDelay);
     }
 
-    postRequest(eventsUrl, { source: sourceUrl, visitorId: visitorId, path: currentPath, type: type, data: data})
+    postRequest(eventsUrl, { source: sourceUrl, visitorId: visitorId, path: currentPath, type: type, data: data })
         .then(r => {
             if (!r.ok) {
                 scheduleRetry();
@@ -107,7 +107,7 @@ function tryToSendViewEvent(sourceUrl, visitorId) {
             }
             if (postScrolled100) {
                 sendScrollEvent(sourceUrl, visitorId, 100);
-            } 
+            }
             minimumPostViewTimePassed = true;
         }, MIN_POST_VIEW_TIME);
     } else if (lastSentViewExpired()) {
@@ -115,7 +115,7 @@ function tryToSendViewEvent(sourceUrl, visitorId) {
     }
 }
 
-function sendScrollEvent(sourceUrl, visitorId, data=postScrolledPercentage) {
+function sendScrollEvent(sourceUrl, visitorId, data = postScrolledPercentage) {
     sendEvent(sourceUrl, visitorId, SCROLL_EVENT_TYPE, data);
 }
 
@@ -182,5 +182,10 @@ if (pageToSendEvents && postPage) {
         }
     });
 
-    setInterval(() => sendEvent(sourceUrl, visitorId, PING_EVENT_TYPE, postScrolledPercentage), SEND_PING_INTERVAL);
+    setInterval(() => {
+        const pageHidden = document.visibilityState == 'hidden' || document.hidden;
+        if (!pageHidden) {
+            sendEvent(sourceUrl, visitorId, PING_EVENT_TYPE, postScrolledPercentage);
+        }
+    }, SEND_PING_INTERVAL);
 }
