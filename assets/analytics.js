@@ -118,7 +118,7 @@ function tryToSendViewEvent(sourceUrl, visitorId) {
     }
 }
 
-function sendScrollEvent(sourceUrl, visitorId, data = postScrolledPercentage) {
+function sendScrollEvent(sourceUrl, visitorId, data) {
     sendEvent(sourceUrl, visitorId, SCROLL_EVENT_TYPE, data);
 }
 
@@ -174,25 +174,25 @@ if (pageToSendEvents && postPage) {
         if (!postScrolled25) {
             postScrolled25 = postScrolledPercentage >= 25;
             if (postScrolled25 && minimumPostViewTimePassed) {
-                sendScrollEvent(sourceUrl, visitorId);
+                sendScrollEvent(sourceUrl, visitorId, 25);
             }
         }
         if (!postScrolled50) {
             postScrolled50 = postScrolledPercentage >= 50;
             if (postScrolled50 && minimumPostViewTimePassed) {
-                sendScrollEvent(sourceUrl, visitorId);
+                sendScrollEvent(sourceUrl, visitorId, 50);
             }
         }
         if (!postScrolled75) {
             postScrolled75 = postScrolledPercentage >= 75;
             if (postScrolled75 && minimumPostViewTimePassed) {
-                sendScrollEvent(sourceUrl, visitorId);
+                sendScrollEvent(sourceUrl, visitorId, 75);
             }
         }
         if (!postScrolled100) {
             postScrolled100 = postScrolledPercentage >= 100;
             if (postScrolled100 && minimumPostViewTimePassed) {
-                sendScrollEvent(sourceUrl, visitorId);
+                sendScrollEvent(sourceUrl, visitorId, 100);
             }
         }
     });
