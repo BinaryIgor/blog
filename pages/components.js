@@ -16,7 +16,7 @@ export function postHtmlDescription({ excerpt, htmlDescription }) {
 export function postPreview(post) {
     const postUrl = `/${post.slug}.html`;
     return `
-   <li class="cursor-pointer border-[2px] border-solid border-primary-text-faded p-6 rounded
+   <li class="cursor-pointer border-2 border-solid border-primary-text-faded p-6 rounded
         max-content-width m-auto"
         onclick="(function() { const selected = document.getSelection().toString(); if (!selected) location.href='${postUrl}' })()">
         <a href="${postUrl}" class="text-2xl mb-2 font-bold">${post.title}</a>
