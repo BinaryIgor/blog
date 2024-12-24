@@ -133,7 +133,7 @@ Once more, how many systems do hundreds of writes per second on a constant, not 
 
 What is more, there is a straightforward way to scale it even further by using multiple SQLite databases:
 * database per module -  [in a modular monolith, there should not be cross-module transactions](/modular-monolith-dependencies-and-communication.html) anyways, so it does not complicate anything and gives us additional, per module, scalability
-* N shards (databases) based on user/account id, country code or anything else that matches application data access patterns - route requests/queries to one of these shards (databases) based on a sharding key (user/account id, country code etc.)
+* N shards (databases) based on user/account id, country code or anything else that matches application data access patterns - route requests/queries to one of these shards (databases) based on a sharding key
 
 **With this simple trick, it is safe to say that SQLite performance can be increased at least five to ten times by sharding it on a single machine** - at some point we will be limited by the underlying OS and hardware I/O operations, not the SQLite db itself. 
 Based on these assumptions and above tests, it comes down to:
@@ -364,8 +364,7 @@ We went from *500 ms to 1 ms* and query plan neatly displayed everything we need
 * Executing multi-statement queries is not implemented by many SQLite drivers - if we need to execute multiple queries separated by `;` in a single SQL string, we have to find some workarounds
 * More quirks - huge respect to the SQLite authors that it comes directly from them - can be found [here](https://www.sqlite.org/omitted.html) and [here](https://www.sqlite.org/quirks.html)
 
-This list is also quite long and some of the quirks and limitations are rather annoying. Nevertheless, we can tweak a few things to work around them; they are absolutely manageable, especially given much longer list of SQLite features and advantages.
-
+This list is also quite long and some of the quirks and limitations are rather annoying. Nevertheless, we can tweak a few things to work around them; they are absolutely manageable, especially given the much longer list of SQLite features and advantages.
 
 ## Final thoughts
 
