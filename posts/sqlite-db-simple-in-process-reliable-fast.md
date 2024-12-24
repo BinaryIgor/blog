@@ -1,7 +1,7 @@
 ---
 {
-    "title": "SQLite DB: simple, in-process, resilient, fast",
-    "slug": "sqlite-db-simple-in-process-resilient-fast",
+    "title": "SQLite DB: simple, in-process, reliable, fast",
+    "slug": "sqlite-db-simple-in-process-reliable-fast",
     "startedAt": "2024-12-12",
     "publishedAt": "2024-12-24",
     "excerpt": "I love simplicity. Complexity is our eternal enemy and Simplicity is beautiful; rarely something is as simple as SQLite: a single-file, in-process database. It runs inside our application, there is no need for a separate database server.",
@@ -10,7 +10,7 @@
 }
 ---
 
-## Simplicity and Resilience
+## Simplicity and Reliability
 
 As you can tell from my writing on [HTMX](htmx-simpler-web-based-app-or-system.html), [Modularity](/modular-monolith-and-microservices-modularity-is-what-truly-matters.html) or [Infrastructure](/kubernetes-maybe-a-few-bash-python-scripts-is-enough.html), 
 I love simplicity. [Complexity is our eternal enemy](https://grugbrain.dev/#grug-on-complexity) and Simplicity is beautiful; rarely something is as simple as SQLite: a single-file, in-process database. 
@@ -26,7 +26,7 @@ Usually, the database is just a dedicated storage of data/state tailored to our 
 Do we really need to share this data/state over the network, directly?
 
 SQLite is an embedded SQL database engine that lives as a library, inside the process and runs together with it; it writes and reads from a single database file (almost).
-**Because of this Simplicity, we get Resilience - network cannot fail us, since we operate on simple, local files.** 
+**Because of this Simplicity, we get Reliability - network cannot fail us, since we operate on simple, local files.** 
 In many cases, we will also gain performance because latency of local file operations is much lower than network access.
 
 **Is it all roses? Of course not, nothing is - there are just better and worse tradeoffs, depending on the context and use case.**
@@ -368,7 +368,7 @@ This list is also quite long and some of the quirks and limitations are rather a
 
 ## Final thoughts
 
-As we have seen, SQLite is a simple, resilient and surprisingly performant database.
+As we have seen, SQLite is a simple, reliable and surprisingly performant database.
 It has its own quirks and limitations, but if we account for them by making a few adjustments, we get:
 * **The simplest, single file database** - ideal for a single virtual machine system
 * **Zero configuration and setup database** - there is nothing to monitor and check, since it is just an in-process library
