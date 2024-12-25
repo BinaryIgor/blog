@@ -1,17 +1,38 @@
 import { URL } from "url";
 
 import { Stats, ViewsBySource, PageStats } from "../src/server/analytics.js";
-import { randomElement, randomNumber, sortByField } from "./test-utils.js";
+import { randomElement, randomNumber, randomBoolean, sortByField } from "./test-utils.js";
 import { SCROLL_EVENT_TYPE, PING_EVENT_TYPE } from "./test-objects.js";
 import { Event } from "../src/server/analytics.js";
 
+const PINGS_AS_READ_WINDOW_MILLIS = 4 * 60 * 1000;
+const PINGS_AS_READ_COUNT_THRESHOLD = 6;
+const PINGS_AS_READ_MIN_SCROLL_THRESHOLD = 50;
+
 export const StatsTestFixture = {
     prepareRandomEvents({ fromTimestamp, toTimestamp, visitorIds, ipHashes, sources, paths, eventType, count }) {
+        function randomEventTimestamp() {
+            if (eventType != PING_EVENT_TYPE) {
+                return randomNumber(fromTimestamp, toTimestamp);
+            }
+
+            if (randomBoolean()) {
+                const higherChanceForBeingReadToTimestamp = fromTimestamp + (2 * PINGS_AS_READ_WINDOW_MILLIS);
+                const toEventTimestamp = higherChanceForBeingReadToTimestamp > toTimestamp ? toTimestamp : higherChanceForBeingReadToTimestamp;
+                return randomNumber(fromTimestamp, toEventTimestamp);
+            }
+
+            const higherChanceForBeingReadFromTimestamp = toTimestamp - (2 * PINGS_AS_READ_WINDOW_MILLIS);
+            const fromEventTimestamp = higherChanceForBeingReadFromTimestamp < fromTimestamp ? higherChanceForBeingReadFromTimestamp : fromTimestamp;
+            return randomNumber(fromEventTimestamp, toTimestamp);
+        }
+
         const events = [];
         for (let i = 0; i < count; i++) {
             const data = eventType == SCROLL_EVENT_TYPE || eventType == PING_EVENT_TYPE ? randomNumber(0, 100) : null;
+
             events.push(
-                new Event(randomNumber(fromTimestamp, toTimestamp),
+                new Event(randomEventTimestamp(),
                     randomElement(visitorIds),
                     randomElement(ipHashes),
                     randomElement(sources),
@@ -20,29 +41,31 @@ export const StatsTestFixture = {
         }
         return events;
     },
-    eventsToExpectedStats({ views, reads, scrolls, pings, normalizeSourceUrls = false }) {
+    eventsToExpectedStats({ views, scrolls, pings, normalizeSourceUrls = false, requireReads = false }) {
         const eventVisitors = countDistinct(views.map(e => e.visitorId));
-        const eventIpHashes = countDistinct(views.concat(reads).concat(scrolls).concat(pings).map(e => e.ipHash));
-        const eventReads = {
-            events: reads.length,
-            ids: countDistinct(reads.map(e => e.visitorId))
-        };
+        const eventIpHashes = countDistinct(views.concat(scrolls).concat(pings).map(e => e.ipHash));
+        const paths = distinctPaths({ views, scrolls, pings });
+        const reads = toExpectedReads(pings);
 
-        const paths = distinctPaths({ views, reads, scrolls, pings });
+        if (requireReads && reads.events <= 0) {
+            throw new Error("Reads are required, but none was found in pings");
+        }
 
         return new Stats(views.length, eventVisitors, eventIpHashes,
-            eventReads, toExpectedScrolls(scrolls), toExpectedPings(pings),
+            toExpectedScrolls(scrolls), toExpectedPings(pings), reads,
             toExpectedViewsBySource(views, normalizeSourceUrls),
-            toExpectedStatsByPath({ paths, views, reads, scrolls, pings }));
+            toExpectedStatsByPath({ paths, views, scrolls, pings }));
     }
+
+
 };
 
 function sourceHost(source) {
     return new URL(source).host;
 }
 
-function distinctPaths({ views, reads, scrolls, pings }) {
-    const paths = [...views, ...reads, ...scrolls, ...pings].map(e => e.path);
+function distinctPaths({ views, scrolls, pings }) {
+    const paths = [...views, ...scrolls, ...pings].map(e => e.path);
     return [...new Set(paths)];
 }
 
@@ -107,6 +130,39 @@ function toExpectedPings(events) {
     return { all: { events: allPings, ids: uniquePingers.size }, byPosition };
 }
 
+// similar grouping to the one in SQL; check out SqliteAnalyticsRepository._pingsAsReadsQuery()
+function toExpectedReads(pings) {
+    const pingsByTimestampWindowVisitorId = new Map();
+    pings.forEach(e => {
+        const timestampWindow = Math.trunc(e.timestamp / PINGS_AS_READ_WINDOW_MILLIS);
+        const key = `${timestampWindow}_${e.visitorId}`;
+        let groupedEvents = pingsByTimestampWindowVisitorId.get(key);
+        if (!groupedEvents) {
+            groupedEvents = [];
+            pingsByTimestampWindowVisitorId.set(key, groupedEvents);
+        }
+        groupedEvents.push(e);
+    });
+
+    let reads = 0;
+    const readers = new Set();
+    [...pingsByTimestampWindowVisitorId.values()].forEach((events) => {
+        const scrollPositions = events.map(e => e.data);
+        const minScroll = Math.min(...scrollPositions);
+        const maxScroll = Math.max(...scrollPositions);
+        if (events.length >= PINGS_AS_READ_COUNT_THRESHOLD &&
+            maxScroll > minScroll && maxScroll >= PINGS_AS_READ_MIN_SCROLL_THRESHOLD) {
+            reads++;
+            readers.add(events[0].visitorId);
+        }
+    });
+
+    return {
+        events: reads,
+        ids: readers.size
+    };
+}
+
 function pingPositionBucket(position) {
     if (position < 25) {
         return 0;
@@ -146,10 +202,9 @@ function toExpectedViewsBySource(events, normalizeSource) {
         }).map(e => new ViewsBySource(e.source, e.views));
 }
 
-function toExpectedStatsByPath({ paths, views, reads, scrolls, pings }) {
+function toExpectedStatsByPath({ paths, views, scrolls, pings }) {
     return paths.map(path => {
         const pathViews = views.filter(v => v.path == path);
-        const pathReads = reads.filter(r => r.path == path);
         const pathScrolls = scrolls.filter(s => s.path == path);
         const pathPings = pings.filter(p => p.path == path);
 
@@ -158,12 +213,9 @@ function toExpectedStatsByPath({ paths, views, reads, scrolls, pings }) {
                 events: pathViews.length,
                 ids: countDistinct(pathViews.map(e => e.visitorId))
             },
-            {
-                events: pathReads.length,
-                ids: countDistinct(pathReads.map(e => e.visitorId))
-            },
             toExpectedScrolls(pathScrolls),
-            toExpectedPings(pathPings));
+            toExpectedPings(pathPings),
+            toExpectedReads(pathPings));
     }).sort((a, b) => {
         // first by views desc, then path asc
         const aViews = a.views.events;

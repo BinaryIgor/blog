@@ -5,10 +5,10 @@ import {
     assertAnalyticsEventsSavedStatsViewCalculated
 } from "../server-int-test-suite.js";
 import { assertJsonResponse, assertOkResponseCode, assertResponseCode } from "../web-tests.js";
-import { Stats, ViewsBySource, PageStats, ALL_TIME_STATS_VIEW } from "../../src/server/analytics.js";
+import { Stats, ALL_TIME_STATS_VIEW } from "../../src/server/analytics.js";
 import { randomNumber, randomString } from "../test-utils.js";
 import { MAX_PATH_LENGTH, MAX_IP_HASH_VISITOR_IDS_IN_LAST_DAY, DAY_SECONDS } from "../../src/server/analytics.js";
-import { TestObjects, VIEW_EVENT_TYPE, READ_EVENT_TYPE, SCROLL_EVENT_TYPE, PING_EVENT_TYPE } from "../test-objects.js";
+import { TestObjects, VIEW_EVENT_TYPE, SCROLL_EVENT_TYPE, PING_EVENT_TYPE } from "../test-objects.js";
 import { StatsTestFixture } from "../stats-test-fixture.js";
 import { hashedIp } from "../../src/server/web.js";
 import crypto from 'crypto';
@@ -30,10 +30,10 @@ serverIntTestSuite("Server integration tests", () => {
 
     it('ignores not allowed path events and return 200', async () => {
         const view = TestObjects.randomEvent({ path: "/not-allowed.html", type: VIEW_EVENT_TYPE });
-        const read = TestObjects.randomEvent({ path: "/not-allowed.html", type: READ_EVENT_TYPE });
+        const ping = TestObjects.randomEvent({ path: "/not-allowed.html", type: PING_EVENT_TYPE });
 
         const addViewResponse = await testRequests.addEventRequest(view);
-        const addReadResponse = await testRequests.addEventRequest(read);
+        const addReadResponse = await testRequests.addEventRequest(ping);
 
         assertOkResponseCode(addViewResponse);
         assertOkResponseCode(addReadResponse);
@@ -112,12 +112,12 @@ serverIntTestSuite("Server integration tests", () => {
             source: source2Url,
             type: VIEW_EVENT_TYPE
         });
-        const ip1Read1 = TestObjects.randomEvent({
+        const ip1Ping1 = TestObjects.randomEvent({
             ipHash: ip1,
             path: allowedPostPath,
             visitorId: visitor1Id,
             source: source2Url,
-            type: READ_EVENT_TYPE
+            type: PING_EVENT_TYPE
         });
 
         const ip2View1 = TestObjects.randomEvent({
@@ -134,14 +134,14 @@ serverIntTestSuite("Server integration tests", () => {
             source: source2Url,
             type: VIEW_EVENT_TYPE
         });
-        const ip2Read1 = TestObjects.randomEvent({
+        const ip2Ping1 = TestObjects.randomEvent({
             ipHash: ip2,
             path: allowedPostPath,
             visitorId: visitor2Id,
             source: source2Url,
-            type: READ_EVENT_TYPE
+            type: PING_EVENT_TYPE
         });
-        const ip2Scroll1 = { ...ip2Read1 };
+        const ip2Scroll1 = { ...ip2Ping1 };
         ip2Scroll1.type = SCROLL_EVENT_TYPE;
         ip2Scroll1.data = 50;
 
@@ -158,10 +158,10 @@ serverIntTestSuite("Server integration tests", () => {
 
         await addEventFromIp(ip1, ip1View1);
         await addEventFromIp(ip1, ip1View2);
-        await addEventFromIp(ip1, ip1Read1);
+        await addEventFromIp(ip1, ip1Ping1);
         await addEventFromIp(ip2, ip2View1);
         await addEventFromIp(ip2, ip2View2);
-        await addEventFromIp(ip2, ip2Read1);
+        await addEventFromIp(ip2, ip2Ping1);
         await addEventFromIp(ip2, ip2Scroll1);
         await addEventFromIp(ip3, ip3View1);
         await addEventFromIp(ip3, ip3Ping1);
@@ -172,10 +172,10 @@ serverIntTestSuite("Server integration tests", () => {
 
         const expectedAllTimeStats = StatsTestFixture.eventsToExpectedStats({
             views: [ip1View1, ip1View2, ip2View1, ip2View2, ip3View1],
-            reads: [ip1Read1, ip2Read1],
             scrolls: [ip2Scroll1],
-            pings: [ip3Ping1],
-            normalizeSourceUrls: true
+            pings: [ip1Ping1, ip2Ping1, ip3Ping1],
+            normalizeSourceUrls: true,
+            requireReads: false
         });
 
         assertJsonResponse(statsResponse, actualStats => {

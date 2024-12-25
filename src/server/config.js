@@ -28,7 +28,7 @@ export function read() {
         postsPath: `${postsHost}/posts.json`,
         postsReadInterval: envVarOrDefault("POSTS_READ_INTERVAL", 60 * MINUTE_MILLIS),
         eventsWriteInterval: envVarOrDefault("EVENTS_WRITE_INTERVAL", 1000),
-        eventsMaxInMemory: envVarOrDefault("EVENTS_MAX_IN_MEMORY", 250),
+        eventsMaxInMemory: envVarOrDefault("EVENTS_MAX_IN_MEMORY", 100),
         statsViewsCalculateShorterPeriodsInterval: envVarOrDefault("STATS_VIEWS_CALCULATE_SHORTER_PERIODS_INTERVAL",
             DEFAULT_STATS_VIEWS_CALCULATE_SHORTER_PERIODS_INTERVAL),
         statsViewsCalculateLongerPeriodsScheduleDelay: envVarOrDefault("STATS_VIEWS_CALCULATE_LONGER_PERIODS_SCHEDULE_DELAY",

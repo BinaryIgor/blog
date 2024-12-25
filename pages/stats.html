@@ -203,9 +203,9 @@
                     <div>Views: ${stats.views}</div>
                     <div>Visitors: ${stats.visitors}</div>
                     <div>Ip hashes: ${stats.ipHashes}</div>
-                    <div>Reads/Readers: ${eventsIdsString(stats.reads)}</div>
                     ${scrollsComponent(stats.scrolls, `${id}-scrolls`)}
                     ${pingsComponent(stats.pings, `${id}-pings`)}
+                    <div>Reads/Readers: ${eventsIdsString(stats.reads)}</div>
                     <h3 class="text-2xl mt-16 mb-4 font-bold">View Sources</h3>
                     ${viewsBySourceComponent(stats.topViewsBySource)}
                     <h3 class="text-2xl mt-16 mb-4 font-bold">Posts</h3>
@@ -234,7 +234,7 @@
             const maybeClickableClass = byPositionsElements ? ' class="cursor-pointer underline"' : "";
             return `
             <div id="${id}"><span${maybeClickableClass}>Scrolls/Scrollers:</span> ${eventsIdsString(stats.all)}</div>
-            <div>
+            <div class="mb-2">
             ${byPositionsElements}
             </div>`;
         }
@@ -255,10 +255,16 @@
                 }
                 return `<div>${positionText}: ${eventsIdsString(s)}</div>`
             }).join("\n");
+
+            const pingMinutes = Math.floor(stats.all.events * 10 / 2) / 10;
+            const pingMinutesPerPerson = Math.round(stats.all.events * 10 / stats.all.ids / 2) / 10;
+            const pingHours = Math.round(stats.all.events * 10 / 120) / 10;
+
             const maybeClickableClass = byPositionsElements ? ' class="cursor-pointer underline"' : "";
             return `
             <div id="${id}"><span${maybeClickableClass}>Pings/Pingers:</span> ${eventsIdsString(stats.all)}</div>
-            <div>
+            <div class="mb-2">
+              <div>${pingHours}h, ${pingMinutes}m, ${pingMinutesPerPerson}mpp</div>
             ${byPositionsElements}
             </div>`;
         }
@@ -285,9 +291,9 @@
                 <h3 class="text-xl font-bold">${post.title}</h3>
                 <a class="italic font-bold mb-4" href="${post.path}">${post.path}</a>
                 <div>Views/Viewers: ${eventsIdsString(post.views)}</div>
-                <div>Reads/Readers: ${eventsIdsString(post.reads)}</div>
                 ${scrollsComponent(post.scrolls, `${id}-scrolls`)}
                 ${pingsComponent(post.pings, `${id}-pings`)}
+                <div>Reads/Readers: ${eventsIdsString(post.reads)}</div>
             </div>
             `;
         }

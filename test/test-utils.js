@@ -2,6 +2,10 @@ import { assert } from "chai";
 
 const CHARACTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 
+export function randomBoolean() {
+    return Math.random() < 0.5;
+}
+
 export function randomNumber(from, to) {
     if (from >= to) {
         throw new Error(`From must be grater that to! From: ${from}, to: ${to}`);
@@ -26,7 +30,7 @@ export function randomString(length = 10) {
     return result;
 }
 
-export function sortByField(elements, field, reverse=false) {
+export function sortByField(elements, field, reverse = false) {
     if (reverse) {
         return elements.sort((a, b) => a[field] < b[field] ? 1 : (a[field] == b[field]) ? 0 : -1);
     }
