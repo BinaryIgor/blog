@@ -152,7 +152,7 @@ async function prepareEventsReturningExpectedStats(fromTimestamp, toTimestamp, a
     });
     const pings = StatsTestFixture.prepareRandomEvents({
         fromTimestamp, toTimestamp, visitorIds, ipHashes, sources, paths,
-        eventType: PING_EVENT_TYPE, count: 100
+        eventType: PING_EVENT_TYPE, count: 50
     });
 
     const allEvents = [...views, ...scrolls, ...pings];
@@ -162,7 +162,7 @@ async function prepareEventsReturningExpectedStats(fromTimestamp, toTimestamp, a
         await analyticsRepository.saveEvents(outsideTimePeriodRandomEvents(fromTimestamp, toTimestamp));
     }
 
-    return StatsTestFixture.eventsToExpectedStats({ views, scrolls, pings, requireReads: true });
+    return StatsTestFixture.eventsToExpectedStats({ views, scrolls, pings });
 }
 
 function timestampMovedBySeconds(timestamp, seconds) {
