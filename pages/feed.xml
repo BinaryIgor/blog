@@ -6,11 +6,11 @@
   
   <title>Binary Igor</title>
   <subtitle>{{ descriptionLine1 }} {{ descriptionLine2 }}</subtitle>
-  <updated>{{ .js: nowDateTime }}</updated>
+  <updated>{{ .js: feedUpdatedAt }}</updated>
 
   <author>
     <name>Igor Roztropiński</name>
-    <email>{{contactEmail}}</email>
+    <email>{{ contactEmail }}</email>
   </author>
 
   {{ .js: postsAtomFeed }}

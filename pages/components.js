@@ -58,9 +58,16 @@ export function allPostsPreview({ posts }) {
     `;
 }
 
-// TODO: mark it with last post date instead of now (incorrectly) - for sitemap.xml & feed.xml
-export function nowDateTime() {
-    return new Date().toISOString();
+export function feedUpdatedAt({ posts, lastFeedUpdateAtAfterLatestPost = null }) {
+    const latestPostPublishedAt = dateToAtomFeedDateTime(posts[0].publishedAt);
+    if (lastFeedUpdateAtAfterLatestPost == null) {
+        return latestPostPublishedAt;
+    }
+    return latestPostPublishedAt > lastFeedUpdateAtAfterLatestPost ? latestPostPublishedAt : lastFeedUpdateAtAfterLatestPost;
+}
+
+function dateToAtomFeedDateTime(date) {
+    return `${date}T00:00:00Z`;
 }
 
 export function postsSiteMap({ httpsDomain, posts }) {
@@ -77,10 +84,6 @@ function stripHtml(text) {
 }
 
 export function postsAtomFeed({ httpsDomain, posts }) {
-    function dateToAtomFeedDateTime(date) {
-        return `${date}T00:00:00+00:00`;
-    }
-
     return posts.map(p => `
     <entry xml:lang="en">
         <title>${p.title}</title>
