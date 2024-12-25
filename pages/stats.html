@@ -255,10 +255,16 @@
                 }
                 return `<div>${positionText}: ${eventsIdsString(s)}</div>`
             }).join("\n");
+
+            const spentMinutes = Math.round(stats.all.events / 2);
+            const spentMinutesPerPerson = Math.round(stats.all.events / stats.all.ids / 2);
+            const spentHours = Math.floor(stats.all.events * 10 / 120) / 10;
+
             const maybeClickableClass = byPositionsElements ? ' class="cursor-pointer underline"' : "";
             return `
             <div id="${id}"><span${maybeClickableClass}>Pings/Pingers:</span> ${eventsIdsString(stats.all)}</div>
             <div>
+                <div class="italic">Time: ${spentHours}h, ${spentMinutes}m, ${spentMinutesPerPerson}mpp</div>
             ${byPositionsElements}
             </div>`;
         }
