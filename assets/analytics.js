@@ -23,9 +23,6 @@ const VISITOR_ID_KEY = "VISITOR_ID";
 
 const MIN_SEND_VIEW_INTERVAL = 1000 * 60;
 const MIN_POST_VIEW_TIME = 1000 * 5;
-const MIN_POST_READ_SEEN_PERCENTAGE = 50;
-const MIN_POST_READ_TIME = 1000 * 60 * 3;
-const POST_READ_RETRY_DELAY_IF_NOT_ACTIVE = 1000 * 5;
 const SEND_PING_INTERVAL = 1000 * 30;
 // a few minutes (2 pings per minute)
 const MAX_PINGS_TO_SEND_WITHOUT_SCROLL_CHANGE = 2 * 5;
@@ -33,7 +30,6 @@ const MAX_PINGS_TO_SEND_WITHOUT_SCROLL_CHANGE = 2 * 5;
 const MAX_SEND_RETRY_DELAY = 15_000;
 
 const VIEW_EVENT_TYPE = "VIEW";
-const READ_EVENT_TYPE = "READ";
 const SCROLL_EVENT_TYPE = "SCROLL";
 const PING_EVENT_TYPE = "PING";
 
@@ -130,46 +126,15 @@ if (pageToSendEvents) {
 }
 
 if (pageToSendEvents && postPage) {
-    let minimumPostPercentageSeen = false;
-    let minimumPostReadTimePassed = false;
 
     function isPageActive() {
         return !(document.visibilityState == 'hidden' || document.hidden);
     }
 
-    function sendReadEventAfterDelayIfSeen(sourceUrl, visitorId) {
-        function sendReadEventIf() {
-            if (!minimumPostPercentageSeen) {
-                minimumPostReadTimePassed = true;
-                return;
-            }
-            if (isPageActive()) {
-                sendReadEvent(sourceUrl, visitorId);
-            } else {
-                setTimeout(sendReadEventIf, POST_READ_RETRY_DELAY_IF_NOT_ACTIVE);
-            }
-        }
-
-        setTimeout(sendReadEventIf, MIN_POST_READ_TIME);
-    }
-
-    function sendReadEvent(sourceUrl, visitorId) {
-        sendEvent(sourceUrl, visitorId, READ_EVENT_TYPE);
-    }
-
-    sendReadEventAfterDelayIfSeen(sourceUrl, visitorId);
-
     let lastPostScrollChangeTimestamp = -1;
     window.addEventListener("post-seen-percentage-change", e => {
         postScrolledPercentage = e.detail.percentage;
         lastPostScrollChangeTimestamp = Date.now();
-
-        if (!minimumPostPercentageSeen) {
-            minimumPostPercentageSeen = postScrolledPercentage >= MIN_POST_READ_SEEN_PERCENTAGE;
-            if (minimumPostPercentageSeen && minimumPostReadTimePassed) {
-                sendReadEvent(sourceUrl, visitorId);
-            }
-        }
 
         if (!postScrolled25) {
             postScrolled25 = postScrolledPercentage >= 25;

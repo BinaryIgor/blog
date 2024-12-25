@@ -12,7 +12,7 @@ import {
     ALL_TIME_STATS_VIEW,
 } from "../../src/server/analytics.js";
 import { TestClock, randomNumber } from "../test-utils.js";
-import { TestObjects, VIEW_EVENT_TYPE, READ_EVENT_TYPE, SCROLL_EVENT_TYPE, PING_EVENT_TYPE } from "../test-objects.js";
+import { TestObjects, VIEW_EVENT_TYPE, SCROLL_EVENT_TYPE, PING_EVENT_TYPE } from "../test-objects.js";
 import { StatsTestFixture } from "../stats-test-fixture.js";
 
 const DB_PATH = path.join("/tmp", `${crypto.randomUUID()}.db`);
@@ -146,27 +146,23 @@ async function prepareEventsReturningExpectedStats(fromTimestamp, toTimestamp, a
         fromTimestamp, toTimestamp, visitorIds, ipHashes, sources, paths,
         eventType: VIEW_EVENT_TYPE, count: 20
     });
-    const reads = StatsTestFixture.prepareRandomEvents({
-        fromTimestamp, toTimestamp, visitorIds, ipHashes, sources, paths,
-        eventType: READ_EVENT_TYPE, count: 7
-    });
     const scrolls = StatsTestFixture.prepareRandomEvents({
         fromTimestamp, toTimestamp, visitorIds, ipHashes, sources, paths,
-        eventType: SCROLL_EVENT_TYPE, count: 12
+        eventType: SCROLL_EVENT_TYPE, count: 10
     });
     const pings = StatsTestFixture.prepareRandomEvents({
         fromTimestamp, toTimestamp, visitorIds, ipHashes, sources, paths,
-        eventType: PING_EVENT_TYPE, count: 15
+        eventType: PING_EVENT_TYPE, count: 100
     });
 
-    const allEvents = [...views, ...reads, ...scrolls, ...pings];
+    const allEvents = [...views, ...scrolls, ...pings];
     await analyticsRepository.saveEvents(allEvents);
 
     if (!allTimeStats) {
         await analyticsRepository.saveEvents(outsideTimePeriodRandomEvents(fromTimestamp, toTimestamp));
     }
 
-    return StatsTestFixture.eventsToExpectedStats({ views, reads, scrolls, pings });
+    return StatsTestFixture.eventsToExpectedStats({ views, scrolls, pings, requireReads: true });
 }
 
 function timestampMovedBySeconds(timestamp, seconds) {
