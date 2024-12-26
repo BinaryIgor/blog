@@ -100,8 +100,7 @@
                 topViewsBySource: limitedViewsBySource.map(v => {
                     return {
                         source: v.source,
-                        // single decimal place trick
-                        views: `${Math.round(v.views * 100 / allViews * 10) / 10}%`
+                        views: formattedPercentage(v.views, allViews)
                     }
                 }),
                 posts: stats.pages.filter(p => postsByPath.has(p.path))
@@ -114,6 +113,10 @@
                     }),
                 pages: stats.pages.filter(p => !postsByPath.has(p.path))
             };
+        }
+
+        function formattedPercentage(nominator, denominator) {
+            return `${Math.round(nominator * 100 / denominator * 10) / 10}%`;
         }
 
         const postsByPath = await fetchPosts();
@@ -205,7 +208,6 @@
                     <div>Ip hashes: ${stats.ipHashes}</div>
                     ${scrollsComponent(stats.scrolls, `${id}-scrolls`)}
                     ${pingsComponent(stats.pings, `${id}-pings`)}
-                    <div>Reads/Readers: ${eventsIdsString(stats.reads)}</div>
                     <h3 class="text-2xl mt-16 mb-4 font-bold">View Sources</h3>
                     ${viewsBySourceComponent(stats.topViewsBySource)}
                     <h3 class="text-2xl mt-16 mb-4 font-bold">Posts</h3>
@@ -230,16 +232,29 @@
         }
 
         function scrollsComponent(stats, id) {
-            const byPositionsElements = stats.byPosition.map(s => `<div>${s.position}%: ${s.events}/${s.ids}</div>`).join("\n");
-            const maybeClickableClass = byPositionsElements ? ' class="cursor-pointer underline"' : "";
+            const allScrolls = stats.all.events;
+            const allScrollers = stats.all.ids;
+            const byPositionsElements = stats.byPosition.map(s => {
+                const scrollsScrollers = `${s.events}/${s.ids}`;
+                const scrollsScrollersPercentages = `${formattedPercentage(s.events, allScrolls)}/${formattedPercentage(s.ids, allScrollers)}`;
+                return `<div><span class="font-bold">${s.position}%:</span> ${scrollsScrollers}, ${scrollsScrollersPercentages}</div>`;
+            }).join("\n");
+            const maybeClickableClass = byPositionsElements ? ' class="cursor-pointer underline"' : '';
             return `
             <div id="${id}"><span${maybeClickableClass}>Scrolls/Scrollers:</span> ${eventsIdsString(stats.all)}</div>
-            <div class="mb-2">
+            <div ${maybeClickableClass ? ' class="mt-1 mb-2"' : ''}>
             ${byPositionsElements}
             </div>`;
         }
 
         function pingsComponent(stats, id) {
+            function pingsAndMinutesFormattedStat(stat) {
+                return `${Math.round(stat / 2)}m (${Math.round(stat)})`
+            }
+
+            const allPings = stats.all.events;
+            const allPingers = stats.all.ids;
+
             const byPositionsElements = stats.byPosition.map(s => {
                 let positionText;
                 if (s.position < 25) {
@@ -253,18 +268,26 @@
                 } else {
                     positionText = ">=100%";
                 }
-                return `<div>${positionText}: ${eventsIdsString(s)}</div>`
+                const pingsPingers = `${s.events}/${s.ids}`;
+                const pingsPercentage = formattedPercentage(s.events, allPings);
+                const pingersPercentage = formattedPercentage(s.ids, allPingers);
+                return `<div><span class="font-bold">${positionText}:</span> ${pingsPingers}, ${pingsPercentage}/${pingersPercentage}</div>`
             }).join("\n");
 
-            const pingMinutes = Math.floor(stats.all.events * 10 / 2) / 10;
-            const pingMinutesPerPerson = Math.round(stats.all.events * 10 / stats.all.ids / 2) / 10;
-            const pingHours = Math.round(stats.all.events * 10 / 120) / 10;
+            // single decimal place tricks
+            const pingMinutes = Math.floor(allPings * 10 / 2) / 10;
+            const pingHours = Math.round(allPings * 10 / 120) / 10;
 
             const maybeClickableClass = byPositionsElements ? ' class="cursor-pointer underline"' : "";
+            const generalStatsElements = `
+            <div>${pingHours}h, ${pingMinutes}m</div>
+            <div>Mean: ${pingsAndMinutesFormattedStat(stats.all.meanById)}</div>
+            <div>Min: ${pingsAndMinutesFormattedStat(stats.all.minById)}</div>
+            <div class="mb-1">Max: ${pingsAndMinutesFormattedStat(stats.all.maxById)}</div>`;
             return `
             <div id="${id}"><span${maybeClickableClass}>Pings/Pingers:</span> ${eventsIdsString(stats.all)}</div>
-            <div class="mb-2">
-              <div>${pingHours}h, ${pingMinutes}m, ${pingMinutesPerPerson}mpp</div>
+            <div ${maybeClickableClass ? ' class="mt-1 mb-2"' : ''}>
+            ${maybeClickableClass ? generalStatsElements : ''}
             ${byPositionsElements}
             </div>`;
         }
@@ -293,7 +316,6 @@
                 <div>Views/Viewers: ${eventsIdsString(post.views)}</div>
                 ${scrollsComponent(post.scrolls, `${id}-scrolls`)}
                 ${pingsComponent(post.pings, `${id}-pings`)}
-                <div>Reads/Readers: ${eventsIdsString(post.reads)}</div>
             </div>
             `;
         }
@@ -312,7 +334,7 @@
         }
 
         // on purpose, for better "Loading..." UX
-        setTimeout(() => renderStats(statsView), 500);
+        setTimeout(() => renderStats(statsView), 250);
     </script>
 </body>
 

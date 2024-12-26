@@ -27,7 +27,7 @@ const SEND_PING_INTERVAL = 1000 * 30;
 // a few minutes (2 pings per minute)
 const MAX_PINGS_TO_SEND_WITHOUT_SCROLL_CHANGE = 2 * 5;
 
-const MAX_SEND_RETRY_DELAY = 15_000;
+const MAX_SEND_RETRY_DELAY = 5000;
 
 const VIEW_EVENT_TYPE = "VIEW";
 const SCROLL_EVENT_TYPE = "SCROLL";

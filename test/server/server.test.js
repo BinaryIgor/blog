@@ -33,10 +33,10 @@ serverIntTestSuite("Server integration tests", () => {
         const ping = TestObjects.randomEvent({ path: "/not-allowed.html", type: PING_EVENT_TYPE });
 
         const addViewResponse = await testRequests.addEventRequest(view);
-        const addReadResponse = await testRequests.addEventRequest(ping);
+        const addPingResponse = await testRequests.addEventRequest(ping);
 
         assertOkResponseCode(addViewResponse);
-        assertOkResponseCode(addReadResponse);
+        assertOkResponseCode(addPingResponse);
 
         await assertAnalyticsEventsSavedStatsViewCalculated();
 
@@ -174,8 +174,7 @@ serverIntTestSuite("Server integration tests", () => {
             views: [ip1View1, ip1View2, ip2View1, ip2View2, ip3View1],
             scrolls: [ip2Scroll1],
             pings: [ip1Ping1, ip2Ping1, ip3Ping1],
-            normalizeSourceUrls: true,
-            requireReads: false
+            normalizeSourceUrls: true
         });
 
         assertJsonResponse(statsResponse, actualStats => {
