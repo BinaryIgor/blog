@@ -167,7 +167,9 @@ export class PingStats {
     }
 
     static empty() {
-        return new PingStats(0, 0, 0, 0, 0, []);
+        return new PingStats(0, 0, 0, 0, 0,
+            PingersStats.atLeastStats({})
+        );
     }
 }
 
@@ -178,15 +180,15 @@ export class PingersStats {
     }
 
     static atLeastSix(row) {
-        return new PingersStats(6, row['pingers6']);
+        return new PingersStats(6, row['pingers6'] ?? 0);
     }
 
     static atLeastTwenty(row) {
-        return new PingersStats(20, row['pingers20']);
+        return new PingersStats(20, row['pingers20'] ?? 0);
     }
 
     static atLeastSixty(row) {
-        return new PingersStats(60, row['pingers60']);
+        return new PingersStats(60, row['pingers60'] ?? 0);
     }
 
     static atLeastStats(row) {

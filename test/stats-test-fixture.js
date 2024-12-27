@@ -3,7 +3,7 @@ import { URL } from "url";
 import { Stats, ViewsBySource, PageStats } from "../src/server/analytics.js";
 import { randomElement, randomNumber, sortByField } from "./test-utils.js";
 import { SCROLL_EVENT_TYPE, PING_EVENT_TYPE } from "./test-objects.js";
-import { Event, PingStats } from "../src/server/analytics.js";
+import { Event, PingStats, PingersStats } from "../src/server/analytics.js";
 
 export const StatsTestFixture = {
     prepareRandomEvents({ fromTimestamp, toTimestamp, visitorIds, ipHashes, sources, paths, eventType, count }) {
@@ -77,8 +77,12 @@ function sortByPosition(elements) {
 }
 
 function toExpectedPings(events) {
-    const pingsByPosition = new Map();
     const allPings = events.length;
+    if (allPings == 0) {
+        return { all: PingStats.empty(), byPosition: [] };
+    }
+
+    const pingsByPosition = new Map();
     let pingsByPingers = new Map();
     events.forEach(e => {
         const pingerPings = pingsByPingers.get(e.visitorId);
@@ -110,7 +114,31 @@ function toExpectedPings(events) {
     const maxPingsById = Math.max(...pingsOfPingers);
     const meanPingsById = pingsOfPingers.reduce((acc, p) => acc + p, 0) / pingsOfPingers.length;
 
-    return { all: new PingStats(allPings, pingsByPingers.size, minPingsById, maxPingsById, meanPingsById), byPosition };
+    let pingers6 = 0;
+    let pingers20 = 0;
+    let pingers60 = 0;
+
+    pingsOfPingers.forEach(pings => {
+        if (pings >= 6) {
+            pingers6++;
+        }
+        if (pings >= 20) {
+            pingers20++;
+        }
+        if (pings >= 60) {
+            pingers60++;
+        }
+    });
+
+    return {
+        all: new PingStats(allPings, pingsByPingers.size, minPingsById, maxPingsById, meanPingsById,
+            [
+                new PingersStats(6, pingers6),
+                new PingersStats(20, pingers20),
+                new PingersStats(60, pingers60)
+            ]),
+        byPosition
+    };
 }
 
 function pingPositionBucket(position) {
