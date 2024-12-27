@@ -157,16 +157,44 @@ export class Stats {
 }
 
 export class PingStats {
-    constructor(events, ids, minById, maxById, meanById) {
+    constructor(events, ids, minById, maxById, meanById, pingersStats) {
         this.events = events;
         this.ids = ids;
         this.minById = minById;
         this.maxById = maxById;
         this.meanById = meanById;
+        this.pingersStats = pingersStats;
     }
 
     static empty() {
-        return new PingStats(0, 0, 0, 0, 0);
+        return new PingStats(0, 0, 0, 0, 0, []);
+    }
+}
+
+export class PingersStats {
+    constructor(minPings, pingers) {
+        this.minPings = minPings;
+        this.pingers = pingers;
+    }
+
+    static atLeastSix(row) {
+        return new PingersStats(6, row['pingers6']);
+    }
+
+    static atLeastTwenty(row) {
+        return new PingersStats(20, row['pingers20']);
+    }
+
+    static atLeastSixty(row) {
+        return new PingersStats(60, row['pingers60']);
+    }
+
+    static atLeastStats(row) {
+        return [
+            PingersStats.atLeastSix(row),
+            PingersStats.atLeastTwenty(row),
+            PingersStats.atLeastSixty(row)
+        ]
     }
 }
 
@@ -524,7 +552,8 @@ export class SqliteAnalyticsRepository {
           COUNT(visitor_id) AS unique_pingers,
           COALESCE(MIN(pings), 0) AS min_pings,
           COALESCE(MAX(pings), 0) AS max_pings,
-          COALESCE(AVG(pings), 0) AS mean_pings
+          COALESCE(AVG(pings), 0) AS mean_pings,
+          ${this._pingerSumsClauses()}
         FROM (
           ${this._queryWithOptionalWhereInTimestampsClause(`
           SELECT visitor_id, COUNT(*) AS pings 
@@ -544,7 +573,8 @@ export class SqliteAnalyticsRepository {
             .then(r => {
                 if (r) {
                     return new PingStats(r["pings"], r["unique_pingers"],
-                        r["min_pings"], r["max_pings"], r["mean_pings"]
+                        r["min_pings"], r["max_pings"], r["mean_pings"],
+                        PingersStats.atLeastStats(r)
                     );
                 }
                 return PingStats.empty();
@@ -557,6 +587,13 @@ export class SqliteAnalyticsRepository {
             })));
 
         return this._allAndByPositionStats(await queryPromise, await queryByPositionPromise);
+    }
+
+    _pingerSumsClauses() {
+        return `
+        COALESCE(SUM(CASE WHEN pings >= 6 THEN 1 ELSE 0 END), 0) AS pingers6,
+        COALESCE(SUM(CASE WHEN pings >= 20 THEN 1 ELSE 0 END), 0) AS pingers20,
+        COALESCE(SUM(CASE WHEN pings >= 60 THEN 1 ELSE 0 END), 0) AS pingers60`;
     }
 
     _aggregatedPositionClause() {
@@ -582,7 +619,8 @@ export class SqliteAnalyticsRepository {
           COUNT(visitor_id) AS unique_pingers,
           COALESCE(MIN(pings), 0) AS min_pings,
           COALESCE(MAX(pings), 0) AS max_pings,
-          COALESCE(AVG(pings), 0) AS mean_pings
+          COALESCE(AVG(pings), 0) AS mean_pings,
+          ${this._pingerSumsClauses()}
         FROM (
           ${this._queryWithOptionalWhereInTimestampsClause(`
           SELECT path, visitor_id, COUNT(*) AS pings 
@@ -607,7 +645,8 @@ export class SqliteAnalyticsRepository {
         const pings = new Map();
         (await queryPromise).forEach(r => {
             pings.set(r['path'], new PingStats(r['pings'], r['unique_pingers'],
-                r['min_pings'], r['max_pings'], r['mean_pings']));
+                r['min_pings'], r['max_pings'], r['mean_pings'],
+                PingersStats.atLeastStats(r)));
         });
         const pingsByPosition = new Map();
         (await queryByPositionPromise).forEach(r => {
@@ -657,7 +696,7 @@ export class SqliteAnalyticsRepository {
                     pScrollsAll ? pScrollsAll : this._emptyEventsIds(),
                     pScrollsByPosition ? pScrollsByPosition : []),
                 this._allAndByPositionStats(
-                    pPingsAll ? pPingsAll : this._emptyEventsIds(),
+                    pPingsAll ? pPingsAll : PingStats.empty(),
                     pPingsByPosition ? pPingsByPosition : []));
         });
     }
