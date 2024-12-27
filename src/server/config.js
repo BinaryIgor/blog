@@ -6,8 +6,11 @@ const DEFAULT_STATS_VIEWS_CALCULATE_SHORTER_PERIODS_INTERVAL = 15 * MINUTE_MILLI
 // 4 hours + slight initial schedule delay not to conflict with shorter period stats (1 minute)
 const DEFAULT_STATS_VIEWS_CALCULATE_LONGER_PERIODS_SCHEDULE_DELAY = MINUTE_MILLIS;
 const DEFAULT_STATS_VIEWS_CALCULATE_LONGER_PERIODS_INTERVAL = 4 * 60 * MINUTE_MILLIS;
-// 6 hours + slight initial schedule delay not to conflict with longer period stats (10 minutes)
-const DEFAULT_DB_BACKUP_SCHEDULE_DELAY = 10 * MINUTE_MILLIS;
+// 8 hours + slight initial schedule delay not to conflict with longer period stats (5 minutes)
+const DEFAULT_STATS_VIEWS_CALCULATE_ALL_TIME_SCHEDULE_DELAY = 5 * MINUTE_MILLIS;
+const DEFAULT_STATS_VIEWS_CALCULATE_ALL_TIME_INTERVAL = 8 * 60 * MINUTE_MILLIS;
+// 6 hours + slight initial schedule delay not to conflict with longer and all time period stats (15 minutes)
+const DEFAULT_DB_BACKUP_SCHEDULE_DELAY = 15 * MINUTE_MILLIS;
 const DEFAULT_DB_BACKUP_INTERVAL = 6 * 60 * MINUTE_MILLIS;
 
 export function read() {
@@ -34,7 +37,11 @@ export function read() {
         statsViewsCalculateLongerPeriodsScheduleDelay: envVarOrDefault("STATS_VIEWS_CALCULATE_LONGER_PERIODS_SCHEDULE_DELAY",
             DEFAULT_STATS_VIEWS_CALCULATE_LONGER_PERIODS_SCHEDULE_DELAY),
         statsViewsCalculateLongerPeriodsInterval: envVarOrDefault("STATS_VIEWS_CALCULATE_LONGER_PERIODS_INTERVAL",
-            DEFAULT_STATS_VIEWS_CALCULATE_LONGER_PERIODS_INTERVAL)
+            DEFAULT_STATS_VIEWS_CALCULATE_LONGER_PERIODS_INTERVAL),
+        statsViewsCalculateAllTimeScheduleDelay: envVarOrDefault("STATS_VIEWS_CALCULATE_ALL_TIME_SCHEDULE_DELAY",
+            DEFAULT_STATS_VIEWS_CALCULATE_ALL_TIME_SCHEDULE_DELAY),
+        statsViewsCalculateAllTimeInterval: envVarOrDefault("STATS_VIEWS_CALCULATE_ALL_TIME_INTERVAL",
+            DEFAULT_STATS_VIEWS_CALCULATE_ALL_TIME_INTERVAL)
     }
 }
 

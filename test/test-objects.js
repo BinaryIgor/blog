@@ -21,8 +21,8 @@ export const TestObjects = {
         source = `https://${randomString(5)}.com`,
         path = "/index.html",
         type = randomEventType(),
-        data = type == SCROLL_EVENT_TYPE || type == PING_EVENT_TYPE ? 22 : null } = {}
-    ) {
+        data = type == SCROLL_EVENT_TYPE || type == PING_EVENT_TYPE ? 22 : null
+    } = {}) {
         return new Event(timestamp, visitorId, ipHash, source, path, type, data);
     }
 };

@@ -66,7 +66,7 @@ export class TestClock {
         this._now.setTime(this._now.getTime() + (seconds * 1000));
     }
 
-    moveTimeByResonableAmount() {
+    moveTimeByReasonableAmount() {
         this.moveTimeBy(10);
     }
 
