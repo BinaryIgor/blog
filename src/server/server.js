@@ -127,26 +127,6 @@ export async function start(clock = new Clock(),
         }
     });
 
-    app.post("/internal/migrate-reads-step-1", async (req, res) => {
-        try {
-            await analyticsRepository.migrateReads();
-            res.sendStatus(200);
-        } catch (e) {
-            Logger.logError(`Problem while migrating reads step 1...`, req.body, e);
-            res.sendStatus(500);
-        }
-    });
-
-    app.post("/internal/migrate-reads-step-2", async (req, res) => {
-        try {
-            await analyticsRepository.switchMigratedReads();
-            res.sendStatus(200);
-        } catch (e) {
-            Logger.logError(`Problem while migrating reads step 2...`, req.body, e);
-            res.sendStatus(500);
-        }
-    });
-
     app.use((error, req, res, next) => {
         Logger.logError("Something went wrong...", error);
         res.status(500);
