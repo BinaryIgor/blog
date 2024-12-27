@@ -24,6 +24,8 @@ const UUID_REGEX = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}
 const VIEW_TYPE = 'VIEW';
 const SCROLL_TYPE = 'SCROLL';
 const PING_TYPE = 'PING';
+// 2 pings per minute so should be 30 in theory but there could be retries, lags and so on
+const NO_PINGS_WINDOW_SECONDS = 20;
 const MIN_SCROLL = 0;
 // Some pages might allow to overscroll a bit
 const MAX_SCROLL = 150;
@@ -44,6 +46,10 @@ export class AnalyticsService {
         await this._validatePathExists(validatedEvent);
 
         await this._validateIpHashUniqueVisitorsLimit(validatedEvent);
+
+        if (event.type == PING_TYPE) {
+            await this._validateVisitorPingsFrequency(validatedEvent);
+        }
 
         await this.eventsSaver.addEvent(validatedEvent);
     }
@@ -121,6 +127,14 @@ export class AnalyticsService {
 
         if (!this.postsSource.postOfPathExists(event.path)) {
             throw new Error(`Path: ${event.path} is neither allowed nor it has associated post`);
+        }
+    }
+
+    async _validateVisitorPingsFrequency(event) {
+        const timestampAgoToCheck = Dates.timestampSecondsAgo(this.clock.nowTimestamp(), NO_PINGS_WINDOW_SECONDS);
+        const notAllowedPings = await this.analyticsRepository.countPingsOfVisitorAfterTimestamp(event.visitorId, timestampAgoToCheck);
+        if (notAllowedPings > 0) {
+            throw new Error(`No pings are allowed in the last ${NO_PINGS_WINDOW_SECONDS} seconds, but ${event.visitorId} has ${notAllowedPings}`);
         }
     }
 }
@@ -270,9 +284,13 @@ export class StatsViews {
         this.clock = clock;
         this.lastShorterPeriodsViewsSaveTimestamp = null;
         this.lastLongerPeriodsViewsSaveTimestamp = null;
+        this.lastAllTimeViewSaveTimestamp = null;
     }
 
-    schedule(scheduler, shorterPeriodsViewsInterval, longerPeriodsViewsInterval, longerPeriodsViewsScheduleDelay) {
+    schedule(scheduler,
+        { shorterPeriodsViewsInterval,
+            longerPeriodsViewsInterval, longerPeriodsViewsScheduleDelay,
+            allTimeViewInterval, allTimeViewSheduleDelay }) {
         scheduler.schedule(async () => {
             try {
                 Logger.logInfo("Calculating shorter periods stats views...");
@@ -292,6 +310,16 @@ export class StatsViews {
                 Logger.logError("Failed to calculate longer periods stats views", e);
             }
         }, longerPeriodsViewsInterval, longerPeriodsViewsScheduleDelay);
+
+        scheduler.schedule(async () => {
+            try {
+                Logger.logInfo("Calculating all time stats view...");
+                await this.saveAllTimeView();
+                Logger.logInfo("All time stats view calculated");
+            } catch (e) {
+                Logger.logError("Failed to calculate all time stats view", e);
+            }
+        }, allTimeViewInterval, allTimeViewSheduleDelay);
     }
 
     async saveViewsForShorterPeriods() {
@@ -324,15 +352,20 @@ export class StatsViews {
         const timestampThreeHundredSixtyFiveDaysAgo = Dates.timestampSecondsAgo(now, THREE_HUNDRED_SIXTY_FIVE_DAYS_SECONDS);
         const lastThreeHundredSixtyFiveDaysStats = await this.analyticsRepository.stats(timestampThreeHundredSixtyFiveDaysAgo, now);
 
-        const allTimeStats = await this.analyticsRepository.stats(null, now);
-
         await this._saveView(new StatsView(LAST_30_DAYS_STATS_VIEW, lastThirtyDaysStats, now));
         await this._saveView(new StatsView(LAST_90_DAYS_STATS_VIEW, lastNinentyDaysStats, now));
         await this._saveView(new StatsView(LAST_180_DAYS_STATS_VIEW, lastOneHundredEightyDaysStats, now));
         await this._saveView(new StatsView(LAST_365_DAYS_STATS_VIEW, lastThreeHundredSixtyFiveDaysStats, now));
-        await this._saveView(new StatsView(ALL_TIME_STATS_VIEW, allTimeStats, now));
 
         this.lastLongerPeriodsViewsSaveTimestamp = now;
+    }
+
+    async saveAllTimeView() {
+        const now = this.clock.nowTimestamp();
+        const allTimeStats = await this.analyticsRepository.stats(null, now);
+        await this._saveView(new StatsView(ALL_TIME_STATS_VIEW, allTimeStats, now));
+
+        this.lastAllTimeViewSaveTimestamp = now;
     }
 
     _saveView(statsView) {
@@ -386,6 +419,17 @@ export class SqliteAnalyticsRepository {
                 }
                 return 0;
             });
+    }
+
+    countPingsOfVisitorAfterTimestamp(visitorId, timestamp) {
+        return this.db.queryOne("SELECT COUNT(*) AS pings FROM ping WHERE visitor_id = ? AND timestamp >= ?",
+            [visitorId, timestamp])
+            .then(r => {
+                if (r) {
+                    return r["pings"];
+                }
+                return 0;
+            })
     }
 
     async stats(fromTimestamp, toTimestamp) {

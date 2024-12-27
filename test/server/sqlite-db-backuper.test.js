@@ -58,7 +58,7 @@ describe("SqliteDbBackuper tests", () => {
         assert.equal(await countTestTableRows(db), 3);
         assert.equal(await countTestTableRows(dbBackup), 2);
 
-        clock.moveTimeByResonableAmount();
+        clock.moveTimeByReasonableAmount();
         await initSingleBackup(backuper);
         const lastBackupTimestamp2 = clock.nowTimestamp();
 

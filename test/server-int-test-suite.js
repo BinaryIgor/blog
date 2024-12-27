@@ -78,7 +78,9 @@ export const serverIntTestSuite = (testsDescription, testsCallback) => {
 
         afterEach(async () => {
             additionalPosts = [];
-            await new SqliteDb(DB_PATH).execute("DELETE FROM event");
+            const db = new SqliteDb(DB_PATH);
+            await db.execute("DELETE FROM event");
+            await db.execute("DELETE FROM stats_view");
         });
 
         after(() => {
@@ -111,10 +113,10 @@ export async function assertAnalyticsEventsSaved() {
 export async function assertStatsViewsCalculated() {
     await statsViews.saveViewsForShorterPeriods();
     await statsViews.saveViewsForLongerPeriods();
+    await statsViews.saveAllTimeView();
 }
 
 export async function assertAnalyticsEventsSavedStatsViewCalculated() {
     await assertAnalyticsEventsSaved();
-    testClock.moveTimeByResonableAmount();
     await assertStatsViewsCalculated();
 }

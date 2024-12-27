@@ -8,13 +8,19 @@ import path from 'path';
 import {
     SqliteAnalyticsRepository, StatsView, StatsViews,
     LAST_DAY_STATS_VIEW, LAST_7_DAYS_STATS_VIEW, LAST_30_DAYS_STATS_VIEW,
-    LAST_90_DAYS_STATS_VIEW, LAST_180_DAYS_STATS_VIEW, LAST_365_DAYS_STATS_VIEW,
-    ALL_TIME_STATS_VIEW,
+    LAST_90_DAYS_STATS_VIEW, LAST_180_DAYS_STATS_VIEW, LAST_365_DAYS_STATS_VIEW, ALL_TIME_STATS_VIEW
 } from "../../src/server/analytics.js";
 import { TestClock, randomNumber } from "../test-utils.js";
 import { TestObjects, VIEW_EVENT_TYPE, SCROLL_EVENT_TYPE, PING_EVENT_TYPE } from "../test-objects.js";
 import { StatsTestFixture } from "../stats-test-fixture.js";
 
+const DAY_SECONDS = 24 * 60 * 60;
+const SEVEN_DAYS_SECONDS = DAY_SECONDS * 7;
+const THIRTY_DAYS_SECONDS = DAY_SECONDS * 30;
+const NINENTY_DAYS_SECONDS = DAY_SECONDS * 90;
+const ONE_HUNDRED_EIGHTY_DAYS_SECONDS = DAY_SECONDS * 180;
+const THREE_HUNDRED_SIXTY_FIVE_DAYS_SECONDS = DAY_SECONDS * 365;
+const ALL_TIME_STATS_DAYS_SECONDS = THREE_HUNDRED_SIXTY_FIVE_DAYS_SECONDS * 5;
 const DB_PATH = path.join("/tmp", `${crypto.randomUUID()}.db`);
 
 const db = new SqliteDb(DB_PATH);
@@ -25,14 +31,6 @@ const clock = new TestClock();
 
 const statsViews = new StatsViews(analyticsRepository, db, clock);
 
-const DAY_SECONDS = 24 * 60 * 60;
-const SEVEN_DAYS_SECONDS = DAY_SECONDS * 7;
-const THIRTY_DAYS_SECONDS = DAY_SECONDS * 30;
-const NINENTY_DAYS_SECONDS = DAY_SECONDS * 90;
-const ONE_HUNDRED_EIGHTY_DAYS_SECONDS = DAY_SECONDS * 180;
-const THREE_HUNDRED_SIXTY_FIVE_DAYS_SECONDS = DAY_SECONDS * 365;
-const ALL_TIME_STATS_DAYS_SECONDS = THREE_HUNDRED_SIXTY_FIVE_DAYS_SECONDS * 5;
-
 describe("StatsViews tests", function () {
     this.slow(250);
 
@@ -42,6 +40,7 @@ describe("StatsViews tests", function () {
 
     afterEach(async () => {
         await deleteEvents();
+        await deleteViews();
     });
 
     after(() => {
@@ -54,7 +53,7 @@ describe("StatsViews tests", function () {
             const fromTimestamp = timestampMovedBySeconds(toTimestamp, -testCase.beforeNowOffset);
             const expectedStats1 = await prepareEventsReturningExpectedStats(fromTimestamp, toTimestamp);
 
-            await triggerViewsSave();
+            await triggerLastPeriodsViewsSave();
 
             await assertStatsViewEqual(testCase.viewPeriod, expectedStats1);
 
@@ -67,17 +66,17 @@ describe("StatsViews tests", function () {
                 timestampMovedBySeconds(fromTimestamp, secondsToMoveTime),
                 timestampMovedBySeconds(toTimestamp, secondsToMoveTime));
 
-            await triggerViewsSave();
+            await triggerLastPeriodsViewsSave();
 
             assertStatsViewEqual(testCase.viewPeriod, expectedStats2);
         }));
 
-    it(`saves allTime period views`, async () => {
+    it(`saves allTime period view`, async () => {
         const toTimestamp = clock.nowTimestamp();
         const fromTimestamp = timestampMovedBySeconds(toTimestamp, -ALL_TIME_STATS_DAYS_SECONDS);
         const expectedStats = await prepareEventsReturningExpectedStats(fromTimestamp, toTimestamp, true);
 
-        await triggerViewsSave();
+        await statsViews.saveAllTimeView();
 
         await assertStatsViewEqual(ALL_TIME_STATS_VIEW, expectedStats);
     });
@@ -117,7 +116,7 @@ function statsViewTestCases() {
     ];
 }
 
-async function triggerViewsSave() {
+async function triggerLastPeriodsViewsSave() {
     await statsViews.saveViewsForShorterPeriods();
     await statsViews.saveViewsForLongerPeriods();
 }
@@ -185,16 +184,24 @@ function outsideTimePeriodRandomEvents(fromTimestamp, toTimestamp) {
 }
 
 async function assertStatsViewEqual(viewPeriod, expectedStats) {
+    const actualStatsView = await assertStatsViewOfPeriodExists(viewPeriod);
+    const expectedStatsView = new StatsView(viewPeriod, expectedStats, clock.nowTimestamp());
+    assert.deepEqual(actualStatsView, expectedStatsView);
+}
+
+async function assertStatsViewOfPeriodExists(period) {
     const views = await statsViews.views();
 
-    const actualStatsView = views.filter(v => v.period == viewPeriod);
+    const actualStatsView = views.filter(v => v.period == period);
     assert.lengthOf(actualStatsView, 1);
 
-    const expectedStatsView = new StatsView(viewPeriod, expectedStats, clock.nowTimestamp());
-
-    assert.deepEqual(actualStatsView[0], expectedStatsView);
+    return actualStatsView[0];
 }
 
 function deleteEvents() {
     return db.execute("DELETE FROM event");
+}
+
+function deleteViews() {
+    return db.execute("DELETE FROM stats_view");
 }

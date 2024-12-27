@@ -42,8 +42,13 @@ export async function start(clock = new Clock(),
     const analyticsRepository = new SqliteAnalyticsRepository(db);
 
     const statsViews = new StatsViews(analyticsRepository, db, clock);
-    statsViews.schedule(scheduler, config.statsViewsCalculateShorterPeriodsInterval,
-        config.statsViewsCalculateLongerPeriodsInterval, config.statsViewsCalculateLongerPeriodsScheduleDelay);
+    statsViews.schedule(scheduler, {
+        shorterPeriodsViewsInterval: config.statsViewsCalculateShorterPeriodsInterval,
+        longerPeriodsViewsInterval: config.statsViewsCalculateLongerPeriodsInterval,
+        longerPeriodsViewsScheduleDelay: config.statsViewsCalculateLongerPeriodsScheduleDelay,
+        allTimeViewInterval: config.statsViewsCalculateAllTimeInterval,
+        allTimeViewSheduleDelay: config.statsViewsCalculateAllTimeScheduleDelay
+    });
 
     const eventsSaver = new DeferredEventsSaver(analyticsRepository, config.eventsMaxInMemory, clock);
     eventsSaver.schedule(scheduler, config.eventsWriteInterval);
@@ -108,6 +113,7 @@ export async function start(clock = new Clock(),
         try {
             await statsViews.saveViewsForShorterPeriods();
             await statsViews.saveViewsForLongerPeriods();
+            await statsViews.saveAllTimeView();
 
             const newViews = await statsViews.views();
             res.send(newViews);

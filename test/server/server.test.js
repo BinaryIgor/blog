@@ -2,12 +2,13 @@ import { assert, expect } from "chai";
 import {
     serverIntTestSuite, randomAllowedPostPath,
     testClock, testRequests, failNextNPostsFetches, addPosts,
-    assertAnalyticsEventsSavedStatsViewCalculated
+    assertAnalyticsEventsSavedStatsViewCalculated,
+    assertAnalyticsEventsSaved,
+    assertStatsViewsCalculated
 } from "../server-int-test-suite.js";
 import { assertJsonResponse, assertOkResponseCode, assertResponseCode } from "../web-tests.js";
-import { Stats, ALL_TIME_STATS_VIEW } from "../../src/server/analytics.js";
 import { randomNumber, randomString } from "../test-utils.js";
-import { MAX_PATH_LENGTH, MAX_IP_HASH_VISITOR_IDS_IN_LAST_DAY, DAY_SECONDS } from "../../src/server/analytics.js";
+import { MAX_PATH_LENGTH, MAX_IP_HASH_VISITOR_IDS_IN_LAST_DAY, DAY_SECONDS, ALL_TIME_STATS_VIEW, Stats } from "../../src/server/analytics.js";
 import { TestObjects, VIEW_EVENT_TYPE, SCROLL_EVENT_TYPE, PING_EVENT_TYPE } from "../test-objects.js";
 import { StatsTestFixture } from "../stats-test-fixture.js";
 import { hashedIp } from "../../src/server/web.js";
@@ -82,6 +83,36 @@ serverIntTestSuite("Server integration tests", () => {
             MAX_IP_HASH_VISITOR_IDS_IN_LAST_DAY + anotherIpViews + limitExpiredViews,
             MAX_IP_HASH_VISITOR_IDS_IN_LAST_DAY + anotherIpViews + limitExpiredViews,
             2);
+    });
+
+    it('rejects too frequent pings per visitor id', async () => {
+        const visitor1Id = crypto.randomUUID();
+        const visitor2Id = crypto.randomUUID();
+
+        await assertPingEventAdded(visitor1Id);
+        await assertPingEventAdded(visitor2Id);
+
+        await assertStatsHavePingsAndPingers(2, 2);
+
+        // max 1 ping per 20 seconds is allowed, so only one of the visitor1 pings will be added
+        testClock.moveTimeBy(20);
+        for (let i = 0; i < 10; i++) {
+            testClock.moveTimeBy(1);
+            await assertPingEventAdded(visitor1Id);
+        }
+        await assertPingEventAdded(visitor2Id);
+
+        await assertStatsHavePingsAndPingers(4, 2);
+
+        // pings are normally added every 30 seconds
+        testClock.moveTimeBy(30);
+        await assertPingEventAdded(visitor1Id);
+        await assertPingEventAdded(visitor2Id);
+        testClock.moveTimeBy(30);
+        await assertPingEventAdded(visitor1Id);
+        await assertPingEventAdded(visitor2Id);
+
+        await assertStatsHavePingsAndPingers(8, 2);
     });
 
     // for more detailed, time-based test-cases, check out stats-views.test
@@ -178,7 +209,7 @@ serverIntTestSuite("Server integration tests", () => {
         });
 
         assertJsonResponse(statsResponse, actualStats => {
-            const actualAllTimeStats = allTimeStatsView(actualStats).stats;
+            const actualAllTimeStats = allTimeStatsView(actualStats);
             assert.deepEqual(actualAllTimeStats, expectedAllTimeStats);
         });
     });
@@ -240,10 +271,19 @@ function assertEmptyStatsResponse(response) {
 
 async function assertStatsHaveViewsVisitorsAndIpHashes(views, visitors, iphashes) {
     assertJsonResponse(await testRequests.getStats(), actualStats => {
-        const allTimeStats = allTimeStatsView(actualStats).stats;
+        const allTimeStats = allTimeStatsView(actualStats);
         assert.deepEqual(allTimeStats.views, views);
         assert.deepEqual(allTimeStats.visitors, visitors);
         assert.deepEqual(allTimeStats.ipHashes, iphashes);
+    });
+}
+
+async function assertStatsHavePingsAndPingers(pings, pingers) {
+    await assertStatsViewsCalculated();
+    assertJsonResponse(await testRequests.getStats(), actualStats => {
+        const allTimePingsStats = allTimeStatsView(actualStats).pings.all;
+        assert.deepEqual(allTimePingsStats.events, pings);
+        assert.deepEqual(allTimePingsStats.ids, pingers);
     });
 }
 
@@ -265,10 +305,20 @@ async function addEventFromIp(ip, event = null) {
     assertOkResponseCode(response);
 }
 
+async function addEvent(event) {
+    const response = await testRequests.addEventRequest(event);
+    assertOkResponseCode(response);
+}
+
+async function assertPingEventAdded(visitorId) {
+    await addEvent(TestObjects.randomEvent({ visitorId, type: PING_EVENT_TYPE }));
+    await assertAnalyticsEventsSaved();
+}
+
 function statsViewOfPeriod(statsViews, period) {
     return statsViews.find(sv => sv.period == period);
 }
 
 function allTimeStatsView(statsView) {
-    return statsViewOfPeriod(statsView, ALL_TIME_STATS_VIEW);
+    return statsViewOfPeriod(statsView, ALL_TIME_STATS_VIEW).stats;
 }
