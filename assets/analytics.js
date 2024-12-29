@@ -28,6 +28,10 @@ const SEND_PING_INTERVAL = 1000 * 30;
 const MAX_PINGS_TO_SEND_WITHOUT_SCROLL_CHANGE = 2 * 5;
 
 const MAX_SEND_RETRY_DELAY = 5000;
+// longest case: 5s * 100 = 500s ~ 8 minutes; ~ 4 minutes (250s) on average probably
+const MAX_RETRIES = 100;
+// pings are sent continuously
+const MAX_PING_RETRIES = 3;
 
 const VIEW_EVENT_TYPE = "VIEW";
 const SCROLL_EVENT_TYPE = "SCROLL";
@@ -74,10 +78,15 @@ function postRequest(url, body) {
     });
 }
 
-function sendEvent(sourceUrl, visitorId, type, data = null) {
+function sendEvent(sourceUrl, visitorId, type, data = null, maxRetries = MAX_RETRIES, retry = 0) {
     function scheduleRetry() {
-        const nextSendEventDelay = Math.random() * MAX_SEND_RETRY_DELAY;
-        setTimeout(() => sendEvent(sourceUrl, visitorId, type, data), nextSendEventDelay);
+        const nextRetry = retry + 1;
+        if (nextRetry <= maxRetries) {
+            const nextSendEventDelay = Math.random() * MAX_SEND_RETRY_DELAY;
+            setTimeout(() => {
+                sendEvent(sourceUrl, visitorId, type, data, maxRetries, nextRetry);
+            }, nextSendEventDelay);
+        }
     }
 
     postRequest(eventsUrl, { source: sourceUrl, visitorId: visitorId, path: currentPath, type: type, data: data })
@@ -174,7 +183,7 @@ if (pageToSendEvents && postPage) {
             sameScrollPositionPings = 0;
         }
         if (sameScrollPositionPings < MAX_PINGS_TO_SEND_WITHOUT_SCROLL_CHANGE) {
-            sendEvent(sourceUrl, visitorId, PING_EVENT_TYPE, postScrolledPercentage);
+            sendEvent(sourceUrl, visitorId, PING_EVENT_TYPE, postScrolledPercentage, MAX_PING_RETRIES);
             lastPingSentTimestamp = Date.now();
         }
     }, SEND_PING_INTERVAL);
