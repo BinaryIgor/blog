@@ -253,7 +253,8 @@
 
         function pingsComponent(stats, id) {
             function pingsAndMinutesFormattedStat(stat) {
-                return `${pingsToFormattedTime(stat)} (${Math.round(stat)})`
+                const roundedStat = Math.round(stat);
+                return `${pingsToFormattedTime(roundedStat)} (${roundedStat})`;
             }
 
             function pingsToFormattedTime(pings) {
@@ -275,7 +276,7 @@
                     return minutes > 0 ? `${hoursWithoutMinutes}h ${minutes}m` : `${hoursWithoutMinutes}h`;
                 }
 
-                return `${Math.round(pings / pingsMinute)}m`;
+                return `${Math.round(pings * 10 / pingsMinute) / 10}m`;
             }
 
             const allPings = stats.all.events;
