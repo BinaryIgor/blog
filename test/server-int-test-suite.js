@@ -94,8 +94,11 @@ export const serverIntTestSuite = (testsDescription, testsCallback) => {
 };
 
 export function randomAllowedPostPath() {
-    const post = POSTS[randomNumber(0, POSTS.length)];
-    return `/${post.slug}.html`;
+    return allowedPostPaths()[randomNumber(0, POSTS.length)];
+}
+
+export function allowedPostPaths() {
+    return POSTS.map(post => `/${post.slug}.html`);
 }
 
 export function failNextNPostsFetches(n) {

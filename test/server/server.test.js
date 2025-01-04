@@ -1,6 +1,6 @@
 import { assert, expect } from "chai";
 import {
-    serverIntTestSuite, randomAllowedPostPath,
+    serverIntTestSuite, randomAllowedPostPath, allowedPostPaths,
     testClock, testRequests, failNextNPostsFetches, addPosts,
     assertAnalyticsEventsSavedStatsViewCalculated,
     assertAnalyticsEventsSaved,
@@ -85,34 +85,39 @@ serverIntTestSuite("Server integration tests", () => {
             2);
     });
 
-    it('rejects too frequent pings per visitor id', async () => {
+    it('rejects too frequent pings per visitor id, path', async () => {
         const visitor1Id = crypto.randomUUID();
         const visitor2Id = crypto.randomUUID();
+        const [path1, path2] = allowedPostPaths();
 
-        await assertPingEventAdded(visitor1Id);
-        await assertPingEventAdded(visitor2Id);
+        await assertPingEventAdded(visitor1Id, path1);
+        await assertPingEventAdded(visitor1Id, path2);
+        await assertPingEventAdded(visitor2Id, path2);
 
-        await assertStatsHavePingsAndPingers(2, 2);
+        await assertStatsHavePingsAndPingers(3, 2);
 
-        // max 1 ping per 20 seconds is allowed, so only one of the visitor1 pings will be added
+        // max 1 ping per 20 seconds is allowed, so only two of the visitor1 pings will be added (different paths)
         testClock.moveTimeBy(20);
         for (let i = 0; i < 10; i++) {
             testClock.moveTimeBy(1);
-            await assertPingEventAdded(visitor1Id);
+            await assertPingEventAdded(visitor1Id, path1);
+            await assertPingEventAdded(visitor1Id, path2);
         }
-        await assertPingEventAdded(visitor2Id);
+        await assertPingEventAdded(visitor2Id, path2);
 
-        await assertStatsHavePingsAndPingers(4, 2);
+        await assertStatsHavePingsAndPingers(6, 2);
 
         // pings are normally added every 30 seconds
         testClock.moveTimeBy(30);
-        await assertPingEventAdded(visitor1Id);
-        await assertPingEventAdded(visitor2Id);
+        await assertPingEventAdded(visitor1Id, path1);
+        await assertPingEventAdded(visitor1Id, path2);
+        await assertPingEventAdded(visitor2Id, path2);
         testClock.moveTimeBy(30);
-        await assertPingEventAdded(visitor1Id);
-        await assertPingEventAdded(visitor2Id);
+        await assertPingEventAdded(visitor1Id, path1);
+        await assertPingEventAdded(visitor1Id, path2);
+        await assertPingEventAdded(visitor2Id, path2);
 
-        await assertStatsHavePingsAndPingers(8, 2);
+        await assertStatsHavePingsAndPingers(12, 2);
     });
 
     // for more detailed, time-based test-cases, check out stats-views.test
@@ -310,8 +315,8 @@ async function addEvent(event) {
     assertOkResponseCode(response);
 }
 
-async function assertPingEventAdded(visitorId) {
-    await addEvent(TestObjects.randomEvent({ visitorId, type: PING_EVENT_TYPE }));
+async function assertPingEventAdded(visitorId, path) {
+    await addEvent(TestObjects.randomEvent({ visitorId, path, type: PING_EVENT_TYPE }));
     await assertAnalyticsEventsSaved();
 }
 

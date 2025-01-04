@@ -112,7 +112,7 @@ export class AnalyticsService {
         const timestampAgoToCheck = Dates.timestampSecondsAgo(this.clock.nowTimestamp(), DAY_SECONDS);
 
         const uniqueVisitorIdsOfIp = await this.analyticsRepository
-            .countDistinctVisitorIdsOfIpHashAfterTimestamp(event.ipHash, timestampAgoToCheck);
+            .countDistinctVisitorIdsAfterTimestamp(event.ipHash, timestampAgoToCheck);
 
         if (uniqueVisitorIdsOfIp >= MAX_IP_HASH_VISITOR_IDS_IN_LAST_DAY) {
             throw new Error(`Too many visitor ids for a given ipHash in the last day (${uniqueVisitorIdsOfIp})`);
@@ -132,9 +132,9 @@ export class AnalyticsService {
 
     async _validateVisitorPingsFrequency(event) {
         const timestampAgoToCheck = Dates.timestampSecondsAgo(this.clock.nowTimestamp(), NO_PINGS_WINDOW_SECONDS);
-        const notAllowedPings = await this.analyticsRepository.countPingsOfVisitorAfterTimestamp(event.visitorId, timestampAgoToCheck);
+        const notAllowedPings = await this.analyticsRepository.countPingsAfterTimestamp(event.visitorId, event.path, timestampAgoToCheck);
         if (notAllowedPings > 0) {
-            throw new Error(`No pings are allowed in the last ${NO_PINGS_WINDOW_SECONDS} seconds, but ${event.visitorId} has ${notAllowedPings}`);
+            throw new Error(`No pings are allowed in the last ${NO_PINGS_WINDOW_SECONDS} seconds, but ${event.visitorId} has ${notAllowedPings} for ${event.path} path`);
         }
     }
 }
@@ -407,7 +407,7 @@ export class SqliteAnalyticsRepository {
         return Promise.resolve();
     }
 
-    countDistinctVisitorIdsOfIpHashAfterTimestamp(ipHash, timestamp) {
+    countDistinctVisitorIdsAfterTimestamp(ipHash, timestamp) {
         return this.db.queryOne(
             `SELECT COUNT(DISTINCT visitor_id) AS visitor_ids 
             FROM event
@@ -421,9 +421,9 @@ export class SqliteAnalyticsRepository {
             });
     }
 
-    countPingsOfVisitorAfterTimestamp(visitorId, timestamp) {
-        return this.db.queryOne("SELECT COUNT(*) AS pings FROM ping WHERE visitor_id = ? AND timestamp >= ?",
-            [visitorId, timestamp])
+    countPingsAfterTimestamp(visitorId, path, timestamp) {
+        return this.db.queryOne("SELECT COUNT(*) AS pings FROM ping WHERE visitor_id = ? AND path = ? AND timestamp >= ?",
+            [visitorId, path, timestamp])
             .then(r => {
                 if (r) {
                     return r["pings"];

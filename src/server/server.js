@@ -74,7 +74,7 @@ export async function start(clock = new Clock(),
             const event = new Event(clock.nowTimestamp(), reqBody.visitorId, ipHash, reqBody.source, reqBody.path, reqBody.type, reqBody.data);
             await analyticsService.addEvent(event);
         } catch (e) {
-            Logger.logError(`Failed to add event ${JSON.stringify(req.body)}, ignoring the result`, e);
+            Logger.logError(`Failed to add event ${JSON.stringify(req.body)}, ignoring it.`, e);
         }
 
         res.sendStatus(200);
