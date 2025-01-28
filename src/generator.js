@@ -85,12 +85,16 @@ function writeFileContent(filePath, fileContent) {
     return fs.promises.writeFile(filePath, fileContent);
 }
 
+// TODO: tags
 async function allPages(pagesDir, postsData) {
     const fileNames = fs.readdirSync(pagesDir);
 
     let pages = {};
 
     for (const fn of fileNames) {
+        if (fn.includes("tag-posts")) {
+            continue;
+        }
         const content = await fileContent(path.join(pagesDir, fn));
         pages[fn] = content;
     }
@@ -185,7 +189,8 @@ async function allPosts(postsDir, variables) {
         posts[fn] = {
             fontMatter: fMatter,
             content: templateWithReplacedVariables(postContent,
-                { ...fMatter, ...variables })
+                { ...variables },
+                { skipMissing: true, renderFunctions: false })
         };
     }
 
@@ -215,7 +220,7 @@ function templateWithReplacedVariables(template, data, opts = { renderFunctions:
             if (opts.skipMissing) {
                 continue;
             }
-            throw new Error(`Variable of ${key} hasn't been provided`);
+            throw new Error(`Variable of ${key} hasn't been provided. Present variables: ${JSON.stringify(data)}`);
         }
 
         renderedTemplate = renderedTemplate.replace(match[0], value);
