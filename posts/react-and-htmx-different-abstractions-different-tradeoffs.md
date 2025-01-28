@@ -15,7 +15,7 @@
 React and HTMX represent two completely different approaches to building web applications. 
 
 **React approach is JSON centric.** It is driven by JSON, a data format that is totally different from what is needed to render web pages or their fragments - HTML. JSON can be replaced here with XML, YAML or any other data exchange format; JSON is just the most popular as of now, the key point being: these formats are completely different from HTML. React is just an example, it also holds true for virtually any Single Page Application (SPA) framework; Vue, Angular, Svelte and so on. In this model, data flow is something like this:
-1. Client has HTML, as it is seen on the rendered by browser web page
+1. Client (JavaScript) has HTML, as it is seen on the rendered by browser web page
 2. Client takes data from HTML, transforms it to JSON and sends a request to the Server
 3. Server responds with JSON
 4. Client gets JSON response from the Server and transforms it into HTML, so it can be rendered
@@ -24,7 +24,7 @@ At the core of this approach lie HTML to JSON and JSON to HTML transformations, 
 
 **HTMX approach is HTML centric.** It is driven by HTML - data is received in the exactly same way it is required for rendering, there is no need for any transformations. HTMX is also used here as an example of the more general approach, where we take HTML pages/fragments from the server and render them on the client side directly, in the exact same form as received. Data flow in this model is something like this:
 1. Client has HTML, as it is seen on the rendered by browser web page
-2. Client sends forms and data from other elements (supported by the HTMX or HTMX-like libraries) to the Server
+2. Client sends forms and data from other HTML elements (supported by the HTMX or HTMX-like libraries) to the Server
 3. Server responds with HTML pages and fragments
 4. Client renders Server responses directly as they come, without any modifications
 
