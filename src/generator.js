@@ -85,16 +85,12 @@ function writeFileContent(filePath, fileContent) {
     return fs.promises.writeFile(filePath, fileContent);
 }
 
-// TODO: tags
 async function allPages(pagesDir, postsData) {
     const fileNames = fs.readdirSync(pagesDir);
 
     let pages = {};
 
     for (const fn of fileNames) {
-        if (fn.includes("tag-posts")) {
-            continue;
-        }
         const content = await fileContent(path.join(pagesDir, fn));
         pages[fn] = content;
     }
