@@ -162,8 +162,8 @@
                 }
             ];
 
-            statsContainer.innerHTML = componentsData
-                .map(cd => statsOfPeriodComponent(cd.title, cd.id, cd.stats))
+            statsContainer.innerHTML = [...componentsData
+                .map(cd => statsOfPeriodComponent(cd.title, cd.id, cd.stats)), trendsComponent(stats)]
                 .join("\n");
 
             componentsData.forEach(cd => {
@@ -191,6 +191,10 @@
                     postPingsComponent.onclick = () => toggleElementVisibility(postPingsComponent.nextElementSibling);
                 });
             });
+
+            const trends = document.getElementById("trends");
+            toggleElementVisibility(trends.nextElementSibling);
+            trends.onclick = () => toggleElementVisibility(trends.nextElementSibling);
         }
 
         function toggleElementVisibility(element) {
@@ -268,7 +272,7 @@
                     const hours = Math.round((days - daysWithoutHours) * 24);
                     return hours > 0 ? `${daysWithoutHours}d ${hours}h` : `${daysWithoutHours}d`;
                 }
-                
+
                 if (pings > pingsHour) {
                     const hours = pings / pingsHour;
                     const hoursWithoutMinutes = Math.round(hours);
@@ -363,6 +367,39 @@
                 <div>Views/Viewers: ${eventsIdsString(page.views)}</div>
             </div>
             `;
+        }
+
+        function trendsComponent(stats) {
+            return `
+            <div>
+                <h2 class="text-3xl my-8 font-bold cursor-pointer underline" id="trends">Trends</h2>
+                <div>
+                   ${dailyAveragesComponent("last 7d", stats.last7Days, 7)}
+                   ${dailyAveragesComponent("last 30d", stats.last30Days, 30)}
+                   ${dailyAveragesComponent("last 90d", stats.last90Days, 90)}
+                   ${dailyAveragesComponent("last 180d", stats.last180Days, 180)}
+                </div>
+            </div>`;
+        }
+
+        function dailyAveragesComponent(period, stats, days) {
+            const views = Math.round(stats.views / days);
+            const visitors = Math.round(stats.visitors / days);
+            
+            const ipHashes = Math.round(stats.ipHashes / days);
+
+            const scrolls = Math.round(stats.scrolls.all.events / days);
+            const scrollers = Math.round(stats.scrolls.all.ids / days);
+
+            const pings = Math.round(stats.pings.all.events / days);
+            const pingers = Math.round(stats.pings.all.ids / days);
+
+            return `
+            <h3 class="text-2xl font-bold mt-8 mb-2">Daily, ${period}</h3>
+            <div>Views/Visitors: ${eventsIdsString({ events: views, ids: visitors })}</div>
+            <div>Ip hashes: ${scaledNumber(ipHashes)}</div>
+            <div>Scrolls/Scrollers: ${eventsIdsString({ events: scrolls, ids: scrollers })}</div>
+            <div>Pings/Pingers: ${eventsIdsString({ events: pings, ids: pingers })}</div>`;
         }
 
         // on purpose, for better "Loading..." UX
