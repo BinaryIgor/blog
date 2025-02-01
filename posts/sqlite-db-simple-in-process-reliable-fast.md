@@ -18,7 +18,7 @@ I love simplicity. [Complexity is our eternal enemy](https://grugbrain.dev/#grug
 
 In the more traditional setup, there usually is a separate database server: PostgreSQL, MySQL, MariaDB, Microsoft SQL Server, Oracle Database and so on. 
 It gives flexibility, when it comes to scaling or multi-application/process access for example, but it also brings complexity.
-This independent database server/process needs to be maintained and monitored, since failure is always possible, and together with it might fail our application might fail as well. 
+This independent database server/process needs to be maintained and monitored, since failure is always possible, and together with it our application might fail as well. 
 We also tend to forget that the [network is not reliable](https://en.wikipedia.org/wiki/Fallacies_of_distributed_computing).
 Network might fail at any time as well, so can our application together with it, and do we always account for this failure? 
 Additionally, how often a single logical (not physical) database needs to be accessed by multiple processes and applications that live on different machines?
