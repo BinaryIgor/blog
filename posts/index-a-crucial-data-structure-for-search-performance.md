@@ -5,7 +5,8 @@
     "publishedAt": "2023-10-08",
     "startedAt": "2023-09-26",
     "excerpt": "There are many variations and types of it, depending on the underlying database/search engine and its purpose, but the core concept is always the same: <em>let's have an additional data structure that points to/references the original data and makes searching fast.</em>",
-    "writingLog": [ 2, 1.5, 3.5, 2.5, 1.5, 3.5, 1, 4, 4.5, 3, 3 ]
+    "writingLog": [ 2, 1.5, 3.5, 2.5, 1.5, 3.5, 1, 4, 4.5, 3, 3 ],
+    "tags": [ "dbs" ]
 }
 ---
 
