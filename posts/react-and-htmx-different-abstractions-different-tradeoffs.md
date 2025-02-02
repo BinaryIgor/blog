@@ -6,7 +6,8 @@
     "publishedAt": "2025-01-28",
     "excerpt": "React and HTMX represent two completely different approaches to building web applications. <em>React approach is JSON centric.</em> It is driven by JSON, a data format that is totally different from what is needed to render web pages or their fragments - HTML ... <em>HTMX approach is HTML centric.</em> It is driven by HTML - data is received in the exactly same way it is required for rendering, there is no need for any transformations.",
     "researchLog": [ 0.5, 0.75, 1 ],
-	  "writingLog": [ 1, 1, 2.5, 4, 3.5, 2, 3, 1, 2 ]
+	  "writingLog": [ 1, 1, 2.5, 4, 3.5, 2, 3, 1, 2 ],
+    "tags": [ "htmx" ]
 }
 ---
 

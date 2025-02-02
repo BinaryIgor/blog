@@ -6,7 +6,8 @@
     "startedAt": "2023-12-16",
     "excerpt": "<em>Web Components</em> are a set of browser APIs that allow us to create custom HTML elements. They are one of the major things that SPA (Single Page Application) frameworks have been giving us for a long time ... <em>HTMX</em> is highly interesting, useful and a promising technology. It simplifies many things and allows us to build SPA or SPA-like applications without complex tooling, dependencies, frameworks and mostly without writing application-specific JavaScript code.",
     "researchLog": [ 2 ],
-    "writingLog": [ 4, 3.5, 1, 3, 6 ]
+    "writingLog": [ 4, 3.5, 1, 3, 6 ],
+    "tags": [ "htmx" ]
 }
 ---
 

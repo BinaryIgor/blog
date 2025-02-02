@@ -7,6 +7,15 @@ export function postMetadata({ publishedAt }) {
     return `<span>${publishedAt}</span>`;
 }
 
+export function extendedPostMetadata({ publishedAt, tags }) {
+    const metaData = postMetadata({ publishedAt, tags });
+    if (tags) {
+        const tagsListing = tags.map(t => `<a href="/${t}-posts.html">#${t}</a>`).join(" ");
+        return `${metaData}; <span>${tagsListing}</span>`;
+    }
+    return metaData;
+}
+
 export function postHtmlDescription({ excerpt, htmlDescription }) {
     const description = htmlDescription ? htmlDescription : excerpt;
     return stripHtml(description);
@@ -30,6 +39,10 @@ export function postsPreview({ posts }) {
     <ul class="space-y-6">
         ${posts.map(p => postPreview(p)).join("\n")}
     </ul>`;
+}
+
+export function tagPostsPreview({ posts }) {
+    return postsPreview({ posts: posts.filter(p => p.tags && p.tags.includes("htmx")) });
 }
 
 export function latestsPostsPreview({ posts }) {

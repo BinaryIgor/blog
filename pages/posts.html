@@ -13,8 +13,15 @@
     {{ navigation.html }}
     <div class="py-6 px-4 text-center">
         <h1 class="text-4xl font-bold mb-6">Posts</h1>
-        <div class="max-content-width mb-24 m-auto">
+        <div class="max-content-width mb-24 m-auto text-left">
             <p>Collection of all posts/articles published on the blog, ordered from the latest ones.</p>
+            <p class="pt-6">If you are looking for more organized content, here are all tags:<p>
+            <div class="text-secondary-3">
+                <a class="underline" href="/htmx-posts.html">#htmx</a>,
+                <a class="underline" href="/dbs-posts.html">#dbs</a>, 
+                <a class="underline" href="/modularity-posts.html">#modularity,</a> 
+                <a class="underline" href="/benchmarks-posts.html">#benchmarks</a>
+            </div>
         </div>
         {{ .js: allPostsPreview }}
     </div>
