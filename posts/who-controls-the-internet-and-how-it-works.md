@@ -38,7 +38,7 @@ The *Internet Assigned Numbers Authority* is responsible for IP address allocati
 1. *IANA* allocates large blocks of IP addresses to a few *Regional Internet Registries (RIRs)*
 2. *RIRs* allocate some of their IP addresses to the *Local Internet Registries*, which are mostly *Internet Service Providers* but also other organizations - governments, cloud/hosting service providers, data centers, big institutions
 
-Do understand this process better, let's go over each step.
+To understand this process better, let's go over each step.
 
 ### Regional Internet Registries {#identity-ip-addresses-regional-internet-registries}
 
