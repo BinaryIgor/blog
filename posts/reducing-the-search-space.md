@@ -210,7 +210,7 @@ WHERE country_code = 1 OR country_code = 2;
 
 SELECT * FROM account WHERE name = ?;
 // needs to scan all shards, 
-// since a particular name reside in any shard!
+// since a particular name might reside in any shard!
 ```
 
 And of course this dependency, between achieved performance improvement and the query specificity, is also true for both partitioning and indexing. What is worth remembering is that with sharding, each shard is an independent database, so even if we need to query a few shards at once, it is still pretty fast, because we can do this in parallel and they have their own, indepedent resources (cpu, memory, storage etc.).
