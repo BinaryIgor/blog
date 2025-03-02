@@ -262,7 +262,7 @@ What is most interesting here:
   * dynamically change `goToCategoryButton` HTMX attributes so it works with a newly selected category
 
 <figure>
-  <img src="{{ imagesPath }}/htmx-with-shoelace/category-selected.png" loading="lazy">
+  <img src="{{ imagesPath }}/htmx-with-shoelace/lighthouse-report-mpa.png" loading="lazy">
   <figcaption>Books main page with category selected</figcaption>
 </figure>
 
