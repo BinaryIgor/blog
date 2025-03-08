@@ -6,7 +6,8 @@
     "publishedAt": "2024-11-11",
     "excerpt": "Both databases solve the same problem: <em>how to most effectively store and provide access to data, in an ACID-compliant way?</em> ACID compliance might be implemented in various ways and SQL databases can vary quite substantially how they choose to go about it.",
     "researchLog": [ 4, 1.5, 1.5, 1, 1, 1.5, 2.5, 1.5, 2, 2.5 ],
-    "writingLog": [ 1, 1, 2, 2.5, 3, 2, 3, 3, 2.5, 5 ]
+    "writingLog": [ 1, 1, 2, 2.5, 3, 2, 3, 3, 2.5, 5 ],
+    "tags": [ "dbs" ]
 }
 ---
 ## ACID

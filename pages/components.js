@@ -32,6 +32,22 @@ export function postsPreview({ posts }) {
     </ul>`;
 }
 
+export function htmxPostsPreview({ posts }) {
+    return tagPostsPreview(posts, "htmx");
+}
+
+export function dbsPostsPreview({ posts }) {
+    return tagPostsPreview(posts, "dbs");
+}
+
+export function modularityPostsPreview({ posts }) {
+    return tagPostsPreview(posts, "modularity");
+}
+
+function tagPostsPreview(posts, tag) {
+    return postsPreview({ posts: posts.filter(p => p.tags && p.tags.includes(tag)) });
+}
+
 export function latestsPostsPreview({ posts }) {
     return postsPreview({ posts: latestsPosts(posts) });
 }

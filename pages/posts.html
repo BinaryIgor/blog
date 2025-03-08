@@ -13,13 +13,18 @@
     {{ navigation.html }}
     <div class="py-6 px-4 text-center">
         <h1 class="text-4xl font-bold mb-6">Posts</h1>
-        <div class="max-content-width mb-24 m-auto">
-            <p>Collection of all posts/articles published on the blog, ordered from the latest ones.</p>
+        <div class="max-content-width m-auto mb-24">
+            <p class="my-6">Collection of all posts/articles published on the blog, ordered from the latest ones.</p>
+            <p>For a more structured experience, here are some recurring themes:</p>
+            <div class="my-2 text-secondary-3">
+                <a class="underline" href="/htmx-posts.html">HTMX</a>,
+                <a class="underline" href="/dbs-posts.html">DBs</a>,
+                <a class="underline" href="/modularity-posts.html">Modularity</a>
+            </div>
         </div>
         {{ .js: allPostsPreview }}
     </div>
     {{ footer.html }}
-
     {{ init-script.html }}
 </body>
 

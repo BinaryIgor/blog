@@ -6,7 +6,8 @@
     "publishedAt": "2024-05-19",
     "excerpt": "Before talking about module communication, it is important to emphasize the consequences of chosen module design. Problems that we will face when communicating between modules, how often and how much of communication there will be, depend mostly on decided modules structure ... Assuming that we have modules that depend very little on each other, but sometimes they do need to talk with each other - how can they and when they should?",
     "researchLog": [ 1 ],
-    "writingLog": [ 1, 2, 3.5, 5, 5, 3.5, 1 ]
+    "writingLog": [ 1, 2, 3.5, 5, 5, 3.5, 1 ],
+    "tags": ["modularity"]
 }
 ---
 
