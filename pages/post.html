@@ -147,7 +147,7 @@
         }
 
         function setupHeadersOnClickAnchorLinks() {
-            document.querySelectorAll("h2,h3").forEach(h => {
+            document.querySelectorAll("h2,h3,h4").forEach(h => {
                 if (h.id) {
                     h.onclick = () => {
                         const selected = document.getSelection().toString();

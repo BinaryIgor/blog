@@ -159,8 +159,8 @@ html {
 /* to make anchor links work: https://css-tricks.com/hash-tag-links-padding/ */
 .anchor-top-scroll {
     scroll-margin-top: 75px;
-    scroll-snap-margin-top: 75px;
     /* iOS 11 and older */
+    scroll-snap-margin-top: 75px;
 }
 
 .nowrap {
@@ -192,6 +192,10 @@ html {
 
     .post h3 {
         @apply text-2xl mt-12 mb-6 font-bold text-center cursor-pointer anchor-top-scroll;
+    }
+
+    .post h4 {
+        @apply text-xl mt-8 mb-4 font-bold text-center cursor-pointer anchor-top-scroll;
     }
 
     .post p {
