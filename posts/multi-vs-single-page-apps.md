@@ -352,7 +352,7 @@ SUM:                            17             46              0            388
 -------------------------------------------------------------------------------
 ```
 **It gives us 1123 lines of code for SPA and 388 for the MPA frontend.**
-It should be obvious that *it is not only about the numbers here* - HTML (mustache) templates are easier to understand and maintain, since they just render HTML based on a set of variables - there is no complex logic besides some JS here and there to make them more dynamic (inline validation, modals, navigation and so on).
+It should be obvious that *it is not only about the numbers here* - HTML (Mustache) templates are easier to understand and maintain, since they just render HTML based on a set of variables - there is no complex logic besides some JS here and there to make them more dynamic (inline validation, modals, navigation and so on).
 
 As mentioned, HTML controllers (returning HTML instead of JSON) are more complex than their API counterparts:
 ```
