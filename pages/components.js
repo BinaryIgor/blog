@@ -44,6 +44,10 @@ export function modularityPostsPreview({ posts }) {
     return tagPostsPreview(posts, "modularity");
 }
 
+export function networksPostsPreview({ posts }) {
+    return tagPostsPreview(posts, "networks");
+}
+
 function tagPostsPreview(posts, tag) {
     return postsPreview({ posts: posts.filter(p => p.tags && p.tags.includes(tag)) });
 }

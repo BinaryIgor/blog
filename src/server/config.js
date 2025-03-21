@@ -57,6 +57,7 @@ function analyticsAllowedPaths() {
         "/htmx-posts.html",
         "/dbs-posts.html",
         "/modularity-posts.html",
+        "/networks-posts.html",
         "/not-found.html",
         "/stats.html"];
 }

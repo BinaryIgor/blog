@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    {{ head-tags.html }}
+    <link rel="canonical" href="{{httpsDomain}}/networks-posts.html">
+    {{ head-default-description-tag.html }}
+    <title>Networks Posts</title>
+    {{ theme-script.html }}
+</head>
+
+<body>
+    {{ navigation.html }}
+    <div class="pt-6 px-4 text-center">
+        <h1 class="text-4xl font-bold mb-8">Networks Posts</h1>
+        {{ .js: networksPostsPreview }}
+        {{ all-posts-footer.html }}
+    </div>
+    {{ footer.html }}
+    {{ init-script.html }}
+</body>
+
+</html>
