@@ -5,7 +5,8 @@
     "publishedAt": "2024-08-31",
     "excerpt": "We take the Internet, as it is, completely for granted. But have you ever wondered: what it is, how it works and who controls it? At its core, the Internet is just a...",
     "researchLog": [ 1 ],
-    "writingLog": [ 1, 2, 1.5, 1, 2, 1.5, 2.5, 2.5, 1.25, 2.5 ]
+    "writingLog": [ 1, 2, 1.5, 1, 2, 1.5, 2.5, 2.5, 1.25, 2.5 ],
+    "tags": ["networks"]
 }
 ---
 
