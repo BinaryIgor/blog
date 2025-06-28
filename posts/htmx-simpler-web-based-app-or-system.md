@@ -296,7 +296,7 @@ Let's simplify web development!**
 
 ### Notes and resources
 1. HTMX: https://htmx.org
-2. WebSockets support in HTMX: https://htmx.org/extensions/web-sockets
+2. WebSockets support in HTMX: https://htmx.org/extensions/ws/
 3. HTMX approach explained by its creator: https://htmx.org/essays/when-to-use-hypermedia
 4. Updating many fragments of the page, based on a single response from the server: https://htmx.org/examples/update-other-content
 5. Shoelace, library of web components: https://shoelace.style

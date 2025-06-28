@@ -1,6 +1,6 @@
 Hey there! 
 
-I am Igor Roztropiński, a programmer passionate about unraveling the mysteries of programming, software engineering, software design, computer science, and the inner workings of binary and digital machines.
+I am Igor Roztropiński, a programmer passionate about unraveling the mysteries of programming, software engineering, software design, computer science, networks and the inner workings of binary and digital machines.
 
 <figure>
     <img id="profile-image" src="{{ imagesPath }}/profile.png">
