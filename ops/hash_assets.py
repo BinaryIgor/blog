@@ -1,12 +1,11 @@
 import os
 from os import path
+from hashlib import sha256
 import re
 import codecs
 
 ASSETS_DIRECTORY = os.environ.get('ASSETS_DIRECTORY',  
                                   path.join(os.getcwd(), "..", "dist"))
-ASSETS_VERSION = os.environ.get('ASSETS_VERSION',
-                                codecs.encode(os.urandom(8), "hex").decode())
 
 IMAGES_EXTENSIONS = ['jpg', 'jpeg', 'png', 'svg']
 EXCLUDE_PATHS = ["favicon.svg", "favicon-light.svg"]
@@ -61,8 +60,11 @@ def should_process(path):
 
 
 def set_files_data_tuple(files_data, key, extension, root_dir, file_path, file_name):
+    with open(file_path, 'rb') as f:
+        file_hash = sha256(f.read()).hexdigest()[0:16]
+
     extension_len = len(extension)
-    new_name = f'{file_name[0:-(extension_len + 1)]}_{ASSETS_VERSION}.{extension}'
+    new_name = f'{file_name[0:-(extension_len + 1)]}.{file_hash}.{extension}'
     new_path = to_path(root_dir, new_name)
     data = files_data.get(key, ({}, {}))
     data[0][file_name] = new_name
