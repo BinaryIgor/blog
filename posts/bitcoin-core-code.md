@@ -90,7 +90,7 @@ Omitting comments and blank lines, **we have a solid few hundred files and a few
 * **[test](https://github.com/bitcoin/bitcoin/tree/master/test)** - functional/integration tests written in Python; they start and stop node processes, requiring bitcoin node binary to be built and available to execute. Unit tests live together with the source code under [src/test](https://github.com/bitcoin/bitcoin/tree/master/src/test) dir
 * other than that we have a couple of not categorized files like [.cirrus.yml](https://github.com/bitcoin/bitcoin/blob/master/.cirrus.yml) for CI processes or[.editorconfig](https://github.com/bitcoin/bitcoin/blob/master/.editorconfig) for files formatting
 
-## Implementation: C++ {#implementation-cpp}
+## Implementation: <span class="nowrap">C++</span> {#implementation-cpp}
 
 C++ code lives under the `src` dir. All the most important logic and functionalities of the bitcoin node and wallet are implemented here (some mining as well). Things like:
 * accepting new blocks and transactions, checking some of the consensus rules - `validation.cpp`; some interesting functions: `AcceptToMemoryPool(...)`, `ProcessNewBlock(...)` or `ConnectBlock(...)`
@@ -129,7 +129,7 @@ Speaking of limiting all possible attack vectors - **the codebase had a few seri
 
 **Let's conclude this section by saying that as Bitcoin's domain is quite unique, so are the solutions implemented in its code.** Thus, something that might seem odd at the first glance is often a natural consequence of how the Bitcoin system works. The codebase had its fair share of bugs and was not structured the best, but ongoing efforts of maintainers have significantly improved the system's quality - it already is at an excellent level - and their continuous work raises this bar still further.
 
-## Tests: units in C++ and functional in Python {#tests-units-in-cpp-and-functional-in-python}
+## Tests: units in <span class="nowrap">C++</span> and functional in Python {#tests-units-in-cpp-and-functional-in-python}
 
 In the `src/test` dir there are lots of unit tests, written with the help of [Boost.Test library](https://www.boost.org/doc/libs/master/libs/test/doc/html/index.html). [Assuming that we have built various bitcoin binaries](#custom-build-system-dependencies-reproducibility-and-verifiability), in the standard `build` dir there is a [unit tests binary](https://github.com/bitcoin/bitcoin/tree/master/src/test#unit-tests):
 ```
