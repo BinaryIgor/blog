@@ -6,7 +6,7 @@
     "publishedAt": "2025-08-23",
     "excerpt": "As we have recently analyzed how the Bitcoin P2P Network works, let's delve into arguably its most important software component - the Bitcoin Core, the reference client and the reference implementation of all aspects of the Bitcoin system. With the main goal of having a few questions answered...",
     "researchLog": [ 2.5, 2.5, 1, 2.5, 1, 7.5, 5, 3, 3, 2.5, 4, 7, 1.5, 3.5, 1.5, 3.5, 3, 1.5, 4, 1 ], 
-    "writingLog": [ 1, 2, 2, 2, 1, 2, 2, 1.5, 1, 4, 1.5, 3, 3, 0.5, 2, 6, 1.5, 2, 1, 1 ]
+    "writingLog": [ 1, 2, 2, 2, 1, 2, 2, 1.5, 1, 4, 1.5, 3, 3, 0.5, 2, 6, 1.5, 2, 1, 1, 1 ]
 }
 ---
 
@@ -709,7 +709,7 @@ Naturally, there is much more to learn about the Bitcoin Core code and the vario
 9. Possible blockchain bugs and vulnerabilities: https://github.com/akircanski/coinbugs and Bitcoin's history of them: https://en.bitcoin.it/wiki/Common_Vulnerabilities_and_Exposures and: https://bitcoinbriefly.com/hacking-bitcoin-history-of-bitcoin-hacks/
 10. Various types of test (code) coverage: https://web.dev/articles/ta-code-coverage
 11. Website with regularly generated Bitcoin Core code coverage reports: https://maflcko.github.io/b-c-cov/
-12. Bootstrappable Builds: https://bootstrappable.org and *Reflections on Trusting Trust* by Ken Thompson: https://users.ece.cmu.edu/~ganger/712.fall02/papers/p761-thompson.pdf
+12. Bootstrappable Builds: https://bootstrappable.org and related *Reflections on Trusting Trust* by Ken Thompson: https://users.ece.cmu.edu/~ganger/712.fall02/papers/p761-thompson.pdf
 13. Reproducible Builds:
     1. https://guix.gnu.org
     2. https://bitcoinops.org/en/topics/reproducible-builds
@@ -721,6 +721,6 @@ Naturally, there is much more to learn about the Bitcoin Core code and the vario
     3. https://bitcoindevphilosophy.com
     4. https://bitcoinops.org/en/topics/
     5. https://learnmeabitcoin.com
-15. The Bitcoin Core Kernel project: https://thecharlatan.ch/Kernel/
+15. The Bitcoin Kernel Library Project: https://thecharlatan.ch/Kernel/
 
 </div>
