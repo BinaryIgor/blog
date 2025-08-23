@@ -7,7 +7,7 @@ I am Igor Roztropiński, a programmer passionate about unraveling the mysteries 
 </figure>
 
 \
-If you possess an insatiable curiosity and a relentless desire to dive deep into the very essence of (mostly software-related) subjects, constantly pondering questions like:
+If you, like me, possess an insatiable curiosity and a relentless desire to dive deep into the very essence of these subjects, constantly pondering questions like:
 * How does it work, and why exactly does it work that way?
 * Can we simplify this seemingly complicated solution? What is the source of that complexity?
 * Do we really need this, or can we live without it?
@@ -17,7 +17,7 @@ If you possess an insatiable curiosity and a relentless desire to dive deep into
 
 ...and if you crave answers that go beyond the superficial and the obvious, then you will feel at home here!
 
-And if you like videos more, **[I also run a YouTube channel under the same name (Binary Igor)]({{youtubeChannelUrl}})**.
+If you like videos more, **[I also run a YouTube channel under the same name (Binary Igor)]({{youtubeChannelUrl}})**.
 
 You can also find me on **[LinkedIn](https://www.linkedin.com/in/igroztr/)** or check out my code on **[GitHub](https://github.com/BinaryIgor)**.
 
