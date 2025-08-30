@@ -311,7 +311,7 @@ To build Bitcoin Core with these packages, pass '--toolchain /home/igor/ws/code/
 
 We right now have locally produced binaries of the Bitcoin Core dependencies. Let's then use them to build the codebase; from the root dir, run:
 ```
-# no wallet (requires GUI); change toolchain file to your specific path
+# no wallet and no GUI; change toolchain file to your specific path
 cmake -B build \
   -DCMAKE_TOOLCHAIN_FILE=depends/x86_64-pc-linux-gnu/toolchain.cmake \
   -DENABLE_WALLET=OFF
@@ -630,8 +630,11 @@ Running it:
 # make it executable
 chmod +x test/functional/rpc_getmagicnumber.py
 
-# recompile so that the test file with a config is generated - only needed to be done once per newly created test file
-cmake --build build -j8
+# trigger test files with config generation - needs to be done only once per newly created test file;
+# as previously, adjust the toolchain and desired parallelism
+cmake -B build \
+  -DCMAKE_TOOLCHAIN_FILE=depends/x86_64-pc-linux-gnu/toolchain.cmake \
+  -DENABLE_WALLET=OFF
 
 # run version with the linked config
 build/test/functional/rpc_getmagicnumber.py
