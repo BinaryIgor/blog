@@ -9,6 +9,8 @@
 }
 ---
 
+*For numbers-first audience, [the results are here](#summing-it-up).*
+
 When designing systems and deciding on the architecture, I often hear justifying the use of *microservices* and other complex solutions because of the predicted *performance* and *scalability* needs. Out of curiosity then, let's test the limits of an extremely simple approach, the simplest possible one. **Let's test a single instance of an application, with a single instance of a database, deployed to a single machine, and answer the question**:
 > How many HTTP requests per second can a Single Machine handle?
 

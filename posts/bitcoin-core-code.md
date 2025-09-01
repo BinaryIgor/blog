@@ -4,6 +4,7 @@
     "slug": "bitcoin-core-code",
     "startedAt": "2025-07-20",
     "publishedAt": "2025-08-23",
+    "updatedAt": "2025-09-01",
     "excerpt": "As we have recently analyzed how the Bitcoin P2P Network works, let's delve into arguably its most important software component - the Bitcoin Core, the reference client and the reference implementation of all aspects of the Bitcoin system. With the main goal of having a few questions answered...",
     "researchLog": [ 2.5, 2.5, 1, 2.5, 1, 7.5, 5, 3, 3, 2.5, 4, 7, 1.5, 3.5, 1.5, 3.5, 3, 1.5, 4, 1 ], 
     "writingLog": [ 1, 2, 2, 2, 1, 2, 2, 1.5, 1, 4, 1.5, 3, 3, 0.5, 2, 6, 1.5, 2, 1, 1, 1 ]
@@ -701,29 +702,30 @@ Naturally, there is much more to learn about the Bitcoin Core code and the vario
 
 ### Notes and resources
 
-1. Official Bitcoin Core website: https://bitcoincore.org. Newest binaries are available here: https://bitcoincore.org/en/download/
-2. Bitcoin Core code repo: https://github.com/bitcoin/bitcoin
-3. Who controls the Bitcoin Core? https://blog.lopp.net/who-controls-bitcoin-core/
-4. Bitcoin Knots, the most popular fork of the Bitcoin Core: https://github.com/bitcoinknots/bitcoin
-5. btcd - alternative full node bitcoin implementation written in Go (golang): https://github.com/btcsuite/btcd
-6. Why C++ for the Bitcoin Core then? https://bitcoin.stackexchange.com/questions/48414/why-is-bitcoin-written-in-c and https://www.youtube.com/watch?v=w4jq4frE5v4
-7. Specification of the JSON-RPC protocol: https://www.jsonrpc.org/specification
-8. What is the difference between consensus and policy in Bitcoin? Consensus is like the constitution - everyone (network) must agree or there is a civil war (The Blocksize War for example). Policy is like local bylaws - towns (nodes) can choose different traffic or tax laws, but they are still in the same country (network)
-9. Possible blockchain bugs and vulnerabilities: https://github.com/akircanski/coinbugs and Bitcoin's history of them: https://en.bitcoin.it/wiki/Common_Vulnerabilities_and_Exposures and: https://bitcoinbriefly.com/hacking-bitcoin-history-of-bitcoin-hacks/
-10. Various types of test (code) coverage: https://web.dev/articles/ta-code-coverage
-11. Website with regularly generated Bitcoin Core code coverage reports: https://maflcko.github.io/b-c-cov/
-12. Bootstrappable Builds: https://bootstrappable.org and related *Reflections on Trusting Trust* by Ken Thompson: https://users.ece.cmu.edu/~ganger/712.fall02/papers/p761-thompson.pdf
-13. Reproducible Builds:
+1. Related video on my YouTube channel (*added 2025-09-01*): https://www.youtube.com/watch?v=C_8NjozwgL4
+2. Official Bitcoin Core website: https://bitcoincore.org. Newest binaries are available here: https://bitcoincore.org/en/download/
+3. Bitcoin Core code repo: https://github.com/bitcoin/bitcoin
+4. Who controls the Bitcoin Core? https://blog.lopp.net/who-controls-bitcoin-core/
+5. Bitcoin Knots, the most popular fork of the Bitcoin Core: https://github.com/bitcoinknots/bitcoin
+6. btcd - alternative full node bitcoin implementation written in Go (golang): https://github.com/btcsuite/btcd
+7. Why C++ for the Bitcoin Core then? https://bitcoin.stackexchange.com/questions/48414/why-is-bitcoin-written-in-c and https://www.youtube.com/watch?v=w4jq4frE5v4
+8. Specification of the JSON-RPC protocol: https://www.jsonrpc.org/specification
+9. What is the difference between consensus and policy in Bitcoin? Consensus is like the constitution - everyone (network) must agree or there is a civil war (The Blocksize War for example). Policy is like local bylaws - towns (nodes) can choose different traffic or tax laws, but they are still in the same country (network)
+10. Possible blockchain bugs and vulnerabilities: https://github.com/akircanski/coinbugs and Bitcoin's history of them: https://en.bitcoin.it/wiki/Common_Vulnerabilities_and_Exposures and: https://bitcoinbriefly.com/hacking-bitcoin-history-of-bitcoin-hacks/
+11. Various types of test (code) coverage: https://web.dev/articles/ta-code-coverage
+12. Website with regularly generated Bitcoin Core code coverage reports: https://maflcko.github.io/b-c-cov/
+13. Bootstrappable Builds: https://bootstrappable.org and related *Reflections on Trusting Trust* by Ken Thompson: https://users.ece.cmu.edu/~ganger/712.fall02/papers/p761-thompson.pdf
+14. Reproducible Builds:
     1. https://guix.gnu.org
     2. https://bitcoinops.org/en/topics/reproducible-builds
     3. https://reproducible-builds.org 
     4. https://www.youtube.com/watch?v=I2iShmUTEl8
-14. General Bitcoin resources:
+15. General Bitcoin resources:
     1. https://github.com/bitcoinbook/bitcoinbook
     2. https://bitcoin.org/en/development
     3. https://bitcoindevphilosophy.com
     4. https://bitcoinops.org/en/topics/
     5. https://learnmeabitcoin.com
-15. The Bitcoin Kernel Library Project: https://thecharlatan.ch/Kernel/
+16. The Bitcoin Kernel Library Project: https://thecharlatan.ch/Kernel/
 
 </div>
