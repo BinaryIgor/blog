@@ -27,11 +27,13 @@ const SEND_PING_INTERVAL = 1000 * 30;
 // a few minutes (2 pings per minute)
 const MAX_PINGS_TO_SEND_WITHOUT_SCROLL_CHANGE = 2 * 5;
 
+const MIN_SEND_RETRY_DELAY = 500;
 const MAX_SEND_RETRY_DELAY = 5000;
-// longest case: 5s * 100 = 500s ~ 8 minutes; ~ 4 minutes (250s) on average probably
-const MAX_RETRIES = 100;
+const MAX_MIN_SEND_RETRY_DELAY_DIFF = MAX_SEND_RETRY_DELAY - MIN_SEND_RETRY_DELAY;
+// longest case: 5s * 60 = 300s ~ 5 minutes; ~ 2.5 minutes (150s) on average probably
+const MAX_RETRIES = 60;
 // pings are sent continuously
-const MAX_PING_RETRIES = 3;
+const MAX_PING_RETRIES = 2;
 
 const VIEW_EVENT_TYPE = "VIEW";
 const SCROLL_EVENT_TYPE = "SCROLL";
@@ -82,7 +84,7 @@ function sendEvent(sourceUrl, visitorId, type, data = null, maxRetries = MAX_RET
     function scheduleRetry() {
         const nextRetry = retry + 1;
         if (nextRetry <= maxRetries) {
-            const nextSendEventDelay = Math.random() * MAX_SEND_RETRY_DELAY;
+            const nextSendEventDelay = MIN_SEND_RETRY_DELAY + (Math.random() * MAX_MIN_SEND_RETRY_DELAY_DIFF);
             setTimeout(() => {
                 sendEvent(sourceUrl, visitorId, type, data, maxRetries, nextRetry);
             }, nextSendEventDelay);
