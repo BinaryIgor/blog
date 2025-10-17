@@ -1,12 +1,14 @@
 {
     "author": "Igor Roztropiński",
     "descriptionLine1": "Some things are either 0 or I.",
-    "descriptionLine2": "Thoughts about managing binary machines (computers), which are controlled by the people called: programmers, software engineers, coders, developers, hackers.",
+    "descriptionLine2": "Deeper and broader thoughts on managing binary machines (computers) through the art and science of software engineering, as practiced by those we call software engineers, programmers, developers, coders and hackers.",
     "domain": "binaryigor.com",
     "httpsDomain": "https://binaryigor.com",
     "pagesToRender": [
         "index.html",
         "posts.html",
+        "newsletter.html",
+        "privacy.html",
         "htmx-posts.html",
         "dbs-posts.html",
         "modularity-posts.html",

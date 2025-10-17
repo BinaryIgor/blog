@@ -17,7 +17,7 @@ If you, like me, possess an insatiable curiosity and a relentless desire to dive
 
 ...and if you crave answers that go beyond the superficial and the obvious, then you will feel at home here!
 
-If you like videos more, **[I also run a YouTube channel under the same name (Binary Igor)]({{youtubeChannelUrl}})**.
+If you like videos more, **[I sometimes also post on YouTube under the same name (Binary Igor)]({{youtubeChannelUrl}})**.
 
 You can also find me on **[LinkedIn](https://www.linkedin.com/in/igroztr/)** or check out my code on **[GitHub](https://github.com/BinaryIgor)**.
 
