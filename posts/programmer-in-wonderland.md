@@ -70,3 +70,7 @@ It is that simple. **Learn your fundamentals and by all means use various tools 
 **After doing that, you will [make the Magic go away](https://blog.cleancoder.com/uncle-bob/2015/08/06/LetTheMagicDie.html) and be in a position where you *can* go and implement your own HTTP Server, Database Client, Web/SPA framework or Web Components library, if you want to.** Becoming this person, you are much better able to judge the merits and usefulness of tools that are out there, on the market. What is more, they are truly optional for you; if, in some contexts or circumstances, it turns out that it is just better and faster for you to build something totally or partially from scratch, you have all the ability and power to do so. If, on the other hand, a given tool turns out to be of great value to you, you will now appreciate it even more, knowing exactly how it works and what it takes to build one.
 
 In conclusion, be *A Great Programmer*, not *The Lost One*: have your basics and fundamentals covered and study the tools you regularly use deeply and broadly. Then, you know exactly what you and them are doing; **you are in control and they truly are your tools, not masters**.
+
+<div id="post-extras">
+{{ .js: newsletterSignUpPostEnd() }}
+</div>

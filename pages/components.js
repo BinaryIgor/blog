@@ -1,5 +1,12 @@
 const LATEST_POSTS = 5;
 
+const NewsletterSignUp = {
+    POST_MID: "POST_MID",
+    POST_END: "POST_END",
+    POST_FLOATING: "POST_FLOATING",
+    LANDING: "LANDING"
+};
+
 export function postMetadata({ publishedAt }) {
     if (!publishedAt) {
         throw new Error("Published at is required, but wasn't supplied!");
@@ -76,6 +83,79 @@ export function allPostsPreview({ posts }) {
         <h2 id="prior" class="text-3xl font-bold mt-24 mb-8 anchor-top-scroll">Prior</h2>
         ${postsPreview({ posts: olderPosts })}
     `;
+}
+
+export function newsletterSignUpPostMid() {
+    return newsletterSignUp(NewsletterSignUp.POST_MID, "Enjoying this piece?");
+}
+
+export function newsletterSignUpPostEnd() {
+    return newsletterSignUp(NewsletterSignUp.POST_END, "Like this type of content?", "my-16");
+}
+
+export function newsletterSignUpPostFloating() {
+    return newsletterSignUp(NewsletterSignUp.POST_FLOATING);
+}
+
+export function newsletterSignUpLanding() {
+    return newsletterSignUp(NewsletterSignUp.LANDING);
+}
+
+// TODO: refactor
+function newsletterSignUp(type, preface, additionalContainerClasses) {
+    let containerClass = "border-[2px] border-solid border-primary-text-faded rounded p-6";
+    if (additionalContainerClasses) {
+        containerClass += " " + additionalContainerClasses;
+    }
+
+    let text = `Get the <span class="font-bold">Binary Log</span> - deep dives, discoveries and distilled insights from my latest work:`;
+    if (preface) {
+        text = preface + " " + text;
+    }
+
+    const headerHTML = `<div class="mb-2">${text}</div>`;
+    const inputHTML = `<input class="p-2 border-[2px] border-solid border-primary-text-faded rounded w-full bg-primary focus:outline-primary-text focus:outline-[2px] focus:outline placeholder:text-secondary-3"
+                placeholder="you@domain.ext" type="email" name="email">`;
+    const privacyPolicyHTML = `<a href="/privacy.html" class="underline opacity-80 text-sm">Privacy</a>`;
+    const footerHTML = `
+    <div class="italic mt-8">Join other developers learning along the way.</div>
+    <div class="italic">No spam, no fluff - pure signal. Unsubscribe anytime.</div>`;
+    const cancelButtonHTML = `<div class="cursor-pointer text-secondary-3 hover:text-primary" data-close-button>Maybe later</div>`;
+    const joinButtonHTML = `<div class="cursor-pointer text-secondary-3 hover:text-primary" data-join-button>Join Binary Log</div>`;
+
+    if (type == NewsletterSignUp.POST_FLOATING) {
+        return `
+        <div id="newsletter-modal" class="bg-modal hidden fixed top-0 left-0 h-full w-full z-10">
+            <div class="max-content-width w-11/12 top-1/2 left-1/2 absolute -translate-x-1/2 -translate-y-1/2 bg-primary border-[2px] border-solid border-primary-text-faded rounded p-6">
+            ${headerHTML}
+            ${inputHTML}
+            ${privacyPolicyHTML}
+            ${footerHTML}
+            <div class="flex justify-between mt-8">
+                ${cancelButtonHTML}
+                ${joinButtonHTML}
+            </div>
+        </div>
+        </div>
+        <script>(function() {
+            console.log("Setting up newsletter sign-up of ${type}");
+        })()</script>`;
+    }
+
+    return `
+     <div class="${containerClass}"
+        data-newsletter-sign-up data-newsletter-sign-up-type="${type}">
+            ${headerHTML}
+            ${inputHTML}
+            ${privacyPolicyHTML}
+            ${footerHTML}
+            <div class="flex justify-end mt-8">
+                ${joinButtonHTML}
+            </div>
+        </div>
+        <script>(function() {
+            console.log("Setting up newsletter sign-up of ${type}");
+        })()</script>`;
 }
 
 export function feedUpdatedAt({ posts, lastFeedUpdateAtAfterLatestPost = null }) {

@@ -1,6 +1,6 @@
 Hey there! 
 
-I am Igor Roztropiński, a programmer passionate about unraveling the mysteries of programming, software engineering, software design, computer science, networks and the inner workings of binary and digital machines.
+I am Igor Roztropiński, a programmer passionate about unraveling the mysteries of programming, software engineering, software design, computer science, networks and the inner workings of binary and digital machines. Basically, I want te be as great and as versatile software engineer as my potential allows me to be. Here, I invite you to this journey.
 
 <figure>
     <img id="profile-image" src="{{ imagesPath }}/profile.png">
@@ -13,13 +13,13 @@ If you, like me, possess an insatiable curiosity and a relentless desire to dive
 * Do we really need this, or can we live without it?
 * Ooh, this is how they solved this problem. Can we do better?
 * While it is nice to use this library/framework, what universal concepts can we extract from it?
-* What alternative approaches and different solutions exist for this particular problem?
+* What alternative approaches and different solutions exist for this particular problem? What the tradeoffs are?
 
 ...and if you crave answers that go beyond the superficial and the obvious, then you will feel at home here!
 
 If you like videos more, **[I sometimes also post on YouTube under the same name (Binary Igor)]({{youtubeChannelUrl}})**.
 
-You can also find me on **[LinkedIn](https://www.linkedin.com/in/igroztr/)** or check out my code on **[GitHub](https://github.com/BinaryIgor)**.
+You can also find me on **[LinkedIn](https://www.linkedin.com/in/igroztr/)**, check out my code on **[GitHub](https://github.com/BinaryIgor)** or **[subscribe to my newsletter](/newsletter.html?source=about)**.
 
 Finally, if you have valuable feedback, questions, corrections or an extension of my work, or just want to get in touch, shoot me an email at <span id="contact-email" class="font-bold">{{ contactEmail }}</span>. 
 

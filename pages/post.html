@@ -12,11 +12,16 @@
 <body data-post-slug="{{ slug }}">
     {{ navigation.html }}
 
+    <div id="subscribe-button"
+        class="bg-primary fixed bottom-4 right-4 border-[2px] border-solid border-primary-text-faded rounded p-4 cursor-pointer">
+        Binary Log</div>
+        {{ .js: newsletterSignUpPostFloating() }}
+    </div>
+
     <!-- see POST_TOP_MARGIN dependency below -->
     <article class="post mt-6 mx-4">
         <h1 class="mb-0 max-content-width">{{ title }}</h1>
-        <div
-            class="mt-2 my-0 text-2xl text-center text-secondary-3 max-content-width m-auto">
+        <div class="mt-2 my-0 text-2xl text-center text-secondary-3 max-content-width m-auto">
             {{ .js: postMetadata() }}
         </div>
         <div class="mt-16 mb-16 max-content-width">
@@ -24,14 +29,12 @@
         </div>
     </article>
 
-    <div class="mb-8 mx-4">
-        <div class="post-delimiter">---</div>
+    <div class="my-16 mx-4">
         <div class="italic max-content-width m-auto">
-            <p>Enjoyed this article? <a class="underline" href="/newsletter.html">Join other developers</a> to get my latest deep and broad dives straight into your inbox.</p>
-            <br/>
-            <p>If you have valuable feedback, questions, comments, or you just want to get in touch, shoot me an email at
+            If you have valuable feedback, questions, comments, or you just want to get in touch, shoot me an email at
             <span id="contact-email" class="font-bold cursor-pointer" onclick="copyToClipboard('{{ contactEmail }}')">
-                {{ contactEmail }}</span>.</p>
+                {{ contactEmail }}</span>.
+            </p>
         </div>
         <p class="italic max-content-width m-auto">See you there!</p>
     </div>
@@ -135,7 +138,7 @@
             </ul>`;
         }
 
-        function setupNextPostsProposition() {
+        function setUpNextPostsProposition() {
             fetch("posts.json")
                 .then(r => r.json())
                 .then(posts => {
@@ -148,7 +151,7 @@
                 .catch(e => console.log("Failed to get posts", e));
         }
 
-        function setupHeadersOnClickAnchorLinks() {
+        function setUpHeadersOnClickAnchorLinks() {
             document.querySelectorAll("h2,h3,h4").forEach(h => {
                 if (h.id) {
                     h.onclick = () => {
@@ -161,7 +164,7 @@
             });
         }
 
-        function setupPostSeenPercentageObserver() {
+        function setUpPostSeenPercentageObserver() {
             const navigationToggle = document.getElementById("navigation-toggle");
             const navigationToggleText = navigationToggle.textContent;
 
@@ -200,9 +203,36 @@
             });
         }
 
-        setupNextPostsProposition();
-        setupHeadersOnClickAnchorLinks();
-        setupPostSeenPercentageObserver();
+        function setUpNewsletterSignUps() {
+            let modalOnScrollChangeShown = false;
+            const newsletterModal = document.getElementById("newsletter-modal");
+            newsletterModal.querySelector("[data-close-button]").onclick = () => newsletterModal.classList.add("hidden");
+            const newsletterModalTriggers = document.querySelectorAll("[data-newsletter-modal-trigger]");
+            for (let trigger of newsletterModalTriggers) {
+                trigger.onclick = () => {
+                    console.log("newsletter trigger clicked!");
+                    newsletterModal.classList.remove("hidden");
+                };
+            }
+            document.getElementById("subscribe-button").onclick = () => {
+                newsletterModal.classList.remove("hidden");
+            };
+
+            for (let signUp of document.querySelectorAll("[data-newsletter-sign-up]")) {
+                const type = signUp.getAttribute("data-newsletter-signup-type");
+                const closeButton = signUp.querySelector("[data-close-button]");
+                if (closeButton) {
+                    closeButton.querySelector("[data-close-button]").onclick = () => {
+                        signUp.classList.add("hidden");
+                    }
+                }
+            }
+        }
+
+        setUpNextPostsProposition();
+        setUpHeadersOnClickAnchorLinks();
+        setUpPostSeenPercentageObserver();
+        setUpNewsletterSignUps();
     </script>
 </body>
 

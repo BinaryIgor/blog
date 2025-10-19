@@ -69,6 +69,7 @@ html.dark {
     --secondary-3-text-color: rgb(156, 163, 175);
     --scrollbar-color: var(--primary-text-color);
     --scrollbar-hover-color: var(--secondary-3-text-color);
+    --modal-bg-color: rgba(15, 15, 15, 0.8);
 }
 
 html {
@@ -83,6 +84,7 @@ html {
     --secondary-3-text-color: rgb(75, 85, 99);
     --scrollbar-color: var(--primary-text-color);
     --scrollbar-hover-color: var(--secondary-3-text-color);
+    --modal-bg-color: rgba(250, 250, 250, 0.8);
 }
 
 :root {
@@ -115,41 +117,58 @@ html {
 }
 
 /* ==chrome before 121, safari scroll== */
+@layer utilities {
+    .bg-primary {
+        background-color: var(--primary-color);
+    }
 
-.bg-primary {
-    background-color: var(--primary-color);
-}
+    .bg-secondary-1 {
+        background-color: var(--secondary-1-color);
+    }
 
-.bg-secondary-1 {
-    background-color: var(--secondary-1-color);
-}
+    .bg-secondary-2 {
+        background-color: var(--secondary-2-color);
+    }
 
-.bg-secondary-2 {
-    background-color: var(--secondary-2-color);
-}
+    .bg-modal {
+        background-color: var(--modal-bg-color);
+    }
 
-.text-primary {
-    color: var(--primary-text-color);
-}
+    .text-primary {
+        color: var(--primary-text-color);
+    }
 
-.text-secondary-1 {
-    color: var(--secondary-1-text-color);
-}
+    .text-primary-faded {
+        color: var(--primary-text-color-faded);
+    }
 
-.text-secondary-2 {
-    color: var(--secondary-2-text-color);
-}
+    .text-secondary-1 {
+        color: var(--secondary-1-text-color);
+    }
 
-.text-secondary-3 {
-    color: var(--secondary-3-text-color);
-}
+    .text-secondary-2 {
+        color: var(--secondary-2-text-color);
+    }
 
-.border-primary-text {
-    border-color: var(--primary-text-color);
-}
+    .text-secondary-3 {
+        color: var(--secondary-3-text-color);
+    }
 
-.border-primary-text-faded {
-    border-color: var(--primary-text-color-faded);
+    .border-primary-text {
+        border-color: var(--primary-text-color);
+    }
+
+    .border-primary-text-faded {
+        border-color: var(--primary-text-color-faded);
+    }
+
+    .outline-primary-text {
+        outline-color: var(--primary-text-color);
+    }
+
+    .outline-primary-text-faded {
+        outline-color: var(--primary-text-color-faded);
+    }
 }
 
 .object-position-50 {

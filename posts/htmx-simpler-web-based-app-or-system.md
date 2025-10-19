@@ -87,6 +87,8 @@ html -> json -> http request -> http response -> json -> html
 
 **Models, validation, error handling, tests.... what if we can write it all once, in a single place, but maintain all (or almost all) flexibility and control over user experience that we have with SPA?** That is where HTMX comes in.
 
+{{ .js: newsletterSignUpPostMid() }}
+
 ## HTMX - fewer layers, simpler system
 
 Is it possible to simplify it and have just one (sort of) layer for data serialization and deserialization? Is it possible to simplify our previous flow to just:
@@ -286,13 +288,11 @@ Let's simplify web development!**
 
 <div id="post-extras">
 
-<div class="post-delimiter">---</div>
+{{ .js: newsletterSignUpPostEnd() }}
 
 ### Related videos on my [YouTube channel]({{ youtubeChannelUrl }})
 1. [HTMX basics, simple index.html page from scratch](https://www.youtube.com/watch?v=A3UB3tyDWa4)
 2. [General overview of HTMX, going through Some Wisdom App, which is using it](https://www.youtube.com/watch?v=9cu0NbyrNuU)
-
-<div class="post-delimiter">---</div>
 
 ### Notes and resources
 1. HTMX: https://htmx.org
