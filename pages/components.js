@@ -1,6 +1,6 @@
 const LATEST_POSTS = 5;
 
-const NewsletterSignUp = {
+const NewsletterSignUpPlacement = {
     POST_MID: "POST_MID",
     POST_END: "POST_END",
     POST_FLOATING: "POST_FLOATING",
@@ -86,23 +86,23 @@ export function allPostsPreview({ posts }) {
 }
 
 export function newsletterSignUpPostMid() {
-    return newsletterSignUp(NewsletterSignUp.POST_MID, "Enjoying this piece?");
+    return newsletterSignUp(NewsletterSignUpPlacement.POST_MID, "Enjoying this piece?");
 }
 
 export function newsletterSignUpPostEnd() {
-    return newsletterSignUp(NewsletterSignUp.POST_END, "Like this type of content?", "my-16");
+    return newsletterSignUp(NewsletterSignUpPlacement.POST_END, "Like this type of content?", "my-16");
 }
 
 export function newsletterSignUpPostFloating() {
-    return newsletterSignUp(NewsletterSignUp.POST_FLOATING);
+    return newsletterSignUp(NewsletterSignUpPlacement.POST_FLOATING);
 }
 
 export function newsletterSignUpLanding() {
-    return newsletterSignUp(NewsletterSignUp.LANDING);
+    return newsletterSignUp(NewsletterSignUpPlacement.LANDING);
 }
 
 // TODO: refactor
-function newsletterSignUp(type, preface, additionalContainerClasses) {
+function newsletterSignUp(placement, preface, additionalContainerClasses) {
     let containerClass = "border-[2px] border-solid border-primary-text-faded rounded p-6";
     if (additionalContainerClasses) {
         containerClass += " " + additionalContainerClasses;
@@ -123,7 +123,7 @@ function newsletterSignUp(type, preface, additionalContainerClasses) {
     const cancelButtonHTML = `<div class="cursor-pointer text-secondary-3 hover:text-primary" data-close-button>Maybe later</div>`;
     const joinButtonHTML = `<div class="cursor-pointer text-secondary-3 hover:text-primary" data-join-button>Join Binary Log</div>`;
 
-    if (type == NewsletterSignUp.POST_FLOATING) {
+    if (placement == NewsletterSignUpPlacement.POST_FLOATING) {
         return `
         <div id="newsletter-modal" class="bg-modal hidden fixed top-0 left-0 h-full w-full z-10">
             <div class="max-content-width w-11/12 top-1/2 left-1/2 absolute -translate-x-1/2 -translate-y-1/2 bg-primary border-[2px] border-solid border-primary-text-faded rounded p-6">
@@ -138,13 +138,13 @@ function newsletterSignUp(type, preface, additionalContainerClasses) {
         </div>
         </div>
         <script>(function() {
-            console.log("Setting up newsletter sign-up of ${type}");
+            console.log("Setting up newsletter sign-up of ${placement}");
         })()</script>`;
     }
 
     return `
      <div class="${containerClass}"
-        data-newsletter-sign-up data-newsletter-sign-up-type="${type}">
+        data-newsletter-sign-up data-newsletter-sign-up-placement="${placement}">
             ${headerHTML}
             ${inputHTML}
             ${privacyPolicyHTML}
@@ -154,7 +154,12 @@ function newsletterSignUp(type, preface, additionalContainerClasses) {
             </div>
         </div>
         <script>(function() {
-            console.log("Setting up newsletter sign-up of ${type}");
+            console.log("Setting up newsletter sign-up of ${placement}");
+            const signUp = document.querySelector('[data-newsletter-sign-up-placement="${placement}"]');
+            const joinButton = signUp.querySelector('[data-join-button]');
+            joinButton.onclick = () => {
+                console.log("Joining newsletter through placement ${placement}");
+            };
         })()</script>`;
 }
 

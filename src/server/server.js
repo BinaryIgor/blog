@@ -80,6 +80,19 @@ export async function start(clock = new Clock(),
         res.sendStatus(200);
     });
 
+    // TODO: implement fully!
+    app.post("/newsletter/subscribe", async (req, res) => {
+        try {
+            const ip = req.header(REAL_IP_HEADER) || req.socket.remoteAddress;
+            const ipHash = Web.hashedIp(ip);
+            const {email, placement, source} = req.body;
+            Logger.logInfo("Adding sub: ", req.body);
+            res.sendStatus(200);
+        } catch(e) {
+            res.sendStatus(500);
+        }
+    });
+
     app.get("/meta/stats", async (req, res) => {
         try {
             const stats = await statsViews.views();
