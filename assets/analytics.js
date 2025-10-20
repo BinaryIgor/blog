@@ -1,21 +1,3 @@
-// Global domain to api
-function apiDomain() {
-    const prodDomain = "https://api.binaryigor.com";
-
-    let domain;
-    try {
-        if (document.location.host.includes("localhost")) {
-            domain = "https://localhost";
-        } else {
-            domain = prodDomain;
-        }
-    } catch (e) {
-        domain = prodDomain;
-    }
-
-    return domain;
-}
-
 // Analytics
 const POST_ATTRIBUTE = "data-post-slug";
 const SENT_VIEW_KEY_PREFIX = "SENT_VIEW";

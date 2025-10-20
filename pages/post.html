@@ -13,7 +13,7 @@
     {{ navigation.html }}
 
     <div id="subscribe-button"
-        class="bg-primary fixed bottom-4 right-4 border-[2px] border-solid border-primary-text-faded rounded p-4 cursor-pointer">
+        class="bg-primary font-bold fixed bottom-4 right-4 border-[2px] border-solid border-primary-text-faded rounded p-4 cursor-pointer">
         Binary Log</div>
         {{ .js: newsletterSignUpPostFloating() }}
     </div>
@@ -203,36 +203,20 @@
             });
         }
 
-        function setUpNewsletterSignUps() {
-            let modalOnScrollChangeShown = false;
-            const newsletterModal = document.getElementById("newsletter-modal");
-            newsletterModal.querySelector("[data-close-button]").onclick = () => newsletterModal.classList.add("hidden");
-            const newsletterModalTriggers = document.querySelectorAll("[data-newsletter-modal-trigger]");
-            for (let trigger of newsletterModalTriggers) {
-                trigger.onclick = () => {
-                    console.log("newsletter trigger clicked!");
-                    newsletterModal.classList.remove("hidden");
-                };
-            }
-            document.getElementById("subscribe-button").onclick = () => {
-                newsletterModal.classList.remove("hidden");
+        function setUpFloatingNewsletter() {
+            const subscribeButton = document.getElementById("subscribe-button");
+            subscribeButton.onclick = () => {
+                document.dispatchEvent(new CustomEvent("newsletter-modal-show"));
             };
-
-            for (let signUp of document.querySelectorAll("[data-newsletter-sign-up]")) {
-                const type = signUp.getAttribute("data-newsletter-signup-type");
-                const closeButton = signUp.querySelector("[data-close-button]");
-                if (closeButton) {
-                    closeButton.querySelector("[data-close-button]").onclick = () => {
-                        signUp.classList.add("hidden");
-                    }
-                }
-            }
+            document.addEventListener("newsletter-modal-signed-up", e => {
+                subscribeButton.classList.add("hidden");
+            });
         }
 
         setUpNextPostsProposition();
         setUpHeadersOnClickAnchorLinks();
         setUpPostSeenPercentageObserver();
-        setUpNewsletterSignUps();
+        setUpFloatingNewsletter();
     </script>
 </body>
 

@@ -114,19 +114,31 @@ function newsletterSignUp(placement, preface, additionalContainerClasses) {
     }
 
     const headerHTML = `<div class="mb-2">${text}</div>`;
-    const inputHTML = `<input class="p-2 border-[2px] border-solid border-primary-text-faded rounded w-full bg-primary focus:outline-primary-text focus:outline-[2px] focus:outline placeholder:text-secondary-3"
-                placeholder="you@domain.ext" type="email" name="email">`;
+    const inputHTML = `
+    <input class="p-2 border-[2px] border-solid border-primary-text-faded rounded w-full bg-primary focus:outline-primary-text focus:outline-[2px] focus:outline placeholder:text-secondary-3"
+        placeholder="you@domain.ext" type="email" name="newsletter-email" autocomplete="email">
+    <span class="text-error block my-2 hidden text-sm" data-email-error>Valid email is required</span>`;
     const privacyPolicyHTML = `<a href="/privacy.html" class="underline opacity-80 text-sm">Privacy</a>`;
     const footerHTML = `
     <div class="italic mt-8">Join other developers learning along the way.</div>
     <div class="italic">No spam, no fluff - pure signal. Unsubscribe anytime.</div>`;
-    const cancelButtonHTML = `<div class="cursor-pointer text-secondary-3 hover:text-primary" data-close-button>Maybe later</div>`;
+    const cancelButtonHTML = `<div class="cursor-pointer text-secondary-3 hover:text-primary" data-cancel-button>Maybe later</div>`;
     const joinButtonHTML = `<div class="cursor-pointer text-secondary-3 hover:text-primary" data-join-button>Join Binary Log</div>`;
+    const afterJoinButtonHTML = `<div class="cursor-pointer text-secondary-3 hover:text-primary" data-after-join-button>Got it</div>`;
+
+    const afterJoinMessage = "Almost there - check your inbox for confirmation and we are all set!";
 
     if (placement == NewsletterSignUpPlacement.POST_FLOATING) {
+        const afterJoinModalContent = `
+        <div>${afterJoinMessage}</div>
+        <div class="flex justify-end mt-8">
+            ${afterJoinButtonHTML}
+        </div>
+        `;
+
         return `
-        <div id="newsletter-modal" class="bg-modal hidden fixed top-0 left-0 h-full w-full z-10">
-            <div class="max-content-width w-11/12 top-1/2 left-1/2 absolute -translate-x-1/2 -translate-y-1/2 bg-primary border-[2px] border-solid border-primary-text-faded rounded p-6">
+        <div class="bg-modal hidden fixed top-0 left-0 h-full w-full z-10" data-newsletter-sign-up data-newsletter-sign-up-placement="${placement}">
+            <div data-modal-content class="max-content-width w-11/12 top-1/2 left-1/2 absolute -translate-x-1/2 -translate-y-1/2 bg-primary border-[2px] border-solid border-primary-text-faded rounded p-6">
             ${headerHTML}
             ${inputHTML}
             ${privacyPolicyHTML}
@@ -139,6 +151,31 @@ function newsletterSignUp(placement, preface, additionalContainerClasses) {
         </div>
         <script>(function() {
             console.log("Setting up newsletter sign-up of ${placement}");
+            const signUp = document.querySelector('[data-newsletter-sign-up-placement="${placement}"]');
+            const signUpContent = signUp.querySelector('[data-modal-content]');
+            const cancelButton = signUp.querySelector('[data-cancel-button]');
+            const emailError = signUp.querySelector('[data-email-error]');
+            const input = signUp.querySelector("input");
+            const joinButton = signUp.querySelector('[data-join-button]');
+            joinButton.onclick = () => {
+                console.log("Joining newsletter through placement ${placement}");
+                // TODO proper validation
+                if (input.value) {
+                    emailError.classList.add("hidden");
+                    joinButton.textContent = "Joining...";
+                    setTimeout(() => {
+                        signUpContent.innerHTML = \`${afterJoinModalContent}\`;
+                        signUpContent.querySelector('[data-after-join-button]').onclick = () =>  signUp.classList.add("hidden"); 
+                        document.dispatchEvent(new CustomEvent("newsletter-modal-signed-up"));
+                    }, 1000);
+                } else {
+                    emailError.classList.remove("hidden");    
+                }
+            };
+            cancelButton.onclick = () => signUp.classList.add("hidden");
+            document.addEventListener("newsletter-modal-show", e => {
+                signUp.classList.remove("hidden");
+            });
         })()</script>`;
     }
 
@@ -156,9 +193,22 @@ function newsletterSignUp(placement, preface, additionalContainerClasses) {
         <script>(function() {
             console.log("Setting up newsletter sign-up of ${placement}");
             const signUp = document.querySelector('[data-newsletter-sign-up-placement="${placement}"]');
+
+            const emailError = signUp.querySelector('[data-email-error]');
+            const input = signUp.querySelector("input");
             const joinButton = signUp.querySelector('[data-join-button]');
             joinButton.onclick = () => {
                 console.log("Joining newsletter through placement ${placement}");
+                // TODO proper validation
+                if (input.value) {
+                    emailError.classList.add("hidden");
+                    joinButton.textContent = "Joining...";
+                    setTimeout(() => {
+                        signUp.innerHTML = "${afterJoinMessage}"; 
+                    }, 1000);
+                } else {
+                    emailError.classList.remove("hidden");    
+                }
             };
         })()</script>`;
 }

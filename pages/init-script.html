@@ -58,5 +58,23 @@ function setupMode() {
 }
 
 setupMode();
+
+// Global function that resolves API domain
+function apiDomain() {
+    const prodDomain = "https://api.binaryigor.com";
+
+    let domain;
+    try {
+        if (document.location.host.includes("localhost")) {
+            domain = "https://localhost";
+        } else {
+            domain = prodDomain;
+        }
+    } catch (e) {
+        domain = prodDomain;
+    }
+
+    return domain;
+}
 </script>
 <script defer src="{{ assetsPath }}/analytics.js"></script>
