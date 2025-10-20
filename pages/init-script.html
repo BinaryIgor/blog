@@ -59,7 +59,7 @@ function setupMode() {
 
 setupMode();
 
-// Global function that resolves API domain
+// some global functions
 function apiDomain() {
     const prodDomain = "https://api.binaryigor.com";
 
@@ -75,6 +75,16 @@ function apiDomain() {
     }
 
     return domain;
+}
+
+function getOrGenerateVisitorId() {
+    let visitorId = localStorage.getItem("VISITOR_ID");
+    if (visitorId) {
+        return visitorId;
+    }
+    visitorId = crypto.randomUUID();
+    localStorage.setItem("VISITOR_ID", visitorId);
+    return visitorId;
 }
 </script>
 <script defer src="{{ assetsPath }}/analytics.js"></script>

@@ -91,11 +91,14 @@ async function allPages(pagesDir, postsData) {
     let pages = {};
 
     for (const fn of fileNames) {
+        if (!fn.includes(".")) {
+            continue;
+        }
         const content = await fileContent(path.join(pagesDir, fn));
         pages[fn] = content;
     }
 
-    pages = pagesWithReplacedVariables(pages, config);
+    pages = await pagesWithReplacedVariables(pages, config);
 
     for (const [k, v] of Object.entries(pages)) {
         const matches = v.matchAll(templateVariablesRegex);
@@ -112,7 +115,7 @@ async function allPages(pagesDir, postsData) {
             let templ = pages[trimmedName];
             if (!templ) {
                 if (isJsComponent(trimmedName)) {
-                    templ = renderedJsComponent(trimmedName, { ...config, posts: postsData });
+                    templ = await renderedJsComponent(trimmedName, { ...config, posts: postsData });
                 }
                 if (!templ) {
                     throw new Error(`There is no page of ${trimmedName} name , but was expected by ${k} page`);
@@ -132,10 +135,10 @@ async function allPages(pagesDir, postsData) {
     return pages;
 }
 
-function pagesWithReplacedVariables(pages, variables) {
+async function pagesWithReplacedVariables(pages, variables) {
     const replacedVariablesPages = { ...pages };
     for (const [k, v] of Object.entries(pages)) {
-        replacedVariablesPages[k] = templateWithReplacedVariables(v, variables, { skipMissing: true });
+        replacedVariablesPages[k] = await templateWithReplacedVariables(v, variables, { skipMissing: true });
     }
     return replacedVariablesPages;
 }
@@ -149,12 +152,12 @@ function isJsComponent(variable) {
     return variable.includes(".js:");
 }
 
-function renderedJsComponent(variable, args) {
+async function renderedJsComponent(variable, args) {
     let componentName = variable.split(".js:")[1].trim();
     if (isFunctionVariable(componentName)) {
         componentName = componentName.replace("(", "").replace(")", "").trim();
     }
-    return jsComponents[componentName](args);
+    return await jsComponents[componentName](args);
 }
 
 function isFunctionVariable(variable) {
@@ -184,7 +187,7 @@ async function allPosts(postsDir, variables) {
 
         posts[fn] = {
             fontMatter: fMatter,
-            content: templateWithReplacedVariables(postContent,
+            content: await templateWithReplacedVariables(postContent,
                 { ...variables },
                 { skipMissing: true, renderFunctions: false })
         };
@@ -197,7 +200,7 @@ function sortedPostsFromRecentOnes(posts) {
     return posts.sort((a, b) => b.publishedAt.localeCompare(a.publishedAt));
 }
 
-function templateWithReplacedVariables(template, data, opts = { renderFunctions: false, skipMissing: false }) {
+async function templateWithReplacedVariables(template, data, opts = { renderFunctions: false, skipMissing: false }) {
     const matches = template.matchAll(templateVariablesRegex);
 
     let renderedTemplate = template;
@@ -207,7 +210,7 @@ function templateWithReplacedVariables(template, data, opts = { renderFunctions:
 
         let value;
         if (opts.renderFunctions && isFunctionVariable(key)) {
-            value = renderedJsComponent(key, data);
+            value = await renderedJsComponent(key, data);
         } else {
             value = data[key];
         }
@@ -248,9 +251,9 @@ const postTemplate = pages[config.postTemplate];
 
 for (const [k, e] of Object.entries(posts)) {
     // TODO: simplify
-    const htmlContent = templateWithReplacedVariables(markdownToHtml(e.content), pages, { skipMissing: true, renderFunctions: true });
+    const htmlContent = await templateWithReplacedVariables(markdownToHtml(e.content), pages, { skipMissing: true, renderFunctions: true });
     const variables = { ...config, ...e.fontMatter, post: htmlContent };
-    const post = templateWithReplacedVariables(postTemplate, variables, { skipMissing: false, renderFunctions: true });
+    const post = await templateWithReplacedVariables(postTemplate, variables, { skipMissing: false, renderFunctions: true });
 
     await writeFileContent(path.join(distDir, `${e.fontMatter.slug}${HTML_EXTENSION}`), post);
 }

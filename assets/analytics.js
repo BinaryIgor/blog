@@ -1,7 +1,6 @@
 // Analytics
 const POST_ATTRIBUTE = "data-post-slug";
 const SENT_VIEW_KEY_PREFIX = "SENT_VIEW";
-const VISITOR_ID_KEY = "VISITOR_ID";
 
 const MIN_SEND_VIEW_INTERVAL = 1000 * 60;
 const MIN_POST_VIEW_TIME = 1000 * 5;
@@ -40,18 +39,6 @@ let postScrolledPercentage = 0;
 function lastSentViewExpired() {
     const viewSent = localStorage.getItem(sentViewKey);
     return !viewSent || (parseInt(viewSent) + MIN_SEND_VIEW_INTERVAL < Date.now());
-}
-
-function getOrGenerateVisitorId() {
-    let visitorId = localStorage.getItem(VISITOR_ID_KEY);
-    if (visitorId) {
-        return visitorId;
-    }
-
-    visitorId = crypto.randomUUID();
-    localStorage.setItem(VISITOR_ID_KEY, visitorId);
-
-    return visitorId;
 }
 
 function postRequest(url, body) {

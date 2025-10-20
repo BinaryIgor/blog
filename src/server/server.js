@@ -81,11 +81,11 @@ export async function start(clock = new Clock(),
     });
 
     // TODO: implement fully!
-    app.post("/newsletter/subscribe", async (req, res) => {
+    app.post("/newsletter/subscribers", async (req, res) => {
         try {
             const ip = req.header(REAL_IP_HEADER) || req.socket.remoteAddress;
             const ipHash = Web.hashedIp(ip);
-            const {email, placement, source} = req.body;
+            const {visitorId, email, placement, source} = req.body;
             Logger.logInfo("Adding sub: ", req.body);
             res.sendStatus(200);
         } catch(e) {

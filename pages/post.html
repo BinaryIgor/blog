@@ -12,10 +12,10 @@
 <body data-post-slug="{{ slug }}">
     {{ navigation.html }}
 
-    <div id="subscribe-button"
+    <div id="get-newsletter-button"
         class="bg-primary font-bold fixed bottom-4 right-4 border-[2px] border-solid border-primary-text-faded rounded p-4 cursor-pointer">
         Binary Log</div>
-        {{ .js: newsletterSignUpPostFloating() }}
+    {{ .js: newsletterSignUpPostFloating() }}
     </div>
 
     <!-- see POST_TOP_MARGIN dependency below -->
@@ -51,6 +51,7 @@
     {{ footer.html }}
 
     {{ init-script.html }}
+    {{ newsletter-lib.html }}
     <script>
         function copyToClipboard(email) {
             navigator.clipboard.writeText(email);
@@ -203,20 +204,24 @@
             });
         }
 
-        function setUpFloatingNewsletter() {
-            const subscribeButton = document.getElementById("subscribe-button");
-            subscribeButton.onclick = () => {
-                document.dispatchEvent(new CustomEvent("newsletter-modal-show"));
-            };
-            document.addEventListener("newsletter-modal-signed-up", e => {
-                subscribeButton.classList.add("hidden");
-            });
+        function setUpFloatingNewsletterButton() {
+            const getNewsletterButton = document.getElementById("get-newsletter-button");
+            if (isNewsletterSubscriber() || wasNewsletterModalClosed()) {
+                getNewsletterButton.classList.add("hidden");
+            } else {
+                getNewsletterButton.onclick = () => document.dispatchEvent(new CustomEvent("newsletter-modal-show"));
+                document.addEventListener("newsletter-modal-signed-up", () => getNewsletterButton.classList.add("hidden"));
+                document.addEventListener("newsletter-modal-already-signed-up", () => getNewsletterButton.classList.add("hidden"));
+                document.addEventListener("newsletter-modal-closed", () => getNewsletterButton.classList.add("hidden"));
+                document.addEventListener("newsletter-signed-up", () => getNewsletterButton.classList.add("hidden"));
+                document.addEventListener("newsletter-already-signed-up", () => getNewsletterButton.classList.add("hidden"));
+            }
         }
 
         setUpNextPostsProposition();
         setUpHeadersOnClickAnchorLinks();
         setUpPostSeenPercentageObserver();
-        setUpFloatingNewsletter();
+        setUpFloatingNewsletterButton();
     </script>
 </body>
 
