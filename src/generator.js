@@ -91,9 +91,6 @@ async function allPages(pagesDir, postsData) {
     let pages = {};
 
     for (const fn of fileNames) {
-        if (!fn.includes(".")) {
-            continue;
-        }
         const content = await fileContent(path.join(pagesDir, fn));
         pages[fn] = content;
     }

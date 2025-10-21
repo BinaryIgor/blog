@@ -1,14 +1,3 @@
-import fs from "fs";
-import path from "path";
-
-import { fileURLToPath } from 'url';
-import { dirname } from 'path';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
-const componentsTemplatesDir = path.join(__dirname, "components-templates");
-
 const LATEST_POSTS = 5;
 
 const NewsletterSignUpPlacement = {
@@ -17,10 +6,6 @@ const NewsletterSignUpPlacement = {
     POST_FLOATING: "POST_FLOATING",
     LANDING: "LANDING"
 };
-
-function fileContent(filePath) {
-    return fs.promises.readFile(filePath, 'utf-8');
-}
 
 export function postMetadata({ publishedAt }) {
     if (!publishedAt) {
@@ -116,17 +101,67 @@ export function newsletterSignUpLanding() {
     return newsletterSignUp(NewsletterSignUpPlacement.LANDING);
 }
 
-// TODO: refactor
+// TODO: refactor, commonize
 async function newsletterSignUp(placement, preface, additionalContainerClasses) {
-    if (placement == NewsletterSignUpPlacement.POST_FLOATING) {
-        const template = await fileContent(path.join(componentsTemplatesDir, "newsletter-sign-up-modal.html"));
-        return template.replaceAll("__PLACEMENT__", placement);
+    let headerMessage = `Get the <span class="font-bold">Binary Log</span> Newsletter - deep dives, discoveries and distilled insights from my latest work:`;
+    if (preface) {
+        headerMessage = preface + " " + headerMessage;
+    }
+    const headerHTML = `<div class="mb-2">${headerMessage}</div>`;
+    const inputHTML = `
+    <input class="p-2 border-[2px] border-solid border-primary-text-faded rounded w-full bg-primary focus:outline-primary-text focus:outline-[2px] focus:outline placeholder:text-secondary-3" 
+        placeholder="you@domain.ext" type="email" name="email" autocomplete="email">
+    <span class="text-error block my-2 hidden text-sm" data-email-error>Valid email is required.</span>
+    <span class="opacity-80 text-sm"><a href="/privacy.html" class="underline">Privacy policy</a> accepted.</span>`
+    const footerHTML = `
+    <div class="italic mt-8">Join other developers learning along the way.</div>
+    <div class="italic">No spam, no fluff - pure signal. Unsubscribe anytime.</div>`;
+
+    let buttonsHTML;
+    if (placement == NewsletterSignUpPlacement.LANDING) {
+        buttonsHTML = `
+        <div class="flex justify-end mt-8">
+            <div class="cursor-pointer text-secondary-3 hover:text-primary ml-4" data-join-button>Join Log</div>
+        </div>`;
+    } else if (placement == NewsletterSignUpPlacement.POST_FLOATING) {
+        buttonsHTML = `
+        <div class="flex justify-between mt-8">
+            <div class="cursor-pointer text-secondary-3 hover:text-primary mr-4" data-close-button>Not Yet</div>
+            <div class="cursor-pointer text-secondary-3 hover:text-primary ml-4" data-join-button>Join Log</div>
+        </div>`;
+    } else {
+        buttonsHTML = `
+        <div class="flex justify-between mt-8">
+            <div class="cursor-pointer text-secondary-3 hover:text-primary mr-4" data-joined-already-button>Already In</div>
+            <div class="cursor-pointer text-secondary-3 hover:text-primary ml-4" data-join-button>Join Log</div>
+        </div>`;
     }
 
-    const template = await fileContent(path.join(componentsTemplatesDir, "newsletter-sign-up.html"));
-    return template.replaceAll("__CLASSES_TO_APPEND__", additionalContainerClasses ? " " + additionalContainerClasses : "")
-        .replaceAll("__PLACEMENT__", placement)
-        .replaceAll("__HEADER_PREFACE__", preface ? preface + " " : "");
+    if (placement == NewsletterSignUpPlacement.POST_FLOATING) {
+        return `
+        <div class="bg-modal hidden fixed top-0 left-0 h-full w-full z-10" data-newsletter-sign-up-modal
+            data-newsletter-sign-up-placement="${placement}">
+            <div data-modal-content class="max-content-width w-11/12 top-1/2 left-1/2 absolute -translate-x-1/2 -translate-y-1/2 bg-primary border-[2px] border-solid border-primary-text-faded rounded p-6">
+                ${headerHTML}
+                ${inputHTML}
+                ${footerHTML}
+                ${buttonsHTML}
+            </div>
+        </div>`;
+    }
+
+    let containerClasses = "border-[2px] border-solid border-primary-text-faded rounded p-6";
+    if (additionalContainerClasses) {
+        containerClasses = containerClasses + " " + additionalContainerClasses;
+    }
+
+    return `
+    <div class="${containerClasses}" data-newsletter-sign-up data-newsletter-sign-up-placement="${placement}">
+        ${headerHTML}
+        ${inputHTML}
+        ${footerHTML}
+        ${buttonsHTML}
+    </div>`;
 }
 
 export function feedUpdatedAt({ posts, lastFeedUpdateAtAfterLatestPost = null }) {

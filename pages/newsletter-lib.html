@@ -42,19 +42,19 @@
         return localStorage.getItem("NEWSLETTER_SUBSCRIBER");
     }
 
-    function storeNewsletterModalClosed() {
-        localStorage.setItem("NEWSLETTER_MODAL_CLOSED_AT", Date.now());
-    }
+    // function storeNewsletterModalClosed() {
+    //     localStorage.setItem("NEWSLETTER_MODAL_CLOSED_AT", Date.now());
+    // }
 
-    // TODO: longer time
-    function wasNewsletterModalClosed() {
-        let closedAt = localStorage.getItem("NEWSLETTER_MODAL_CLOSED_AT");
-        if (!closedAt) {
-            return false;
-        }
-        // show it again after a few hours
-        return (Date.now() - parseInt(closedAt)) < (1 * 3600 * 1000);
-    }
+    // // TODO: longer time
+    // function wasNewsletterModalClosed() {
+    //     let closedAt = localStorage.getItem("NEWSLETTER_MODAL_CLOSED_AT");
+    //     if (!closedAt) {
+    //         return false;
+    //     }
+    //     // show it again after a few hours
+    //     return (Date.now() - parseInt(closedAt)) < (1 * 3600 * 1000);
+    // }
 
     function setUpNewsletterSignUps() {
         for (let signUp of document.querySelectorAll('[data-newsletter-sign-up]')) {
@@ -65,15 +65,19 @@
 
     // TODO: refactor a bit
     const newSubsriberMessage = "Almost there - check your inbox for confirmation and we are all set!";
-    const alreadyJoinedMessageHTML = `You have already joined the <a href="/newsletter.html" class='underline font-bold'>Binary Log</a> - thanks!`;
-    const justJoinedMessageHTML = `You have just joined the <span class='font-bold'>Binary Log</span> - thanks!`;
+    const alreadyJoinedMessageHTML = `It seems that you have already joined the <a href="/newsletter.html" class='underline'><strong>Binary Log</strong> Newsletter</a>. Thanks!`;
+    const justJoinedMessageHTML = `It seems that you have just joined the <strong>Binary Log</strong> Newsletter. Thanks!`;
     const joiningMessage = "Joining...";
-    const sendNewSubscriberErrorMessage = "Failed to subscribe - network or server error. Try again later";
+    const sendNewSubscriberErrorMessage = "Failed to subscribe - network or server error. Try again later.";
 
     function setUpNewsletterSignUp(signUp) {
         const placement = signUp.getAttribute('data-newsletter-sign-up-placement');
         if (isNewsletterSubscriber() && placement != 'LANDING') {
-            signUp.innerHTML = alreadyJoinedMessageHTML;
+            if (placement == 'POST_END') {
+                signUp.innerHTML = alreadyJoinedMessageHTML;
+            } else {
+                signUp.classList.add("hidden");
+            }
             return;
         }
 
@@ -107,7 +111,6 @@
                 signUp.innerHTML = subscriberResult == sendSubscriberResult.CREATED ? newSubsriberMessage : alreadyJoinedMessageHTML;
                 const scrollAfter = signUp.clientHeight;
                 window.scrollBy({ top: (scrollAfter - scrollBefore), left: 0, behavior: 'instant' });
-
                 document.dispatchEvent(new CustomEvent("newsletter-signed-up", { detail: { placement } }));
             } else {
                 emailError.textContent = sendNewSubscriberErrorMessage;
@@ -117,14 +120,16 @@
 
             joining = false;
         };
-        joinedAlreadyButton.onclick = () => {
-            const scrollBefore = signUp.clientHeight;
-            storeNewsletterSubscriber();
-            document.dispatchEvent(new CustomEvent("newsletter-already-signed-up"));
-            signUp.innerHTML = alreadyJoinedMessageHTML;
-            const scrollAfter = signUp.clientHeight;
-            window.scrollBy({ top: (scrollAfter - scrollBefore), left: 0, behavior: 'instant' });
-        };
+        if (joinedAlreadyButton) {
+            joinedAlreadyButton.onclick = () => {
+                const scrollBefore = signUp.clientHeight;
+                storeNewsletterSubscriber();
+                document.dispatchEvent(new CustomEvent("newsletter-already-signed-up"));
+                signUp.innerHTML = alreadyJoinedMessageHTML;
+                const scrollAfter = signUp.clientHeight;
+                window.scrollBy({ top: (scrollAfter - scrollBefore), left: 0, behavior: 'instant' });
+            };
+        }
 
         document.addEventListener("newsletter-signed-up", e => {
             // subscribed from a different placement - disable
@@ -133,10 +138,9 @@
             }
         });
         // subscribed from modal - disable
-        document.addEventListener("newsletter-modal-signed-up", e => signUp.innerHTML = justJoinedMessageHTML);
-        // informed that joined already from modal or another sign up
-        document.addEventListener("newsletter-modal-already-signed-up", e => signUp.innerHTML = alreadyJoinedMessageHTML);
-        document.addEventListener("newsletter-already-signed-up", e => signUp.innerHTML = alreadyJoinedMessageHTML);
+        document.addEventListener("newsletter-modal-signed-up", () => signUp.innerHTML = justJoinedMessageHTML);
+        // informed that joined already from another sign up
+        document.addEventListener("newsletter-already-signed-up", () => signUp.innerHTML = alreadyJoinedMessageHTML);
     }
 
     function setUpNewsletterSignUpModal() {
@@ -157,7 +161,6 @@
         const closeButton = signUp.querySelector('[data-close-button]');
         const joinButton = signUp.querySelector('[data-join-button]');
         const initialJoinButtonText = joinButton.textContent;
-        const joinedAlreadyButton = signUp.querySelector('[data-joined-already-button]');
 
         let joining = false;
         joinButton.onclick = async () => {
@@ -192,19 +195,18 @@
 
             joining = false;
         };
-        closeButton.onclick = () => {
+        const onClose = () => {
             signUp.classList.add("hidden");
-            storeNewsletterModalClosed();
+            // storeNewsletterModalClosed();
             document.dispatchEvent(new CustomEvent("newsletter-modal-closed"));
-        }
-        document.addEventListener("newsletter-modal-show", e => {
-            signUp.classList.remove("hidden");
-        });
-        joinedAlreadyButton.onclick = () => {
-            storeNewsletterSubscriber();
-            document.dispatchEvent(new CustomEvent("newsletter-modal-already-signed-up"));
-            signUp.classList.add("hidden");
         };
+        closeButton.onclick = onClose;
+        document.addEventListener("newsletter-modal-show", e => signUp.classList.remove("hidden"));
+        signUp.addEventListener("click", e => {
+            if (e.target == signUp) {
+                onClose();
+            }
+        });
     }
 
     setUpNewsletterSignUps();
