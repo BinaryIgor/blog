@@ -11,8 +11,8 @@ const MAX_PINGS_TO_SEND_WITHOUT_SCROLL_CHANGE = 2 * 5;
 const MIN_SEND_RETRY_DELAY = 500;
 const MAX_SEND_RETRY_DELAY = 5000;
 const MAX_MIN_SEND_RETRY_DELAY_DIFF = MAX_SEND_RETRY_DELAY - MIN_SEND_RETRY_DELAY;
-// longest case: 5s * 60 = 300s ~ 5 minutes; ~ 2.5 minutes (150s) on average probably
-const MAX_RETRIES = 60;
+// longest case: 5s * 30 = 150s ~ 2.5 minutes; ~ 1.25 minutes (125s) on average probably
+const MAX_RETRIES = 30;
 // pings are sent continuously
 const MAX_PING_RETRIES = 2;
 
@@ -49,18 +49,24 @@ function postRequest(url, body) {
     });
 }
 
-function sendEvent(sourceUrl, visitorId, type, data = null, maxRetries = MAX_RETRIES, retry = 0) {
+function sendEvent(type, data = null, maxRetries = MAX_RETRIES, retry = 0) {
     function scheduleRetry() {
         const nextRetry = retry + 1;
         if (nextRetry <= maxRetries) {
             const nextSendEventDelay = MIN_SEND_RETRY_DELAY + (Math.random() * MAX_MIN_SEND_RETRY_DELAY_DIFF);
             setTimeout(() => {
-                sendEvent(sourceUrl, visitorId, type, data, maxRetries, nextRetry);
+                sendEvent(type, data, maxRetries, nextRetry);
             }, nextSendEventDelay);
         }
     }
 
-    postRequest(eventsUrl, { source: sourceUrl, visitorId: visitorId, path: currentPath, type: type, data: data })
+    const visitorId = getOrGenerateVisitorId();
+    const sessionId = getOrGenerateSessionId();
+    const source = sessionSource();
+    const medium = sessionMedium();
+    const ref = pageRef();
+
+    postRequest(eventsUrl, { visitorId, sessionId, source, medium, ref, path: currentPath, type, data })
         .then(r => {
             if (!r.ok) {
                 scheduleRetry();
@@ -71,38 +77,35 @@ function sendEvent(sourceUrl, visitorId, type, data = null, maxRetries = MAX_RET
         .catch(scheduleRetry);
 }
 
-function tryToSendViewEvent(sourceUrl, visitorId) {
+function tryToSendViewEvent() {
     if (postPage) {
         setTimeout(() => {
-            sendEvent(sourceUrl, visitorId, VIEW_EVENT_TYPE);
+            sendEvent(VIEW_EVENT_TYPE);
             if (postScrolled25) {
-                sendScrollEvent(sourceUrl, visitorId, 25);
+                sendScrollEvent(25);
             }
             if (postScrolled50) {
-                sendScrollEvent(sourceUrl, visitorId, 50);
+                sendScrollEvent(50);
             }
             if (postScrolled75) {
-                sendScrollEvent(sourceUrl, visitorId, 75);
+                sendScrollEvent(75);
             }
             if (postScrolled100) {
-                sendScrollEvent(sourceUrl, visitorId, 100);
+                sendScrollEvent(100);
             }
             minimumPostViewTimePassed = true;
         }, MIN_POST_VIEW_TIME);
     } else if (lastSentViewExpired()) {
-        sendEvent(sourceUrl, visitorId, VIEW_EVENT_TYPE);
+        sendEvent(VIEW_EVENT_TYPE);
     }
 }
 
-function sendScrollEvent(sourceUrl, visitorId, data) {
-    sendEvent(sourceUrl, visitorId, SCROLL_EVENT_TYPE, data);
+function sendScrollEvent(data) {
+    sendEvent(SCROLL_EVENT_TYPE, data);
 }
 
-const sourceUrl = document.referrer ? document.referrer : document.location.href;
-const visitorId = getOrGenerateVisitorId();
-
 if (pageToSendEvents) {
-    tryToSendViewEvent(sourceUrl, visitorId);
+    tryToSendViewEvent();
 }
 
 if (pageToSendEvents && postPage) {
@@ -119,25 +122,25 @@ if (pageToSendEvents && postPage) {
         if (!postScrolled25) {
             postScrolled25 = postScrolledPercentage >= 25;
             if (postScrolled25 && minimumPostViewTimePassed) {
-                sendScrollEvent(sourceUrl, visitorId, 25);
+                sendScrollEvent(25);
             }
         }
         if (!postScrolled50) {
             postScrolled50 = postScrolledPercentage >= 50;
             if (postScrolled50 && minimumPostViewTimePassed) {
-                sendScrollEvent(sourceUrl, visitorId, 50);
+                sendScrollEvent(50);
             }
         }
         if (!postScrolled75) {
             postScrolled75 = postScrolledPercentage >= 75;
             if (postScrolled75 && minimumPostViewTimePassed) {
-                sendScrollEvent(sourceUrl, visitorId, 75);
+                sendScrollEvent(75);
             }
         }
         if (!postScrolled100) {
             postScrolled100 = postScrolledPercentage >= 100;
             if (postScrolled100 && minimumPostViewTimePassed) {
-                sendScrollEvent(sourceUrl, visitorId, 100);
+                sendScrollEvent(100);
             }
         }
     });
@@ -154,7 +157,7 @@ if (pageToSendEvents && postPage) {
             sameScrollPositionPings = 0;
         }
         if (sameScrollPositionPings < MAX_PINGS_TO_SEND_WITHOUT_SCROLL_CHANGE) {
-            sendEvent(sourceUrl, visitorId, PING_EVENT_TYPE, postScrolledPercentage, MAX_PING_RETRIES);
+            sendEvent(PING_EVENT_TYPE, postScrolledPercentage, MAX_PING_RETRIES);
             lastPingSentTimestamp = Date.now();
         }
     }, SEND_PING_INTERVAL);

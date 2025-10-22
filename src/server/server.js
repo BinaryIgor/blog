@@ -71,7 +71,9 @@ export async function start(clock = new Clock(),
             const ip = req.header(REAL_IP_HEADER) || req.socket.remoteAddress;
             const ipHash = Web.hashedIp(ip);
             const reqBody = req.body;
-            const event = new Event(clock.nowTimestamp(), reqBody.visitorId, ipHash, reqBody.source, reqBody.path, reqBody.type, reqBody.data);
+            const event = new Event(clock.nowTimestamp(), reqBody.visitorId, reqBody.sessionId, ipHash,
+                reqBody.source, reqBody.medium, reqBody.ref,
+                reqBody.path, reqBody.type, reqBody.data);
             await analyticsService.addEvent(event);
         } catch (e) {
             Logger.logError(`Failed to add event ${JSON.stringify(req.body)}, ignoring it.`, e);
@@ -85,10 +87,10 @@ export async function start(clock = new Clock(),
         try {
             const ip = req.header(REAL_IP_HEADER) || req.socket.remoteAddress;
             const ipHash = Web.hashedIp(ip);
-            const {visitorId, email, placement, source} = req.body;
+            const { visitorId, email, placement, source } = req.body;
             Logger.logInfo("Adding sub: ", req.body);
             res.sendStatus(200);
-        } catch(e) {
+        } catch (e) {
             res.sendStatus(500);
         }
     });

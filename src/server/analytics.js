@@ -1,8 +1,12 @@
-import { URL } from "url";
 import * as Dates from "../shared/dates.js";
 import * as Logger from "../shared/logger.js";
 
-export const MAX_VISITOR_ID_LENGTH = 50;
+// UUID, checked by regex as well
+export const MAX_ID_LENGTH = 50;
+// max allowed domain name length
+export const MAX_SOURCE_LENGTH = 255;
+export const MAX_MEDIUM_LENGTH = 100;
+export const MAX_REF_LENGTH = 500;
 export const MAX_PATH_LENGTH = 500;
 export const DAY_SECONDS = 24 * 60 * 60;
 export const SEVEN_DAYS_SECONDS = DAY_SECONDS * 7;
@@ -41,23 +45,35 @@ export class AnalyticsService {
     }
 
     async addEvent(event) {
-        const validatedEvent = this._validatedEvent(event);
+        const validatedEvent = this.#validatedEvent(event);
 
-        await this._validatePathExists(validatedEvent);
+        await this.#validatePathExists(validatedEvent);
 
-        await this._validateIpHashUniqueVisitorsLimit(validatedEvent);
+        await this.#validateIpHashUniqueVisitorsLimit(validatedEvent);
 
         if (event.type == PING_TYPE) {
-            await this._validateVisitorPingsFrequency(validatedEvent);
+            await this.#validateVisitorPingsFrequency(validatedEvent);
         }
 
         await this.eventsSaver.addEvent(validatedEvent);
     }
 
-    _validatedEvent(event) {
-        const sourceUrl = new URL(event.source);
+    // TODO: lacking tests
+    #validatedEvent(event) {
+        this.#validateId(event.visitorId, "VisitorId");
+        this.#validateId(event.sessionId, "SessionId");
 
-        this._validateVisitorId(event.visitorId);
+        if (!event.source || event.source.length > MAX_SOURCE_LENGTH) {
+            throw new Error(`Source should not be empty and have max ${MAX_SOURCE_LENGTH} characters`)
+        }
+
+        if (event.medium && event.medium.length > MAX_MEDIUM_LENGTH) {
+            throw new Error(`Medium can have up to ${MAX_MEDIUM_LENGTH} characters`)
+        }
+
+        if (event.ref && event.ref.length > MAX_REF_LENGTH) {
+            throw new Error(`Ref can have up to ${MAX_REF_LENGTH} characters`)
+        }
 
         if (!event.path || event.path.length > MAX_PATH_LENGTH) {
             throw new Error(`Path can't be empty and must be less than ${MAX_PATH_LENGTH} of length, but was: ${event.path}`);
@@ -68,32 +84,30 @@ export class AnalyticsService {
             throw new Error('Unsupported event type!');
         }
 
-        const data = this._validatedEventData(event);
+        const data = this.#validatedEventData(event);
 
-        return { ...event, data: data, source: sourceUrl.host }
+        return { ...event, data: data };
     }
 
-    _validateVisitorId(visitorId) {
-        if (!visitorId || visitorId.length > MAX_VISITOR_ID_LENGTH) {
-            throw new Error(`VisitorId should no be empty and have max ${MAX_VISITOR_ID_LENGTH} characters`)
+    #validateId(id, idName) {
+        if (!id || id.length > MAX_ID_LENGTH) {
+            throw new Error(`${idName} should not be empty and have max ${MAX_ID_LENGTH} characters`)
         }
 
-        const match = visitorId.match(UUID_REGEX);
+        const match = id.match(UUID_REGEX);
         if (match === null) {
-            throw new Error("VisitorId should be valid UUID, but was: " + visitorId);
+            throw new Error(`${idName} should be valid UUID, but was: ${id}`);
         }
-
-        return true;
     }
 
-    _validatedEventData(event) {
+    #validatedEventData(event) {
         if (event.type == VIEW_TYPE) {
             return null;
         }
-        return this._validatedScrollPosition(event.data);
+        return this.#validatedScrollPosition(event.data);
     }
 
-    _validatedScrollPosition(position) {
+    #validatedScrollPosition(position) {
         try {
             const parsed = parseInt(position);
             if (isNaN(parsed)) {
@@ -108,7 +122,7 @@ export class AnalyticsService {
         }
     }
 
-    async _validateIpHashUniqueVisitorsLimit(event) {
+    async #validateIpHashUniqueVisitorsLimit(event) {
         const timestampAgoToCheck = Dates.timestampSecondsAgo(this.clock.nowTimestamp(), DAY_SECONDS);
 
         const uniqueVisitorIdsOfIp = await this.analyticsRepository
@@ -119,7 +133,7 @@ export class AnalyticsService {
         }
     }
 
-    async _validatePathExists(event) {
+    async #validatePathExists(event) {
         const inAllowedPaths = this.allowedPaths.some(p => p === event.path);
         if (inAllowedPaths) {
             return;
@@ -130,7 +144,7 @@ export class AnalyticsService {
         }
     }
 
-    async _validateVisitorPingsFrequency(event) {
+    async #validateVisitorPingsFrequency(event) {
         const timestampAgoToCheck = Dates.timestampSecondsAgo(this.clock.nowTimestamp(), NO_PINGS_WINDOW_SECONDS);
         const notAllowedPings = await this.analyticsRepository.countPingsAfterTimestamp(event.visitorId, event.path, timestampAgoToCheck);
         if (notAllowedPings > 0) {
@@ -140,11 +154,14 @@ export class AnalyticsService {
 }
 
 export class Event {
-    constructor(timestamp, visitorId, ipHash, source, path, type, data = null) {
+    constructor(timestamp, visitorId, sessionId, ipHash, source, medium, ref, path, type, data = null) {
         this.timestamp = timestamp;
         this.visitorId = visitorId;
+        this.sessionId = sessionId;
         this.ipHash = ipHash;
         this.source = source;
+        this.medium = medium;
+        this.ref = ref;
         this.path = path;
         this.type = type;
         this.data = data;

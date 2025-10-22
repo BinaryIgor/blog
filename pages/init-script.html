@@ -1,90 +1,195 @@
 <script>
-// Theme mode is embedded here for a better user experience - to avoid 0/I icon blink
-// Navigation/dark mode switch
-const navigation = document.getElementById("navigation");
+    // Theme mode is embedded here for a better user experience - to avoid 0/I icon blink
+    // Navigation/dark mode switch
+    const navigation = document.getElementById("navigation");
 
-document.getElementById("navigation-toggle").onclick = () => {
-    navigation.classList.toggle("hidden");
-};
+    document.getElementById("navigation-toggle").onclick = () => {
+        navigation.classList.toggle("hidden");
+    };
 
-function setupMode() {
-    const KEY = "MODE";
+    function setupMode() {
+        const KEY = "MODE";
 
-    const LIGHT_MODE = 'light';
-    const DARK_MODE = 'dark';
-    const LIGHT_MODE_ICON = "I";
-    const DARK_MODE_ICON = "0";
-    const LIGHT_FAVICON_LINK = '/assets/favicon-light.svg';
-    const DARK_FAVICON_LINK = '/assets/favicon.svg';
+        const LIGHT_MODE = 'light';
+        const DARK_MODE = 'dark';
+        const LIGHT_MODE_ICON = "I";
+        const DARK_MODE_ICON = "0";
+        const LIGHT_FAVICON_LINK = '/assets/favicon-light.svg';
+        const DARK_FAVICON_LINK = '/assets/favicon.svg';
 
-    const themeToggle = document.getElementById("theme-toggle");
-    const faviconLink = document.querySelector('link[rel="icon"]');
+        const themeToggle = document.getElementById("theme-toggle");
+        const faviconLink = document.querySelector('link[rel="icon"]');
 
-    const currentMode = () => {
-        const mode = localStorage.getItem(KEY);
-        if (mode) {
-            return mode;
+        const currentMode = () => {
+            const mode = localStorage.getItem(KEY);
+            if (mode) {
+                return mode;
+            }
+            return DARK_MODE;
         }
-        return DARK_MODE;
-    }
 
-    const setDarkMode = () => {
-        document.documentElement.classList.add(DARK_MODE);
-        localStorage.setItem(KEY, DARK_MODE)
-        themeToggle.textContent = DARK_MODE_ICON;
-        faviconLink.setAttribute('href', DARK_FAVICON_LINK);
-    };
+        const setDarkMode = () => {
+            document.documentElement.classList.add(DARK_MODE);
+            localStorage.setItem(KEY, DARK_MODE)
+            themeToggle.textContent = DARK_MODE_ICON;
+            faviconLink.setAttribute('href', DARK_FAVICON_LINK);
+        };
 
-    const setLightMode = () => {
-        document.documentElement.classList.remove(DARK_MODE);
-        localStorage.setItem(KEY, LIGHT_MODE)
-        themeToggle.textContent = LIGHT_MODE_ICON;
-        faviconLink.setAttribute('href', LIGHT_FAVICON_LINK);
-    };
+        const setLightMode = () => {
+            document.documentElement.classList.remove(DARK_MODE);
+            localStorage.setItem(KEY, LIGHT_MODE)
+            themeToggle.textContent = LIGHT_MODE_ICON;
+            faviconLink.setAttribute('href', LIGHT_FAVICON_LINK);
+        };
 
-    if (currentMode() == LIGHT_MODE) {
-        setLightMode();
-    } else {
-        setDarkMode();
-    }
-
-    themeToggle.onclick = () => {
         if (currentMode() == LIGHT_MODE) {
-            setDarkMode();
-        } else {
             setLightMode();
-        }
-    };
-}
-
-setupMode();
-
-// some global functions
-function apiDomain() {
-    const prodDomain = "https://api.binaryigor.com";
-
-    let domain;
-    try {
-        if (document.location.host.includes("localhost")) {
-            domain = "https://localhost";
         } else {
+            setDarkMode();
+        }
+
+        themeToggle.onclick = () => {
+            if (currentMode() == LIGHT_MODE) {
+                setDarkMode();
+            } else {
+                setLightMode();
+            }
+        };
+    }
+
+    setupMode();
+
+    // some global functions
+    function apiDomain() {
+        const prodDomain = "https://api.binaryigor.com";
+
+        let domain;
+        try {
+            if (document.location.host.includes("localhost")) {
+                domain = "https://localhost";
+            } else {
+                domain = prodDomain;
+            }
+        } catch (e) {
             domain = prodDomain;
         }
-    } catch (e) {
-        domain = prodDomain;
+
+        return domain;
     }
 
-    return domain;
-}
-
-function getOrGenerateVisitorId() {
-    let visitorId = localStorage.getItem("VISITOR_ID");
-    if (visitorId) {
+    function getOrGenerateVisitorId() {
+        let visitorId = localStorage.getItem("VISITOR_ID");
+        if (visitorId) {
+            return visitorId;
+        }
+        visitorId = crypto.randomUUID();
+        localStorage.setItem("VISITOR_ID", visitorId);
         return visitorId;
     }
-    visitorId = crypto.randomUUID();
-    localStorage.setItem("VISITOR_ID", visitorId);
-    return visitorId;
-}
+
+    const SESSION_TIMEOUT_MS = 2 * 60 * 60 * 1000; // 2 hours
+    const SESSION_ID_KEY = "SESSION_ID";
+    const SESSION_SOURCE_KEY = "SESSION_SOURCE";
+    const SESSION_MEDIUM_KEY = "SESSION_MEDIUM";
+
+    function getOrGenerateSessionId() {
+        const savedSessionId = localStorage.getItem(SESSION_ID_KEY);
+        if (!savedSessionId) {
+            const newId = crypto.randomUUID();
+            localStorage.setItem(SESSION_ID_KEY, JSON.stringify({ sessionId: newId, timestamp: Date.now() }));
+            return newId;
+        }
+
+        const { sessionId, timestamp } = JSON.parse(savedSessionId);
+        const now = Date.now();
+        if ((now - timestamp) <= SESSION_TIMEOUT_MS) {
+            localStorage.setItem(SESSION_ID_KEY, JSON.stringify({ sessionId, timestamp: now }));
+            return sessionId;
+        }
+
+        const newId = crypto.randomUUID();
+        localStorage.setItem(SESSION_ID_KEY, JSON.stringify({ sessionId: newId, timestamp: now }));
+        return newId;
+    }
+
+
+    function sessionSource() {
+        const savedSource = sessionSourceFromStorage();
+        if (savedSource) {
+            return savedSource;
+        }
+
+        let newSource;
+        const params = new URLSearchParams(location.search);
+        const paramsSource = params.get("source") ?? params.get("utm_source");
+        if (paramsSource) {
+            newSource = paramsSource;
+        } else if (document.referrer) {
+            newSource = new URL(document.referrer).host;
+        } else {
+            newSource = document.location.host;
+        }
+
+        localStorage.setItem(SESSION_SOURCE_KEY, JSON.stringify({ source: newSource, sessionId: getOrGenerateSessionId() }));
+
+        return newSource;
+    }
+
+    function sessionSourceFromStorage() {
+        const savedSource = localStorage.getItem(SESSION_SOURCE_KEY);
+        if (!savedSource) {
+            return null;
+        }
+        const { source, sessionId } = JSON.parse(savedSource);
+        if (sessionId == getOrGenerateSessionId()) {
+            return source;
+        }
+        return null;
+    }
+
+    function sessionMedium() {
+        const savedMedium = sessionMediumFromStorage();
+        if (savedMedium) {
+            return savedMedium;
+        }
+
+        const params = new URLSearchParams(location.search);
+        let newMedium = params.get("medium") ?? params.get("utm_medium");
+
+        if (newMedium) {
+            localStorage.setItem(SESSION_MEDIUM_KEY, JSON.stringify({ medium: newMedium, sessionId: getOrGenerateSessionId() }));
+        }
+
+        return newMedium;
+    }
+
+    function sessionMediumFromStorage() {
+        const savedMedium = localStorage.getItem(SESSION_MEDIUM_KEY);
+        if (!savedMedium) {
+            return null;
+        }
+
+        const { medium, sessionId } = JSON.parse(savedMedium);
+        if ((sessionId == getOrGenerateSessionId())) {
+            return medium;
+        }
+
+        localStorage.removeItem(SESSION_MEDIUM_KEY);
+        return null;
+    }
+
+    function pageRef() {
+        const ref = document.referrer;
+        if (ref) {
+            const url = new URL(ref);
+            return url.host + url.pathname;
+        }
+        return null;
+    }
+
+    console.log("Active sessionId: ", getOrGenerateSessionId());
+    console.log("Session source: ", sessionSource());
+    console.log("Session medium: ", sessionMedium());
+    console.log("Page ref: ", pageRef());
 </script>
 <script defer src="{{ assetsPath }}/analytics.js"></script>

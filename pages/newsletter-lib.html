@@ -42,20 +42,6 @@
         return localStorage.getItem("NEWSLETTER_SUBSCRIBER");
     }
 
-    // function storeNewsletterModalClosed() {
-    //     localStorage.setItem("NEWSLETTER_MODAL_CLOSED_AT", Date.now());
-    // }
-
-    // // TODO: longer time
-    // function wasNewsletterModalClosed() {
-    //     let closedAt = localStorage.getItem("NEWSLETTER_MODAL_CLOSED_AT");
-    //     if (!closedAt) {
-    //         return false;
-    //     }
-    //     // show it again after a few hours
-    //     return (Date.now() - parseInt(closedAt)) < (1 * 3600 * 1000);
-    // }
-
     function setUpNewsletterSignUps() {
         for (let signUp of document.querySelectorAll('[data-newsletter-sign-up]')) {
             setUpNewsletterSignUp(signUp);

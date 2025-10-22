@@ -6,14 +6,21 @@ export function initSchema(db) {
         CREATE TABLE IF NOT EXISTS event (
             timestamp INTEGER(8) NOT NULL,
             visitor_id TEXT NOT NULL,
+            session_id TEXT NOT NULL,
             ip_hash TEXT NOT NULL,
             source TEXT NOT NULL,
+            medium TEXT,
+            ref TEXT,
             path TEXT NOT NULL,
             type TEXT NOT NULL,
             data TEXT
         );
     
         CREATE INDEX IF NOT EXISTS event_timestamp ON event(timestamp);
+
+        -- ALTER TABLE event ADD COLUMN medium TEXT --;
+        -- ALTER TABLE event ADD COLUMN ref TEXT --;
+        -- ALTER TABLE event ADD COLUMN session_id TEXT NOT NULL DEFAULT '' --;
     
         CREATE VIEW IF NOT EXISTS view AS SELECT * FROM event WHERE type = 'VIEW';
         CREATE VIEW IF NOT EXISTS scroll AS SELECT * FROM event WHERE type = 'SCROLL';
