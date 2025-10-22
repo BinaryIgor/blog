@@ -31,7 +31,7 @@ const PING_TYPE = 'PING';
 // 2 pings per minute so should be 30 in theory but there could be retries, lags and so on
 const NO_PINGS_WINDOW_SECONDS = 20;
 const MIN_SCROLL = 0;
-// Some pages might allow to overscroll a bit
+// Some pages (posts) might allow to overscroll a bit
 const MAX_SCROLL = 150;
 
 export class AnalyticsService {
@@ -96,7 +96,7 @@ export class AnalyticsService {
 
         const match = id.match(UUID_REGEX);
         if (match === null) {
-            throw new Error(`${idName} should be valid UUID, but was: ${id}`);
+            throw new Error(`${idName} should be valid UUID but was: ${id}`);
         }
     }
 

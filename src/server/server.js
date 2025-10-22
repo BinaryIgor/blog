@@ -14,8 +14,6 @@ import { initSchema, SqliteDb, SqliteDbBackuper } from "./db.js";
 import { Clock } from "../shared/dates.js";
 import { PostsSource } from "./posts.js";
 
-const REAL_IP_HEADER = "X-Real-Ip";
-
 let server;
 let scheduler;
 let db;
@@ -68,7 +66,7 @@ export async function start(clock = new Clock(),
     // TODO: some metrics + diagnostics endpoint!
     app.post("/analytics/events", async (req, res) => {
         try {
-            const ip = req.header(REAL_IP_HEADER) || req.socket.remoteAddress;
+            const ip = Web.sourceIp(req);
             const ipHash = Web.hashedIp(ip);
             const reqBody = req.body;
             const event = new Event(clock.nowTimestamp(), reqBody.visitorId, reqBody.sessionId, ipHash,
@@ -85,9 +83,10 @@ export async function start(clock = new Clock(),
     // TODO: implement fully!
     app.post("/newsletter/subscribers", async (req, res) => {
         try {
-            const ip = req.header(REAL_IP_HEADER) || req.socket.remoteAddress;
+            const ip = Web.sourceIp(req);
             const ipHash = Web.hashedIp(ip);
-            const { visitorId, email, placement, source } = req.body;
+            const { email, placement, visitorId, sessionId, source, medium, ref } = req.body;
+            // TODO: save potential sub + then integrate with hooks!
             Logger.logInfo("Adding sub: ", req.body);
             res.sendStatus(200);
         } catch (e) {

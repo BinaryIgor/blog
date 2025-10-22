@@ -55,7 +55,7 @@ function analyticsAllowedPaths() {
         "/about.html",
         "/posts.html",
         "/newsletter.html",
-        "/privacy.html",
+        "/privacy-policy.html",
         "/htmx-posts.html",
         "/dbs-posts.html",
         "/modularity-posts.html",

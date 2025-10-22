@@ -1,7 +1,9 @@
 <script>
+    // TODO: handle!
     const sendSubscriberResult = {
         CREATED: "CREATED",
         EXISTS: "EXISTS",
+        INVALID_EMAIL: "INVALID_EMAIL",
         FAILURE: "FAILURE"
     };
     async function sendNewSubscriber(email, placement, retry = true) {
@@ -11,8 +13,11 @@
                 headers: { "content-type": "application/json" },
                 body: JSON.stringify({
                     visitorId: getOrGenerateVisitorId(),
+                    sessionId: getOrGenerateSessionId(),
+                    source: sessionSource(),
+                    medium: sessionMedium(),
+                    ref: pageRef(),
                     email,
-                    source: "TODO",
                     placement
                 })
             });
@@ -22,6 +27,9 @@
             }
             if (response.status == 409) {
                 return sendSubscriberResult.EXISTS;
+            }
+            if (response.status == 422) {
+                return sendSubscriberResult.INVALID_EMAIL;
             }
         } catch (e) {
             console.error("Error", e);
@@ -54,7 +62,8 @@
     const alreadyJoinedMessageHTML = `It seems that you have already joined the <a href="/newsletter.html" class='underline'><strong>Binary Log</strong> Newsletter</a>. Thanks!`;
     const justJoinedMessageHTML = `It seems that you have just joined the <strong>Binary Log</strong> Newsletter. Thanks!`;
     const joiningMessage = "Joining...";
-    const sendNewSubscriberErrorMessage = "Failed to subscribe - network or server error. Try again later.";
+    const sendNewSubscriberFailureMessage = "Failed to join - network or server error. Try again later.";
+    const sendNewSubscriberInvalidEmailMessage = "Invalid email - make sure that both username and domain parts of the address have intended values.";
 
     function setUpNewsletterSignUp(signUp) {
         const placement = signUp.getAttribute('data-newsletter-sign-up-placement');
@@ -79,8 +88,7 @@
             if (joining) {
                 return;
             }
-            // TODO proper validation
-            if (!input.value) {
+            if (!isEmailValid(input.value)) {
                 emailError.classList.remove("hidden");
                 return;
 
@@ -92,16 +100,18 @@
             joinButton.textContent = joiningMessage;
 
             const subscriberResult = await sendNewSubscriber(input.value, placement);
-            if (subscriberResult != sendSubscriberResult.FAILURE) {
+            if (subscriberResult == sendSubscriberResult.FAILURE ||
+                subscriberResult == sendSubscriberResult.INVALID_EMAIL
+            ) {
+                emailError.textContent = subscriberResult == sendSubscriberResult.FAILURE ? sendNewSubscriberFailureMessage : sendNewSubscriberInvalidEmailMessage;
+                emailError.classList.remove("hidden");
+                joinButton.textContent = initialJoinButtonText;
+            } else {
                 const scrollBefore = signUp.clientHeight;
                 signUp.innerHTML = subscriberResult == sendSubscriberResult.CREATED ? newSubsriberMessage : alreadyJoinedMessageHTML;
                 const scrollAfter = signUp.clientHeight;
                 window.scrollBy({ top: (scrollAfter - scrollBefore), left: 0, behavior: 'instant' });
                 document.dispatchEvent(new CustomEvent("newsletter-signed-up", { detail: { placement } }));
-            } else {
-                emailError.textContent = sendNewSubscriberErrorMessage;
-                emailError.classList.remove("hidden");
-                joinButton.textContent = initialJoinButtonText;
             }
 
             joining = false;
@@ -129,6 +139,11 @@
         document.addEventListener("newsletter-already-signed-up", () => signUp.innerHTML = alreadyJoinedMessageHTML);
     }
 
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    function isEmailValid(input) {
+        return input && emailRegex.test(input);
+    }
+
     function setUpNewsletterSignUpModal() {
         const signUp = document.querySelector(`[data-newsletter-sign-up-modal]`);
         if (!signUp) {
@@ -153,8 +168,7 @@
             if (joining) {
                 return;
             }
-            // TODO proper validation
-            if (!input.value) {
+            if (!isEmailValid(input.value)) {
                 emailError.classList.remove("hidden");
                 return;
             }
@@ -164,7 +178,13 @@
             emailError.classList.add("hidden");
             joinButton.textContent = joiningMessage;
             const subscriberResult = await sendNewSubscriber(input.value, placement);
-            if (subscriberResult != sendSubscriberResult.FAILURE) {
+            if (subscriberResult == sendSubscriberResult.FAILURE ||
+                subscriberResult == sendSubscriberResult.INVALID_EMAIL
+            ) {
+                emailError.textContent = subscriberResult == sendSubscriberResult.FAILURE ? sendNewSubscriberFailureMessage : sendNewSubscriberInvalidEmailMessage;
+                emailError.classList.remove("hidden");
+                joinButton.textContent = initialJoinButtonText;
+            } else {
                 const message = subscriberResult == sendSubscriberResult.CREATED ? newSubsriberMessage : alreadyJoinedMessageHTML;
                 signUpContent.innerHTML = `
                     <div>${message}</div>
@@ -173,10 +193,6 @@
                     </div>`;
                 signUpContent.querySelector('[data-after-join-button]').onclick = () => signUp.classList.add("hidden");
                 document.dispatchEvent(new CustomEvent("newsletter-modal-signed-up"));
-            } else {
-                emailError.textContent = sendNewSubscriberErrorMessage;
-                emailError.classList.remove("hidden");
-                joinButton.textContent = initialJoinButtonText;
             }
 
             joining = false;
