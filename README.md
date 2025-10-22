@@ -34,3 +34,9 @@ npm run build:run:blog
 For the rest, checkout package.json scripts and ops, and scripts folders!
 
 For now, the blog is deployed on the Digital Ocean's amazing App Platform and the server (for analytics) is on the separate droplet (also Digital Ocean's).
+
+
+### Newsletter
+* integrate some webhooks: https://docs.buttondown.com/api-webhooks-introduction
+* batch job to save analytics: https://docs.buttondown.com/api-emails-analytics
+* https://docs.buttondown.com/welcome-sequence
