@@ -112,7 +112,7 @@ async function newsletterSignUp(placement, preface, additionalContainerClasses) 
     <input class="p-2 border-[2px] border-solid border-primary-text-faded rounded w-full bg-primary focus:outline-primary-text focus:outline-[2px] focus:outline placeholder:text-secondary-3" 
         placeholder="you@domain.ext" type="email" name="email" autocomplete="email">
     <span class="text-error block my-1 hidden text-sm" data-email-error>Valid email is required.</span>
-    <span class="opacity-80 text-sm"><a href="/privacy-policy.html" class="underline">Privacy policy</a> accepted.</span>`
+    <span class="opacity-80 text-sm"><a href="/privacy-policy.html" class="underline">Privacy policy</a></span>`
     const footerHTML = `
     <div class="italic mt-8">Join other developers learning along the way.</div>
     <div class="italic">No spam, no fluff - pure signal. Unsubscribe anytime.</div>`;

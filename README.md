@@ -40,3 +40,5 @@ For now, the blog is deployed on the Digital Ocean's amazing App Platform and th
 * integrate some webhooks: https://docs.buttondown.com/api-webhooks-introduction
 * batch job to save analytics: https://docs.buttondown.com/api-emails-analytics
 * https://docs.buttondown.com/welcome-sequence
+* Buttondown - do they have retry policy? What about describing webhooks auth?
+* https://docs.buttondown.com/customizing-email-design

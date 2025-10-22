@@ -2,6 +2,7 @@ import bodyParser from "body-parser";
 import express from "express";
 import cors from "cors";
 import { AnalyticsService, DeferredEventsSaver, StatsViews, SqliteAnalyticsRepository, Event } from "./analytics.js";
+import { SubscriberService, SqliteSubscriberRepository, Subscriber, SubscriberSignUpContext, SubscribeResult, ButtondownSubscriberApi, ButtondownWebhookHandler } from "./newsletter.js";
 import { Scheduler } from "./scheduler.js";
 import * as Logger from "../shared/logger.js";
 
@@ -53,6 +54,11 @@ export async function start(clock = new Clock(),
 
     const analyticsService = new AnalyticsService(analyticsRepository, eventsSaver, postsSource, config.analyticsAllowedPaths, clock);
 
+    const subscriberRepository = new SqliteSubscriberRepository(db);
+    const subscriberApi = new ButtondownSubscriberApi(config.buttonDownApiUrl, config.buttonDownApiKey);
+    const subscriberService = new SubscriberService(subscriberRepository, subscriberApi, clock);
+    const newsletterWebhookHandler = new ButtondownWebhookHandler(subscriberService);
+
     const app = express();
 
     app.use(bodyParser.json());
@@ -80,16 +86,39 @@ export async function start(clock = new Clock(),
         res.sendStatus(200);
     });
 
-    // TODO: implement fully!
     app.post("/newsletter/subscribers", async (req, res) => {
         try {
-            const ip = Web.sourceIp(req);
-            const ipHash = Web.hashedIp(ip);
             const { email, placement, visitorId, sessionId, source, medium, campaign, ref } = req.body;
-            // TODO: save potential sub + then integrate with hooks!
-            Logger.logInfo("Adding sub: ", req.body);
-            res.sendStatus(200);
+            const context = new SubscriberSignUpContext(visitorId, sessionId, source, medium, campaign, ref, placement);
+            const subscriber = Subscriber.newOne(email, clock.nowTimestamp(), context);
+            const result = await subscriberService.subscribe(subscriber);
+            if (result == SubscribeResult.SUBSCRIBER_CREATED) {
+                res.sendStatus(201);
+            } else if (result == SubscribeResult.SUBSCRIBER_EXISTS) {
+                res.sendStatus(409);
+            } else if (result == SubscribeResult.INVALID_SUBSCRIBER_DATA) {
+                res.sendStatus(422);
+            } else {
+                res.sendStatus(500);
+            }
         } catch (e) {
+            Logger.logError(`Failed to create subscriber ${JSON.stringify(req.body)}:`, e);
+            res.sendStatus(500);
+        }
+    });
+
+    app.post("/webhooks/newsletter", async (req, res) => {
+        try {
+            const authorization = req.header("Authorization") ?? "";
+            const token = authorization.replaceAll("Token ", "");
+            if (config.buttonDownApiKey == token) {
+                await newsletterWebhookHandler.handle(req.body);
+            } else {
+                Logger.logWarn(`Got invalid auth header (${authorization}) on /webhooks/newsletter endpoint - ignoring it. Other headers:`, req.headers);
+                res.sendStatus(404);
+            }
+        } catch (e) {
+            Logger.logError(`Failed to handle webhook event ${JSON.stringify(req.body)}:`, e);
             res.sendStatus(500);
         }
     });

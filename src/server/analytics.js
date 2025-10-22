@@ -1,13 +1,7 @@
 import * as Dates from "../shared/dates.js";
 import * as Logger from "../shared/logger.js";
+import * as Validator from "../shared/validator.js";
 
-// UUID, checked by regex as well
-export const MAX_ID_LENGTH = 50;
-export const MAX_SOURCE_LENGTH = 100;
-export const MAX_MEDIUM_LENGTH = 100;
-export const MAX_CAMPAIGN_LENGTH = 100;
-// could be longer -  domain + path; see pages/init-script.html implementation
-export const MAX_REF_LENGTH = 250;
 export const MAX_PATH_LENGTH = 100;
 export const DAY_SECONDS = 24 * 60 * 60;
 export const SEVEN_DAYS_SECONDS = DAY_SECONDS * 7;
@@ -23,8 +17,6 @@ export const LAST_90_DAYS_STATS_VIEW = "last90Days";
 export const LAST_180_DAYS_STATS_VIEW = "last180Days";
 export const LAST_365_DAYS_STATS_VIEW = "last365Days";
 export const ALL_TIME_STATS_VIEW = "allTime";
-
-const UUID_REGEX = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
 
 const VIEW_TYPE = 'VIEW';
 const SCROLL_TYPE = 'SCROLL';
@@ -61,28 +53,7 @@ export class AnalyticsService {
 
     // TODO: lacking tests
     #validatedEvent(event) {
-        this.#validateId(event.visitorId, "VisitorId");
-        this.#validateId(event.sessionId, "SessionId");
-
-        if (!event.source || event.source.length > MAX_SOURCE_LENGTH) {
-            throw new Error(`Source should not be empty and have max ${MAX_SOURCE_LENGTH} characters`)
-        }
-
-        if (event.medium && event.medium.length > MAX_MEDIUM_LENGTH) {
-            throw new Error(`Medium can have up to ${MAX_MEDIUM_LENGTH} characters`)
-        }
-
-        if (event.campaign && event.campaign.length > MAX_CAMPAIGN_LENGTH) {
-            throw new Error(`Campaign can have up to ${MAX_CAMPAIGN_LENGTH} characters`)
-        }
-
-        if (event.ref && event.ref.length > MAX_REF_LENGTH) {
-            throw new Error(`Ref can have up to ${MAX_REF_LENGTH} characters`)
-        }
-
-        if (!event.path || event.path.length > MAX_PATH_LENGTH) {
-            throw new Error(`Path can't be empty and must be less than ${MAX_PATH_LENGTH} of length, but was: ${event.path}`);
-        }
+        Validator.validateEventContext(event);
 
         const supportedEvent = event.type == VIEW_TYPE || event.type == SCROLL_TYPE || event.type == PING_TYPE;
         if (!supportedEvent) {
@@ -92,17 +63,6 @@ export class AnalyticsService {
         const data = this.#validatedEventData(event);
 
         return { ...event, data: data };
-    }
-
-    #validateId(id, idName) {
-        if (!id || id.length > MAX_ID_LENGTH) {
-            throw new Error(`${idName} should not be empty and have max ${MAX_ID_LENGTH} characters`)
-        }
-
-        const match = id.match(UUID_REGEX);
-        if (match === null) {
-            throw new Error(`${idName} should be valid UUID but was: ${id}`);
-        }
     }
 
     #validatedEventData(event) {

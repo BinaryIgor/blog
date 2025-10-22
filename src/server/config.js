@@ -41,7 +41,9 @@ export function read() {
         statsViewsCalculateAllTimeScheduleDelay: envVarOrDefault("STATS_VIEWS_CALCULATE_ALL_TIME_SCHEDULE_DELAY",
             DEFAULT_STATS_VIEWS_CALCULATE_ALL_TIME_SCHEDULE_DELAY),
         statsViewsCalculateAllTimeInterval: envVarOrDefault("STATS_VIEWS_CALCULATE_ALL_TIME_INTERVAL",
-            DEFAULT_STATS_VIEWS_CALCULATE_ALL_TIME_INTERVAL)
+            DEFAULT_STATS_VIEWS_CALCULATE_ALL_TIME_INTERVAL),
+        buttonDownApiUrl: envVarOrDefault("BUTTON_DOWN_API_URL", "https://api.buttondown.com/v1"),
+        buttonDownApiKey: envVarOrDefault("BUTTON_DOWN_API_KEY", "_BUTTON_DOWN_API_KEY_")
     }
 }
 
