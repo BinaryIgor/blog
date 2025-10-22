@@ -60,21 +60,22 @@ function sendEvent(type, data = null, maxRetries = MAX_RETRIES, retry = 0) {
         }
     }
 
-    const visitorId = getOrGenerateVisitorId();
-    const sessionId = getOrGenerateSessionId();
-    const source = sessionSource();
-    const medium = sessionMedium();
-    const ref = pageRef();
-
-    postRequest(eventsUrl, { visitorId, sessionId, source, medium, ref, path: currentPath, type, data })
-        .then(r => {
-            if (!r.ok) {
-                scheduleRetry();
-            } else if (!postPage) {
-                localStorage.setItem(sentViewKey, Date.now());
-            }
-        })
-        .catch(scheduleRetry);
+    postRequest(eventsUrl, {
+        visitorId: getOrGenerateVisitorId(),
+        sessionId: getOrGenerateSessionId(),
+        source: sessionSource(),
+        medium: sessionMedium(),
+        campaign: sessionCampaign(),
+        ref: pageRef(),
+        path: currentPath,
+        type, data
+    }).then(r => {
+        if (!r.ok) {
+            scheduleRetry();
+        } else if (!postPage) {
+            localStorage.setItem(sentViewKey, Date.now());
+        }
+    }).catch(scheduleRetry);
 }
 
 function tryToSendViewEvent() {

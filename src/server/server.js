@@ -70,7 +70,7 @@ export async function start(clock = new Clock(),
             const ipHash = Web.hashedIp(ip);
             const reqBody = req.body;
             const event = new Event(clock.nowTimestamp(), reqBody.visitorId, reqBody.sessionId, ipHash,
-                reqBody.source, reqBody.medium, reqBody.ref,
+                reqBody.source, reqBody.medium, reqBody.campaign, reqBody.ref,
                 reqBody.path, reqBody.type, reqBody.data);
             await analyticsService.addEvent(event);
         } catch (e) {
@@ -85,7 +85,7 @@ export async function start(clock = new Clock(),
         try {
             const ip = Web.sourceIp(req);
             const ipHash = Web.hashedIp(ip);
-            const { email, placement, visitorId, sessionId, source, medium, ref } = req.body;
+            const { email, placement, visitorId, sessionId, source, medium, campaign, ref } = req.body;
             // TODO: save potential sub + then integrate with hooks!
             Logger.logInfo("Adding sub: ", req.body);
             res.sendStatus(200);

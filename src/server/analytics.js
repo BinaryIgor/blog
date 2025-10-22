@@ -3,11 +3,12 @@ import * as Logger from "../shared/logger.js";
 
 // UUID, checked by regex as well
 export const MAX_ID_LENGTH = 50;
-// max allowed domain name length
-export const MAX_SOURCE_LENGTH = 255;
+export const MAX_SOURCE_LENGTH = 100;
 export const MAX_MEDIUM_LENGTH = 100;
-export const MAX_REF_LENGTH = 500;
-export const MAX_PATH_LENGTH = 500;
+export const MAX_CAMPAIGN_LENGTH = 100;
+// could be longer -  domain + path; see pages/init-script.html implementation
+export const MAX_REF_LENGTH = 250;
+export const MAX_PATH_LENGTH = 100;
 export const DAY_SECONDS = 24 * 60 * 60;
 export const SEVEN_DAYS_SECONDS = DAY_SECONDS * 7;
 export const THIRTY_DAYS_SECONDS = DAY_SECONDS * 30;
@@ -69,6 +70,10 @@ export class AnalyticsService {
 
         if (event.medium && event.medium.length > MAX_MEDIUM_LENGTH) {
             throw new Error(`Medium can have up to ${MAX_MEDIUM_LENGTH} characters`)
+        }
+
+        if (event.campaign && event.campaign.length > MAX_CAMPAIGN_LENGTH) {
+            throw new Error(`Campaign can have up to ${MAX_CAMPAIGN_LENGTH} characters`)
         }
 
         if (event.ref && event.ref.length > MAX_REF_LENGTH) {
@@ -154,13 +159,14 @@ export class AnalyticsService {
 }
 
 export class Event {
-    constructor(timestamp, visitorId, sessionId, ipHash, source, medium, ref, path, type, data = null) {
+    constructor(timestamp, visitorId, sessionId, ipHash, source, medium, campaign, ref, path, type, data = null) {
         this.timestamp = timestamp;
         this.visitorId = visitorId;
         this.sessionId = sessionId;
         this.ipHash = ipHash;
         this.source = source;
         this.medium = medium;
+        this.campaign = campaign;
         this.ref = ref;
         this.path = path;
         this.type = type;

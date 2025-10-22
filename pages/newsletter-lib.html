@@ -16,6 +16,7 @@
                     sessionId: getOrGenerateSessionId(),
                     source: sessionSource(),
                     medium: sessionMedium(),
+                    campaign: sessionCampaign(),
                     ref: pageRef(),
                     email,
                     placement
@@ -31,8 +32,8 @@
             if (response.status == 422) {
                 return sendSubscriberResult.INVALID_EMAIL;
             }
-        } catch (e) {
-            console.error("Error", e);
+        } catch (ignored) {
+
         }
         if (retry) {
             const delay = t => new Promise(resolve => setTimeout(resolve, t));

@@ -91,6 +91,7 @@
     const SESSION_ID_KEY = "SESSION_ID";
     const SESSION_SOURCE_KEY = "SESSION_SOURCE";
     const SESSION_MEDIUM_KEY = "SESSION_MEDIUM";
+    const SESSION_CAMPAIGN_KEY = "SESSION_CAMPAIGN";
 
     function getOrGenerateSessionId() {
         const savedSessionId = localStorage.getItem(SESSION_ID_KEY);
@@ -178,6 +179,37 @@
         return null;
     }
 
+    function sessionCampaign() {
+        const savedCampaign = sessionCampaignFromStorage();
+        if (savedCampaign) {
+            return savedCampaign;
+        }
+
+        const params = new URLSearchParams(location.search);
+        let newCampaign = params.get("campaign") ?? params.get("utm_campaign");
+
+        if (newCampaign) {
+            localStorage.setItem(SESSION_CAMPAIGN_KEY, JSON.stringify({ campaign: newCampaign, sessionId: getOrGenerateSessionId() }));
+        }
+
+        return newCampaign;
+    }
+
+    function sessionCampaignFromStorage() {
+        const savedCampaign = localStorage.getItem(SESSION_CAMPAIGN_KEY);
+        if (!savedCampaign) {
+            return null;
+        }
+
+        const { campaign, sessionId } = JSON.parse(savedCampaign);
+        if ((sessionId == getOrGenerateSessionId())) {
+            return campaign;
+        }
+
+        localStorage.removeItem(SESSION_CAMPAIGN_KEY);
+        return null;
+    }
+
     function pageRef() {
         const ref = document.referrer;
         if (ref) {
@@ -190,6 +222,7 @@
     console.log("Active sessionId: ", getOrGenerateSessionId());
     console.log("Session source: ", sessionSource());
     console.log("Session medium: ", sessionMedium());
+    console.log("Session campaign: ", sessionCampaign());
     console.log("Page ref: ", pageRef());
 </script>
 <script defer src="{{ assetsPath }}/analytics.js"></script>

@@ -10,6 +10,7 @@ export function initSchema(db) {
             ip_hash TEXT NOT NULL,
             source TEXT NOT NULL,
             medium TEXT,
+            campaign TEXT,
             ref TEXT,
             path TEXT NOT NULL,
             type TEXT NOT NULL,
@@ -18,9 +19,10 @@ export function initSchema(db) {
     
         CREATE INDEX IF NOT EXISTS event_timestamp ON event(timestamp);
 
-        -- ALTER TABLE event ADD COLUMN medium TEXT --;
-        -- ALTER TABLE event ADD COLUMN ref TEXT --;
-        -- ALTER TABLE event ADD COLUMN session_id TEXT NOT NULL DEFAULT '' --;
+        -- ALTER TABLE event ADD COLUMN medium TEXT; --
+        -- ALTER TABLE event ADD COLUMN campaign TEXT; --
+        -- ALTER TABLE event ADD COLUMN ref TEXT; --
+        -- ALTER TABLE event ADD COLUMN session_id TEXT NOT NULL DEFAULT ''; --
     
         CREATE VIEW IF NOT EXISTS view AS SELECT * FROM event WHERE type = 'VIEW';
         CREATE VIEW IF NOT EXISTS scroll AS SELECT * FROM event WHERE type = 'SCROLL';
