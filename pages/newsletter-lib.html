@@ -1,5 +1,4 @@
 <script>
-    // TODO: handle!
     const sendSubscriberResult = {
         CREATED: "CREATED",
         EXISTS: "EXISTS",
@@ -47,8 +46,16 @@
         localStorage.setItem("NEWSLETTER_SUBSCRIBER", true);
     }
 
+    // TODO: eliminate this feature flag!
+    function isNewsletterFeatureEnabled() {
+        return localStorage.getItem("NEWSLETTER_FEATURE_ENABLED");
+    }
+
     function isNewsletterSubscriber() {
-        return localStorage.getItem("NEWSLETTER_SUBSCRIBER");
+        if (isNewsletterFeatureEnabled()) {
+            return localStorage.getItem("NEWSLETTER_SUBSCRIBER");
+        }
+        return true;
     }
 
     function setUpNewsletterSignUps() {
@@ -74,6 +81,11 @@
             } else {
                 signUp.classList.add("hidden");
             }
+            return;
+        }
+
+        if (!isNewsletterFeatureEnabled() && placement == 'LANDING') {
+            signUp.innerHTML = "Work in progress, launching soon! If you want to join already, write to me at <strong>igor@binaryigor.com</strong> to be on the waitlist.";
             return;
         }
 
