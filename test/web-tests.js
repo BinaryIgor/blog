@@ -7,8 +7,8 @@ export class TestRequests {
         this.serverUrl = serverUrl;
     }
 
-    async addEventRequest(request, headers={}) {
-        let req = this._appRequest()
+    async postEvent(request, headers={}) {
+        let req = this.#appRequest()
             .post("/analytics/events");
 
         for (let [k, v] of Object.entries(headers)) {
@@ -19,14 +19,14 @@ export class TestRequests {
     }
 
     async getStats() {
-        return this._appRequest().get("/meta/stats");
+        return this.#appRequest().get("/meta/stats");
     }
 
     async reloadPosts() { 
-        return this._appRequest().post("/internal/reload-posts");
+        return this.#appRequest().post("/internal/reload-posts");
     }
 
-    _appRequest() {
+    #appRequest() {
         return request(this.serverUrl);
     }
 }

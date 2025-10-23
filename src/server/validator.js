@@ -1,9 +1,9 @@
-export const MAX_ID_LENGTH = 40;
+export const MAX_ID_LENGTH = 36;
 const UUID_REGEX = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
 export const MAX_SOURCE_LENGTH = 100;
 export const MAX_MEDIUM_LENGTH = 100;
 export const MAX_CAMPAIGN_LENGTH = 100;
-// could be longer -  domain + path; see pages/init-script.html implementation
+// could be longer - domain + path; see pages/init-script.html implementation
 export const MAX_REF_LENGTH = 300;
 
 /**
@@ -26,19 +26,19 @@ export function validateEventContext(context) {
     validateId(sessionId, "SessionId");
 
     if (!source || source.length > MAX_SOURCE_LENGTH) {
-        throw new Error(`Source should not be empty and have max ${MAX_SOURCE_LENGTH} characters`)
+        throw new Error(`Source should not be empty and have max ${MAX_SOURCE_LENGTH} characters`);
     }
 
     if (medium && medium.length > MAX_MEDIUM_LENGTH) {
-        throw new Error(`Medium can have up to ${MAX_MEDIUM_LENGTH} characters`)
+        throw new Error(`Medium can have up to ${MAX_MEDIUM_LENGTH} characters`);
     }
 
     if (campaign && campaign.length > MAX_CAMPAIGN_LENGTH) {
-        throw new Error(`Campaign can have up to ${MAX_CAMPAIGN_LENGTH} characters`)
+        throw new Error(`Campaign can have up to ${MAX_CAMPAIGN_LENGTH} characters`);
     }
 
     if (ref && ref.length > MAX_REF_LENGTH) {
-        throw new Error(`Ref can have up to ${MAX_REF_LENGTH} characters`)
+        throw new Error(`Ref can have up to ${MAX_REF_LENGTH} characters`);
     }
 }
 

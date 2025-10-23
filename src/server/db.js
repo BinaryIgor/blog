@@ -39,13 +39,47 @@ export function initSchema(db) {
 
 export class SqliteDb {
 
-    constructor(filePath) {
-        this.db = new sqlite3.Database(filePath);
+    #dbs;
+    #nextDbIdx = 0;
+
+    constructor(filePath, connections = 3) {
+        if (!connections || connections < 1 || connections > 10) {
+            throw new Error(`1 - 10 connections are supported but ${connections} were requested`);
+        }
+        this.#dbs = Array.from({ length: connections }, () => new sqlite3.Database(filePath));
+    }
+
+    #db() {
+        const db = this.#dbs[this.#nextDbIdx];
+        this.#nextDbIdx = (this.#nextDbIdx + 1) % this.#dbs.length;
+        return db;
+    }
+
+    static async initInstance(filePath, connections = 3) {
+        const db = new SqliteDb(filePath, connections);
+        await db.init();
+        return db;
+    }
+
+    async init() {
+        for (let db of this.#dbs) {
+            await this.#initDb(db);
+        }
+    }
+
+    async #initDb(db) {
+        // Cache size stands for a multiple of page size - 4096 bytes by default.
+        // Setting 10 000 gives us  ~ 40,96MB of cache.
+        // Pragma reference: https://sqlite.org/pragma.html
+        await this.#execute(db, "PRAGMA cache_size=10000");
+        await this.#execute(db, "PRAGMA busy_timeout=5000");
+        await this.#execute(db, "PRAGMA journal_mode=WAL");
+        await this.#execute(db, "PRAGMA synchronous=NORMAL");
     }
 
     executeRaw(sql) {
         return new Promise((resolve, reject) => {
-            this.db.exec(sql, err => {
+            this.#db().exec(sql, err => {
                 if (err) {
                     reject(err);
                 } else {
@@ -56,8 +90,12 @@ export class SqliteDb {
     }
 
     execute(sql, params = []) {
+        return this.#execute(this.#db(), sql, params);
+    }
+
+    #execute(db, sql, params = []) {
         return new Promise((resolve, reject) => {
-            this.db.run(sql, params, err => {
+            db.run(sql, params, err => {
                 if (err) {
                     reject(err);
                 } else {
@@ -69,7 +107,7 @@ export class SqliteDb {
 
     queryOne(sql, params = []) {
         return new Promise((resolve, reject) => {
-            this.db.get(sql, params, (error, row) => {
+            this.#db().get(sql, params, (error, row) => {
                 if (error) {
                     reject(error);
                 }
@@ -80,7 +118,7 @@ export class SqliteDb {
 
     query(sql, params = []) {
         return new Promise((resolve, reject) => {
-            this.db.all(sql, params, (error, rows) => {
+            this.#db().all(sql, params, (error, rows) => {
                 if (error) {
                     reject(error);
                 }
@@ -91,7 +129,7 @@ export class SqliteDb {
 
     backup(backupPath) {
         return new Promise((resolve, reject) => {
-            const backup = this.db.backup(backupPath);
+            const backup = this.#db().backup(backupPath);
             backup.step(-1, error => {
                 if (error) {
                     reject(error);
@@ -109,15 +147,17 @@ export class SqliteDb {
     }
 
     close() {
-        return new Promise((resolve, reject) => {
-            this.db.close(error => {
-                if (error) {
-                    reject(error);
-                } else {
-                    resolve();
-                }
-            });
-        });
+        const closePromises = this.#dbs.map(db =>
+            new Promise((resolve, reject) => {
+                db.close(error => {
+                    if (error) {
+                        reject(error);
+                    } else {
+                        resolve();
+                    }
+                });
+            }));
+        return Promise.all(closePromises);
     }
 }
 

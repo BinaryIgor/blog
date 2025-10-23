@@ -35,6 +35,7 @@ describe("StatsViews tests", function () {
     this.slow(250);
 
     before(async () => {
+        await db.init();
         await initSchema(db);
     });
 
@@ -127,6 +128,12 @@ async function prepareEventsReturningExpectedStats(fromTimestamp, toTimestamp, a
         crypto.randomUUID(),
         crypto.randomUUID()
     ];
+    const sessionIds = [
+        crypto.randomUUID(),
+        crypto.randomUUID(),
+        crypto.randomUUID(),
+        crypto.randomUUID()
+    ];
     const ipHashes = [
         "ip-hash-1",
         "ip-hash-2"
@@ -135,6 +142,13 @@ async function prepareEventsReturningExpectedStats(fromTimestamp, toTimestamp, a
         "binaryigor.com",
         "google.com"
     ];
+    const mediums = [
+        "organic",
+        "email",
+        "social"
+    ];
+    const campaigns = ["some-initiative"];
+    const refs = ["some-website/awesome-links/", "binaryigor.com/posts.html"];
     const paths = [
         "index.html",
         "/post-1.html",
@@ -142,15 +156,18 @@ async function prepareEventsReturningExpectedStats(fromTimestamp, toTimestamp, a
     ];
 
     const views = StatsTestFixture.prepareRandomEvents({
-        fromTimestamp, toTimestamp, visitorIds, ipHashes, sources, paths,
+        fromTimestamp, toTimestamp, visitorIds, sessionIds, ipHashes,
+        sources, mediums, campaigns, refs, paths,
         eventType: VIEW_EVENT_TYPE, count: 20
     });
     const scrolls = StatsTestFixture.prepareRandomEvents({
-        fromTimestamp, toTimestamp, visitorIds, ipHashes, sources, paths,
+        fromTimestamp, toTimestamp, visitorIds, sessionIds, ipHashes,
+        sources, mediums, campaigns, refs, paths,
         eventType: SCROLL_EVENT_TYPE, count: 10
     });
     const pings = StatsTestFixture.prepareRandomEvents({
-        fromTimestamp, toTimestamp, visitorIds, ipHashes, sources, paths,
+        fromTimestamp, toTimestamp, visitorIds, sessionIds, ipHashes,
+        sources, mediums, campaigns, refs, paths,
         eventType: PING_EVENT_TYPE, count: 50
     });
 

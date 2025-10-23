@@ -1,4 +1,4 @@
-import { envVarOrDefault } from "../shared/env.js";
+import { envVarOrDefault, envVarOrThrow } from "../shared/env.js";
 
 const MINUTE_MILLIS = 60 * 1000;
 // 15 minutes
@@ -43,7 +43,7 @@ export function read() {
         statsViewsCalculateAllTimeInterval: envVarOrDefault("STATS_VIEWS_CALCULATE_ALL_TIME_INTERVAL",
             DEFAULT_STATS_VIEWS_CALCULATE_ALL_TIME_INTERVAL),
         buttonDownApiUrl: envVarOrDefault("BUTTON_DOWN_API_URL", "https://api.buttondown.com/v1"),
-        buttonDownApiKey: envVarOrDefault("BUTTON_DOWN_API_KEY", "_BUTTON_DOWN_API_KEY_")
+        buttonDownApiKey: envVarOrThrow("BUTTON_DOWN_API_KEY")
     }
 }
 

@@ -1,4 +1,4 @@
-import * as Validator from '../shared/validator.js';
+import * as Validator from './validator.js';
 import * as Logger from "../shared/logger.js";
 
 const MAX_EMAIL_LENGTH = 125;

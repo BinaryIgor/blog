@@ -1,6 +1,6 @@
 import * as Dates from "../shared/dates.js";
 import * as Logger from "../shared/logger.js";
-import * as Validator from "../shared/validator.js";
+import * as Validator from "./validator.js";
 
 export const MAX_PATH_LENGTH = 100;
 export const DAY_SECONDS = 24 * 60 * 60;
@@ -51,9 +51,12 @@ export class AnalyticsService {
         await this.eventsSaver.addEvent(validatedEvent);
     }
 
-    // TODO: lacking tests
     #validatedEvent(event) {
         Validator.validateEventContext(event);
+
+        if (!event.path || event.path.length > MAX_PATH_LENGTH) {
+            throw new Error(`Path should not be empty and have max ${MAX_PATH_LENGTH} characters`);
+        }
 
         const supportedEvent = event.type == VIEW_TYPE || event.type == SCROLL_TYPE || event.type == PING_TYPE;
         if (!supportedEvent) {
@@ -62,7 +65,7 @@ export class AnalyticsService {
 
         const data = this.#validatedEventData(event);
 
-        return { ...event, data: data };
+        return { ...event, data };
     }
 
     #validatedEventData(event) {
@@ -379,12 +382,13 @@ export class SqliteAnalyticsRepository {
 
     saveEvents(events) {
         if (events.length > 0) {
-            const argsPlaceholders = events.map(_ => "(?, ?, ?, ?, ?, ?, ?)")
+            const argsPlaceholders = events.map(_ => "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
                 .join(",\n");
-            const argsValues = events.flatMap(e => [e.timestamp, e.visitorId, e.ipHash, e.source, e.path, e.type, e.data]);
+            const argsValues = events.flatMap(e => [e.timestamp, e.visitorId, e.sessionId, e.ipHash,
+            e.source, e.medium, e.campaign, e.ref, e.path, e.type, e.data]);
 
             return this.db.execute(`
-            INSERT INTO event (timestamp, visitor_id, ip_hash, source, path, type, data)
+            INSERT INTO event (timestamp, visitor_id, session_id, ip_hash, source, medium, campaign, ref, path, type, data)
             VALUES ${argsPlaceholders}`, argsValues);
         }
         return Promise.resolve();
