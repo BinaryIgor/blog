@@ -208,6 +208,7 @@ export async function start(clock = new Clock(),
     return { eventsSaver, statsViews };
 }
 
+// TODO: not truly graceful - close vs server.closeAllConnections() on timeout possible race condition
 let closing = false;
 export function stop() {
     if (!server || closing) {

@@ -171,9 +171,13 @@
                 toggleElementVisibility(component.nextElementSibling);
                 component.onclick = () => toggleElementVisibility(component.nextElementSibling);
 
-                 if (!cd.stats) {
+                if (!cd.stats) {
                     return;
                 }
+
+                const sessionsComponent = document.getElementById(`${cd.id}-sessions`);
+                toggleElementVisibility(sessionsComponent.nextElementSibling);
+                sessionsComponent.onclick = () => toggleElementVisibility(sessionsComponent.nextElementSibling);
 
                 const scrollsComponent = document.getElementById(`${cd.id}-scrolls`);
                 toggleElementVisibility(scrollsComponent.nextElementSibling);
@@ -214,6 +218,7 @@
                     <div>Views: ${scaledNumber(stats.views)}</div>
                     <div>Visitors: ${scaledNumber(stats.visitors)}</div>
                     <div>Ip hashes: ${scaledNumber(stats.ipHashes)}</div>
+                    ${sessionsComponent(stats.sessions, `${id}-sessions`)}
                     ${scrollsComponent(stats.scrolls, `${id}-scrolls`)}
                     ${pingsComponent(stats.pings, `${id}-pings`)}
                     <h3 class="text-2xl mt-16 mb-4 font-bold">View Sources</h3>
@@ -241,6 +246,53 @@
 
         function scaledNumber(number) {
             return number < 10_000 ? `${number}` : `${Math.round(number / 1000 * 10) / 10}K`;
+        }
+
+        function sessionsComponent(stats, id) {
+            const minute = 60_000;
+            const hour = 60 * minute;
+            const formattedDuration = (millis) => {
+                if (millis == 0) {
+                    millis = Math.round(Math.random() * 3600_000);
+                }
+                if (millis <= minute) {
+                    const seconds = Math.round(millis / 1000);
+                    return `${seconds}s`;
+                }
+                if (millis <= hour) {
+                    const minutes = Math.round(millis / minute);
+                    return `${minutes}m`;
+                }
+                const hours = Math.round(millis / hour);
+                return `${hours}h`;
+            };
+
+            let thresholds;
+            if (stats.thresholds.length > 0) {
+                thresholds = stats.thresholds;
+            } else {
+                thresholds = Array.from({ length: 10 },
+                    () => ({
+                        minDuration: Math.round(Math.random() * 3600_000),
+                        sessions: Math.round(Math.random() * 1000)
+                    }));
+            }
+
+            const thresholdsHTML = thresholds.map(t => {
+                const duration = formattedDuration(t.minDuration);
+                const sessions = scaledNumber(t.sessions);
+                const allSessions = stats.sessions == 0 ? Math.round(t.sessions + (2 * Math.random() * t.sessions)): stats.sessions;
+                const sessionsPercentage = formattedPercentage(t.sessions, stats.sessions == 0 ? allSessions: stats.sessions);
+                return `<div>Sessions ${duration}: ${sessions} (${sessionsPercentage}%)</div>`;
+            }).join('\n');
+
+            return `
+            <div id="${id}"><span class="cursor-pointer underline">Sessions:</span> ${scaledNumber(stats.sessions)}</div>
+            <div class="mt-1 mb-2">
+                <div>Average: ${formattedDuration(stats.averageDuration)}</div>
+                <div>Max: ${formattedDuration(stats.maxDuration)}</div>
+                ${thresholdsHTML}
+            </div>`;
         }
 
         function scrollsComponent(stats, id) {

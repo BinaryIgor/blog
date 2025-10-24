@@ -1,6 +1,4 @@
-import { URL } from "url";
-
-import { Stats, ViewsBySource, PageStats } from "../src/server/analytics.js";
+import { Stats, ViewsBySource, PageStats, SessionsStats } from "../src/server/analytics.js";
 import { randomElement, randomElementOrNull, randomNumber, sortByField } from "./test-utils.js";
 import { SCROLL_EVENT_TYPE, PING_EVENT_TYPE } from "./test-objects.js";
 import { Event, PingStats, PingersStats } from "../src/server/analytics.js";
@@ -30,16 +28,12 @@ export const StatsTestFixture = {
         const eventIpHashes = countDistinct(views.concat(scrolls).concat(pings).map(e => e.ipHash));
         const paths = distinctPaths({ views, scrolls, pings });
 
-        return new Stats(views.length, eventVisitors, eventIpHashes,
+        return new Stats(views.length, eventVisitors, eventIpHashes, toExpectedSessions(views, scrolls, pings),
             toExpectedScrolls(scrolls), toExpectedPings(pings),
             toExpectedViewsBySource(views),
             toExpectedStatsByPath({ paths, views, scrolls, pings }));
     }
 };
-
-function sourceHost(source) {
-    return new URL(source).host;
-}
 
 function distinctPaths({ views, scrolls, pings }) {
     const paths = [...views, ...scrolls, ...pings].map(e => e.path);
@@ -48,6 +42,68 @@ function distinctPaths({ views, scrolls, pings }) {
 
 function countDistinct(elements) {
     return new Set(elements).size;
+}
+
+function toExpectedSessions(views, scrolls, pings) {
+    const events = [...views, ...scrolls, ...pings];
+
+    const sessions = countDistinct(events.map(e => e.sessionId));
+
+    const eventsBySessionId = new Map();
+    events.forEach(e => {
+        let sessionEvents = eventsBySessionId.get(e.sessionId);
+        if (!sessionEvents) {
+            sessionEvents = [];
+            eventsBySessionId.set(e.sessionId, sessionEvents);
+        }
+        sessionEvents.push(e);
+    });
+
+    const durationsBySessionId = new Map();
+    eventsBySessionId.forEach((events, sessionId) => {
+        const timestamps = events.map(e => e.timestamp);
+        const maxTimestamp = Math.max(...timestamps);
+        const minTimestamp = Math.min(...timestamps);
+
+        durationsBySessionId.set(sessionId, (maxTimestamp - minTimestamp));
+    });
+
+    const durations = [...durationsBySessionId.values()];
+
+    const maxDuration = Math.max(...durations);
+    const averageDuration = durations.reduce((acc, d) => acc + d, 0) / durations.length;
+
+    const durationsCountByThreshold = new Map();
+    durations.forEach(d => {
+        let threshold;
+        if (d >= 360000) {
+            threshold = 3600;
+        } else if (d >= 180000) {
+            threshold = 1800;
+        } else if (d >= 600000) {
+            threshold = 600;
+        } else if (d >= 180000) {
+            threshold = 180;
+        } else if (d >= 60000) {
+            threshold = 60;
+        } else {
+            threshold = 0;
+        }
+
+        const tDurations = durationsCountByThreshold.get(threshold);
+        if (tDurations) {
+            durationsCountByThreshold.set(threshold, tDurations + 1);
+        } else {
+            durationsCountByThreshold.set(threshold, 1);
+        }
+    });
+
+    const thresholds = [...durationsCountByThreshold.entries()]
+        .map(kv => ({ minDuration: kv[0], sessions: kv[1] }));
+    const sortedThresholds = sortByField(thresholds, "minDuration");
+
+    // TODO: full impl!
+    return new SessionsStats(sessions, maxDuration, averageDuration, sortedThresholds);
 }
 
 function toExpectedScrolls(events) {
