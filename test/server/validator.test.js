@@ -101,7 +101,7 @@ function invalidEventContextsWithExpectedErrors() {
 }
 
 function validEventContext() {
-    return { visitorId: crypto.randomUUID(), sessionId: crypto.randomUUID(), source: "source" };
+    return { visitorId: crypto.randomUUID(), sessionId: crypto.randomUUID(), source: "some source" };
 }
 
 function validEventContexts() {

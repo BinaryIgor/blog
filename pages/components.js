@@ -90,7 +90,7 @@ export function newsletterSignUpPostMid() {
 }
 
 export function newsletterSignUpPostEnd() {
-    return newsletterSignUp(NewsletterSignUpPlacement.POST_END, "Like this type of content?", "my-16");
+    return newsletterSignUp(NewsletterSignUpPlacement.POST_END, "Like this type of content?", "mt-24 mb-16");
 }
 
 export function newsletterSignUpPostFloating() {
@@ -102,7 +102,7 @@ export function newsletterSignUpLanding() {
 }
 
 // TODO: refactor, commonize
-async function newsletterSignUp(placement, preface, additionalContainerClasses) {
+function newsletterSignUp(placement, preface, additionalContainerClasses) {
     let headerMessage = `Get the <span class="font-bold">Binary Log</span> Newsletter - deep dives, discoveries and distilled insights from my latest work:`;
     if (preface) {
         headerMessage = preface + " " + headerMessage;

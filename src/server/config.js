@@ -13,7 +13,7 @@ const DEFAULT_STATS_VIEWS_CALCULATE_ALL_TIME_INTERVAL = 8 * 60 * MINUTE_MILLIS;
 const DEFAULT_DB_BACKUP_SCHEDULE_DELAY = 15 * MINUTE_MILLIS;
 const DEFAULT_DB_BACKUP_INTERVAL = 6 * 60 * MINUTE_MILLIS;
 
-export function read() {
+export async function read() {
     const postsHost = envVarOrDefault("POSTS_HOST", "https://localhost");
     if (postsHost.includes("localhost")) {
         process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
@@ -43,7 +43,7 @@ export function read() {
         statsViewsCalculateAllTimeInterval: envVarOrDefault("STATS_VIEWS_CALCULATE_ALL_TIME_INTERVAL",
             DEFAULT_STATS_VIEWS_CALCULATE_ALL_TIME_INTERVAL),
         buttonDownApiUrl: envVarOrDefault("BUTTON_DOWN_API_URL", "https://api.buttondown.com/v1"),
-        buttonDownApiKey: envVarOrThrow("BUTTON_DOWN_API_KEY")
+        buttonDownApiKey: await envVarOrThrow("BUTTON_DOWN_API_KEY")
     }
 }
 

@@ -55,7 +55,7 @@ export class AnalyticsService {
         Validator.validateEventContext(event);
 
         if (!event.path || event.path.length > MAX_PATH_LENGTH) {
-            throw new Error(`Path should not be empty and have max ${MAX_PATH_LENGTH} characters`);
+            throw new Error(`Path can't be empty and must be less than ${MAX_PATH_LENGTH} of length, but was: ${event.path}`);
         }
 
         const supportedEvent = event.type == VIEW_TYPE || event.type == SCROLL_TYPE || event.type == PING_TYPE;

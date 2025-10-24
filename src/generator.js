@@ -95,7 +95,7 @@ async function allPages(pagesDir, postsData) {
         pages[fn] = content;
     }
 
-    pages = await pagesWithReplacedVariables(pages, config);
+    pages = pagesWithReplacedVariables(pages, config);
 
     for (const [k, v] of Object.entries(pages)) {
         const matches = v.matchAll(templateVariablesRegex);
@@ -112,7 +112,7 @@ async function allPages(pagesDir, postsData) {
             let templ = pages[trimmedName];
             if (!templ) {
                 if (isJsComponent(trimmedName)) {
-                    templ = await renderedJsComponent(trimmedName, { ...config, posts: postsData });
+                    templ = renderedJsComponent(trimmedName, { ...config, posts: postsData });
                 }
                 if (!templ) {
                     throw new Error(`There is no page of ${trimmedName} name , but was expected by ${k} page`);
@@ -132,10 +132,10 @@ async function allPages(pagesDir, postsData) {
     return pages;
 }
 
-async function pagesWithReplacedVariables(pages, variables) {
+function pagesWithReplacedVariables(pages, variables) {
     const replacedVariablesPages = { ...pages };
     for (const [k, v] of Object.entries(pages)) {
-        replacedVariablesPages[k] = await templateWithReplacedVariables(v, variables, { skipMissing: true });
+        replacedVariablesPages[k] = templateWithReplacedVariables(v, variables, { skipMissing: true });
     }
     return replacedVariablesPages;
 }
@@ -149,12 +149,12 @@ function isJsComponent(variable) {
     return variable.includes(".js:");
 }
 
-async function renderedJsComponent(variable, args) {
+function renderedJsComponent(variable, args) {
     let componentName = variable.split(".js:")[1].trim();
     if (isFunctionVariable(componentName)) {
         componentName = componentName.replace("(", "").replace(")", "").trim();
     }
-    return await jsComponents[componentName](args);
+    return jsComponents[componentName](args);
 }
 
 function isFunctionVariable(variable) {
@@ -184,7 +184,7 @@ async function allPosts(postsDir, variables) {
 
         posts[fn] = {
             fontMatter: fMatter,
-            content: await templateWithReplacedVariables(postContent,
+            content: templateWithReplacedVariables(postContent,
                 { ...variables },
                 { skipMissing: true, renderFunctions: false })
         };
@@ -197,7 +197,7 @@ function sortedPostsFromRecentOnes(posts) {
     return posts.sort((a, b) => b.publishedAt.localeCompare(a.publishedAt));
 }
 
-async function templateWithReplacedVariables(template, data, opts = { renderFunctions: false, skipMissing: false }) {
+function templateWithReplacedVariables(template, data, opts = { renderFunctions: false, skipMissing: false }) {
     const matches = template.matchAll(templateVariablesRegex);
 
     let renderedTemplate = template;
@@ -207,7 +207,7 @@ async function templateWithReplacedVariables(template, data, opts = { renderFunc
 
         let value;
         if (opts.renderFunctions && isFunctionVariable(key)) {
-            value = await renderedJsComponent(key, data);
+            value = renderedJsComponent(key, data);
         } else {
             value = data[key];
         }
@@ -247,10 +247,9 @@ for (const p of config.pagesToRender) {
 const postTemplate = pages[config.postTemplate];
 
 for (const [k, e] of Object.entries(posts)) {
-    // TODO: simplify
-    const htmlContent = await templateWithReplacedVariables(markdownToHtml(e.content), pages, { skipMissing: true, renderFunctions: true });
+    const htmlContent = templateWithReplacedVariables(markdownToHtml(e.content), pages, { skipMissing: true, renderFunctions: true });
     const variables = { ...config, ...e.fontMatter, post: htmlContent };
-    const post = await templateWithReplacedVariables(postTemplate, variables, { skipMissing: false, renderFunctions: true });
+    const post = templateWithReplacedVariables(postTemplate, variables, { skipMissing: false, renderFunctions: true });
 
     await writeFileContent(path.join(distDir, `${e.fontMatter.slug}${HTML_EXTENSION}`), post);
 }

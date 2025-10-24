@@ -26,7 +26,7 @@ export async function start(clock = new Clock(),
         initialDelay: 500,
         backoffMultiplier: 2
     }) {
-    const config = Config.read();
+    const config = await Config.read();
 
     db = await SqliteDb.initInstance(config.dbPath);
 

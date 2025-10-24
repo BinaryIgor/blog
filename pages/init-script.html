@@ -113,7 +113,6 @@
         return newId;
     }
 
-
     function sessionSource() {
         const savedSource = sessionSourceFromStorage();
         if (savedSource) {
@@ -171,7 +170,7 @@
         }
 
         const { medium, sessionId } = JSON.parse(savedMedium);
-        if ((sessionId == getOrGenerateSessionId())) {
+        if (sessionId == getOrGenerateSessionId()) {
             return medium;
         }
 
@@ -202,7 +201,7 @@
         }
 
         const { campaign, sessionId } = JSON.parse(savedCampaign);
-        if ((sessionId == getOrGenerateSessionId())) {
+        if (sessionId == getOrGenerateSessionId()) {
             return campaign;
         }
 
