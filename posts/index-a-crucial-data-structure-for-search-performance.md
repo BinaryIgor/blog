@@ -440,12 +440,10 @@ As we saw, **Index is a crucial data structure for search performance**. Simple 
 
 <div id="post-extras">
 
-<div class="post-delimiter">---</div>
+{{ .js: newsletterSignUpPostEnd() }}
 
 ### Related videos on my [YouTube channel]({{ youtubeChannelUrl }})
 1. <a href="https://www.youtube.com/watch?v=edAvauoS3L0">Index vs Inverted Index performance in Postgres</a>
-
-<div class="post-delimiter">---</div>
 
 ### Notes and resources
 

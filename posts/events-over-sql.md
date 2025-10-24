@@ -87,6 +87,8 @@ As we most likely already use it in our application/system, we know that there a
 
 Having it all in mind, let's see how we are able to leverage those features of SQL to build a simple, performant and highly reliable events platform on top of it.
 
+{{ .js: newsletterSignUpPostMid() }}
+
 ## Overview 
 
 We just need to have a few tables. Column names should be prefixed because some of the names are reserved keywords in some databases (Postgres syntax, schema is fully managed by EventSQL):
@@ -458,7 +460,7 @@ As we have seen, **we can make an even better use of battle-tested SQL databases
 
 <div id="post-extras">
 
-<div class="post-delimiter">---</div>
+{{ .js: newsletterSignUpPostEnd() }}
 
 ### Notes and resources
 

@@ -1,12 +1,12 @@
 import { URL } from "url";
 
 import { Stats, ViewsBySource, PageStats } from "../src/server/analytics.js";
-import { randomElement, randomNumber, sortByField } from "./test-utils.js";
+import { randomElement, randomElementOrNull, randomNumber, sortByField } from "./test-utils.js";
 import { SCROLL_EVENT_TYPE, PING_EVENT_TYPE } from "./test-objects.js";
 import { Event, PingStats, PingersStats } from "../src/server/analytics.js";
 
 export const StatsTestFixture = {
-    prepareRandomEvents({ fromTimestamp, toTimestamp, visitorIds, ipHashes, sources, paths, eventType, count }) {
+    prepareRandomEvents({ fromTimestamp, toTimestamp, visitorIds, sessionIds, ipHashes, sources, mediums, campaigns, refs, paths, eventType, count }) {
         const events = [];
         for (let i = 0; i < count; i++) {
             const data = eventType == SCROLL_EVENT_TYPE || eventType == PING_EVENT_TYPE ? randomNumber(0, 100) : null;
@@ -14,21 +14,25 @@ export const StatsTestFixture = {
             events.push(
                 new Event(randomNumber(fromTimestamp, toTimestamp),
                     randomElement(visitorIds),
+                    randomElement(sessionIds),
                     randomElement(ipHashes),
                     randomElement(sources),
+                    randomElementOrNull(mediums),
+                    randomElementOrNull(campaigns),
+                    randomElementOrNull(refs),
                     randomElement(paths),
                     eventType, data));
         }
         return events;
     },
-    eventsToExpectedStats({ views, scrolls, pings, normalizeSourceUrls = false }) {
+    eventsToExpectedStats({ views, scrolls, pings }) {
         const eventVisitors = countDistinct(views.map(e => e.visitorId));
         const eventIpHashes = countDistinct(views.concat(scrolls).concat(pings).map(e => e.ipHash));
         const paths = distinctPaths({ views, scrolls, pings });
 
         return new Stats(views.length, eventVisitors, eventIpHashes,
             toExpectedScrolls(scrolls), toExpectedPings(pings),
-            toExpectedViewsBySource(views, normalizeSourceUrls),
+            toExpectedViewsBySource(views),
             toExpectedStatsByPath({ paths, views, scrolls, pings }));
     }
 };
@@ -157,11 +161,11 @@ function pingPositionBucket(position) {
     return 100;
 }
 
-function toExpectedViewsBySource(events, normalizeSource) {
+function toExpectedViewsBySource(events) {
     const viewsBySource = new Map();
 
     events.forEach(e => {
-        const source = normalizeSource == true ? sourceHost(e.source) : e.source;
+        const source = e.source;
         const views = viewsBySource.get(source) ?? { source, views: 0 };
         views.views += 1;
         viewsBySource.set(source, views);

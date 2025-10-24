@@ -247,7 +247,7 @@ for (const p of config.pagesToRender) {
 const postTemplate = pages[config.postTemplate];
 
 for (const [k, e] of Object.entries(posts)) {
-    const htmlContent = markdownToHtml(e.content);
+    const htmlContent = templateWithReplacedVariables(markdownToHtml(e.content), pages, { skipMissing: true, renderFunctions: true });
     const variables = { ...config, ...e.fontMatter, post: htmlContent };
     const post = templateWithReplacedVariables(postTemplate, variables, { skipMissing: false, renderFunctions: true });
 

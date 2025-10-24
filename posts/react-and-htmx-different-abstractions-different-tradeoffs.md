@@ -296,7 +296,7 @@ I think that we might be deeply surprised:
 
 <div id="post-extras">
 
-<div class="post-delimiter">---</div>
+{{ .js: newsletterSignUpPostEnd() }}
 
 ### Notes and resources
 

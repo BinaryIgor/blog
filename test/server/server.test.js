@@ -2,7 +2,7 @@ import { assert, expect } from "chai";
 import {
     serverIntTestSuite, randomAllowedPostPath, allowedPostPaths,
     testClock, testRequests, failNextNPostsFetches, addPosts,
-    assertAnalyticsEventsSavedStatsViewCalculated,
+    assertAnalyticsEventsSavedAndStatsViewCalculated,
     assertAnalyticsEventsSaved,
     assertStatsViewsCalculated
 } from "../server-int-test-suite.js";
@@ -16,12 +16,12 @@ import crypto from 'crypto';
 
 serverIntTestSuite("Server integration tests", () => {
     invalidEvents().forEach(e => {
-        it('ignores invalid event and returns 200', async () => {
-            const addEventResponse = await testRequests.addEventRequest(e);
+        it(`ignores invalid ${JSON.stringify(e)} event and returns 200`, async () => {
+            const eventResponse = await testRequests.postEvent(e);
 
-            await assertAnalyticsEventsSavedStatsViewCalculated();
+            await assertAnalyticsEventsSavedAndStatsViewCalculated();
 
-            assertOkResponseCode(addEventResponse);
+            assertOkResponseCode(eventResponse);
 
             const statsResponse = await testRequests.getStats();
 
@@ -33,13 +33,13 @@ serverIntTestSuite("Server integration tests", () => {
         const view = TestObjects.randomEvent({ path: "/not-allowed.html", type: VIEW_EVENT_TYPE });
         const ping = TestObjects.randomEvent({ path: "/not-allowed.html", type: PING_EVENT_TYPE });
 
-        const addViewResponse = await testRequests.addEventRequest(view);
-        const addPingResponse = await testRequests.addEventRequest(ping);
+        const addViewResponse = await testRequests.postEvent(view);
+        const addPingResponse = await testRequests.postEvent(ping);
 
         assertOkResponseCode(addViewResponse);
         assertOkResponseCode(addPingResponse);
 
-        await assertAnalyticsEventsSavedStatsViewCalculated();
+        await assertAnalyticsEventsSavedAndStatsViewCalculated();
 
         const statsResponse = await testRequests.getStats();
 
@@ -54,7 +54,7 @@ serverIntTestSuite("Server integration tests", () => {
 
         await addViewsFromIp(ip, MAX_IP_HASH_VISITOR_IDS_IN_LAST_DAY);
 
-        await assertAnalyticsEventsSavedStatsViewCalculated();
+        await assertAnalyticsEventsSavedAndStatsViewCalculated();
 
         await assertStatsHaveViewsVisitorsAndIpHashes(
             MAX_IP_HASH_VISITOR_IDS_IN_LAST_DAY,
@@ -64,7 +64,7 @@ serverIntTestSuite("Server integration tests", () => {
         await addViewsFromIp(anotherIp, anotherIpViews);
         await addViewsFromIp(ip, overLimitViews);
 
-        await assertAnalyticsEventsSavedStatsViewCalculated();
+        await assertAnalyticsEventsSavedAndStatsViewCalculated();
 
         await assertStatsHaveViewsVisitorsAndIpHashes(
             MAX_IP_HASH_VISITOR_IDS_IN_LAST_DAY + anotherIpViews,
@@ -77,7 +77,7 @@ serverIntTestSuite("Server integration tests", () => {
 
         await addViewsFromIp(ip, limitExpiredViews);
 
-        await assertAnalyticsEventsSavedStatsViewCalculated();
+        await assertAnalyticsEventsSavedAndStatsViewCalculated();
 
         await assertStatsHaveViewsVisitorsAndIpHashes(
             MAX_IP_HASH_VISITOR_IDS_IN_LAST_DAY + anotherIpViews + limitExpiredViews,
@@ -202,15 +202,14 @@ serverIntTestSuite("Server integration tests", () => {
         await addEventFromIp(ip3, ip3View1);
         await addEventFromIp(ip3, ip3Ping1);
 
-        await assertAnalyticsEventsSavedStatsViewCalculated();
+        await assertAnalyticsEventsSavedAndStatsViewCalculated();
 
         const statsResponse = await testRequests.getStats();
 
         const expectedAllTimeStats = StatsTestFixture.eventsToExpectedStats({
             views: [ip1View1, ip1View2, ip2View1, ip2View2, ip3View1],
             scrolls: [ip2Scroll1],
-            pings: [ip1Ping1, ip2Ping1, ip3Ping1],
-            normalizeSourceUrls: true
+            pings: [ip1Ping1, ip2Ping1, ip3Ping1]
         });
 
         assertJsonResponse(statsResponse, actualStats => {
@@ -248,15 +247,17 @@ function invalidEvents() {
         151
     ];
 
+    // more detailed unit tests are in validator.test.js - minimal and/or lacking cases here!
     return [
         {
 
         },
-        TestObjects.randomEvent({ source: "invalid-url" }),
+        TestObjects.randomEvent({ source: "" }),
         TestObjects.randomEvent({ type: "NEITHER_VIEW_NOR_READ_NOR_SCROLL" }),
         TestObjects.randomEvent({ type: "" }),
         TestObjects.randomEvent({ visitorId: "" }),
         TestObjects.randomEvent({ visitorId: randomString() }),
+        TestObjects.randomEvent({ path: null }),
         TestObjects.randomEvent({ path: "" }),
         TestObjects.randomEvent({ path: MAX_PATH_LENGTH + 1 }),
         ...scrollPingInvalidData.flatMap(data => [
@@ -306,12 +307,12 @@ async function addEventFromIp(ip, event = null) {
     if (!event) {
         event = TestObjects.randomEvent({ ipHash: ip });
     }
-    const response = await testRequests.addEventRequest(event, { "X-Real-Ip": ip });
+    const response = await testRequests.postEvent(event, { "X-Real-Ip": ip });
     assertOkResponseCode(response);
 }
 
 async function addEvent(event) {
-    const response = await testRequests.addEventRequest(event);
+    const response = await testRequests.postEvent(event);
     assertOkResponseCode(response);
 }
 

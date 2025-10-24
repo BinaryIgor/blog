@@ -1,6 +1,3 @@
-import { Scheduler } from "../../src/server/scheduler.js";
-import { delay } from "../../src/shared/promises.js";
-
 import { SqliteDb, SqliteDbBackuper } from "../../src/server/db.js";
 
 import { assert } from "chai";
@@ -10,25 +7,17 @@ import crypto from 'crypto';
 import path from 'path';
 import { TestClock } from "../test-utils.js";
 
-const DB_PATH = path.join("/tmp", `${crypto.randomUUID()}.db`);
-const DB_BACKUP_PATH = path.join("/tmp", `${crypto.randomUUID()}_backup.db`);
+const DB_PATH = path.join("/tmp", "backup_test.db");
+const DB_BACKUP_PATH = path.join("/tmp", "backup_test_backup.db");
 
-const BACKUP_INTERVAL = 1;
-const BACKUP_INTERVAL_AWAIT = 5;
-
-const scheduler = new Scheduler();
-
-const db = new SqliteDb(DB_PATH);
+let db;
 
 const clock = new TestClock();
 
 describe("SqliteDbBackuper tests", () => {
     before(async () => {
+        db = await SqliteDb.initInstance(DB_PATH);
         await createTestTable();
-    });
-
-    afterEach(() => {
-        scheduler.close();
     });
 
     after(() => {
@@ -38,16 +27,17 @@ describe("SqliteDbBackuper tests", () => {
 
     it(`backups db`, async () => {
         const backuper = new SqliteDbBackuper(db, DB_BACKUP_PATH, clock);
+        await createTestTable();
 
         await insertTestTableRow();
         await insertTestTableRow();
 
         assert.equal(await countTestTableRows(db), 2);
 
-        await initSingleBackup(backuper);
+        await backuper.backup();
         const lastBackupTimestamp1 = clock.nowTimestamp();
 
-        const dbBackup = fromBackupDb();
+        const dbBackup = await SqliteDb.initInstance(DB_BACKUP_PATH);
 
         assert.equal(await countTestTableRows(db), 2);
         assert.equal(await countTestTableRows(dbBackup), 2);
@@ -59,7 +49,7 @@ describe("SqliteDbBackuper tests", () => {
         assert.equal(await countTestTableRows(dbBackup), 2);
 
         clock.moveTimeByReasonableAmount();
-        await initSingleBackup(backuper);
+        await backuper.backup();
         const lastBackupTimestamp2 = clock.nowTimestamp();
 
         assert.equal(await countTestTableRows(dbBackup), 3);
@@ -81,20 +71,6 @@ function insertTestTableRow(timestamp = Date.now(), id = crypto.randomUUID()) {
 
 function countTestTableRows(db) {
     return db.queryOne("SELECT COUNT(*) AS rows FROM test_table").then(r => r['rows']);
-}
-
-function nextBackupInterval() {
-    return delay(BACKUP_INTERVAL_AWAIT);
-}
-
-function fromBackupDb() {
-    return new SqliteDb(DB_BACKUP_PATH);
-}
-
-async function initSingleBackup(backuper) {
-    backuper.schedule(scheduler, BACKUP_INTERVAL);
-    await nextBackupInterval();
-    scheduler.close();
 }
 
 function assertLastBackupTimestampEqual(backuper, expectedTimestamp) {

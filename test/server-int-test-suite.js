@@ -14,6 +14,7 @@ const MOCK_SERVER_PORT = 10_000 + Math.ceil(Math.random() * 10_000);
 export const SERVER_URL = `http://localhost:${SERVER_PORT}`;
 export const MOCK_SERVER_URL = `http://localhost:${MOCK_SERVER_PORT}`;
 const DB_PATH = path.join(TMP_DIR, "analytics.db");
+const BUTTON_DOWN_API_KEY = crypto.randomUUID();
 
 export const testClock = new TestClock();
 export const testRequests = new TestRequests(SERVER_URL);
@@ -60,6 +61,8 @@ export const serverIntTestSuite = (testsDescription, testsCallback) => {
 
             process.env['POSTS_HOST'] = MOCK_SERVER_URL;
 
+            process.env["BUTTON_DOWN_API_KEY"] = BUTTON_DOWN_API_KEY;
+
             MockServer.start({
                 port: MOCK_SERVER_PORT, getRoutes: [{
                     path: "/posts.json",
@@ -70,7 +73,7 @@ export const serverIntTestSuite = (testsDescription, testsCallback) => {
             const app = await Server.start(testClock, NoOpScheduler, { retries: 3, initialDelay: 10, backoffMultiplier: 2 });
             ({ eventsSaver, statsViews } = app);
 
-            // Currently good enough hack to wait for MockServer and Server readiness
+            // Currently, good enough hack to wait for MockServer and Server readiness
             await delay(500);
             //Read posts.json
             await testRequests.reloadPosts();
@@ -119,7 +122,7 @@ export async function assertStatsViewsCalculated() {
     await statsViews.saveAllTimeView();
 }
 
-export async function assertAnalyticsEventsSavedStatsViewCalculated() {
+export async function assertAnalyticsEventsSavedAndStatsViewCalculated() {
     await assertAnalyticsEventsSaved();
     await assertStatsViewsCalculated();
 }

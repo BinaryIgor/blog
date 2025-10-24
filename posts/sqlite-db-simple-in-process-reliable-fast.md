@@ -389,7 +389,7 @@ I highly recommend SQLite - it is more than enough; and when we outgrow it, it i
 
 <div id="post-extras">
 
-<div class="post-delimiter">---</div>
+{{ .js: newsletterSignUpPostEnd() }}
 
 ### Notes and resources
 

@@ -2,6 +2,7 @@ import bodyParser from "body-parser";
 import express from "express";
 import cors from "cors";
 import { AnalyticsService, DeferredEventsSaver, StatsViews, SqliteAnalyticsRepository, Event } from "./analytics.js";
+import { SubscriberService, SqliteSubscriberRepository, Subscriber, SubscriberSignUpContext, SubscribeResult, ButtondownSubscriberApi, ButtondownWebhookHandler } from "./newsletter.js";
 import { Scheduler } from "./scheduler.js";
 import * as Logger from "../shared/logger.js";
 
@@ -14,8 +15,6 @@ import { initSchema, SqliteDb, SqliteDbBackuper } from "./db.js";
 import { Clock } from "../shared/dates.js";
 import { PostsSource } from "./posts.js";
 
-const REAL_IP_HEADER = "X-Real-Ip";
-
 let server;
 let scheduler;
 let db;
@@ -27,9 +26,9 @@ export async function start(clock = new Clock(),
         initialDelay: 500,
         backoffMultiplier: 2
     }) {
-    const config = Config.read();
+    const config = await Config.read();
 
-    db = new SqliteDb(config.dbPath);
+    db = await SqliteDb.initInstance(config.dbPath);
 
     await initSchema(db);
 
@@ -55,6 +54,11 @@ export async function start(clock = new Clock(),
 
     const analyticsService = new AnalyticsService(analyticsRepository, eventsSaver, postsSource, config.analyticsAllowedPaths, clock);
 
+    const subscriberRepository = new SqliteSubscriberRepository(db);
+    const subscriberApi = new ButtondownSubscriberApi(config.buttonDownApiUrl, config.buttonDownApiKey);
+    const subscriberService = new SubscriberService(subscriberRepository, subscriberApi, clock);
+    const newsletterWebhookHandler = new ButtondownWebhookHandler(subscriberService);
+
     const app = express();
 
     app.use(bodyParser.json());
@@ -68,16 +72,58 @@ export async function start(clock = new Clock(),
     // TODO: some metrics + diagnostics endpoint!
     app.post("/analytics/events", async (req, res) => {
         try {
-            const ip = req.header(REAL_IP_HEADER) || req.socket.remoteAddress;
+            const ip = Web.sourceIp(req);
             const ipHash = Web.hashedIp(ip);
             const reqBody = req.body;
-            const event = new Event(clock.nowTimestamp(), reqBody.visitorId, ipHash, reqBody.source, reqBody.path, reqBody.type, reqBody.data);
+            const event = new Event(clock.nowTimestamp(), reqBody.visitorId, reqBody.sessionId, ipHash,
+                reqBody.source, reqBody.medium, reqBody.campaign, reqBody.ref,
+                reqBody.path, reqBody.type, reqBody.data);
             await analyticsService.addEvent(event);
         } catch (e) {
             Logger.logError(`Failed to add event ${JSON.stringify(req.body)}, ignoring it.`, e);
         }
 
         res.sendStatus(200);
+    });
+
+    app.post("/newsletter/subscribers", async (req, res) => {
+        try {
+            const { email, placement, visitorId, sessionId, source, medium, campaign, ref } = req.body;
+            const context = new SubscriberSignUpContext(visitorId, sessionId, source, medium, campaign, ref, placement);
+            const subscriber = Subscriber.newOne(email, clock.nowTimestamp(), context);
+            const result = await subscriberService.subscribe(subscriber);
+            if (result == SubscribeResult.SUBSCRIBER_CREATED) {
+                res.sendStatus(201);
+            } else if (result == SubscribeResult.SUBSCRIBER_EXISTS) {
+                res.sendStatus(409);
+            } else if (result == SubscribeResult.INVALID_SUBSCRIBER_DATA) {
+                res.sendStatus(422);
+            } else {
+                res.sendStatus(500);
+            }
+        } catch (e) {
+            Logger.logError(`Failed to create subscriber ${JSON.stringify(req.body)}:`, e);
+            res.sendStatus(500);
+        }
+    });
+
+    app.post("/webhooks/newsletter", async (req, res) => {
+        try {
+            // const authorization = req.header("Authorization") ?? "";
+            // const token = authorization.replaceAll("Token ", "");
+            // if (config.buttonDownApiKey == token) {
+            //     await newsletterWebhookHandler.handle(req.body);
+            // } else {
+            //     Logger.logWarn(`Got invalid auth header (${authorization}) on /webhooks/newsletter endpoint - ignoring it. Other headers:`, req.headers);
+            //     res.sendStatus(404);
+            // }
+            Logger.logInfo(`Got event on /webhooks/newsletter endpoint. Headers:`, req.headers);
+            Logger.logInfo(`Got event on /webhooks/newsletter endpoint. Body:`, req.body);
+            res.sendStatus(200);
+        } catch (e) {
+            Logger.logError(`Failed to handle webhook event ${JSON.stringify(req.body)}:`, e);
+            res.sendStatus(500);
+        }
     });
 
     app.get("/meta/stats", async (req, res) => {
@@ -109,7 +155,7 @@ export async function start(clock = new Clock(),
         }
     });
 
-    app.post("/internal/calculate-stats-views", async (req, res) => {
+    app.post("/internal/calculate-stats-views", async (_, res) => {
         try {
             await statsViews.saveViewsForShorterPeriods();
             await statsViews.saveViewsForLongerPeriods();
@@ -149,32 +195,52 @@ export async function start(clock = new Clock(),
         Logger.logError('Unhandled exception: ', err);
     });
 
-    //TODO: graceful shutdown
     process.on('SIGTERM', () => {
         Logger.logInfo("Received SIGTERM signal, exiting...");
         stop();
-        process.exit();
     });
 
     process.on('SIGINT', () => {
         Logger.logInfo("Received SIGINT signal, exiting...");
         stop();
-        process.exit();
     });
 
     return { eventsSaver, statsViews };
 }
 
+let closing = false;
 export function stop() {
-    if (server) {
-        server.close();
+    if (!server || closing) {
+        return;
     }
-    if (scheduler) {
-        scheduler.close();
-    }
-    if (db) {
-        db.close();
-    }
+
+    closing = true;
+
+    server.close(async () => {
+        try {
+            Logger.logInfo("Server closed, closing scheduler and db...");
+            if (scheduler) {
+                scheduler.close();
+            }
+            Logger.logInfo("Scheduler closed, closing db...");
+            if (db) {
+                await db.close();
+            }
+            Logger.logInfo("Db closed as well - the whole processed is about to exit successfully");
+            process.exit(0);
+        } catch (e) {
+            Logger.logError("Problem when stopping the app - exiting with the error code", e);
+            process.exit(1);
+        }
+    });
+
+    Logger.logInfo("Closing all idle connections...");
+    server.closeIdleConnections();
+
+    setTimeout(() => {
+        Logger.logInfo("Closing all remaining connections...");
+        server.closeAllConnections();
+    }, 1000);
 }
 
 //Start only if called directly from the console

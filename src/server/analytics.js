@@ -1,9 +1,8 @@
-import { URL } from "url";
 import * as Dates from "../shared/dates.js";
 import * as Logger from "../shared/logger.js";
+import * as Validator from "./validator.js";
 
-export const MAX_VISITOR_ID_LENGTH = 50;
-export const MAX_PATH_LENGTH = 500;
+export const MAX_PATH_LENGTH = 100;
 export const DAY_SECONDS = 24 * 60 * 60;
 export const SEVEN_DAYS_SECONDS = DAY_SECONDS * 7;
 export const THIRTY_DAYS_SECONDS = DAY_SECONDS * 30;
@@ -19,15 +18,13 @@ export const LAST_180_DAYS_STATS_VIEW = "last180Days";
 export const LAST_365_DAYS_STATS_VIEW = "last365Days";
 export const ALL_TIME_STATS_VIEW = "allTime";
 
-const UUID_REGEX = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
-
 const VIEW_TYPE = 'VIEW';
 const SCROLL_TYPE = 'SCROLL';
 const PING_TYPE = 'PING';
 // 2 pings per minute so should be 30 in theory but there could be retries, lags and so on
 const NO_PINGS_WINDOW_SECONDS = 20;
 const MIN_SCROLL = 0;
-// Some pages might allow to overscroll a bit
+// Some pages (posts) might allow to overscroll a bit
 const MAX_SCROLL = 150;
 
 export class AnalyticsService {
@@ -41,23 +38,21 @@ export class AnalyticsService {
     }
 
     async addEvent(event) {
-        const validatedEvent = this._validatedEvent(event);
+        const validatedEvent = this.#validatedEvent(event);
 
-        await this._validatePathExists(validatedEvent);
+        await this.#validatePathExists(validatedEvent);
 
-        await this._validateIpHashUniqueVisitorsLimit(validatedEvent);
+        await this.#validateIpHashUniqueVisitorsLimit(validatedEvent);
 
         if (event.type == PING_TYPE) {
-            await this._validateVisitorPingsFrequency(validatedEvent);
+            await this.#validateVisitorPingsFrequency(validatedEvent);
         }
 
         await this.eventsSaver.addEvent(validatedEvent);
     }
 
-    _validatedEvent(event) {
-        const sourceUrl = new URL(event.source);
-
-        this._validateVisitorId(event.visitorId);
+    #validatedEvent(event) {
+        Validator.validateEventContext(event);
 
         if (!event.path || event.path.length > MAX_PATH_LENGTH) {
             throw new Error(`Path can't be empty and must be less than ${MAX_PATH_LENGTH} of length, but was: ${event.path}`);
@@ -68,32 +63,19 @@ export class AnalyticsService {
             throw new Error('Unsupported event type!');
         }
 
-        const data = this._validatedEventData(event);
+        const data = this.#validatedEventData(event);
 
-        return { ...event, data: data, source: sourceUrl.host }
+        return { ...event, data };
     }
 
-    _validateVisitorId(visitorId) {
-        if (!visitorId || visitorId.length > MAX_VISITOR_ID_LENGTH) {
-            throw new Error(`VisitorId should no be empty and have max ${MAX_VISITOR_ID_LENGTH} characters`)
-        }
-
-        const match = visitorId.match(UUID_REGEX);
-        if (match === null) {
-            throw new Error("VisitorId should be valid UUID, but was: " + visitorId);
-        }
-
-        return true;
-    }
-
-    _validatedEventData(event) {
+    #validatedEventData(event) {
         if (event.type == VIEW_TYPE) {
             return null;
         }
-        return this._validatedScrollPosition(event.data);
+        return this.#validatedScrollPosition(event.data);
     }
 
-    _validatedScrollPosition(position) {
+    #validatedScrollPosition(position) {
         try {
             const parsed = parseInt(position);
             if (isNaN(parsed)) {
@@ -108,7 +90,7 @@ export class AnalyticsService {
         }
     }
 
-    async _validateIpHashUniqueVisitorsLimit(event) {
+    async #validateIpHashUniqueVisitorsLimit(event) {
         const timestampAgoToCheck = Dates.timestampSecondsAgo(this.clock.nowTimestamp(), DAY_SECONDS);
 
         const uniqueVisitorIdsOfIp = await this.analyticsRepository
@@ -119,7 +101,7 @@ export class AnalyticsService {
         }
     }
 
-    async _validatePathExists(event) {
+    async #validatePathExists(event) {
         const inAllowedPaths = this.allowedPaths.some(p => p === event.path);
         if (inAllowedPaths) {
             return;
@@ -130,7 +112,7 @@ export class AnalyticsService {
         }
     }
 
-    async _validateVisitorPingsFrequency(event) {
+    async #validateVisitorPingsFrequency(event) {
         const timestampAgoToCheck = Dates.timestampSecondsAgo(this.clock.nowTimestamp(), NO_PINGS_WINDOW_SECONDS);
         const notAllowedPings = await this.analyticsRepository.countPingsAfterTimestamp(event.visitorId, event.path, timestampAgoToCheck);
         if (notAllowedPings > 0) {
@@ -140,11 +122,15 @@ export class AnalyticsService {
 }
 
 export class Event {
-    constructor(timestamp, visitorId, ipHash, source, path, type, data = null) {
+    constructor(timestamp, visitorId, sessionId, ipHash, source, medium, campaign, ref, path, type, data = null) {
         this.timestamp = timestamp;
         this.visitorId = visitorId;
+        this.sessionId = sessionId;
         this.ipHash = ipHash;
         this.source = source;
+        this.medium = medium;
+        this.campaign = campaign;
+        this.ref = ref;
         this.path = path;
         this.type = type;
         this.data = data;
@@ -396,12 +382,13 @@ export class SqliteAnalyticsRepository {
 
     saveEvents(events) {
         if (events.length > 0) {
-            const argsPlaceholders = events.map(_ => "(?, ?, ?, ?, ?, ?, ?)")
+            const argsPlaceholders = events.map(_ => "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
                 .join(",\n");
-            const argsValues = events.flatMap(e => [e.timestamp, e.visitorId, e.ipHash, e.source, e.path, e.type, e.data]);
+            const argsValues = events.flatMap(e => [e.timestamp, e.visitorId, e.sessionId, e.ipHash,
+            e.source, e.medium, e.campaign, e.ref, e.path, e.type, e.data]);
 
             return this.db.execute(`
-            INSERT INTO event (timestamp, visitor_id, ip_hash, source, path, type, data)
+            INSERT INTO event (timestamp, visitor_id, session_id, ip_hash, source, medium, campaign, ref, path, type, data)
             VALUES ${argsPlaceholders}`, argsValues);
         }
         return Promise.resolve();

@@ -220,7 +220,7 @@ Fortunately, there is no single entity that controls the Internet; there are man
 
 <div id="post-extras">
 
-<div class="post-delimiter">---</div>
+{{ .js: newsletterSignUpPostEnd() }}
 
 ### Notes and resources
 

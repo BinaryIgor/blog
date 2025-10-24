@@ -20,6 +20,13 @@ export function randomElement(elements) {
     return elements[randomNumber(0, elements.length)];
 }
 
+export function randomElementOrNull(elements) {
+    if (elements.length == 0 || randomBoolean()) {
+        return null;
+    }
+    return elements[randomNumber(0, elements.length)];
+}
+
 export function randomString(length = 10) {
     let result = "";
 

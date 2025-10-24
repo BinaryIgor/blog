@@ -97,6 +97,8 @@ CREATE INDEX account_name_id ON account(name, id);
 
 Now, we have all the data we need in the index (name and id columns), so [it can be retrieved in a single read operation, directly from the index](https://www.postgresql.org/docs/current/indexes-index-only-scans.html).
 
+{{ .js: newsletterSignUpPostMid() }}
+
 ## Partitioning
 
 Generally, when we refer to *partitioning*, in the database context, we mean table partitioning. It is an optimization strategy, where we take a table and split it into multiple subtables using one, or many, of its fields as a partition key. Additionally, we choose a partition strategy, which describes how column(s) value(s) maps into a specific subtable (partition). Each subtable has exactly the same schema (as opposed to vertical partitoning that we did earlier). Most commonly used strategies (forms) are range, list and hash partitioning. Let's explain them on examples:
@@ -230,13 +232,11 @@ We just went over most commonly used strategies to reduce the search space of ou
 
 <div id="post-extras">
 
-<div class="post-delimiter">---</div>
+{{ .js: newsletterSignUpPostEnd() }}
 
 ### Related videos on my [YouTube channel]({{ youtubeChannelUrl }})
 1. [Partitioning](https://www.youtube.com/watch?v=xVZsFpYa1Yc)
 2. [Sharding](https://www.youtube.com/watch?v=B5aHDQFDiuw)
-
-<div class="post-delimiter">---</div>
 
 ### Notes and resources
 

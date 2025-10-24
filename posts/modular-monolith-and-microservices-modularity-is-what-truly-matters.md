@@ -176,12 +176,10 @@ We should thoughtfully consider which strategy meets our particular requirements
 
 <div id="post-extras">
 
-<div class="post-delimiter">---</div>
+{{ .js: newsletterSignUpPostEnd() }}
 
 ### Related videos on my [YouTube channel]({{ youtubeChannelUrl }})
 1. [Modular Monolith with Independently Deployable Modules in Java](https://www.youtube.com/watch?v=onV4449vs1g)
-
-<div class="post-delimiter">---</div>
 
 ### Notes and resources
 1. Excellent article about the consequences of different cohesion and coupling degrees in software architecture: https://codeopinion.com/solid-nope-just-coupling-and-cohesion/

@@ -1,4 +1,4 @@
-import { envVarOrDefault } from "../shared/env.js";
+import { envVarOrDefault, envVarOrThrow } from "../shared/env.js";
 
 const MINUTE_MILLIS = 60 * 1000;
 // 15 minutes
@@ -13,7 +13,7 @@ const DEFAULT_STATS_VIEWS_CALCULATE_ALL_TIME_INTERVAL = 8 * 60 * MINUTE_MILLIS;
 const DEFAULT_DB_BACKUP_SCHEDULE_DELAY = 15 * MINUTE_MILLIS;
 const DEFAULT_DB_BACKUP_INTERVAL = 6 * 60 * MINUTE_MILLIS;
 
-export function read() {
+export async function read() {
     const postsHost = envVarOrDefault("POSTS_HOST", "https://localhost");
     if (postsHost.includes("localhost")) {
         process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
@@ -41,7 +41,9 @@ export function read() {
         statsViewsCalculateAllTimeScheduleDelay: envVarOrDefault("STATS_VIEWS_CALCULATE_ALL_TIME_SCHEDULE_DELAY",
             DEFAULT_STATS_VIEWS_CALCULATE_ALL_TIME_SCHEDULE_DELAY),
         statsViewsCalculateAllTimeInterval: envVarOrDefault("STATS_VIEWS_CALCULATE_ALL_TIME_INTERVAL",
-            DEFAULT_STATS_VIEWS_CALCULATE_ALL_TIME_INTERVAL)
+            DEFAULT_STATS_VIEWS_CALCULATE_ALL_TIME_INTERVAL),
+        buttonDownApiUrl: envVarOrDefault("BUTTON_DOWN_API_URL", "https://api.buttondown.com/v1"),
+        buttonDownApiKey: await envVarOrThrow("BUTTON_DOWN_API_KEY")
     }
 }
 
@@ -54,6 +56,8 @@ function analyticsAllowedPaths() {
         "/index.html",
         "/about.html",
         "/posts.html",
+        "/newsletter.html",
+        "/privacy-policy.html",
         "/htmx-posts.html",
         "/dbs-posts.html",
         "/modularity-posts.html",

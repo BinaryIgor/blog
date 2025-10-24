@@ -416,7 +416,8 @@ On the other hand, Single Page Applications take advantage of a rich and mature 
 **In conclusion, Multi Page Applications offer simpler and often more performant default choice.** Unless we have an application with clear requirements that justify SPA - such as highly complex client-side interactions and state management or sophisticated offline capabilities - starting with MPA is a wiser move.
 
 <div id="post-extras">
-<div class="post-delimiter">---</div>
+
+{{ .js: newsletterSignUpPostEnd() }}
 
 ### Notes and resources
 

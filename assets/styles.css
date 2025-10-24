@@ -1,6 +1,5 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss" source(none);
+@source "../pages";
 
 @font-face {
     font-family: 'RobotoMono';
@@ -51,104 +50,124 @@
 }
 
 /* Tailwind overrides code font */
-*,
-code {
-    /* Fallback only for a swap period */
-    font-family: "RobotoMono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-}
+@layer base {
 
-html.dark {
-    --primary-color: rgb(15, 15, 15);
-    --secondary-1-color: rgb(17, 24, 39);
-    --secondary-2-color: rgb(31, 41, 55);
-    --primary-text-color-0: rgb(251, 253, 255);
-    --primary-text-color: rgb(240, 240, 240);
-    --primary-text-color-faded: rgba(240, 240, 240, 0.125);
-    --secondary-1-text-color: rgb(229, 231, 235);
-    --secondary-2-text-color: rgb(209, 213, 219);
-    --secondary-3-text-color: rgb(156, 163, 175);
-    --scrollbar-color: var(--primary-text-color);
-    --scrollbar-hover-color: var(--secondary-3-text-color);
-}
+    *,
+    code {
+        /* Fallback only for a swap period */
+        font-family: "RobotoMono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    }
 
-html {
-    --primary-color: rgb(250, 250, 250);
-    --secondary-1-color: rgb(242, 243, 245);
-    --secondary-2-color: rgb(229, 231, 235);
-    --primary-text-color-0: rgb(11, 13, 15);
-    --primary-text-color: rgb(25, 25, 25);
-    --primary-text-color-faded: rgba(25, 25, 25, 0.125);
-    --secondary-1-text-color: rgb(31, 41, 55);
-    --secondary-2-text-color: rgb(55, 65, 81);
-    --secondary-3-text-color: rgb(75, 85, 99);
-    --scrollbar-color: var(--primary-text-color);
-    --scrollbar-hover-color: var(--secondary-3-text-color);
-}
+    html.dark {
+        --primary-color: rgb(15, 15, 15);
+        --secondary-1-color: rgb(17, 24, 39);
+        --secondary-2-color: rgb(31, 41, 55);
+        --primary-text-color-0: rgb(251, 253, 255);
+        --primary-text-color: rgb(240, 240, 240);
+        --primary-text-color-faded: rgba(240, 240, 240, 0.125);
+        --secondary-1-text-color: rgb(229, 231, 235);
+        --secondary-2-text-color: rgb(209, 213, 219);
+        --secondary-3-text-color: rgb(156, 163, 175);
+        --scrollbar-color: var(--primary-text-color);
+        --scrollbar-hover-color: var(--secondary-3-text-color);
+        --modal-bg-color: rgba(15, 15, 15, 0.8);
+        --error-color: rgb(250, 123, 123);
+    }
 
-:root {
-    /* ==scroll firefox and new chrome: https://developer.chrome.com/blog/new-in-chrome-121== */
-    /* "auto" or "thin" */
-    scrollbar-width: thin;
-    /* scroll thumb and track */
-    scrollbar-color: var(--scrollbar-color) var(--primary-color);
-    /* ==scroll firefox== */
-    /* Turn of chrome blue highlight */
-    -webkit-tap-highlight-color: transparent;
+    html {
+        --primary-color: rgb(250, 250, 250);
+        --secondary-1-color: rgb(242, 243, 245);
+        --secondary-2-color: rgb(229, 231, 235);
+        --primary-text-color-0: rgb(11, 13, 15);
+        --primary-text-color: rgb(25, 25, 25);
+        --primary-text-color-faded: rgba(25, 25, 25, 0.125);
+        --secondary-1-text-color: rgb(31, 41, 55);
+        --secondary-2-text-color: rgb(55, 65, 81);
+        --secondary-3-text-color: rgb(75, 85, 99);
+        --scrollbar-color: var(--primary-text-color);
+        --scrollbar-hover-color: var(--secondary-3-text-color);
+        --modal-bg-color: rgba(250, 250, 250, 0.8);
+        --error-color: rgb(153, 27, 27);
+    }
+
+    :root {
+        /* ==scroll firefox and new chrome: https://developer.chrome.com/blog/new-in-chrome-121== */
+        /* "auto" or "thin" */
+        scrollbar-width: thin;
+        /* scroll thumb and track */
+        scrollbar-color: var(--scrollbar-color) var(--primary-color);
+        /* ==scroll firefox== */
+        /* Turn of chrome blue highlight */
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+        /* relative for footer to work properly*/
+        @apply bg-primary text-primary min-h-screen relative text-lg;
+    }
+
+    /* ==chrome before 121, safari scroll== */
+    ::-webkit-scrollbar {
+        width: 6px;
+        height: 4px;
+    }
+
+    ::-webkit-scrollbar-track {
+        background: var(--background-color);
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background: var(--scrollbar-color);
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        background: var(--scrollbar-hover-color);
+    }
 }
 
 /* ==chrome before 121, safari scroll== */
-::-webkit-scrollbar {
-    width: 6px;
-    height: 4px;
-}
 
-::-webkit-scrollbar-track {
-    background: var(--background-color);
-}
-
-::-webkit-scrollbar-thumb {
-    background: var(--scrollbar-color);
-}
-
-::-webkit-scrollbar-thumb:hover {
-    background: var(--scrollbar-hover-color);
-}
-
-/* ==chrome before 121, safari scroll== */
-
-.bg-primary {
+@utility bg-primary {
     background-color: var(--primary-color);
 }
 
-.bg-secondary-1 {
+@utility bg-secondary-1 {
     background-color: var(--secondary-1-color);
 }
 
-.bg-secondary-2 {
+@utility bg-secondary-2 {
     background-color: var(--secondary-2-color);
 }
 
-.text-primary {
+.bg-modal {
+    background-color: var(--modal-bg-color);
+}
+
+@utility text-primary {
     color: var(--primary-text-color);
 }
 
-.text-secondary-1 {
+@utility text-secondary-1 {
     color: var(--secondary-1-text-color);
 }
 
-.text-secondary-2 {
+@utility text-secondary-2 {
     color: var(--secondary-2-text-color);
 }
 
-.text-secondary-3 {
+@utility text-secondary-3 {
     color: var(--secondary-3-text-color);
 }
 
-.border-primary-text {
+.text-error {
+    color: var(--error-color);
+}
+
+@utility border-primary-text {
     border-color: var(--primary-text-color);
 }
 
-.border-primary-text-faded {
+@utility border-primary-text-faded {
     border-color: var(--primary-text-color-faded);
 }
 
@@ -157,7 +176,7 @@ html {
 }
 
 /* to make anchor links work: https://css-tricks.com/hash-tag-links-padding/ */
-.anchor-top-scroll {
+@utility anchor-top-scroll {
     scroll-margin-top: 75px;
     /* iOS 11 and older */
     scroll-snap-margin-top: 75px;
@@ -167,17 +186,12 @@ html {
     white-space: nowrap;
 }
 
+/* keep in sync with .post img below! */
+@utility max-content-width {
+    @apply max-w-[750px];
+}
+
 @layer components {
-    body {
-        /* relative for footer to work properly*/
-        @apply bg-primary text-primary min-h-screen relative text-lg;
-    }
-
-    /* keep in sync with img below! */
-    .max-content-width {
-        @apply max-w-[750px];
-    }
-
     .post>* {
         @apply m-auto;
     }
@@ -228,11 +242,11 @@ html {
 
     .post pre {
         scrollbar-width: thin;
-        @apply bg-secondary-1 p-4 text-left border-l-[4px] rounded-sm border-primary-text max-content-width overflow-auto;
+        @apply bg-secondary-1 p-4 text-left border-l-[4px] rounded-xs border-primary-text max-content-width overflow-auto;
     }
 
     .post :not(pre)>code {
-        @apply bg-secondary-2 p-1 rounded;
+        @apply bg-secondary-2 p-1 rounded-sm;
     }
 
     .post code {
@@ -240,7 +254,7 @@ html {
     }
 
     .post blockquote {
-        @apply py-2 px-4 text-left border-l-[4px] rounded-sm border-primary-text italic;
+        @apply py-2 px-4 text-left border-l-[4px] rounded-xs border-primary-text italic;
     }
 
     .post figure {
@@ -248,11 +262,11 @@ html {
     }
 
     .post img {
-        @apply object-contain m-auto rounded max-h-[750px] max-w-[750px] w-full;
+        @apply object-contain m-auto rounded-sm max-h-[750px] max-w-[750px] w-full;
     }
 
     #profile-image {
-        @apply max-w-[275px] sm:max-w-[350px] object-contain m-auto rounded;
+        @apply max-w-[275px] sm:max-w-[350px] object-contain m-auto rounded-sm;
     }
 
     .post figcaption {
@@ -261,14 +275,6 @@ html {
 
     .post a {
         @apply break-words underline;
-    }
-
-    .delimiter-like {
-        @apply text-secondary-2 font-bold text-2xl text-center;
-    }
-
-    .post-delimiter {
-        @apply delimiter-like my-16;
     }
 
     #post-extras {

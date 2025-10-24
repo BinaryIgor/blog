@@ -130,6 +130,8 @@ Speaking of limiting all possible attack vectors - **the codebase had a few seri
 
 **Let's conclude this section by saying that as Bitcoin's domain is quite unique, so are the solutions implemented in its code.** Thus, something that might seem odd at the first glance is often a natural consequence of how the Bitcoin system works. The codebase had its fair share of bugs and was not structured the best, but ongoing efforts of maintainers have significantly improved the system's quality - it already is at an excellent level - and their continuous work raises this bar still further.
 
+{{ .js: newsletterSignUpPostMid() }}
+
 ## Tests: units in <span class="nowrap">C++</span> and functional in Python {#tests-units-in-cpp-and-functional-in-python}
 
 In the `src/test` dir there are lots of unit tests, written with the help of [Boost.Test library](https://www.boost.org/doc/libs/master/libs/test/doc/html/index.html). [Assuming that we have built various bitcoin binaries](#custom-build-system-dependencies-reproducibility-and-verifiability), in the standard `build` dir there is a [unit tests binary](https://github.com/bitcoin/bitcoin/tree/master/src/test#unit-tests):
@@ -698,7 +700,7 @@ Naturally, there is much more to learn about the Bitcoin Core code and the vario
 
 <div id="post-extras">
 
-<div class="post-delimiter">---</div>
+{{ .js: newsletterSignUpPostEnd() }}
 
 ### Notes and resources
 

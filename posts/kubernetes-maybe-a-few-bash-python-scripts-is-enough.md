@@ -126,14 +126,13 @@ In conclusion: if we have a single or few teams, we should just build a modular 
 So, let's forge ahead and keep simplifying!
 
 <div id="post-extras">
-<div class="post-delimiter">---</div>
+
+{{ .js: newsletterSignUpPostEnd() }}
 
 ### Related videos on my [YouTube channel]({{ youtubeChannelUrl }})
 1. [Collecting metrics and logs from Docker containers](https://www.youtube.com/watch?v=68PzQNsuSWc)
 2. [Visualizing container metrics in Grafana](https://www.youtube.com/watch?v=YGJN8lsiWvk)
 3. [How many HTTP requests can a Single Machine handle?](https://www.youtube.com/watch?v=NsdDIBll-Lw)
-
-<div class="post-delimiter">---</div>
 
 ### Notes and resources
 
