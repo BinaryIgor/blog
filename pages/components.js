@@ -34,7 +34,7 @@ export function postPreview(post) {
 
 export function postsPreview({ posts }) {
     return `
-    <ul class="space-y-6">
+    <ul class="flex flex-col gap-6">
         ${posts.map(p => postPreview(p)).join("\n")}
     </ul>`;
 }
@@ -109,7 +109,7 @@ async function newsletterSignUp(placement, preface, additionalContainerClasses) 
     }
     const headerHTML = `<div class="mb-2">${headerMessage}</div>`;
     const inputHTML = `
-    <input class="p-2 border-[2px] border-solid border-primary-text-faded rounded w-full bg-primary focus:outline-primary-text focus:outline-[2px] focus:outline placeholder:text-secondary-3" 
+    <input class="p-2 border-2 border-solid border-primary-text-faded rounded w-full bg-primary focus:outline-primary-text focus:outline-2 focus:outline placeholder:text-secondary-3" 
         placeholder="you@domain.ext" type="email" name="email" autocomplete="email">
     <span class="text-error block my-1 hidden text-sm" data-email-error>Valid email is required.</span>
     <span class="opacity-80 text-sm"><a href="/privacy-policy.html" class="underline">Privacy policy</a></span>`
@@ -141,7 +141,7 @@ async function newsletterSignUp(placement, preface, additionalContainerClasses) 
         return `
         <div class="bg-modal hidden fixed top-0 left-0 h-full w-full z-10" data-newsletter-sign-up-modal
             data-newsletter-sign-up-placement="${placement}">
-            <div data-modal-content class="max-content-width w-11/12 top-1/2 left-1/2 absolute -translate-x-1/2 -translate-y-1/2 bg-primary border-[2px] border-solid border-primary-text-faded rounded p-6">
+            <div data-modal-content class="max-content-width w-11/12 top-1/2 left-1/2 absolute -translate-x-1/2 -translate-y-1/2 bg-primary border-2 border-solid border-primary-text-faded rounded p-6">
                 ${headerHTML}
                 ${inputHTML}
                 ${footerHTML}
@@ -150,7 +150,7 @@ async function newsletterSignUp(placement, preface, additionalContainerClasses) 
         </div>`;
     }
 
-    let containerClasses = "border-[2px] border-solid border-primary-text-faded rounded p-6";
+    let containerClasses = "border-2 border-solid border-primary-text-faded rounded p-6";
     if (additionalContainerClasses) {
         containerClasses = containerClasses + " " + additionalContainerClasses;
     }

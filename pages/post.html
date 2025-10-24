@@ -13,7 +13,7 @@
     {{ navigation.html }}
 
     <div id="get-newsletter-button"
-        class="bg-primary fixed bottom-4 right-4 border-[2px] border-solid border-primary-text-faded rounded p-4 cursor-pointer">
+        class="bg-primary fixed bottom-4 right-4 border-2 border-solid border-primary-text-faded rounded p-4 cursor-pointer">
         <span class="font-bold">BL</span> Newsletter
     </div>
     {{ .js: newsletterSignUpPostFloating() }}
@@ -22,7 +22,7 @@
     <!-- see POST_TOP_MARGIN dependency below -->
     <article class="post mt-6 mx-4">
         <h1 class="mb-0 max-content-width">{{ title }}</h1>
-        <div class="mt-2 my-0 text-2xl text-center text-secondary-3 max-content-width m-auto">
+        <div class="mt-2 my-0 text-2xl text-center text-secondary-3">
             {{ .js: postMetadata() }}
         </div>
         <div class="mt-16 mb-16 max-content-width">
@@ -135,7 +135,7 @@
 
         function postsPreview(posts) {
             return `
-            <ul class="space-y-6">
+            <ul class="flex flex-col gap-6">
                 ${posts.map(p => postPreview(p)).join("\n")}
             </ul>`;
         }

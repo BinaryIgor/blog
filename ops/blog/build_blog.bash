@@ -14,7 +14,7 @@ cp -r assets dist/assets
 
 echo "Build tailwind..."
 
-tailwindcss -i ./assets/styles.css -o ./dist/assets/styles.css --minify
+npx @tailwindcss/cli -i ./assets/styles.css -o ./dist/assets/styles.css --minify
 
 echo "Generate blog..."
 
