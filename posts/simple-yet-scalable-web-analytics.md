@@ -500,7 +500,7 @@ Have a great time collecting and analyzing your events!
 
 <div id="post-extras">
 
-<div class="post-delimiter">---</div>
+{{ .js: newsletterSignUpPostEnd() }}
 
 ### Links
 

@@ -178,13 +178,11 @@ As we have learned, tests are a crucial component of the software development pr
 
 <div id="post-extras">
 
-<div class="post-delimiter">---</div>
+{{ .js: newsletterSignUpPostEnd() }}
 
 ### Related videos on my [YouTube channel]({{ youtubeChannelUrl }})
 1. [Integration tests of REST API in Java 21](https://www.youtube.com/watch?v=rBoZfQ3z3gU)
 2. [E2E tests of the UI in Playwright](https://www.youtube.com/watch?v=o9vj0dLf3f4)
-
-<div class="post-delimiter">---</div>
 
 ### Notes and resources
 

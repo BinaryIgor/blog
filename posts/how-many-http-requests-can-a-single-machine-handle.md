@@ -710,7 +710,8 @@ Of course, there are other, non-performance related, reasons for having more tha
 Keep things simple!
 
 <div id="post-extras">
-<div class="post-delimiter">---</div>
+
+{{ .js: newsletterSignUpPostEnd() }}
 
 ### Links
 1. Related video on my YouTube channel: https://www.youtube.com/watch?v=NsdDIBll-Lw

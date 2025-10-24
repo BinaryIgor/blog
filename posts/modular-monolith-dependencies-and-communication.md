@@ -320,7 +320,7 @@ Having great module design and applying communication patterns wisely, will not 
 
 <div id="post-extras">
 
-<div class="post-delimiter">---</div>
+{{ .js: newsletterSignUpPostEnd() }}
 
 ### Notes and resources 
 

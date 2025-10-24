@@ -235,7 +235,7 @@ in place, it is possible to create a fully decentralized network that no single 
 
 <div id="post-extras">
 
-<div class="post-delimiter">---</div>
+{{ .js: newsletterSignUpPostEnd() }}
 
 ### Notes and resources
 

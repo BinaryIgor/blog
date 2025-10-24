@@ -67,8 +67,8 @@
 
     // TODO: refactor a bit
     const newSubsriberMessage = "Almost there - check your inbox for confirmation and we are all set!";
-    const alreadyJoinedMessageHTML = `It seems that you have already joined the <a href="/newsletter.html" class='underline'><strong>Binary Log</strong> Newsletter</a>. Thanks!`;
-    const justJoinedMessageHTML = `It seems that you have just joined the <strong>Binary Log</strong> Newsletter. Thanks!`;
+    const alreadyJoinedMessageHTML = `Seems like you have already joined the <a href="/newsletter.html" class='underline'><strong>Binary Log</strong> Newsletter</a>. Thanks!`;
+    const justJoinedMessageHTML = `Seems like you have just joined the <strong>Binary Log</strong> Newsletter. Thanks!`;
     const joiningMessage = "Joining...";
     const sendNewSubscriberFailureMessage = "Failed to join - network or server error. Try again later.";
     const sendNewSubscriberInvalidEmailMessage = "Invalid email - make sure that both username and domain parts of the address have intended values.";
@@ -85,7 +85,7 @@
         }
 
         if (!isNewsletterFeatureEnabled() && placement == 'LANDING') {
-            signUp.innerHTML = "Work in progress, launching soon! If you want to join already, write to me at <strong>igor@binaryigor.com</strong> to be on the waitlist.";
+            signUp.innerHTML = "Work in progress, launching soon! If you want to join already, shoot me an email at <strong>igor@binaryigor.com</strong> and I will add you to the waitlist.";
             return;
         }
 

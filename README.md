@@ -34,13 +34,3 @@ npm run build:run:blog
 For the rest, checkout package.json scripts and ops, and scripts folders!
 
 For now, the blog is deployed on the Digital Ocean's amazing App Platform and the server (for analytics) is on the separate droplet (also Digital Ocean's).
-
-
-### Newsletter
-* integrate some webhooks: https://docs.buttondown.com/api-webhooks-introduction
-* batch job to save analytics: https://docs.buttondown.com/api-emails-analytics
-* https://docs.buttondown.com/welcome-sequence
-* Buttondown - do they have retry policy? What about describing webhooks auth?
-* https://docs.buttondown.com/customizing-email-design
-* https://github.com/TryGhost/node-sqlite3/issues/747
-* https://sqlite.org/pragma.html#pragma_synchronous

@@ -397,14 +397,14 @@ However, I do not find styling and customizing Shoelace components intuitive. Mo
 \
 In conclusion, as of now, *Shoelace Library* is the best and most comprehensive collection of framework-agnostic components for the Web. It can be used seamlessly with HTMX to create fully functional web applications. **But, there are better approaches for creating framework-agnostic components out there, they are just not at the Sholeace's size and level of maturity.**
 
-<div class="post-delimiter">---</div>
+<div id="post-extras">
+
+{{ .js: newsletterSignUpPostEnd() }}
 
 ### Related videos on my [YouTube channel]({{ youtubeChannelUrl }})
 1. [HTMX + Web Components](https://www.youtube.com/watch?v=M4i-JQVLgfE)
 2. [Flexible Web Components: Modal Container example](https://www.youtube.com/watch?v=eUQ5ne292Rk)
 3. [Extension of this blog post](https://www.youtube.com/watch?v=E9fRUi_kZyc) (*added 2024-10-19*)
-
-<div class="post-delimiter">---</div>
 
 ### Notes and resources
 
@@ -425,3 +425,5 @@ In conclusion, as of now, *Shoelace Library* is the best and most comprehensive 
     2. https://enhance.dev/wasm
     3. https://github.com/11ty/webc
     4. https://lit.dev/docs/ssr/overview/
+
+</div>
