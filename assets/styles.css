@@ -103,7 +103,7 @@
 
     body {
         /* relative for footer to work properly*/
-        @apply bg-primary text-primary min-h-screen relative text-lg;
+        @apply bg-primary text-primary min-h-dvh relative text-lg;
     }
 
     /* ==chrome before 121, safari scroll== */
