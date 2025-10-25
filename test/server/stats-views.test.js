@@ -132,6 +132,7 @@ async function prepareEventsReturningExpectedStats(fromTimestamp, toTimestamp, a
         crypto.randomUUID(),
         crypto.randomUUID(),
         crypto.randomUUID(),
+        crypto.randomUUID(),
         crypto.randomUUID()
     ];
     const ipHashes = [

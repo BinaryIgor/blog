@@ -138,9 +138,10 @@ export class Event {
 }
 
 export class Stats {
-    constructor(views, visitors, ipHashes, scrolls, pings, viewsBySource, pages) {
+    constructor(views, visitors, ipHashes, sessions, scrolls, pings, viewsBySource, pages) {
         this.views = views;
         this.visitors = visitors;
+        this.sessions = sessions;
         this.ipHashes = ipHashes;
         this.scrolls = scrolls;
         this.pings = pings;
@@ -149,10 +150,38 @@ export class Stats {
     }
 
     static empty() {
-        return new Stats(0, 0, 0,
+        return new Stats(0, 0, 0, SessionsStats.empty(),
             { all: { events: 0, ids: 0 }, byPosition: [] },
             { all: PingStats.empty(), byPosition: [] },
             [], []);
+    }
+}
+
+/**
+ * @typedef SessionThresholdStat
+ * @param {number} duration
+ * @param {number} sessions
+ */
+
+export class SessionsStats {
+
+    /**
+     * @param {number} sessions 
+     * @param {number} meanDuration - in milliseconds
+     * @param {number} maxDuration - in milliseconds 
+     * @param {number} minDuration - in milliseconds 
+     * @param {Array<SessionThresholdStat>} thresholds 
+     */
+    constructor(sessions, meanDuration, maxDuration, minDuration, thresholds) {
+        this.sessions = sessions;
+        this.meanDuration = meanDuration;
+        this.maxDuration = maxDuration;
+        this.minDuration = minDuration;
+        this.thresholds = thresholds;
+    }
+
+    static empty() {
+        return new SessionsStats(0, 0, 0, 0, []);
     }
 }
 
@@ -260,6 +289,10 @@ export class DeferredEventsSaver {
         if (this.eventsToSave.length >= this.maxInMemoryEvents) {
             await this.saveEvents();
         }
+    }
+
+    async close() {
+        this.saveEvents();
     }
 }
 
@@ -421,6 +454,7 @@ export class SqliteAnalyticsRepository {
 
     async stats(fromTimestamp, toTimestamp) {
         const viewsVisitorsIpHashes = this._viewsVisitorsIpHashesStats(fromTimestamp, toTimestamp);
+        const sessions = this.#sessionStats(fromTimestamp, toTimestamp);
         const scrolls = this._scrollStats(fromTimestamp, toTimestamp);
         const pings = this._pingsStats(fromTimestamp, toTimestamp);
 
@@ -429,7 +463,7 @@ export class SqliteAnalyticsRepository {
 
         const { views, visitors, ipHashes } = await viewsVisitorsIpHashes;
 
-        return new Stats(views, visitors, ipHashes,
+        return new Stats(views, visitors, ipHashes, await sessions,
             await scrolls, await pings, await viewsBySource, await pages);
     }
 
@@ -454,10 +488,17 @@ export class SqliteAnalyticsRepository {
             });
     }
 
-    _queryWithOptionalWhereInTimestampsClause(query, fromTimestamp, toTimestamp) {
+    _queryWithOptionalWhereInTimestampsClause(query, fromTimestamp, toTimestamp, additionalClause = undefined) {
         const whereInTimestampsClause = this._whereInTimestampsClause(fromTimestamp, toTimestamp);
         if (whereInTimestampsClause) {
-            return query + ` ${whereInTimestampsClause}`;
+            const withWhereQuery = `${query} ${whereInTimestampsClause}`;
+            if (additionalClause) {
+                return `${withWhereQuery} AND ${additionalClause}`;
+            }
+            return withWhereQuery;
+        }
+        if (additionalClause) {
+            return `${query} AND ${additionalClause}`;
         }
         return query;
     }
@@ -497,6 +538,62 @@ export class SqliteAnalyticsRepository {
 
     _emptyEventsIds() {
         return { events: 0, ids: 0 };
+    }
+
+    async #sessionStats(fromTimestamp, toTimestamp) {
+        const sessionsQuery = this._queryWithOptionalWhereInTimestampsClause(`
+            SELECT COUNT(DISTINCT session_id) AS sessions FROM event`,
+            fromTimestamp, toTimestamp, "session_id !=''"
+        );
+        const sessionsDurationQuery = this._queryWithOptionalWhereInTimestampsClause(`
+            SELECT session_id, MAX(timestamp) - MIN(timestamp) AS duration FROM event`,
+            fromTimestamp, toTimestamp, "session_id != ''"
+        ) + " GROUP BY session_id";
+
+        const meanMaxMinSessionsQuery = `
+        SELECT AVG(duration) AS mean_duration, MAX(duration) AS max_duration, MIN(duration) AS min_duration
+        FROM (${sessionsDurationQuery}) AS durations`;
+
+        // keep in sync with tests!
+        const sessionsThresholdsQuery = `
+        SELECT 
+            CASE 
+                WHEN duration >= 720000 THEN 7200000
+                WHEN duration >= 360000 THEN 3600000
+                WHEN duration >= 180000 THEN 1800000
+                WHEN duration >= 600000 THEN 600000
+                WHEN duration >= 300000 THEN 300000
+                WHEN duration >= 180000 THEN 180000
+                WHEN duration >= 60000 THEN 60000
+                ELSE 0
+            END AS duration_threshold,
+            COUNT(*) AS sessions
+        FROM (${sessionsDurationQuery}) AS durations
+        GROUP BY duration_threshold
+        ORDER BY duration_threshold`;
+
+        const sessions = await this.db.queryOne(sessionsQuery)
+            .then(r => {
+                if (r) {
+                    return r["sessions"]
+                }
+                return 0;
+            });
+
+        if (sessions == 0) {
+            return SessionsStats.empty();
+        }
+
+        const meanMaxMinSessionsQueryPromise = this.db.queryOne(meanMaxMinSessionsQuery)
+            .then(r => ({ meanDuration: r["mean_duration"], maxDuration: r["max_duration"], minDuration: r["min_duration"] }));
+        const sessionsThresholdsQueryPromise = this.db.query(sessionsThresholdsQuery)
+            .then(rows => rows.map(r => ({
+                duration: r['duration_threshold'],
+                sessions: r['sessions']
+            })));
+        const { meanDuration, maxDuration, minDuration } = await meanMaxMinSessionsQueryPromise;
+        const thresholds = await sessionsThresholdsQueryPromise;
+        return new SessionsStats(sessions, meanDuration, maxDuration, minDuration, thresholds);
     }
 
     async _scrollStats(fromTimestamp, toTimestamp) {

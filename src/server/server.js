@@ -17,15 +17,18 @@ import { PostsSource } from "./posts.js";
 
 let server;
 let scheduler;
+let eventsSaver;
 let db;
 
-export async function start(clock = new Clock(),
-    scheduler = new Scheduler(),
+export async function start(appClock = new Clock(), appScheduler = new Scheduler(),
     postsRetryConfig = {
         retries: 5,
         initialDelay: 500,
         backoffMultiplier: 2
     }) {
+    const clock = appClock;
+    scheduler = appScheduler;
+
     const config = await Config.read();
 
     db = await SqliteDb.initInstance(config.dbPath);
@@ -49,7 +52,7 @@ export async function start(clock = new Clock(),
         allTimeViewSheduleDelay: config.statsViewsCalculateAllTimeScheduleDelay
     });
 
-    const eventsSaver = new DeferredEventsSaver(analyticsRepository, config.eventsMaxInMemory, clock);
+    eventsSaver = new DeferredEventsSaver(analyticsRepository, config.eventsMaxInMemory, clock);
     eventsSaver.schedule(scheduler, config.eventsWriteInterval);
 
     const analyticsService = new AnalyticsService(analyticsRepository, eventsSaver, postsSource, config.analyticsAllowedPaths, clock);
@@ -218,15 +221,17 @@ export function stop() {
 
     server.close(async () => {
         try {
-            Logger.logInfo("Server closed, closing scheduler and db...");
-            if (scheduler) {
-                scheduler.close();
-            }
-            Logger.logInfo("Scheduler closed, closing db...");
-            if (db) {
-                await db.close();
-            }
+            Logger.logInfo("Server closed - closing scheduler, events saver and db");
+            await scheduler.close();
+
+            Logger.logInfo("Scheduler closed - saving potentially pending events");
+            await eventsSaver.close();
+
+            Logger.logInfo("All events saved - closing db");
+            await db.close();
+
             Logger.logInfo("Db closed as well - the whole processed is about to exit successfully");
+
             process.exit(0);
         } catch (e) {
             Logger.logError("Problem when stopping the app - exiting with the error code", e);
@@ -238,9 +243,9 @@ export function stop() {
     server.closeIdleConnections();
 
     setTimeout(() => {
-        Logger.logInfo("Closing all remaining connections...");
+        Logger.logWarn("Some connections refused to close; force-closing them");
         server.closeAllConnections();
-    }, 1000);
+    }, 3000);
 }
 
 //Start only if called directly from the console

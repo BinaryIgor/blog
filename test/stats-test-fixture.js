@@ -1,6 +1,4 @@
-import { URL } from "url";
-
-import { Stats, ViewsBySource, PageStats } from "../src/server/analytics.js";
+import { Stats, ViewsBySource, PageStats, SessionsStats } from "../src/server/analytics.js";
 import { randomElement, randomElementOrNull, randomNumber, sortByField } from "./test-utils.js";
 import { SCROLL_EVENT_TYPE, PING_EVENT_TYPE } from "./test-objects.js";
 import { Event, PingStats, PingersStats } from "../src/server/analytics.js";
@@ -30,16 +28,12 @@ export const StatsTestFixture = {
         const eventIpHashes = countDistinct(views.concat(scrolls).concat(pings).map(e => e.ipHash));
         const paths = distinctPaths({ views, scrolls, pings });
 
-        return new Stats(views.length, eventVisitors, eventIpHashes,
+        return new Stats(views.length, eventVisitors, eventIpHashes, toExpectedSessions(views, scrolls, pings),
             toExpectedScrolls(scrolls), toExpectedPings(pings),
             toExpectedViewsBySource(views),
             toExpectedStatsByPath({ paths, views, scrolls, pings }));
     }
 };
-
-function sourceHost(source) {
-    return new URL(source).host;
-}
 
 function distinctPaths({ views, scrolls, pings }) {
     const paths = [...views, ...scrolls, ...pings].map(e => e.path);
@@ -48,6 +42,75 @@ function distinctPaths({ views, scrolls, pings }) {
 
 function countDistinct(elements) {
     return new Set(elements).size;
+}
+
+function toExpectedSessions(views, scrolls, pings) {
+    const events = [...views, ...scrolls, ...pings];
+
+    const sessions = countDistinct(events.map(e => e.sessionId));
+
+    const eventTimestampsBySessionId = new Map();
+    events.forEach(e => {
+        let sessionTimestamps = eventTimestampsBySessionId.get(e.sessionId);
+        if (!sessionTimestamps) {
+            sessionTimestamps = [];
+            eventTimestampsBySessionId.set(e.sessionId, sessionTimestamps);
+        }
+        sessionTimestamps.push(e.timestamp);
+    });
+
+    const durationsBySessionId = new Map();
+    eventTimestampsBySessionId.forEach((timestamps, sessionId) => {
+        const maxTimestamp = Math.max(...timestamps);
+        const minTimestamp = Math.min(...timestamps);
+        durationsBySessionId.set(sessionId, (maxTimestamp - minTimestamp));
+    });
+
+    const durations = [...durationsBySessionId.values()];
+
+    const meanDuration = durations.reduce((acc, d) => acc + d, 0) / durations.length;
+    const maxDuration = Math.max(...durations);
+    const minDuration = Math.min(...durations);
+
+    const durationsCountByThreshold = new Map();
+    durations.forEach(d => {
+        const threshold = sessionDurationThreshold(d);
+        const tDurations = durationsCountByThreshold.get(threshold);
+        if (tDurations) {
+            durationsCountByThreshold.set(threshold, tDurations + 1);
+        } else {
+            durationsCountByThreshold.set(threshold, 1);
+        }
+    });
+
+    const thresholds = [...durationsCountByThreshold.entries()]
+        .map(kv => ({ duration: kv[0], sessions: kv[1] }));
+    const sortedThresholds = sortByField(thresholds, "duration");
+
+    return new SessionsStats(sessions, meanDuration, maxDuration, minDuration, sortedThresholds);
+}
+
+// keep in sync with SqliteAnalyticsRepository
+function sessionDurationThreshold(duration) {
+    let threshold;
+    if (duration >= 720000) {
+        threshold = 7200000;
+    } else if (duration >= 360000) {
+        threshold = 3600000;
+    } else if (duration >= 180000) {
+        threshold = 1800000;
+    } else if (duration >= 600000) {
+        threshold = 600000;
+    } else if (duration >= 30000) {
+        threshold = 300000;
+    } else if (duration >= 180000) {
+        threshold = 180000;
+    } else if (duration >= 60000) {
+        threshold = 60000;
+    } else {
+        threshold = 0;
+    }
+    return threshold;
 }
 
 function toExpectedScrolls(events) {
