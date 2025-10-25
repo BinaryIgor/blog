@@ -288,6 +288,10 @@ export class DeferredEventsSaver {
             await this.saveEvents();
         }
     }
+
+    async close() {
+        this.saveEvents();
+    }
 }
 
 export class StatsViews {
