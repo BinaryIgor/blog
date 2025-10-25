@@ -221,13 +221,13 @@ export function stop() {
 
     server.close(async () => {
         try {
-            Logger.logInfo("Server closed, closing scheduler, events saver and db...");
+            Logger.logInfo("Server closed - closing scheduler, events saver and db");
             await scheduler.close();
 
-            Logger.logInfo("Scheduler closed, saving potentially pending events...");
+            Logger.logInfo("Scheduler closed - saving potentially pending events");
             await eventsSaver.close();
 
-            Logger.logInfo("All events saved, closing db..");
+            Logger.logInfo("All events saved - closing db");
             await db.close();
 
             Logger.logInfo("Db closed as well - the whole processed is about to exit successfully");

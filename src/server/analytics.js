@@ -159,7 +159,7 @@ export class Stats {
 
 /**
  * @typedef SessionThresholdStat
- * @param {number} minDuration
+ * @param {number} duration
  * @param {number} sessions
  */
 
@@ -167,19 +167,21 @@ export class SessionsStats {
 
     /**
      * @param {number} sessions 
+     * @param {number} meanDuration - in milliseconds
      * @param {number} maxDuration - in milliseconds 
-     * @param {number} averageDuration - in milliseconds
+     * @param {number} minDuration - in milliseconds 
      * @param {Array<SessionThresholdStat>} thresholds 
      */
-    constructor(sessions, maxDuration, averageDuration, thresholds) {
+    constructor(sessions, meanDuration, maxDuration, minDuration, thresholds) {
         this.sessions = sessions;
+        this.meanDuration = meanDuration;
         this.maxDuration = maxDuration;
-        this.averageDuration = averageDuration;
+        this.minDuration = minDuration;
         this.thresholds = thresholds;
     }
 
     static empty() {
-        return new SessionsStats(0, 0, 0, []);
+        return new SessionsStats(0, 0, 0, 0, []);
     }
 }
 
@@ -548,52 +550,50 @@ export class SqliteAnalyticsRepository {
             fromTimestamp, toTimestamp, "session_id != ''"
         ) + " GROUP BY session_id";
 
-        const maxAverageSessionQuery = `
-        SELECT MAX(duration) as max_duration, AVG(duration) as average_duration
+        const meanMaxMinSessionsQuery = `
+        SELECT AVG(duration) AS mean_duration, MAX(duration) AS max_duration, MIN(duration) AS min_duration
         FROM (${sessionsDurationQuery}) AS durations`;
 
         // keep in sync with tests!
         const sessionsThresholdsQuery = `
         SELECT 
             CASE 
-                WHEN duration >= 360000 THEN 3600
-                WHEN duration >= 180000 THEN 1800
-                WHEN duration >= 600000 THEN 600
-                WHEN duration >= 180000 THEN 180
-                WHEN duration >= 60000 THEN 60
+                WHEN duration >= 720000 THEN 7200000
+                WHEN duration >= 360000 THEN 3600000
+                WHEN duration >= 180000 THEN 1800000
+                WHEN duration >= 600000 THEN 600000
+                WHEN duration >= 300000 THEN 300000
+                WHEN duration >= 180000 THEN 180000
+                WHEN duration >= 60000 THEN 60000
                 ELSE 0
-            END AS threshold,
+            END AS duration_threshold,
             COUNT(*) AS sessions
         FROM (${sessionsDurationQuery}) AS durations
-        GROUP BY threshold
-        ORDER BY threshold`;
+        GROUP BY duration_threshold
+        ORDER BY duration_threshold`;
 
-        const sessionsQueryPromise = this.db.queryOne(sessionsQuery)
+        const sessions = await this.db.queryOne(sessionsQuery)
             .then(r => {
                 if (r) {
                     return r["sessions"]
                 }
                 return 0;
             });
-        const maxAverageSessionQueryPromise = this.db.queryOne(maxAverageSessionQuery)
-            .then(r => {
-                if (r) {
-                    return { maxDuration: r["max_duration"], averageDuration: r["average_duration"] };
-                }
-                return { maxDuration: 0, averageDuration: 0 };
-            });
+
+        if (sessions == 0) {
+            return SessionsStats.empty();
+        }
+
+        const meanMaxMinSessionsQueryPromise = this.db.queryOne(meanMaxMinSessionsQuery)
+            .then(r => ({ meanDuration: r["mean_duration"], maxDuration: r["max_duration"], minDuration: r["min_duration"] }));
         const sessionsThresholdsQueryPromise = this.db.query(sessionsThresholdsQuery)
             .then(rows => rows.map(r => ({
-                minDuration: r['threshold'],
+                duration: r['duration_threshold'],
                 sessions: r['sessions']
             })));
-
-
-        const sessions = await sessionsQueryPromise;
-        const { maxDuration, averageDuration } = await maxAverageSessionQueryPromise;
+        const { meanDuration, maxDuration, minDuration } = await meanMaxMinSessionsQueryPromise;
         const thresholds = await sessionsThresholdsQueryPromise;
-
-        return new SessionsStats(sessions, maxDuration, averageDuration, thresholds);
+        return new SessionsStats(sessions, meanDuration, maxDuration, minDuration, thresholds);
     }
 
     async _scrollStats(fromTimestamp, toTimestamp) {

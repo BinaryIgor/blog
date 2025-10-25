@@ -249,48 +249,36 @@
         }
 
         function sessionsComponent(stats, id) {
-            const minute = 60_000;
-            const hour = 60 * minute;
+            const minuteSeconds = 60;
+            const minuteMillis = minuteSeconds * 1000;
+            const hourMillis = 60 * minuteMillis;
             const formattedDuration = (millis) => {
                 if (millis == 0) {
-                    millis = Math.round(Math.random() * 3600_000);
+                    return "<1m"
                 }
-                if (millis <= minute) {
-                    const seconds = Math.round(millis / 1000);
-                    return `${seconds}s`;
-                }
-                if (millis <= hour) {
-                    const minutes = Math.round(millis / minute);
+                if (millis <= hourMillis) {
+                    const minutes = Math.round(millis / minuteMillis);
                     return `${minutes}m`;
                 }
-                const hours = Math.round(millis / hour);
-                return `${hours}h`;
+                const hours = millis / hourMillis;
+                const hoursWithoutMinutes = Math.round(hours);
+                const minutes = Math.round((hours - hoursWithoutMinutes) * minuteSeconds);
+                return minutes > 0 ? `${hoursWithoutMinutes}h ${minutes}m` : `${hoursWithoutMinutes}h`;
             };
 
-            let thresholds;
-            if (stats.thresholds.length > 0) {
-                thresholds = stats.thresholds;
-            } else {
-                thresholds = Array.from({ length: 10 },
-                    () => ({
-                        minDuration: Math.round(Math.random() * 3600_000),
-                        sessions: Math.round(Math.random() * 1000)
-                    }));
-            }
-
-            const thresholdsHTML = thresholds.map(t => {
-                const duration = formattedDuration(t.minDuration);
+            const thresholdsHTML = stats.thresholds.map(t => {
+                const duration = formattedDuration(t.duration);
                 const sessions = scaledNumber(t.sessions);
-                const allSessions = stats.sessions == 0 ? Math.round(t.sessions + (2 * Math.random() * t.sessions)): stats.sessions;
-                const sessionsPercentage = formattedPercentage(t.sessions, stats.sessions == 0 ? allSessions: stats.sessions);
+                const sessionsPercentage = formattedPercentage(t.sessions, stats.sessions);
                 return `<div>Sessions ${duration}: ${sessions} (${sessionsPercentage}%)</div>`;
             }).join('\n');
 
             return `
             <div id="${id}"><span class="cursor-pointer underline">Sessions:</span> ${scaledNumber(stats.sessions)}</div>
             <div class="mt-1 mb-2">
-                <div>Average: ${formattedDuration(stats.averageDuration)}</div>
+                <div>Mean: ${formattedDuration(stats.meanDuration)}</div>
                 <div>Max: ${formattedDuration(stats.maxDuration)}</div>
+                <div>Min: ${formattedDuration(stats.minDuration)}</div>
                 ${thresholdsHTML}
             </div>`;
         }

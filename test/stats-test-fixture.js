@@ -49,47 +49,32 @@ function toExpectedSessions(views, scrolls, pings) {
 
     const sessions = countDistinct(events.map(e => e.sessionId));
 
-    const eventsBySessionId = new Map();
+    const eventTimestampsBySessionId = new Map();
     events.forEach(e => {
-        let sessionEvents = eventsBySessionId.get(e.sessionId);
-        if (!sessionEvents) {
-            sessionEvents = [];
-            eventsBySessionId.set(e.sessionId, sessionEvents);
+        let sessionTimestamps = eventTimestampsBySessionId.get(e.sessionId);
+        if (!sessionTimestamps) {
+            sessionTimestamps = [];
+            eventTimestampsBySessionId.set(e.sessionId, sessionTimestamps);
         }
-        sessionEvents.push(e);
+        sessionTimestamps.push(e.timestamp);
     });
 
     const durationsBySessionId = new Map();
-    eventsBySessionId.forEach((events, sessionId) => {
-        const timestamps = events.map(e => e.timestamp);
+    eventTimestampsBySessionId.forEach((timestamps, sessionId) => {
         const maxTimestamp = Math.max(...timestamps);
         const minTimestamp = Math.min(...timestamps);
-
         durationsBySessionId.set(sessionId, (maxTimestamp - minTimestamp));
     });
 
     const durations = [...durationsBySessionId.values()];
 
+    const meanDuration = durations.reduce((acc, d) => acc + d, 0) / durations.length;
     const maxDuration = Math.max(...durations);
-    const averageDuration = durations.reduce((acc, d) => acc + d, 0) / durations.length;
+    const minDuration = Math.min(...durations);
 
     const durationsCountByThreshold = new Map();
     durations.forEach(d => {
-        let threshold;
-        if (d >= 360000) {
-            threshold = 3600;
-        } else if (d >= 180000) {
-            threshold = 1800;
-        } else if (d >= 600000) {
-            threshold = 600;
-        } else if (d >= 180000) {
-            threshold = 180;
-        } else if (d >= 60000) {
-            threshold = 60;
-        } else {
-            threshold = 0;
-        }
-
+        const threshold = sessionDurationThreshold(d);
         const tDurations = durationsCountByThreshold.get(threshold);
         if (tDurations) {
             durationsCountByThreshold.set(threshold, tDurations + 1);
@@ -99,11 +84,33 @@ function toExpectedSessions(views, scrolls, pings) {
     });
 
     const thresholds = [...durationsCountByThreshold.entries()]
-        .map(kv => ({ minDuration: kv[0], sessions: kv[1] }));
-    const sortedThresholds = sortByField(thresholds, "minDuration");
+        .map(kv => ({ duration: kv[0], sessions: kv[1] }));
+    const sortedThresholds = sortByField(thresholds, "duration");
 
-    // TODO: full impl!
-    return new SessionsStats(sessions, maxDuration, averageDuration, sortedThresholds);
+    return new SessionsStats(sessions, meanDuration, maxDuration, minDuration, sortedThresholds);
+}
+
+// keep in sync with SqliteAnalyticsRepository
+function sessionDurationThreshold(duration) {
+    let threshold;
+    if (duration >= 720000) {
+        threshold = 7200000;
+    } else if (duration >= 360000) {
+        threshold = 3600000;
+    } else if (duration >= 180000) {
+        threshold = 1800000;
+    } else if (duration >= 600000) {
+        threshold = 600000;
+    } else if (duration >= 30000) {
+        threshold = 300000;
+    } else if (duration >= 180000) {
+        threshold = 180000;
+    } else if (duration >= 60000) {
+        threshold = 60000;
+    } else {
+        threshold = 0;
+    }
+    return threshold;
 }
 
 function toExpectedScrolls(events) {
