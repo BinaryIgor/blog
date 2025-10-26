@@ -1,18 +1,17 @@
-import bodyParser from "body-parser";
 import express from "express";
 
 let server;
 
 export function start({
     port = 8080,
-    getRoutes = []
+    routes = []
 } = {}) {
     const app = express();
 
-    app.use(bodyParser.json());
+    app.use(express.json());
 
-    getRoutes.forEach(r => {
-        app.get(r.path, async (req, res) => {
+    routes.forEach(r => {
+        app[r.method.toLowerCase()](r.path, async (req, res) => {
             r.handler(req, res);
         });
     });

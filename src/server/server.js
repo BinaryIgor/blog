@@ -1,8 +1,10 @@
-import bodyParser from "body-parser";
 import express from "express";
 import cors from "cors";
 import { AnalyticsService, DeferredEventsSaver, StatsViews, SqliteAnalyticsRepository, Event } from "./analytics.js";
-import { SubscriberService, SqliteSubscriberRepository, Subscriber, SubscriberSignUpContext, SubscribeResult, ButtondownSubscriberApi, ButtondownWebhookHandler } from "./newsletter.js";
+import {
+    SubscriberService, SqliteSubscriberRepository, Subscriber, SubscriberSignUpContext, ButtondownSubscriberApi, NewsletterWebhookHandler,
+    SubscriberExistsError, SubscriberValidationError, SubscriberFailureError
+} from "./newsletter.js";
 import { Scheduler } from "./scheduler.js";
 import * as Logger from "../shared/logger.js";
 
@@ -60,11 +62,17 @@ export async function start(appClock = new Clock(), appScheduler = new Scheduler
     const subscriberRepository = new SqliteSubscriberRepository(db);
     const subscriberApi = new ButtondownSubscriberApi(config.buttonDownApiUrl, config.buttonDownApiKey);
     const subscriberService = new SubscriberService(subscriberRepository, subscriberApi, clock);
-    const newsletterWebhookHandler = new ButtondownWebhookHandler(subscriberService);
+    const newsletterWebhookHandler = new NewsletterWebhookHandler(subscriberService);
 
     const app = express();
 
-    app.use(bodyParser.json());
+    app.use((req, res, next) => {
+        if (req.originalUrl.startsWith("/webhooks/")) {
+            express.raw()(req, res, next);
+        } else {
+            express.json()(req, res, next);
+        }
+    });
 
     const corsOptions = {
         origin: config.corsAllowedOrigin,
@@ -94,22 +102,21 @@ export async function start(appClock = new Clock(), appScheduler = new Scheduler
             const { email, placement, visitorId, sessionId, source, medium, campaign, ref } = req.body;
             const context = new SubscriberSignUpContext(visitorId, sessionId, source, medium, campaign, ref, placement);
             const subscriber = Subscriber.newOne(email, clock.nowTimestamp(), context);
-            const result = await subscriberService.subscribe(subscriber);
-            if (result == SubscribeResult.SUBSCRIBER_CREATED) {
-                res.sendStatus(201);
-            } else if (result == SubscribeResult.SUBSCRIBER_EXISTS) {
+            await subscriberService.subscribe(subscriber);
+            res.sendStatus(201);
+        } catch (e) {
+            if (e instanceof SubscriberExistsError) {
                 res.sendStatus(409);
-            } else if (result == SubscribeResult.INVALID_SUBSCRIBER_DATA) {
+            } else if (e instanceof SubscriberValidationError) {
                 res.sendStatus(422);
             } else {
+                Logger.logError(`Failed to create subscriber ${JSON.stringify(req.body)}:`, e);
                 res.sendStatus(500);
             }
-        } catch (e) {
-            Logger.logError(`Failed to create subscriber ${JSON.stringify(req.body)}:`, e);
-            res.sendStatus(500);
         }
     });
 
+    // TODO: internal version!
     app.post("/webhooks/newsletter", async (req, res) => {
         try {
             // const authorization = req.header("Authorization") ?? "";
@@ -122,6 +129,17 @@ export async function start(appClock = new Clock(), appScheduler = new Scheduler
             // }
             Logger.logInfo(`Got event on /webhooks/newsletter endpoint. Headers:`, req.headers);
             Logger.logInfo(`Got event on /webhooks/newsletter endpoint. Body:`, req.body);
+            res.sendStatus(200);
+        } catch (e) {
+            Logger.logError(`Failed to handle webhook event ${JSON.stringify(req.body)}:`, e);
+            res.sendStatus(500);
+        }
+    });
+
+    app.post("/internal/webhooks/newsletter", async (req, res) => {
+        try {
+            const { event_type, data } = req.body;
+            await newsletterWebhookHandler.handle({ type: event_type, data });
             res.sendStatus(200);
         } catch (e) {
             Logger.logError(`Failed to handle webhook event ${JSON.stringify(req.body)}:`, e);
@@ -208,11 +226,11 @@ export async function start(appClock = new Clock(), appScheduler = new Scheduler
         stop();
     });
 
-    return { eventsSaver, statsViews };
+    return { eventsSaver, statsViews, subscriberRepository, subscriberService, newsletterWebhookHandler };
 }
 
 let closing = false;
-export function stop() {
+export function stop(exit = true) {
     if (!server || closing) {
         return;
     }
@@ -232,10 +250,18 @@ export function stop() {
 
             Logger.logInfo("Db closed as well - the whole processed is about to exit successfully");
 
-            process.exit(0);
+            if (exit) {
+                process.exit(0);
+            } else {
+                Logger.logInfo("Exit disabled - process is owned somwhere in the upstream");
+            }
         } catch (e) {
             Logger.logError("Problem when stopping the app - exiting with the error code", e);
-            process.exit(1);
+            if (exit) {
+                process.exit(1);
+            } else {
+                Logger.logInfo("Exit disabled - process is owned somwhere in the upstream");
+            }
         }
     });
 

@@ -1,4 +1,4 @@
-FROM node:20-alpine
+FROM node:22-alpine
 
 COPY tmp/ /app
 COPY run_server_app.sh /app/run_app.sh

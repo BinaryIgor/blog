@@ -4,15 +4,18 @@ import {
     testClock, testRequests, failNextNPostsFetches, addPosts,
     assertAnalyticsEventsSavedAndStatsViewCalculated,
     assertAnalyticsEventsSaved,
-    assertStatsViewsCalculated
+    assertStatsViewsCalculated,
+    subscriberRepository
 } from "../server-int-test-suite.js";
-import { assertJsonResponse, assertOkResponseCode, assertResponseCode } from "../web-tests.js";
+import { assertConflictResponseCode, assertCreatedResponseCode, assertJsonResponse, assertOkResponseCode, assertResponseCode, assertUnprocessableContentResponseCode } from "../web-tests.js";
 import { randomNumber, randomString } from "../test-utils.js";
 import { MAX_PATH_LENGTH, MAX_IP_HASH_VISITOR_IDS_IN_LAST_DAY, DAY_SECONDS, ALL_TIME_STATS_VIEW, Stats } from "../../src/server/analytics.js";
 import { TestObjects, VIEW_EVENT_TYPE, SCROLL_EVENT_TYPE, PING_EVENT_TYPE } from "../test-objects.js";
 import { StatsTestFixture } from "../stats-test-fixture.js";
 import { hashedIp } from "../../src/server/web.js";
 import crypto from 'crypto';
+import * as ButtonDownApiStub from '../button-down-api-stub.js';
+import { ApiSubscriberType, Subscriber, SubscriberState } from "../../src/server/newsletter.js";
 
 serverIntTestSuite("Server integration tests", () => {
     invalidEvents().forEach(e => {
@@ -218,7 +221,7 @@ serverIntTestSuite("Server integration tests", () => {
         });
     });
 
-    it(`allows to trigger post reload, retrying if necessary`, async function () {
+    it(`allows to trigger post reload, retrying if necessary`, async () => {
         // 3 retries in test config. Next reload tests eventually successful reload
         failNextNPostsFetches(5);
 
@@ -235,6 +238,96 @@ serverIntTestSuite("Server integration tests", () => {
         assertJsonResponse(successfulReload, actualResponse => {
             expect(actualResponse.knownPosts).to.include("/a.html", "/b.html");
         });
+    });
+
+    it('creates new subscriber idempotently', async () => {
+        const subscriberEmail = TestObjects.randomEmail();
+        const subscriberSignUpContext = TestObjects.randomSubscriberSignUpContext();
+        const createResponseBody = { id: crypto.randomUUID(), source: "Some source", type: "Some type" };
+
+        ButtonDownApiStub.nextCreateSubscriberResponse({
+            status: 201,
+            body: createResponseBody
+        });
+
+        const createSubscriberResponse = await testRequests.postNewsletterSubscriber({
+            email: subscriberEmail, ...subscriberSignUpContext
+        });
+        assertCreatedResponseCode(createSubscriberResponse);
+
+        const expectedSubscriber = Subscriber.newOne(subscriberEmail, testClock.nowTimestamp(), subscriberSignUpContext,
+            {
+                externalId: createResponseBody.id,
+                externalSource: createResponseBody.source,
+                externalType: createResponseBody.type
+            });
+        assertSubscriberSavedInDb(expectedSubscriber);
+
+
+        //and when trying to create existing subscriber, return 409
+        const createExistingSubscriberResponse = await testRequests.postNewsletterSubscriber({
+            email: subscriberEmail, ...subscriberSignUpContext
+        });
+        assertConflictResponseCode(createExistingSubscriberResponse);
+    });
+
+    [SubscriberState.CREATED, SubscriberState.CONFIRMED].forEach(state =>
+        it('creates new subscriber returning 409 if it exists in the API', async () => {
+            const subscriber = TestObjects.randomSubscriber({ state });
+            await saveSubscriberInDb(subscriber);
+
+            ButtonDownApiStub.nextCreateSubscriberResponse({ status: 409 });
+
+            const createExistingSubscriberResponse = await testRequests.postNewsletterSubscriber({
+                email: subscriber.email, ...subscriber.signUpContext
+            });
+            assertConflictResponseCode(createExistingSubscriberResponse);
+        }));
+
+    // TODO: more cases
+    it('returns 422 when trying to create subscriber with invalid data', async () => {
+        const subscriberInvalidEmail = "@mail.com";
+
+        const createSubscriberResponse = await testRequests.postNewsletterSubscriber({
+            email: subscriberInvalidEmail, ...TestObjects.randomSubscriberSignUpContext()
+        });
+
+        assertUnprocessableContentResponseCode(createSubscriberResponse);
+        assertSubscriberNotSavedInDb(subscriberInvalidEmail);
+    });
+
+    it('resubscribes previous subscriber', async () => {
+        const unsubscribedSubscriber = TestObjects.randomSubscriber({ state: SubscriberState.UNSUBSCRIBED });
+        await saveSubscriberInDb(unsubscribedSubscriber);
+        // to have different signedUpAt than createdAt
+        testClock.moveTimeByReasonableAmount();
+
+        ButtonDownApiStub.nextGetSubscriberResponse({
+            status: 200,
+            emailOrId: unsubscribedSubscriber.email,
+            body: TestObjects.randomApiSubscriber({
+                id: unsubscribedSubscriber.externalId,
+                email_address: unsubscribedSubscriber.email,
+                type: unsubscribedSubscriber.externalType
+            })
+        });
+        ButtonDownApiStub.nextUpdateSubscriberResponse({
+            status: 200,
+            emailOrId: unsubscribedSubscriber.email,
+            type: ApiSubscriberType.Regular,
+            body: {}
+        });
+
+        const createSubscriberResponse = await testRequests.postNewsletterSubscriber({
+            email: unsubscribedSubscriber.email, ...TestObjects.randomSubscriberSignUpContext()
+        });
+        assertCreatedResponseCode(createSubscriberResponse);
+
+        const expectedSubscriber = {...unsubscribedSubscriber, 
+            externalType: ApiSubscriberType.Regular,
+            signedUpAt: testClock.nowTimestamp()
+        };
+        assertSubscriberSavedInDb(expectedSubscriber);
     });
 });
 
@@ -327,4 +420,17 @@ function statsViewOfPeriod(statsViews, period) {
 
 function allTimeStatsView(statsView) {
     return statsViewOfPeriod(statsView, ALL_TIME_STATS_VIEW).stats;
+}
+
+async function assertSubscriberSavedInDb(expectedSubscriber) {
+    const dbSubscriber = await subscriberRepository.ofEmail(expectedSubscriber.email);
+    assert.deepEqual(dbSubscriber, expectedSubscriber);
+}
+
+async function assertSubscriberNotSavedInDb(email) {
+    assert.isNull(await subscriberRepository.ofEmail(email));
+}
+
+async function saveSubscriberInDb(subscriber) {
+    await subscriberRepository.createReturningExisting(subscriber);
 }
