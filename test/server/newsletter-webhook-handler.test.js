@@ -1,10 +1,6 @@
 import { assert } from "chai";
 import {
-    serverIntTestSuite, randomAllowedPostPath, allowedPostPaths,
-    testClock, testRequests, failNextNPostsFetches, addPosts,
-    assertAnalyticsEventsSavedAndStatsViewCalculated,
-    assertAnalyticsEventsSaved,
-    assertStatsViewsCalculated,
+    serverIntTestSuite, testClock,
     subscriberRepository, newsletterWebhookHandler
 } from "../server-int-test-suite.js";
 import { TestObjects } from "../test-objects.js";
@@ -24,8 +20,8 @@ serverIntTestSuite('NewsletterWebhookHandler integration tests', () => {
             body: TestObjects.randomApiSubscriber({ id: externalId, email_address: existingSubscriber.email })
         });
 
-        const event = subscriberEvent(NewsletterWebhookEventType.SUBSCRIBER_CREATED, externalId);
-        await newsletterWebhookHandler.handle(event);
+        const { event, signature } = signedSubscriberEvent(NewsletterWebhookEventType.SUBSCRIBER_CREATED, externalId);
+        await newsletterWebhookHandler.handle(event, signature);
 
         await assertSubscriberSavedInDb(existingSubscriber);
     });
@@ -39,8 +35,8 @@ serverIntTestSuite('NewsletterWebhookHandler integration tests', () => {
             body: apiSubscriber
         });
 
-        const event = subscriberEvent(NewsletterWebhookEventType.SUBSCRIBER_CREATED, subscriberId);
-        await newsletterWebhookHandler.handle(event);
+        const { event, signature } = signedSubscriberEvent(NewsletterWebhookEventType.SUBSCRIBER_CREATED, subscriberId);
+        await newsletterWebhookHandler.handle(event, signature);
 
         const expectedSubscriber = Subscriber.newOne(apiSubscriber.email_address, testClock.nowTimestamp(), null, {
             externalId: subscriberId,
@@ -61,8 +57,8 @@ serverIntTestSuite('NewsletterWebhookHandler integration tests', () => {
             body: apiSubscriber
         });
 
-        const event = subscriberEvent(NewsletterWebhookEventType.SUBSCRIBER_CONFIRMED, externalId);
-        await newsletterWebhookHandler.handle(event);
+        const { event, signature } = signedSubscriberEvent(NewsletterWebhookEventType.SUBSCRIBER_CONFIRMED, externalId);
+        await newsletterWebhookHandler.handle(event, signature);
 
         const expectedSubscriber = {
             ...subscriber,
@@ -86,8 +82,8 @@ serverIntTestSuite('NewsletterWebhookHandler integration tests', () => {
             body: apiSubscriber
         });
 
-        const event = subscriberEvent(NewsletterWebhookEventType.SUBSCRIBER_UNSUBSCRIBED, externalId);
-        await newsletterWebhookHandler.handle(event);
+        const { event, signature } = signedSubscriberEvent(NewsletterWebhookEventType.SUBSCRIBER_UNSUBSCRIBED, externalId);
+        await newsletterWebhookHandler.handle(event, signature);
 
         const expectedSubscriber = {
             ...subscriber,
@@ -103,8 +99,8 @@ serverIntTestSuite('NewsletterWebhookHandler integration tests', () => {
         const subscriber = await saveSubscriberInDb(TestObjects.randomSubscriber({ externalId }));
         await assertSubscriberSavedInDb(subscriber);
 
-        const event = subscriberEvent(NewsletterWebhookEventType.SUBSCRIBER_DELETED, externalId);
-        await newsletterWebhookHandler.handle(event);
+        const { event, signature } = signedSubscriberEvent(NewsletterWebhookEventType.SUBSCRIBER_DELETED, externalId);
+        await newsletterWebhookHandler.handle(event, signature);
 
         await assertSubscriberDoesNotExistInDb(subscriber.email);
     });
@@ -123,8 +119,8 @@ serverIntTestSuite('NewsletterWebhookHandler integration tests', () => {
             body: apiSubscriber
         });
 
-        const event = subscriberEvent(NewsletterWebhookEventType.SUBSCRIBER_CLICKED, externalId);
-        await newsletterWebhookHandler.handle(event);
+        const { event, signature } = signedSubscriberEvent(NewsletterWebhookEventType.SUBSCRIBER_CLICKED, externalId);
+        await newsletterWebhookHandler.handle(event, signature);
 
         const expectedSubscriber = {
             ...subscriber,
@@ -147,8 +143,8 @@ serverIntTestSuite('NewsletterWebhookHandler integration tests', () => {
             body: apiSubscriber
         });
 
-        const event = subscriberEvent(NewsletterWebhookEventType.SUBSCRIBER_OPENED, externalId);
-        await newsletterWebhookHandler.handle(event);
+        const { event, signature } = signedSubscriberEvent(NewsletterWebhookEventType.SUBSCRIBER_OPENED, externalId);
+        await newsletterWebhookHandler.handle(event, signature);
 
         const expectedSubscriber = {
             ...subscriber,
@@ -171,6 +167,6 @@ async function assertSubscriberDoesNotExistInDb(email) {
     assert.isNull(await subscriberRepository.ofEmail(email));
 }
 
-function subscriberEvent(type, subscriberId) {
-    return { type, data: { subscriber: subscriberId } };
+function signedSubscriberEvent(type, subscriberId) {
+    return ButtonDownApiStub.signedWebhookEvent(type, { subscriber: subscriberId });
 }

@@ -62,7 +62,7 @@ export async function start(appClock = new Clock(), appScheduler = new Scheduler
     const subscriberRepository = new SqliteSubscriberRepository(db);
     const subscriberApi = new ButtondownSubscriberApi(config.buttonDownApiUrl, config.buttonDownApiKey);
     const subscriberService = new SubscriberService(subscriberRepository, subscriberApi, clock);
-    const newsletterWebhookHandler = new NewsletterWebhookHandler(subscriberService);
+    const newsletterWebhookHandler = new NewsletterWebhookHandler(subscriberService, config.buttonDownWebhookSigningKey);
 
     const app = express();
 
@@ -116,22 +116,17 @@ export async function start(appClock = new Clock(), appScheduler = new Scheduler
         }
     });
 
-    // TODO: internal version!
     app.post("/webhooks/newsletter", async (req, res) => {
         try {
-            // const authorization = req.header("Authorization") ?? "";
-            // const token = authorization.replaceAll("Token ", "");
-            // if (config.buttonDownApiKey == token) {
-            //     await newsletterWebhookHandler.handle(req.body);
-            // } else {
-            //     Logger.logWarn(`Got invalid auth header (${authorization}) on /webhooks/newsletter endpoint - ignoring it. Other headers:`, req.headers);
-            //     res.sendStatus(404);
-            // }
-            Logger.logInfo(`Got event on /webhooks/newsletter endpoint. Headers:`, req.headers);
-            Logger.logInfo(`Got event on /webhooks/newsletter endpoint. Body:`, req.body);
-            res.sendStatus(200);
+            const signature = req.header("X-Buttondown-Signature") ?? "";
+            if (await newsletterWebhookHandler.handle(req.body, signature)) {
+                res.sendStatus(200);
+            } else {
+                Logger.logWarn("Invalid signature for webhook - rejecting it. Headers: ", req.headers);
+                res.sendStatus(401);
+            }
         } catch (e) {
-            Logger.logError(`Failed to handle webhook event ${JSON.stringify(req.body)}:`, e);
+            Logger.logError(`Failed to handle webhook event`, req.body, e);
             res.sendStatus(500);
         }
     });

@@ -43,7 +43,8 @@ export async function read() {
         statsViewsCalculateAllTimeInterval: envVarOrDefault("STATS_VIEWS_CALCULATE_ALL_TIME_INTERVAL",
             DEFAULT_STATS_VIEWS_CALCULATE_ALL_TIME_INTERVAL),
         buttonDownApiUrl: envVarOrDefault("BUTTON_DOWN_API_URL", "https://api.buttondown.com/v1"),
-        buttonDownApiKey: await envVarOrThrow("BUTTON_DOWN_API_KEY")
+        buttonDownApiKey: await envVarOrThrow("BUTTON_DOWN_API_KEY"),
+        buttonDownWebhookSigningKey: await envVarOrThrow("BUTTON_DOWN_WEBHOOK_SIGNING_KEY")
     }
 }
 

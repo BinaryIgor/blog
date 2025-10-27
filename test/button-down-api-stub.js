@@ -1,7 +1,9 @@
 import { ApiSubscriberType } from "../src/server/newsletter.js";
 import { TestObjects } from './test-objects.js';
+import crypto from "crypto";
 
 export const authToken = crypto.randomUUID();
+export const webhookSigningKey = crypto.randomUUID();
 
 export const routes = [
     {
@@ -74,10 +76,10 @@ export function getSubscriberHandler(req, res) {
 
 function validateRequestMatchesSetResponseValue(reqValue, resValue) {
     const requestMatchingSetResponse = isFieldMatching(reqValue, resValue);
-        if (!requestMatchingSetResponse) {
-            console.error("Request doesn't match set response value!", reqValue, resValue);
-            throw new Error("Request doesn't match set response value");
-        }
+    if (!requestMatchingSetResponse) {
+        console.error("Request doesn't match set response value!", reqValue, resValue);
+        throw new Error("Request doesn't match set response value");
+    }
 }
 
 function isFieldMatching(reqValue, resValue) {
@@ -109,4 +111,13 @@ export function updateSubscriberHandler(req, res) {
     } else {
         res.sendStatus(401);
     }
+}
+
+
+export function signedWebhookEvent(eventType, data, signingKey = webhookSigningKey) {
+    const event = Buffer.from(JSON.stringify({ event_type: eventType, data }), "utf-8");
+    const signature = crypto.createHmac('sha256', signingKey)
+        .update(event)
+        .digest("hex");
+    return { event, signature: `sha256=${signature}` };
 }

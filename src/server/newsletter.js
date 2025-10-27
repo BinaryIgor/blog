@@ -3,6 +3,7 @@ import * as Logger from "../shared/logger.js";
 import * as Dates from '../shared/dates.js';
 import * as Promises from '../shared/promises.js';
 import { snakeCasedObject } from './db.js';
+import { createHmac, timingSafeEqual } from 'crypto';
 
 const MAX_EMAIL_LENGTH = 125;
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -393,13 +394,32 @@ export class ButtondownSubscriberApi {
 export class NewsletterWebhookHandler {
 
     #subscriberService;
+    #signingKey;
 
-    constructor(subscriberService) {
+    constructor(subscriberService, signingKey) {
         this.#subscriberService = subscriberService;
+        this.#signingKey = signingKey;
     }
 
-    async handle(event) {
-        const { type, data } = event;
+    #verifySignature(payload, signatureHeader) {
+        const signature = signatureHeader?.replace("sha256=", "");
+        if (!signature) {
+            return false;
+        }
+        const expectedSignature = createHmac('sha256', this.#signingKey)
+            .update(payload)
+            .digest("hex");
+
+        return timingSafeEqual(Buffer.from(signature), Buffer.from(expectedSignature));
+    }
+
+    async handle(rawEvent, signatureHeader) {
+        if (!this.#verifySignature(rawEvent, signatureHeader)) {
+            return false;
+        }
+
+        const { event_type: type, data } = JSON.parse(rawEvent);
+
         Logger.logInfo(`Handling ${type} webhook event with the payload:`, data);
         if (type == NewsletterWebhookEventType.SUBSCRIBER_CREATED) {
             await this.#subscriberService.onSubscriberCreated(data.subscriber);
@@ -418,6 +438,8 @@ export class NewsletterWebhookHandler {
         } else {
             Logger.logWarn(`Got webhook event of ${type} but don't have dedicated handler for it just yet`);
         }
+
+        return true;
     }
 }
 
