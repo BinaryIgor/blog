@@ -101,7 +101,7 @@ export function nextUpdateSubscriberResponse(response) {
 export function updateSubscriberHandler(req, res) {
     if (isAuthenticated(req)) {
         validateRequestMatchesSetResponseValue(req.params.emailOrId, _nextUpdateSubscriberResponse.emailOrId);
-        validateRequestMatchesSetResponseValue(req.params.type, _nextUpdateSubscriberResponse.type);
+        validateRequestMatchesSetResponseValue(req.body.type, _nextUpdateSubscriberResponse.type);
         if (_nextUpdateSubscriberResponse.body) {
             res.status(_nextUpdateSubscriberResponse.status)
                 .send(_nextUpdateSubscriberResponse.body)

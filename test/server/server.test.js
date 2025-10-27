@@ -7,7 +7,7 @@ import {
     assertStatsViewsCalculated,
     subscriberRepository
 } from "../server-int-test-suite.js";
-import { assertConflictResponseCode, assertCreatedResponseCode, assertJsonResponse, assertOkResponseCode, assertResponseCode, assertUnprocessableContentResponseCode } from "../web-tests.js";
+import { assertConflictResponseCode, assertCreatedResponseCode, assertJsonResponse, assertOkResponseCode, assertResponseCode, assertUnauthenticatedResponseCode, assertUnprocessableContentResponseCode } from "../web-tests.js";
 import { randomNumber, randomString } from "../test-utils.js";
 import { MAX_PATH_LENGTH, MAX_IP_HASH_VISITOR_IDS_IN_LAST_DAY, DAY_SECONDS, ALL_TIME_STATS_VIEW, Stats } from "../../src/server/analytics.js";
 import { TestObjects, VIEW_EVENT_TYPE, SCROLL_EVENT_TYPE, PING_EVENT_TYPE } from "../test-objects.js";
@@ -28,7 +28,7 @@ serverIntTestSuite("Server integration tests", () => {
 
             const statsResponse = await testRequests.getStats();
 
-            assertEmptyStatsResponse(statsResponse);
+            await assertEmptyStatsResponse(statsResponse);
         });
     })
 
@@ -46,7 +46,7 @@ serverIntTestSuite("Server integration tests", () => {
 
         const statsResponse = await testRequests.getStats();
 
-        assertEmptyStatsResponse(statsResponse);
+        await assertEmptyStatsResponse(statsResponse);
     });
 
     it('rejects too many visitor ids per ip hash in a day', async () => {
@@ -215,7 +215,7 @@ serverIntTestSuite("Server integration tests", () => {
             pings: [ip1Ping1, ip2Ping1, ip3Ping1]
         });
 
-        assertJsonResponse(statsResponse, actualStats => {
+        await assertJsonResponse(statsResponse, actualStats => {
             const actualAllTimeStats = allTimeStatsView(actualStats);
             assert.deepEqual(actualAllTimeStats, expectedAllTimeStats);
         });
@@ -235,7 +235,7 @@ serverIntTestSuite("Server integration tests", () => {
 
         const successfulReload = await testRequests.reloadPosts();
 
-        assertJsonResponse(successfulReload, actualResponse => {
+        await assertJsonResponse(successfulReload, actualResponse => {
             expect(actualResponse.knownPosts).to.include("/a.html", "/b.html");
         });
     });
@@ -323,11 +323,43 @@ serverIntTestSuite("Server integration tests", () => {
         });
         assertCreatedResponseCode(createSubscriberResponse);
 
-        const expectedSubscriber = {...unsubscribedSubscriber, 
+        const expectedSubscriber = {
+            ...unsubscribedSubscriber,
             externalType: ApiSubscriberType.Regular,
             signedUpAt: testClock.nowTimestamp()
         };
         assertSubscriberSavedInDb(expectedSubscriber);
+    });
+
+    it('accepts signed webhook newsletter event', async () => {
+        const { event, signature } = ButtonDownApiStub.signedWebhookEvent("dummy_type", { someData: "some data" });
+        const postEventResponse = await testRequests.postWebhookNewsletterEvent(event,
+            { "X-Buttondown-Signature": signature });
+        assertOkResponseCode(postEventResponse);
+    });
+
+    it('rejects unsigned webhook newsletter event', async () => {
+        const { event } = ButtonDownApiStub.signedWebhookEvent("dummy_type", { someData: "some data" });
+        const postEventResponse = await testRequests.postWebhookNewsletterEvent(event);
+        assertUnauthenticatedResponseCode(postEventResponse);
+    });
+
+    it('rejects webhook newsletter event with invalid signature', async () => {
+        const { event, signature } = ButtonDownApiStub.signedWebhookEvent("dummy_type", { someData: "some data" });
+        const postEventResponse = await testRequests.postWebhookNewsletterEvent(event,
+            { "X-Buttondown-Signature": signature + "0" }
+        );
+        assertUnauthenticatedResponseCode(postEventResponse);
+    });
+
+    it('rejects webhook newsletter event signed with a different key', async () => {
+        const { event, signature } = ButtonDownApiStub.signedWebhookEvent("dummy_type", { someData: "some data" },
+            "some diferent key"
+        );
+        const postEventResponse = await testRequests.postWebhookNewsletterEvent(event,
+            { "X-Buttondown-Signature": signature }
+        );
+        assertUnauthenticatedResponseCode(postEventResponse);
     });
 });
 
@@ -360,8 +392,8 @@ function invalidEvents() {
     ]
 }
 
-function assertEmptyStatsResponse(response) {
-    assertJsonResponse(response, actualStats => {
+async function assertEmptyStatsResponse(response) {
+    await assertJsonResponse(response, actualStats => {
         actualStats.forEach(as => {
             assert.deepEqual(as.stats, Stats.empty());
         });
@@ -369,7 +401,7 @@ function assertEmptyStatsResponse(response) {
 }
 
 async function assertStatsHaveViewsVisitorsAndIpHashes(views, visitors, iphashes) {
-    assertJsonResponse(await testRequests.getStats(), actualStats => {
+    await assertJsonResponse(await testRequests.getStats(), actualStats => {
         const allTimeStats = allTimeStatsView(actualStats);
         assert.deepEqual(allTimeStats.views, views);
         assert.deepEqual(allTimeStats.visitors, visitors);

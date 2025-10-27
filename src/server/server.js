@@ -68,7 +68,7 @@ export async function start(appClock = new Clock(), appScheduler = new Scheduler
 
     app.use((req, res, next) => {
         if (req.originalUrl.startsWith("/webhooks/")) {
-            express.raw()(req, res, next);
+            express.raw({ type: "application/json" })(req, res, next);
         } else {
             express.json()(req, res, next);
         }

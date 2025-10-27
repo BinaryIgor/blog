@@ -410,7 +410,8 @@ export class NewsletterWebhookHandler {
             .update(payload)
             .digest("hex");
 
-        return timingSafeEqual(Buffer.from(signature), Buffer.from(expectedSignature));
+        return signature.length == expectedSignature.length &&
+            timingSafeEqual(Buffer.from(signature), Buffer.from(expectedSignature));
     }
 
     async handle(rawEvent, signatureHeader) {

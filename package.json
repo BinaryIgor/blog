@@ -36,7 +36,6 @@
         "chai": "^4.2.0",
         "marked": "^14.0.0",
         "mocha": "^7.1.0",
-        "supertest": "^6.3.3",
         "tailwindcss": "^4.1.16"
     },
     "type": "module"
