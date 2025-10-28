@@ -71,7 +71,7 @@
         --scrollbar-color: var(--primary-text-color);
         --scrollbar-hover-color: var(--secondary-3-text-color);
         --modal-bg-color: rgba(15, 15, 15, 0.8);
-        --error-color: rgb(250, 123, 123);
+        --error-color: rgb(250, 115, 115);
     }
 
     html {
@@ -87,7 +87,7 @@
         --scrollbar-color: var(--primary-text-color);
         --scrollbar-hover-color: var(--secondary-3-text-color);
         --modal-bg-color: rgba(250, 250, 250, 0.8);
-        --error-color: rgb(153, 27, 27);
+        --error-color: rgb(170, 20, 20);
     }
 
     :root {
@@ -123,9 +123,38 @@
     ::-webkit-scrollbar-thumb:hover {
         background: var(--scrollbar-hover-color);
     }
-}
 
-/* ==chrome before 121, safari scroll== */
+    /* ==chrome before 121, safari scroll== */
+
+    /* mainly to disable autofills on chrome */
+    /* input:-webkit-autofill,
+    input:-webkit-autofill:hover,
+    input:-webkit-autofill:focus,
+    textarea:-webkit-autofill,
+    textarea:-webkit-autofill:hover,
+    textarea:-webkit-autofill:focus,
+    select:-webkit-autofill,
+    select:-webkit-autofill:hover,
+    select:-webkit-autofill:focus {
+        -webkit-text-fill-color: var(--primary-text-color) !important;
+        -webkit-box-shadow: 0 0 0px 1000px var(--primary-color) inset !important;
+        box-shadow: 0 0 0px 1000px var(--primary-color) inset;
+        transition: background-color 1000s ease-in-out 0s;
+        caret-color: var(--primary-text-color);
+    } */
+
+    /* Keep in sync with other inputs - Newsletter mainly */
+    input:-webkit-autofill,
+    input:-webkit-autofill:hover,
+    input:-webkit-autofill:focus {
+        @apply border-primary-text-faded text-primary bg-primary outline-1 outline-primary-text-faded;
+        -webkit-box-shadow: 0 0 0px 1000px var(--primary-color) inset !important;
+        -webkit-text-fill-color: var(--primary-text-color) !important;
+        caret-color: var(--primary-text-color) !important;
+        /* Chrome sometimes reapplies its internal thing */
+        transition: background-color 5000s ease-in-out 0s !important;
+    }
+}
 
 @utility bg-primary {
     background-color: var(--primary-color);
@@ -173,6 +202,14 @@
 
 @utility bg-primary-text-faded {
     background-color: var(--primary-text-color-faded);
+}
+
+@utility outline-primary-text {
+    outline-color: var(--primary-text-color);
+}
+
+@utility outline-primary-text-faded {
+    outline-color: var(--primary-text-color-faded);
 }
 
 .object-position-50 {
