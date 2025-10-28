@@ -51,15 +51,15 @@ export const TestObjects = {
         return new Event(timestamp, visitorId, sessionId, ipHash,
             source, medium, campaign, ref, path, type, data);
     },
-    randomSubscriberSignUpContext({ visitorId, sessionId, source, medium, campaign, ref, placement } = {
-        visitorId: crypto.randomUUID(),
-        sessionId: crypto.randomUUID(),
-        source: randomElement(SOURCES),
-        medium: randomElementOrNull(MEDIUMS),
-        campaign: randomElementOrNull(CAMPAIGNS),
-        ref: randomElementOrNull(REFS),
-        placement: randomElement(SUBSCRIBER_SIGN_UP_PLACEMENTS)
-    }) {
+    randomSubscriberSignUpContext({
+        visitorId = crypto.randomUUID(),
+        sessionId = crypto.randomUUID(),
+        source = randomElement(SOURCES),
+        medium = randomElementOrNull(MEDIUMS),
+        campaign = randomElementOrNull(CAMPAIGNS),
+        ref = randomElementOrNull(REFS),
+        placement = randomElement(SUBSCRIBER_SIGN_UP_PLACEMENTS)
+    } = {}) {
         return new SubscriberSignUpContext(visitorId, sessionId, source, medium, campaign, ref, placement);
     },
     randomEmail() {

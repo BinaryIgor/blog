@@ -25,6 +25,7 @@ export const routes = [
 
 let _nextCreateSubscriberResponse = {
     status: 201,
+    expectedEmailAddress: '',
     body: {
         id: crypto.randomUUID(),
         source: "API",
@@ -37,6 +38,7 @@ export function nextCreateSubscriberResponse(response) {
 
 function createSubscriberHandler(req, res) {
     if (isAuthenticated(req)) {
+        validateRequestMatchesSetResponseValue(req.body.email_address, _nextCreateSubscriberResponse.expectedEmailAddress);
         if (_nextCreateSubscriberResponse.body) {
             res.status(_nextCreateSubscriberResponse.status)
                 .send(_nextCreateSubscriberResponse.body);
@@ -54,7 +56,7 @@ function isAuthenticated(req) {
 
 let _nextGetSubscriberResponse = {
     status: 200,
-    emailOrId: '',
+    expectedEmailOrId: '',
     body: TestObjects.randomApiSubscriber()
 };
 export function nextGetSubscriberResponse(response) {
@@ -62,7 +64,7 @@ export function nextGetSubscriberResponse(response) {
 }
 export function getSubscriberHandler(req, res) {
     if (isAuthenticated(req)) {
-        validateRequestMatchesSetResponseValue(req.params.emailOrId, _nextGetSubscriberResponse.emailOrId);
+        validateRequestMatchesSetResponseValue(req.params.emailOrId, _nextGetSubscriberResponse.expectedEmailOrId);
         if (_nextGetSubscriberResponse.body) {
             res.status(_nextGetSubscriberResponse.status)
                 .send(_nextGetSubscriberResponse.body)
@@ -91,8 +93,8 @@ function isFieldMatching(reqValue, resValue) {
 
 let _nextUpdateSubscriberResponse = {
     status: 200,
-    emailOrId: '',
-    type: '',
+    expectedEmailOrId: '',
+    expectedType: '',
     body: TestObjects.randomApiSubscriber()
 };
 export function nextUpdateSubscriberResponse(response) {
@@ -100,8 +102,8 @@ export function nextUpdateSubscriberResponse(response) {
 }
 export function updateSubscriberHandler(req, res) {
     if (isAuthenticated(req)) {
-        validateRequestMatchesSetResponseValue(req.params.emailOrId, _nextUpdateSubscriberResponse.emailOrId);
-        validateRequestMatchesSetResponseValue(req.body.type, _nextUpdateSubscriberResponse.type);
+        validateRequestMatchesSetResponseValue(req.params.emailOrId, _nextUpdateSubscriberResponse.expectedEmailOrId);
+        validateRequestMatchesSetResponseValue(req.body.type, _nextUpdateSubscriberResponse.expectedType);
         if (_nextUpdateSubscriberResponse.body) {
             res.status(_nextUpdateSubscriberResponse.status)
                 .send(_nextUpdateSubscriberResponse.body)

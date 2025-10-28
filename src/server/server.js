@@ -110,7 +110,7 @@ export async function start(appClock = new Clock(), appScheduler = new Scheduler
             } else if (e instanceof SubscriberValidationError) {
                 res.sendStatus(422);
             } else {
-                Logger.logError(`Failed to create subscriber ${JSON.stringify(req.body)}:`, e);
+                Logger.logError('Failed to create subscriber:', req.body, e);
                 res.sendStatus(500);
             }
         }
@@ -134,7 +134,7 @@ export async function start(appClock = new Clock(), appScheduler = new Scheduler
     app.post("/internal/webhooks/newsletter", async (req, res) => {
         try {
             const { event_type, data } = req.body;
-            await newsletterWebhookHandler.handle({ type: event_type, data });
+            await newsletterWebhookHandler.handleEvent(event_type, data);
             res.sendStatus(200);
         } catch (e) {
             Logger.logError(`Failed to handle webhook event ${JSON.stringify(req.body)}:`, e);
@@ -142,7 +142,7 @@ export async function start(appClock = new Clock(), appScheduler = new Scheduler
         }
     });
 
-    app.get("/meta/stats", async (req, res) => {
+    app.get("/meta/stats", async (_, res) => {
         try {
             const stats = await statsViews.views();
             res.send(stats);
@@ -152,7 +152,7 @@ export async function start(appClock = new Clock(), appScheduler = new Scheduler
         }
     });
 
-    app.get("/meta/posts", async (req, res) => {
+    app.get("/meta/posts", async (_, res) => {
         try {
             res.send(postsSource.knownPosts());
         } catch (e) {

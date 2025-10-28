@@ -5,7 +5,7 @@ import * as Promises from '../shared/promises.js';
 import { snakeCasedObject } from './db.js';
 import { createHmac, timingSafeEqual } from 'crypto';
 
-const MAX_EMAIL_LENGTH = 125;
+export const MAX_EMAIL_LENGTH = 125;
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const ALLOWED_SUBSCRIBER_SIGN_UP_PLACEMENTS = ["POST_MID", "POST_END", "POST_FLOATING", "LANDING"];
 
@@ -26,7 +26,6 @@ export class SubscriberService {
 
     /**
      * @param {Subscriber} subscriber
-     * @returns {Promise<SubscribeResult>} one of the possible results
      */
     async subscribe(subscriber) {
         try {
@@ -142,14 +141,13 @@ export class SubscriberService {
         }
     }
 
-    // TODO: impl if needed
-    async onSubscriberUpdated(externalId) {
+    async onSubscriberChangedEmail(externalId) {
         const apiSubscriber = await this.#api.get(externalId);
-        const dbSubscriber = await this.#repository.ofEmail(apiSubscriber.email_address);
+        const dbSubscriber = await this.#repository.ofExternalId(externalId);
         if (dbSubscriber) {
-            Logger.logInfo("Received update request for subscriber. API vs DB:", apiSubscriber, dbSubscriber);
+            await this.#repository.updateOfEmail(dbSubscriber.email, { email: apiSubscriber.email_address });
         } else {
-            Logger.logWarn("Received update request for non existing subscriber; ignoring it:", apiSubscriber);
+            Logger.logWarn("Received changed email event for non existing subscriber; ignoring it:", apiSubscriber);
         }
     }
 
@@ -308,7 +306,7 @@ export class ButtondownSubscriberApi {
     #createRequest(email) {
         return fetch(this.#subscribersUrl(), {
             method: "POST",
-            headers: this.#withAuthorizationHeaders(),
+            headers: this.#withAuthorizationHeaders({ "content-type": "application/json" }),
             body: JSON.stringify({ email_address: email })
         });
     }
@@ -362,7 +360,7 @@ export class ButtondownSubscriberApi {
     #updateRequest(emailOrId, type) {
         return fetch(this.#subscribersUrl(emailOrId), {
             method: "PATCH",
-            headers: this.#withAuthorizationHeaders(),
+            headers: this.#withAuthorizationHeaders({ "content-type": "application/json" }),
             body: JSON.stringify({ type })
         });
     }
@@ -391,6 +389,7 @@ export class ButtondownSubscriberApi {
     }
 }
 
+// TODO: recreate webhook endpoint
 export class NewsletterWebhookHandler {
 
     #subscriberService;
@@ -418,9 +417,12 @@ export class NewsletterWebhookHandler {
         if (!this.#verifySignature(rawEvent, signatureHeader)) {
             return false;
         }
-
         const { event_type: type, data } = JSON.parse(rawEvent);
+        await this.handleEvent(type, data);
+        return true;
+    }
 
+    async handleEvent(type, data) {
         Logger.logInfo(`Handling ${type} webhook event with the payload:`, data);
         if (type == NewsletterWebhookEventType.SUBSCRIBER_CREATED) {
             await this.#subscriberService.onSubscriberCreated(data.subscriber);
@@ -434,13 +436,11 @@ export class NewsletterWebhookHandler {
             await this.#subscriberService.onSubscriberUnsubscribed(data.subscriber);
         } else if (type == NewsletterWebhookEventType.SUBSCRIBER_DELETED) {
             await this.#subscriberService.onSubscriberDeleted(data.subscriber);
-        } else if (type == NewsletterWebhookEventType.SUBSCRIBER_UPDATED) {
-            await this.#subscriberService.onSubscriberUpdated(data.subscriber);
+        } else if (type == NewsletterWebhookEventType.SUBSCRIBER_CHANGED_EMAIL) {
+            await this.#subscriberService.onSubscriberChangedEmail(data.subscriber);
         } else {
             Logger.logWarn(`Got webhook event of ${type} but don't have dedicated handler for it just yet`);
         }
-
-        return true;
     }
 }
 
@@ -578,6 +578,5 @@ export const NewsletterWebhookEventType = {
     SUBSCRIBER_UNSUBSCRIBED: 'subscriber.unsubscribed',
     SUBSCRIBER_DELETED: 'subscriber.deleted',
     SUBSCRIBER_OPENED: 'subscriber.opened',
-    SUBSCRIBER_CLICKED: 'subscriber.clicked',
-    SUBSCRIBER_UPDATED: 'subscriber.updated'
+    SUBSCRIBER_CLICKED: 'subscriber.clicked'
 };

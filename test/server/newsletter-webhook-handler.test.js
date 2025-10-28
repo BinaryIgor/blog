@@ -16,7 +16,7 @@ serverIntTestSuite('NewsletterWebhookHandler integration tests', () => {
         const externalId = crypto.randomUUID();
         ButtondownApiStub.nextGetSubscriberResponse({
             status: 200,
-            emailOrId: externalId,
+            expectedEmailOrId: externalId,
             body: TestObjects.randomApiSubscriber({ id: externalId, email_address: existingSubscriber.email })
         });
 
@@ -31,7 +31,7 @@ serverIntTestSuite('NewsletterWebhookHandler integration tests', () => {
         const apiSubscriber = TestObjects.randomApiSubscriber({ id: subscriberId });
         ButtondownApiStub.nextGetSubscriberResponse({
             status: 200,
-            emailOrId: subscriberId,
+            expectedEmailOrId: subscriberId,
             body: apiSubscriber
         });
 
@@ -53,7 +53,7 @@ serverIntTestSuite('NewsletterWebhookHandler integration tests', () => {
         const apiSubscriber = TestObjects.randomApiSubscriber({ id: externalId, email_address: subscriber.email });
         ButtondownApiStub.nextGetSubscriberResponse({
             status: 200,
-            emailOrId: externalId,
+            expectedEmailOrId: externalId,
             body: apiSubscriber
         });
 
@@ -78,7 +78,7 @@ serverIntTestSuite('NewsletterWebhookHandler integration tests', () => {
         const apiSubscriber = TestObjects.randomApiSubscriber({ id: externalId, email_address: subscriber.email, type: ApiSubscriberType.Unsubscribed });
         ButtondownApiStub.nextGetSubscriberResponse({
             status: 200,
-            emailOrId: externalId,
+            expectedEmailOrId: externalId,
             body: apiSubscriber
         });
 
@@ -115,7 +115,7 @@ serverIntTestSuite('NewsletterWebhookHandler integration tests', () => {
         });
         ButtondownApiStub.nextGetSubscriberResponse({
             status: 200,
-            emailOrId: externalId,
+            expectedEmailOrId: externalId,
             body: apiSubscriber
         });
 
@@ -139,7 +139,7 @@ serverIntTestSuite('NewsletterWebhookHandler integration tests', () => {
         });
         ButtondownApiStub.nextGetSubscriberResponse({
             status: 200,
-            emailOrId: externalId,
+            expectedEmailOrId: externalId,
             body: apiSubscriber
         });
 
@@ -151,6 +151,24 @@ serverIntTestSuite('NewsletterWebhookHandler integration tests', () => {
             lastOpenedAt: Dates.timestampFromIsoDateTime(apiSubscriber.last_open_date),
         };
         await assertSubscriberSavedInDb(expectedSubscriber);
+    });
+
+    it(`handles ${NewsletterWebhookEventType.SUBSCRIBER_CHANGED_EMAIL} event`, async () => {
+        const externalId = crypto.randomUUID();
+        const subscriber = await saveSubscriberInDb(TestObjects.randomSubscriber({ externalId }));
+        await assertSubscriberSavedInDb(subscriber);
+
+        const changedEmail = `changed_${subscriber.email}`;
+        ButtondownApiStub.nextGetSubscriberResponse({
+            status: 200,
+            expectedEmailOrId: externalId,
+            body: TestObjects.randomApiSubscriber({ id: externalId, email_address: changedEmail })
+        });
+
+        const { event, signature } = signedSubscriberEvent(NewsletterWebhookEventType.SUBSCRIBER_CHANGED_EMAIL, externalId);
+        await newsletterWebhookHandler.handle(event, signature);
+
+        await assertSubscriberSavedInDb({ ...subscriber, email: changedEmail });
     });
 });
 

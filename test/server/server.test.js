@@ -16,6 +16,7 @@ import { hashedIp } from "../../src/server/web.js";
 import crypto from 'crypto';
 import * as ButtondownApiStub from '../buttondown-api-stub.js';
 import { ApiSubscriberType, Subscriber, SubscriberState } from "../../src/server/newsletter.js";
+import { MAX_EMAIL_LENGTH } from "../../src/server/newsletter.js";
 
 serverIntTestSuite("Server integration tests", () => {
     invalidEvents().forEach(e => {
@@ -247,6 +248,7 @@ serverIntTestSuite("Server integration tests", () => {
 
         ButtondownApiStub.nextCreateSubscriberResponse({
             status: 201,
+            expectedEmailAddress: subscriberEmail,
             body: createResponseBody
         });
 
@@ -276,7 +278,7 @@ serverIntTestSuite("Server integration tests", () => {
             const subscriber = TestObjects.randomSubscriber({ state });
             await saveSubscriberInDb(subscriber);
 
-            ButtondownApiStub.nextCreateSubscriberResponse({ status: 409 });
+            ButtondownApiStub.nextCreateSubscriberResponse({ status: 409, expectedEmailAddress: subscriber.email });
 
             const createExistingSubscriberResponse = await testRequests.postNewsletterSubscriber({
                 email: subscriber.email, ...subscriber.signUpContext
@@ -284,27 +286,23 @@ serverIntTestSuite("Server integration tests", () => {
             assertConflictResponseCode(createExistingSubscriberResponse);
         }));
 
-    // TODO: more cases
-    it('returns 422 when trying to create subscriber with invalid data', async () => {
-        const subscriberInvalidEmail = "@mail.com";
-
-        const createSubscriberResponse = await testRequests.postNewsletterSubscriber({
-            email: subscriberInvalidEmail, ...TestObjects.randomSubscriberSignUpContext()
-        });
-
-        assertUnprocessableContentResponseCode(createSubscriberResponse);
-        assertSubscriberNotSavedInDb(subscriberInvalidEmail);
+    invalidSubscribers().forEach(s => {
+        it(`returns 422 when trying to create subscriber with invalid data ${JSON.stringify(s)}`, async () => {
+            const createSubscriberResponse = await testRequests.postNewsletterSubscriber(s);
+            assertUnprocessableContentResponseCode(createSubscriberResponse);
+            assertSubscriberNotSavedInDb(s.email);
+        })
     });
 
     it('resubscribes previous subscriber', async () => {
-        const unsubscribedSubscriber = TestObjects.randomSubscriber({ state: SubscriberState.UNSUBSCRIBED });
+        const unsubscribedSubscriber = TestObjects.randomSubscriber({ state: SubscriberState.UNSUBSCRIBED, externalType: ApiSubscriberType.Unsubscribed });
         await saveSubscriberInDb(unsubscribedSubscriber);
         // to have different signedUpAt than createdAt
         testClock.moveTimeByReasonableAmount();
 
         ButtondownApiStub.nextGetSubscriberResponse({
             status: 200,
-            emailOrId: unsubscribedSubscriber.email,
+            expectedEmailOrId: unsubscribedSubscriber.email,
             body: TestObjects.randomApiSubscriber({
                 id: unsubscribedSubscriber.externalId,
                 email_address: unsubscribedSubscriber.email,
@@ -313,8 +311,8 @@ serverIntTestSuite("Server integration tests", () => {
         });
         ButtondownApiStub.nextUpdateSubscriberResponse({
             status: 200,
-            emailOrId: unsubscribedSubscriber.email,
-            type: ApiSubscriberType.Regular,
+            expectedEmailOrId: unsubscribedSubscriber.email,
+            expectedType: ApiSubscriberType.Regular,
             body: {}
         });
 
@@ -332,20 +330,20 @@ serverIntTestSuite("Server integration tests", () => {
     });
 
     it('accepts signed webhook newsletter event', async () => {
-        const { event, signature } = ButtondownApiStub.signedWebhookEvent("dummy_type", { someData: "some data" });
+        const { event, signature } = someSignedWebhookEvent();
         const postEventResponse = await testRequests.postWebhookNewsletterEvent(event,
             { "X-Buttondown-Signature": signature });
         assertOkResponseCode(postEventResponse);
     });
 
     it('rejects unsigned webhook newsletter event', async () => {
-        const { event } = ButtondownApiStub.signedWebhookEvent("dummy_type", { someData: "some data" });
+        const { event } = someSignedWebhookEvent();
         const postEventResponse = await testRequests.postWebhookNewsletterEvent(event);
         assertUnauthenticatedResponseCode(postEventResponse);
     });
 
     it('rejects webhook newsletter event with invalid signature', async () => {
-        const { event, signature } = ButtondownApiStub.signedWebhookEvent("dummy_type", { someData: "some data" });
+        const { event, signature } = someSignedWebhookEvent();
         const postEventResponse = await testRequests.postWebhookNewsletterEvent(event,
             { "X-Buttondown-Signature": signature + "0" }
         );
@@ -465,4 +463,40 @@ async function assertSubscriberNotSavedInDb(email) {
 
 async function saveSubscriberInDb(subscriber) {
     await subscriberRepository.createReturningExisting(subscriber);
+}
+
+function invalidSubscribers() {
+    return [
+        {
+            email: null, ...TestObjects.randomSubscriberSignUpContext()
+        },
+        {
+            email: '', ...TestObjects.randomSubscriberSignUpContext()
+        },
+        {
+            email: '2355', ...TestObjects.randomSubscriberSignUpContext()
+        },
+        {
+            email: '@com.c', ...TestObjects.randomSubscriberSignUpContext()
+        },
+        {
+            email: 'ala@com', ...TestObjects.randomSubscriberSignUpContext()
+        },
+        {
+            email: "a".repeat(MAX_EMAIL_LENGTH) + "@email.com", ...TestObjects.randomSubscriberSignUpContext()
+        },
+        {
+            email: TestObjects.randomEmail(), ...TestObjects.randomSubscriberSignUpContext({ source: null })
+        },
+        {
+            email: TestObjects.randomEmail(), ...TestObjects.randomSubscriberSignUpContext({ placement: null })
+        },
+        {
+            email: TestObjects.randomEmail(), ...TestObjects.randomSubscriberSignUpContext({ placement: "not in allowed set" })
+        }
+    ];
+}
+
+function someSignedWebhookEvent() {
+    return ButtondownApiStub.signedWebhookEvent("dummy_type", { someData: "some data" });
 }
