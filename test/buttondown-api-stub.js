@@ -20,6 +20,21 @@ export const routes = [
         path: '/subscribers/:emailOrId',
         method: "PATCH",
         handler: updateSubscriberHandler
+    },
+    {
+        path: '/webhooks',
+        method: "GET",
+        handler: getWebhooksHandler
+    },
+    {
+        path: '/webhooks',
+        method: "POST",
+        handler: createWebhookHandler
+    },
+    {
+        path: '/webhooks/:id',
+        method: "PATCH",
+        handler: updateWebhookHandler
     }
 ];
 
@@ -62,7 +77,7 @@ let _nextGetSubscriberResponse = {
 export function nextGetSubscriberResponse(response) {
     _nextGetSubscriberResponse = response;
 }
-export function getSubscriberHandler(req, res) {
+function getSubscriberHandler(req, res) {
     if (isAuthenticated(req)) {
         validateRequestMatchesSetResponseValue(req.params.emailOrId, _nextGetSubscriberResponse.expectedEmailOrId);
         if (_nextGetSubscriberResponse.body) {
@@ -100,13 +115,13 @@ let _nextUpdateSubscriberResponse = {
 export function nextUpdateSubscriberResponse(response) {
     _nextUpdateSubscriberResponse = response;
 }
-export function updateSubscriberHandler(req, res) {
+function updateSubscriberHandler(req, res) {
     if (isAuthenticated(req)) {
         validateRequestMatchesSetResponseValue(req.params.emailOrId, _nextUpdateSubscriberResponse.expectedEmailOrId);
         validateRequestMatchesSetResponseValue(req.body.type, _nextUpdateSubscriberResponse.expectedType);
         if (_nextUpdateSubscriberResponse.body) {
             res.status(_nextUpdateSubscriberResponse.status)
-                .send(_nextUpdateSubscriberResponse.body)
+                .send(_nextUpdateSubscriberResponse.body);
         } else {
             res.sendStatus(_nextUpdateSubscriberResponse.status);
         }
@@ -115,7 +130,6 @@ export function updateSubscriberHandler(req, res) {
     }
 }
 
-
 export function signedWebhookEvent(eventType, data, signingKey = webhookSigningKey) {
     const event = Buffer.from(JSON.stringify({ event_type: eventType, data }), "utf-8");
     const signature = crypto.createHmac('sha256', signingKey)
@@ -123,3 +137,61 @@ export function signedWebhookEvent(eventType, data, signingKey = webhookSigningK
         .digest("hex");
     return { event, signature: `sha256=${signature}` };
 }
+
+let _nextGetWebhooksResponse = {
+    status: 200,
+    body: {
+        result: [],
+        count: 0
+    }
+};
+export function nextGetWebhooksResponse(response) {
+    _nextGetWebhooksResponse = response;
+}
+function getWebhooksHandler(req, res) {
+    if (isAuthenticated(req)) {
+        if (_nextGetWebhooksResponse.body) {
+            res.status(_nextGetWebhooksResponse.status)
+                .send(_nextGetWebhooksResponse.body);
+        } else {
+            res.sendStatus(_nextGetWebhooksResponse.status);
+        }
+    } else {
+        res.sendStatus(401);
+    }
+}
+
+let _nextCreateWebhookResponse = {
+    status: 201,
+    expectedBody: ''
+};
+export function nextCreateWebhookResponse(response) {
+    _nextCreateWebhookResponse = response;
+}
+function createWebhookHandler(req, res) {
+    if (isAuthenticated(req)) {
+        validateRequestMatchesSetResponseValue(req.body, _nextCreateWebhookResponse.body);
+        res.sendStatus(_nextCreateWebhookResponse.status);
+    } else {
+        res.sendStatus(401);
+    }
+}
+
+let _nextUpdateWebhookResponse = {
+    status: 200,
+    expectedId: '',
+    expectedBody: ''
+};
+export function nextUpdateWebhookResponse(response) {
+    _nextUpdateWebhookResponse = response;
+}
+function updateWebhookHandler(req, res) {
+    if (isAuthenticated(req)) {
+        validateRequestMatchesSetResponseValue(req.params.id, _nextUpdateWebhookResponse.expectedId);
+        validateRequestMatchesSetResponseValue(req.body, _nextUpdateWebhookResponse.body);
+        res.sendStatus(_nextCreateWebhookResponse.status);
+    } else {
+        res.sendStatus(401);
+    }
+}
+

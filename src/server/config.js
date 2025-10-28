@@ -44,7 +44,8 @@ export async function read() {
             DEFAULT_STATS_VIEWS_CALCULATE_ALL_TIME_INTERVAL),
         buttondownApiUrl: envVarOrDefault("BUTTONDOWN_API_URL", "https://api.buttondown.com/v1"),
         buttondownApiKey: await envVarOrThrow("BUTTONDOWN_API_KEY"),
-        buttondownWebhookSigningKey: await envVarOrThrow("BUTTONDOWN_WEBHOOK_SIGNING_KEY")
+        buttondownWebhookSigningKey: await envVarOrThrow("BUTTONDOWN_WEBHOOK_SIGNING_KEY"),
+        buttondownWebhookUrl: envVarOrDefault("https://api.binaryigor.com/webhooks/newsletter")
     }
 }
 

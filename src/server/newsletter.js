@@ -4,6 +4,7 @@ import * as Dates from '../shared/dates.js';
 import * as Promises from '../shared/promises.js';
 import { snakeCasedObject } from './db.js';
 import { createHmac, timingSafeEqual } from 'crypto';
+import { SubscribersStats, SubscribersByPlacementStats, SubscribersBySourceStats } from './shared.js';
 
 export const MAX_EMAIL_LENGTH = 125;
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -267,6 +268,61 @@ export class SqliteSubscriberRepository {
     async deleteOfEmail(email) {
         return this.#db.execute("DELETE FROM subscriber WHERE email = ?", [email]);
     }
+
+    /**
+     * @param {number?} fromTimestamp 
+     * @param {number} toTimestamp 
+     */
+    async subscribersStats(fromTimestamp, toTimestamp) {
+        const createdAtClause = fromTimestamp ?
+            `created_at >= ${fromTimestamp} AND created_at <= ${toTimestamp}` :
+            `created_at <= ${toTimestamp}`;
+        const confirmedAtClause = fromTimestamp ?
+            `confirmed_at >= ${fromTimestamp} AND confirmed_at <= ${toTimestamp}` :
+            `confirmed_at <= ${toTimestamp}`;
+        const unsubscribedAtClause = fromTimestamp ?
+            `unsubscribed_at >= ${fromTimestamp} AND unsubscribed_at <= ${toTimestamp}` :
+            `unsubscribed_at <= ${toTimestamp}`;
+
+        const subscribersCountPromise = this.#db.queryOne(`
+        SELECT 
+            (SELECT COUNT(*) FROM subscriber WHERE ${createdAtClause}) AS created,
+            (SELECT COUNT(*) FROM subscriber WHERE ${confirmedAtClause}) AS confirmed,
+            (SELECT COUNT(*) FROM subscriber WHERE ${unsubscribedAtClause}) AS unsubscribed
+        `).then(r => {
+            const created = (r && r['created']) ?? 0;
+            const confirmed = (r && r['confirmed']) ?? 0;
+            const unsubscribed = (r && r['unsubscribed']) ?? 0;
+            return { created, confirmed, unsubscribed };
+        });
+
+        const subscribersByPlacementPromise = this.#db.query(`
+        SELECT 
+            CASE WHEN sign_up_context_placement IS NULL THEN 'OTHER' ELSE sign_up_context_placement END AS placement,
+            SUM(CASE WHEN ${createdAtClause} THEN 1 ELSE 0 END) AS created,
+            SUM(CASE WHEN ${confirmedAtClause} THEN 1 ELSE 0 END) AS confirmed
+        FROM subscriber
+        WHERE (${createdAtClause}) OR (${confirmedAtClause})
+        GROUP BY placement
+        ORDER BY created DESC, confirmed DESC, placement ASC`)
+            .then(rows => rows.map(r => new SubscribersByPlacementStats(r['placement'], r['created'], r['confirmed'])));
+
+        const subscribersBySourceQuery = this.#db.query(`
+        SELECT 
+            CASE WHEN sign_up_context_source IS NULL THEN 'other' ELSE sign_up_context_source END AS source,
+            SUM(CASE WHEN ${createdAtClause} THEN 1 ELSE 0 END) AS created,
+            SUM(CASE WHEN ${confirmedAtClause} THEN 1 ELSE 0 END) AS confirmed
+        FROM subscriber
+        WHERE (${createdAtClause}) OR (${confirmedAtClause})
+        GROUP BY source
+        ORDER BY created DESC, confirmed DESC, source ASC`)
+            .then(rows => rows.map(r => new SubscribersBySourceStats(r['source'], r['created'], r['confirmed'])));
+
+        const { created, confirmed, unsubscribed } = await subscribersCountPromise;
+
+        return new SubscribersStats(created, confirmed, unsubscribed,
+            await subscribersByPlacementPromise, await subscribersBySourceQuery);
+    }
 }
 
 export class ButtondownSubscriberApi {
@@ -306,7 +362,7 @@ export class ButtondownSubscriberApi {
     #createRequest(email) {
         return fetch(this.#subscribersUrl(), {
             method: "POST",
-            headers: this.#withAuthorizationHeaders({ "content-type": "application/json" }),
+            headers: ButtondownApi.withJsonContentTypeAndAuthorizationHeaders(this.#apiKey),
             body: JSON.stringify({ email_address: email })
         });
     }
@@ -333,10 +389,6 @@ export class ButtondownSubscriberApi {
         return idOrEmail ? `${url}/${idOrEmail}` : url;
     }
 
-    #withAuthorizationHeaders(headers = {}) {
-        return { ...headers, "Authorization": `Token ${this.#apiKey}` };
-    }
-
     async update(emailOrId, type) {
         const response = await this.#executeRequestRetrying(() => this.#updateRequest(emailOrId, type));
         if (response.ok) {
@@ -360,7 +412,7 @@ export class ButtondownSubscriberApi {
     #updateRequest(emailOrId, type) {
         return fetch(this.#subscribersUrl(emailOrId), {
             method: "PATCH",
-            headers: this.#withAuthorizationHeaders({ "content-type": "application/json" }),
+            headers: ButtondownApi.withJsonContentTypeAndAuthorizationHeaders(this.#apiKey),
             body: JSON.stringify({ type })
         });
     }
@@ -384,12 +436,102 @@ export class ButtondownSubscriberApi {
     #getRequest(emailOrId) {
         return fetch(this.#subscribersUrl(emailOrId), {
             method: "GET",
-            headers: this.#withAuthorizationHeaders()
+            headers: ButtondownApi.withAuthorizationHeaders(this.#apiKey)
         });
     }
 }
 
-// TODO: recreate webhook endpoint
+const ButtondownApi = {
+    withAuthorizationHeaders(apiKey, headers = {}) {
+        return { ...headers, "Authorization": `Token ${apiKey}` };
+    },
+    withJsonContentTypeAndAuthorizationHeaders(apiKey) {
+        return this.withAuthorizationHeaders(apiKey, { "content-type": "application/json" });
+    }
+};
+
+export class NewsletterWebhookSynchronizer {
+
+    #url;
+    #webhookUrl;
+    #apiKey;
+    #signingKey;
+    #webhookDescription = "Primary API managed webhook for automation";
+
+    constructor(url, webhookUrl, apiKey, signingKey) {
+        this.#url = url;
+        this.#webhookUrl = webhookUrl;
+        this.#apiKey = apiKey;
+        this.#signingKey = signingKey;
+    }
+
+    async synchronize() {
+        Logger.logInfo("Synchronizing webhook, we should have just one, up-to-date version.")
+        const webhooks = await this.#getAllWebhooks();
+        const webhooksToUpdate = webhooks.filter(w => w.url == this.#webhookUrl);
+        if (webhooksToUpdate.length == 1) {
+            Logger.logInfo(`${this.#webhookUrl} exists already, updating it...`);
+            const webhookId = webhooksToUpdate[0].id;
+            const updateResponse = await this.#updateWebhook(webhookId);
+            if (updateResponse.ok) {
+                Logger.logInfo("Webhook updated, up-to-date automation is on!");
+            }
+            throw new Error(`Failed to update webhook: ${updateResponse.status}`);
+        } else if (webhooksToUpdate.length == 0) {
+            Logger.logInfo(`No previous webhook to update, creating it...`);
+            const createResponse = await this.#createWebhook();
+            if (createResponse.ok) {
+                Logger.logInfo("Webhook created, automation is on!");
+            } else {
+                throw new Error(`Failed to create webhook: ${createResponse.status}`);
+            }
+        } else {
+            throw new Error(`Expected to get no webhooks to update or just, but got: ${webhooksToUpdate.length}. Delete it first and rerun the process`);
+        }
+    }
+
+    async #getAllWebhooks() {
+        const response = await fetch(this.#webhooksUrl(), {
+            method: "GET",
+            headers: ButtondownApi.withAuthorizationHeaders(this.#apiKey)
+        });
+        return await response.json().results;
+    }
+
+    async #createWebhook() {
+        return fetch(this.#webhooksUrl(), {
+            method: "POST",
+            headers: ButtondownApi.withJsonContentTypeAndAuthorizationHeaders(this.#apiKey),
+            body: {
+                status: "enabled",
+                event_types: NewsletterWebhookEventTypes,
+                url: this.#webhookUrl,
+                description: this.#webhookDescription,
+                signing_key: this.#signingKey
+            }
+        });
+    }
+
+    async #updateWebhook(webhookId) {
+        return fetch(this.#webhooksUrl(webhookId), {
+            method: "PATCH",
+            headers: ButtondownApi.withJsonContentTypeAndAuthorizationHeaders(this.#apiKey),
+            body: {
+                status: "enabled",
+                event_types: NewsletterWebhookEventTypes,
+                url: this.#webhookUrl,
+                description: this.#webhookDescription,
+                signing_key: this.#signingKey
+            }
+        });
+    }
+
+    #webhooksUrl(id) {
+        const webhooksUrl = `${this.#url}/webhooks`;
+        return id ? `${webhooksUrl}/${id}` : webhooksUrl;
+    }
+}
+
 export class NewsletterWebhookHandler {
 
     #subscriberService;
@@ -571,7 +713,6 @@ export class ApiSubscriber {
 }
 
 export const NewsletterWebhookEventType = {
-    SUBSCRIBER_BOUNCED: 'subscriber.bounced',
     SUBSCRIBER_CHANGED_EMAIL: 'subscriber.changed_email',
     SUBSCRIBER_CONFIRMED: 'subscriber.confirmed',
     SUBSCRIBER_CREATED: 'subscriber.created',
@@ -580,3 +721,4 @@ export const NewsletterWebhookEventType = {
     SUBSCRIBER_OPENED: 'subscriber.opened',
     SUBSCRIBER_CLICKED: 'subscriber.clicked'
 };
+export const NewsletterWebhookEventTypes = Object.values(NewsletterWebhookEventType);

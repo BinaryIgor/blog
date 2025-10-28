@@ -3,8 +3,10 @@ import cors from "cors";
 import { AnalyticsService, DeferredEventsSaver, StatsViews, SqliteAnalyticsRepository, Event } from "./analytics.js";
 import {
     SubscriberService, SqliteSubscriberRepository, Subscriber, SubscriberSignUpContext, ButtondownSubscriberApi, NewsletterWebhookHandler,
-    SubscriberExistsError, SubscriberValidationError, SubscriberFailureError
+    SubscriberExistsError, SubscriberValidationError,
+    NewsletterWebhookSynchronizer
 } from "./newsletter.js";
+import { subscribersStatsSupplierFactory } from './shared.js';
 import { Scheduler } from "./scheduler.js";
 import * as Logger from "../shared/logger.js";
 
@@ -43,9 +45,16 @@ export async function start(appClock = new Clock(), appScheduler = new Scheduler
     const postsSource = new PostsSource(config.postsPath, postsRetryConfig);
     postsSource.schedule(scheduler, config.postsReadInterval);
 
+    const subscriberRepository = new SqliteSubscriberRepository(db);
+    const subscriberApi = new ButtondownSubscriberApi(config.buttondownApiUrl, config.buttondownApiKey);
+    const subscriberService = new SubscriberService(subscriberRepository, subscriberApi, clock);
+    const newsletterWebhookHandler = new NewsletterWebhookHandler(subscriberService, config.buttondownWebhookSigningKey);
+    const newsletterWebhookSynchronizer = new NewsletterWebhookSynchronizer(config.buttondownApiUrl, config.buttondownWebhookUrl,
+        config.buttondownApiKey, config.buttondownWebhookSigningKey);
+
     const analyticsRepository = new SqliteAnalyticsRepository(db);
 
-    const statsViews = new StatsViews(analyticsRepository, db, clock);
+    const statsViews = new StatsViews(analyticsRepository, subscribersStatsSupplierFactory(subscriberRepository), db, clock);
     statsViews.schedule(scheduler, {
         shorterPeriodsViewsInterval: config.statsViewsCalculateShorterPeriodsInterval,
         longerPeriodsViewsInterval: config.statsViewsCalculateLongerPeriodsInterval,
@@ -58,11 +67,6 @@ export async function start(appClock = new Clock(), appScheduler = new Scheduler
     eventsSaver.schedule(scheduler, config.eventsWriteInterval);
 
     const analyticsService = new AnalyticsService(analyticsRepository, eventsSaver, postsSource, config.analyticsAllowedPaths, clock);
-
-    const subscriberRepository = new SqliteSubscriberRepository(db);
-    const subscriberApi = new ButtondownSubscriberApi(config.buttondownApiUrl, config.buttondownApiKey);
-    const subscriberService = new SubscriberService(subscriberRepository, subscriberApi, clock);
-    const newsletterWebhookHandler = new NewsletterWebhookHandler(subscriberService, config.buttondownWebhookSigningKey);
 
     const app = express();
 
@@ -138,6 +142,15 @@ export async function start(appClock = new Clock(), appScheduler = new Scheduler
             res.sendStatus(200);
         } catch (e) {
             Logger.logError(`Failed to handle webhook event ${JSON.stringify(req.body)}:`, e);
+            res.sendStatus(500);
+        }
+    });
+
+    app.post("/internal/synchronize-newsletter-webhook", async (_, res) => {
+        try {
+            await newsletterWebhookSynchronizer.synchronize();
+        } catch (e) {
+            Logger.logError(`Failed to synchronize newsletter webhook`, e);
             res.sendStatus(500);
         }
     });

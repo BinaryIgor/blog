@@ -107,5 +107,15 @@ export const TestObjects = {
             last_click_date, last_open_date, metadata, notes, source, tags, type,
             undeliverability_date, undeliverability_reason, unsubscription_date, unsubscription_reason,
             utm_campaign, utm_medium, utm_source);
+    },
+    randomWebhook({
+        id = crypto.randomUUID(),
+        status = randomBoolean() ? 'enabled' : 'disabled',
+        event_types = ["event.type"],
+        url = 'some-url',
+        description = randomString(),
+        signing_key = crypto.randomUUID()
+    } = {}) {
+        return { id, status, event_types, url, description, signing_key };
     }
 };

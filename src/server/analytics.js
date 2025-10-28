@@ -229,39 +229,6 @@ export class PingersStats {
     }
 }
 
-export class SubscribersStats {
-
-    constructor(all, created, confirmed, unsubscribed,
-        byPlacementStats, bySourceStats) {
-        this.all = all;
-        this.created = created;
-        this.confirmed = confirmed;
-        this.unsubscribed = unsubscribed;
-        this.byPlacementStats = byPlacementStats;
-        this.bySourceStats = bySourceStats;
-    }
-}
-
-export class SubscribersByPlacementStats {
-    constructor(placement, all, created, confirmed, unsubscribed) {
-        this.placement = placement;
-        this.all = all;
-        this.created = created;
-        this.confirmed = confirmed;
-        this.unsubscribed = unsubscribed;
-    }
-}
-
-export class SubscribersBySourceStats {
-    constructor(source, all, created, confirmed, unsubscribed) {
-        this.source = source;
-        this.all = all;
-        this.created = created;
-        this.confirmed = confirmed;
-        this.unsubscribed = unsubscribed;
-    }
-}
-
 export class ViewsBySource {
     constructor(source, views) {
         this.source = source;
@@ -330,13 +297,23 @@ export class DeferredEventsSaver {
 }
 
 export class StatsViews {
-    constructor(analyticsRepository, db, clock) {
-        this.analyticsRepository = analyticsRepository;
-        this.db = db;
-        this.clock = clock;
-        this.lastShorterPeriodsViewsSaveTimestamp = null;
-        this.lastLongerPeriodsViewsSaveTimestamp = null;
-        this.lastAllTimeViewSaveTimestamp = null;
+
+    #analyticsRepository;
+    #db;
+    #subscribersStatsSupplier;
+    #clock;
+    #lastShorterPeriodsViewsSaveTimestamp;
+    #lastLongerPeriodsViewsSaveTimestamp;
+    #lastAllTimeViewSaveTimestamp;
+
+    constructor(analyticsRepository, subscribersStatsSupplier, db, clock) {
+        this.#analyticsRepository = analyticsRepository;
+        this.#subscribersStatsSupplier = subscribersStatsSupplier;
+        this.#db = db;
+        this.#clock = clock;
+        this.#lastShorterPeriodsViewsSaveTimestamp = null;
+        this.#lastLongerPeriodsViewsSaveTimestamp = null;
+        this.#lastAllTimeViewSaveTimestamp = null;
     }
 
     schedule(scheduler,
@@ -375,53 +352,59 @@ export class StatsViews {
     }
 
     async saveViewsForShorterPeriods() {
-        const now = this.clock.nowTimestamp();
+        const now = this.#clock.nowTimestamp();
 
         const timestampDayAgo = Dates.timestampSecondsAgo(now, DAY_SECONDS);
-        const lastDayStats = await this.analyticsRepository.stats(timestampDayAgo, now);
+        const lastDayStats = await this.#statsViewForPeriod(timestampDayAgo, now);
 
         const timestampSevenDaysAgo = Dates.timestampSecondsAgo(now, SEVEN_DAYS_SECONDS);
-        const lastSevenDaysStats = await this.analyticsRepository.stats(timestampSevenDaysAgo, now);
+        const lastSevenDaysStats = await this.#statsViewForPeriod(timestampSevenDaysAgo, now);
 
-        await this._saveView(new StatsView(LAST_DAY_STATS_VIEW, lastDayStats, now));
-        await this._saveView(new StatsView(LAST_7_DAYS_STATS_VIEW, lastSevenDaysStats, now));
+        await this.#saveView(new StatsView(LAST_DAY_STATS_VIEW, lastDayStats, now));
+        await this.#saveView(new StatsView(LAST_7_DAYS_STATS_VIEW, lastSevenDaysStats, now));
 
-        this.lastShorterPeriodsViewsSaveTimestamp = now;
+        this.#lastShorterPeriodsViewsSaveTimestamp = now;
+    }
+
+    async #statsViewForPeriod(fromTimestamp, toTimestamp) {
+        const analyticsStats = this.#analyticsRepository.stats(fromTimestamp, toTimestamp);
+        const subscribersStats = this.#subscribersStatsSupplier(fromTimestamp, toTimestamp);
+        return { ...await analyticsStats, subscribers: await subscribersStats };
     }
 
     async saveViewsForLongerPeriods() {
-        const now = this.clock.nowTimestamp();
+        const now = this.#clock.nowTimestamp();
 
         const timestampThirtyDaysAgo = Dates.timestampSecondsAgo(now, THIRTY_DAYS_SECONDS);
-        const lastThirtyDaysStats = await this.analyticsRepository.stats(timestampThirtyDaysAgo, now);
+        const lastThirtyDaysStats = await this.#statsViewForPeriod(timestampThirtyDaysAgo, now);
 
         const timestampNinentyDaysAgo = Dates.timestampSecondsAgo(now, NINENTY_DAYS_SECONDS);
-        const lastNinentyDaysStats = await this.analyticsRepository.stats(timestampNinentyDaysAgo, now);
+        const lastNinentyDaysStats = await this.#statsViewForPeriod(timestampNinentyDaysAgo, now);
 
         const timestampOneHundredEightyDaysAgo = Dates.timestampSecondsAgo(now, ONE_HUNDRED_EIGHTY_DAYS_SECONDS);
-        const lastOneHundredEightyDaysStats = await this.analyticsRepository.stats(timestampOneHundredEightyDaysAgo, now);
+        const lastOneHundredEightyDaysStats = await this.#statsViewForPeriod(timestampOneHundredEightyDaysAgo, now);
 
         const timestampThreeHundredSixtyFiveDaysAgo = Dates.timestampSecondsAgo(now, THREE_HUNDRED_SIXTY_FIVE_DAYS_SECONDS);
-        const lastThreeHundredSixtyFiveDaysStats = await this.analyticsRepository.stats(timestampThreeHundredSixtyFiveDaysAgo, now);
+        const lastThreeHundredSixtyFiveDaysStats = await this.#statsViewForPeriod(timestampThreeHundredSixtyFiveDaysAgo, now);
 
-        await this._saveView(new StatsView(LAST_30_DAYS_STATS_VIEW, lastThirtyDaysStats, now));
-        await this._saveView(new StatsView(LAST_90_DAYS_STATS_VIEW, lastNinentyDaysStats, now));
-        await this._saveView(new StatsView(LAST_180_DAYS_STATS_VIEW, lastOneHundredEightyDaysStats, now));
-        await this._saveView(new StatsView(LAST_365_DAYS_STATS_VIEW, lastThreeHundredSixtyFiveDaysStats, now));
+        await this.#saveView(new StatsView(LAST_30_DAYS_STATS_VIEW, lastThirtyDaysStats, now));
+        await this.#saveView(new StatsView(LAST_90_DAYS_STATS_VIEW, lastNinentyDaysStats, now));
+        await this.#saveView(new StatsView(LAST_180_DAYS_STATS_VIEW, lastOneHundredEightyDaysStats, now));
+        await this.#saveView(new StatsView(LAST_365_DAYS_STATS_VIEW, lastThreeHundredSixtyFiveDaysStats, now));
 
-        this.lastLongerPeriodsViewsSaveTimestamp = now;
+        this.#lastLongerPeriodsViewsSaveTimestamp = now;
     }
 
     async saveAllTimeView() {
-        const now = this.clock.nowTimestamp();
-        const allTimeStats = await this.analyticsRepository.stats(null, now);
-        await this._saveView(new StatsView(ALL_TIME_STATS_VIEW, allTimeStats, now));
+        const now = this.#clock.nowTimestamp();
+        const allTimeStats = await this.#statsViewForPeriod(null, now);
+        await this.#saveView(new StatsView(ALL_TIME_STATS_VIEW, allTimeStats, now));
 
-        this.lastAllTimeViewSaveTimestamp = now;
+        this.#lastAllTimeViewSaveTimestamp = now;
     }
 
-    _saveView(statsView) {
-        return this.db.execute(`
+    #saveView(statsView) {
+        return this.#db.execute(`
             INSERT INTO stats_view (period, stats, calculated_at)
             VALUES (?, ?, json(?))
             ON CONFLICT (period) 
@@ -432,7 +415,7 @@ export class StatsViews {
     }
 
     views() {
-        return this.db.query("SELECT * FROM stats_view")
+        return this.#db.query("SELECT * FROM stats_view")
             .then(rows => rows.map(r => {
                 const stats = JSON.parse(r["stats"]);
                 return new StatsView(r["period"], stats, r["calculated_at"]);
@@ -490,7 +473,6 @@ export class SqliteAnalyticsRepository {
         const sessions = this.#sessionsStats(fromTimestamp, toTimestamp);
         const scrolls = this._scrollStats(fromTimestamp, toTimestamp);
         const pings = this._pingsStats(fromTimestamp, toTimestamp);
-        const subscribers = this.#subscribersStats(fromTimestamp, toTimestamp);
 
         const viewsBySource = this._viewsByTopSourceStats(fromTimestamp, toTimestamp, 25);
         const pages = this._pagesStats(fromTimestamp, toTimestamp);
@@ -774,18 +756,6 @@ export class SqliteAnalyticsRepository {
           ELSE
             100
           END`;
-    }
-
-    async #subscribersStats(fromTimestamp, toTimestamp) {
-        return new SubscribersStats(10, 5, 4, 2,
-            [
-                new SubscribersByPlacementStats('LANDING', 1, 2, 3, 4),
-                new SubscribersByPlacementStats('POST_END', 1, 2, 3, 4)
-            ],
-            [
-                new SubscribersBySourceStats("binaryigor.com", 1, 2, 3, 4),
-                new SubscribersBySourceStats("google.com", 1, 2, 3, 4)
-            ]);
     }
 
     async _pingsByPathStats(fromTimestamp, toTimestamp) {

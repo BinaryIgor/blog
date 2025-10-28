@@ -37,11 +37,24 @@ export function randomString(length = 10) {
     return result;
 }
 
-export function sortByField(elements, field, reverse = false) {
-    if (reverse) {
-        return elements.sort((a, b) => a[field] < b[field] ? 1 : (a[field] == b[field]) ? 0 : -1);
-    }
-    return elements.sort((a, b) => a[field] > b[field] ? 1 : (a[field] == b[field]) ? 0 : -1);
+export function sortByField(elements, field, reverse = false, field2 = null, reverse2 = false, field3 = null, reverse3 = false) {
+    const fieldCompartor = (a, b, field, reverse) => {
+        if (reverse) {
+            return a[field] < b[field] ? 1 : (a[field] == b[field]) ? 0 : -1;
+        }
+        return a[field] > b[field] ? 1 : (a[field] == b[field]) ? 0 : -1;
+    };
+    return elements.sort((a, b) => {
+        const comparison1 = fieldCompartor(a, b, field, reverse);
+        if (comparison1 == 0 && field2) {
+            const comparison2 = fieldCompartor(a, b, field2, reverse2);
+            if (comparison2 == 0 && field3) {
+                return fieldCompartor(a, b, field3, reverse3);
+            }
+            return comparison2;
+        }
+        return comparison1;
+    });
 }
 
 export async function assertThrowsException(func, type, containsMessage = null) {

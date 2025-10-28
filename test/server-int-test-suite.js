@@ -95,6 +95,7 @@ export const serverIntTestSuite = (testsDescription, testsCallback) => {
             additionalPosts = [];
             const db = new SqliteDb(DB_PATH);
             await db.execute("DELETE FROM event");
+            await db.execute("DELETE FROM subscriber");
             await db.execute("DELETE FROM stats_view");
         });
 

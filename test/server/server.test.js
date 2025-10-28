@@ -17,6 +17,7 @@ import crypto from 'crypto';
 import * as ButtondownApiStub from '../buttondown-api-stub.js';
 import { ApiSubscriberType, Subscriber, SubscriberState } from "../../src/server/newsletter.js";
 import { MAX_EMAIL_LENGTH } from "../../src/server/newsletter.js";
+import { SubscribersStats } from "../../src/server/shared.js";
 
 serverIntTestSuite("Server integration tests", () => {
     invalidEvents().forEach(e => {
@@ -213,7 +214,8 @@ serverIntTestSuite("Server integration tests", () => {
         const expectedAllTimeStats = StatsTestFixture.eventsToExpectedStats({
             views: [ip1View1, ip1View2, ip2View1, ip2View2, ip3View1],
             scrolls: [ip2Scroll1],
-            pings: [ip1Ping1, ip2Ping1, ip3Ping1]
+            pings: [ip1Ping1, ip2Ping1, ip3Ping1],
+            subscribers: []
         });
 
         await assertJsonResponse(statsResponse, actualStats => {
@@ -393,7 +395,7 @@ function invalidEvents() {
 async function assertEmptyStatsResponse(response) {
     await assertJsonResponse(response, actualStats => {
         actualStats.forEach(as => {
-            assert.deepEqual(as.stats, Stats.empty());
+            assert.deepEqual(as.stats, { ...Stats.empty(), subscribers: SubscribersStats.empty()});
         });
     });
 }

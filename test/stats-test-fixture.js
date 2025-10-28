@@ -1,7 +1,8 @@
 import { Stats, ViewsBySource, PageStats, SessionsStats } from "../src/server/analytics.js";
-import { randomElement, randomElementOrNull, randomNumber, sortByField } from "./test-utils.js";
-import { SCROLL_EVENT_TYPE, PING_EVENT_TYPE } from "./test-objects.js";
+import { randomBoolean, randomElement, randomElementOrNull, randomNumber, sortByField } from "./test-utils.js";
+import { SCROLL_EVENT_TYPE, PING_EVENT_TYPE, TestObjects } from "./test-objects.js";
 import { Event, PingStats, PingersStats } from "../src/server/analytics.js";
+import { SubscribersStats, SubscribersByPlacementStats, SubscribersBySourceStats } from "../src/server/shared.js";
 
 export const StatsTestFixture = {
     prepareRandomEvents({ fromTimestamp, toTimestamp, visitorIds, sessionIds, ipHashes, sources, mediums, campaigns, refs, paths, eventType, count }) {
@@ -23,15 +24,35 @@ export const StatsTestFixture = {
         }
         return events;
     },
-    eventsToExpectedStats({ views, scrolls, pings }) {
+    prepareRandomSubscribers({ fromTimestamp, toTimestamp, sources, placements, count }) {
+        const subscribers = [];
+        for (let i = 0; i < count; i++) {
+            subscribers.push(TestObjects.randomSubscriber(
+                {
+                    createdAt: randomNumber(fromTimestamp, toTimestamp),
+                    confirmedAt: randomBoolean() ? randomNumber(fromTimestamp, toTimestamp) : null,
+                    unsubscribedAt: randomBoolean() ? randomNumber(fromTimestamp, toTimestamp) : null,
+                    signUpContext: TestObjects.randomSubscriberSignUpContext({
+                        source: randomElementOrNull(sources),
+                        placement: randomElementOrNull(placements)
+                    })
+                }
+            ));
+        }
+        return subscribers;
+    },
+    eventsToExpectedStats({ views, scrolls, pings, subscribers }) {
         const eventVisitors = countDistinct(views.map(e => e.visitorId));
         const eventIpHashes = countDistinct(views.concat(scrolls).concat(pings).map(e => e.ipHash));
         const paths = distinctPaths({ views, scrolls, pings });
 
-        return new Stats(views.length, eventVisitors, eventIpHashes, toExpectedSessions(views, scrolls, pings),
+        const analyticsStats = new Stats(views.length, eventVisitors, eventIpHashes, toExpectedSessions(views, scrolls, pings),
             toExpectedScrolls(scrolls), toExpectedPings(pings),
             toExpectedViewsBySource(views),
             toExpectedStatsByPath({ paths, views, scrolls, pings }));
+        const subscribersStats = toExpectedSubscribersStats(subscribers);
+
+        return { ...analyticsStats, subscribers: subscribersStats };
     }
 };
 
@@ -272,4 +293,40 @@ function toExpectedStatsByPath({ paths, views, scrolls, pings }) {
         }
         return a.path > b.path ? 1 : -1;
     });
+}
+
+function toExpectedSubscribersStats(subscribers) {
+    const created = subscribers.length;
+    const confirmed = subscribers.filter(s => s.confirmedAt != null).length;
+    const unsubscribed = subscribers.filter(s => s.unsubscribedAt != null).length;
+
+    const subscribersByPlacement = new Map();
+    const subscribersBySource = new Map();
+    subscribers.forEach(s => {
+        const placement = s.signUpContext.placement ?? "OTHER";
+        let ofPlacement = subscribersByPlacement.get(placement);
+        if (ofPlacement) {
+            ofPlacement.created = ofPlacement.created + 1;
+            if (s.confirmedAt) {
+                ofPlacement.confirmed = ofPlacement.confirmed + 1;
+            }
+        } else {
+            subscribersByPlacement.set(placement, { placement, created: 1, confirmed: s.confirmedAt ? 1 : 0 });
+        }
+
+        const source = s.signUpContext.source ?? "other";
+        let ofSource = subscribersBySource.get(source);
+        if (ofSource) {
+            ofSource.created = ofSource.created + 1;
+            if (s.confirmedAt) {
+                ofSource.confirmed = ofSource.confirmed + 1;
+            }
+        } else {
+            subscribersBySource.set(source, { source, created: 1, confirmed: s.confirmedAt ? 1 : 0 });
+        }
+    });
+
+    return new SubscribersStats(created, confirmed, unsubscribed,
+        sortByField([...subscribersByPlacement.values()], "created", true, "confirmed", true, "placement"),
+        sortByField([...subscribersBySource.values()], "created", true, "confirmed", true, "source"));
 }
