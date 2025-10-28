@@ -229,6 +229,39 @@ export class PingersStats {
     }
 }
 
+export class SubscribersStats {
+
+    constructor(all, created, confirmed, unsubscribed,
+        byPlacementStats, bySourceStats) {
+        this.all = all;
+        this.created = created;
+        this.confirmed = confirmed;
+        this.unsubscribed = unsubscribed;
+        this.byPlacementStats = byPlacementStats;
+        this.bySourceStats = bySourceStats;
+    }
+}
+
+export class SubscribersByPlacementStats {
+    constructor(placement, all, created, confirmed, unsubscribed) {
+        this.placement = placement;
+        this.all = all;
+        this.created = created;
+        this.confirmed = confirmed;
+        this.unsubscribed = unsubscribed;
+    }
+}
+
+export class SubscribersBySourceStats {
+    constructor(source, all, created, confirmed, unsubscribed) {
+        this.source = source;
+        this.all = all;
+        this.created = created;
+        this.confirmed = confirmed;
+        this.unsubscribed = unsubscribed;
+    }
+}
+
 export class ViewsBySource {
     constructor(source, views) {
         this.source = source;
@@ -454,9 +487,10 @@ export class SqliteAnalyticsRepository {
 
     async stats(fromTimestamp, toTimestamp) {
         const viewsVisitorsIpHashes = this._viewsVisitorsIpHashesStats(fromTimestamp, toTimestamp);
-        const sessions = this.#sessionStats(fromTimestamp, toTimestamp);
+        const sessions = this.#sessionsStats(fromTimestamp, toTimestamp);
         const scrolls = this._scrollStats(fromTimestamp, toTimestamp);
         const pings = this._pingsStats(fromTimestamp, toTimestamp);
+        const subscribers = this.#subscribersStats(fromTimestamp, toTimestamp);
 
         const viewsBySource = this._viewsByTopSourceStats(fromTimestamp, toTimestamp, 25);
         const pages = this._pagesStats(fromTimestamp, toTimestamp);
@@ -540,7 +574,7 @@ export class SqliteAnalyticsRepository {
         return { events: 0, ids: 0 };
     }
 
-    async #sessionStats(fromTimestamp, toTimestamp) {
+    async #sessionsStats(fromTimestamp, toTimestamp) {
         const sessionsQuery = this._queryWithOptionalWhereInTimestampsClause(`
             SELECT COUNT(DISTINCT session_id) AS sessions FROM event`,
             fromTimestamp, toTimestamp, "session_id !=''"
@@ -740,6 +774,18 @@ export class SqliteAnalyticsRepository {
           ELSE
             100
           END`;
+    }
+
+    async #subscribersStats(fromTimestamp, toTimestamp) {
+        return new SubscribersStats(10, 5, 4, 2,
+            [
+                new SubscribersByPlacementStats('LANDING', 1, 2, 3, 4),
+                new SubscribersByPlacementStats('POST_END', 1, 2, 3, 4)
+            ],
+            [
+                new SubscribersBySourceStats("binaryigor.com", 1, 2, 3, 4),
+                new SubscribersBySourceStats("google.com", 1, 2, 3, 4)
+            ]);
     }
 
     async _pingsByPathStats(fromTimestamp, toTimestamp) {
