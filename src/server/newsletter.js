@@ -454,13 +454,14 @@ export class NewsletterWebhookSynchronizer {
 
     #url;
     #webhookUrl;
+    #webhookDescription;
     #apiKey;
     #signingKey;
-    #webhookDescription = "Primary API managed webhook for automation";
 
-    constructor(url, webhookUrl, apiKey, signingKey) {
+    constructor(url, webhookUrl, webhookDescription, apiKey, signingKey) {
         this.#url = url;
         this.#webhookUrl = webhookUrl;
+        this.#webhookDescription = webhookDescription;
         this.#apiKey = apiKey;
         this.#signingKey = signingKey;
     }
@@ -468,6 +469,7 @@ export class NewsletterWebhookSynchronizer {
     async synchronize() {
         Logger.logInfo("Synchronizing webhook, we should have just one, up-to-date version.")
         const webhooks = await this.#getAllWebhooks();
+        console.log("Got webhooks: ", webhooks);
         const webhooksToUpdate = webhooks.filter(w => w.url == this.#webhookUrl);
         if (webhooksToUpdate.length == 1) {
             Logger.logInfo(`${this.#webhookUrl} exists already, updating it...`);
@@ -475,8 +477,9 @@ export class NewsletterWebhookSynchronizer {
             const updateResponse = await this.#updateWebhook(webhookId);
             if (updateResponse.ok) {
                 Logger.logInfo("Webhook updated, up-to-date automation is on!");
+            } else {
+                throw new Error(`Failed to update webhook: ${updateResponse.status}`);
             }
-            throw new Error(`Failed to update webhook: ${updateResponse.status}`);
         } else if (webhooksToUpdate.length == 0) {
             Logger.logInfo(`No previous webhook to update, creating it...`);
             const createResponse = await this.#createWebhook();
@@ -486,7 +489,7 @@ export class NewsletterWebhookSynchronizer {
                 throw new Error(`Failed to create webhook: ${createResponse.status}`);
             }
         } else {
-            throw new Error(`Expected to get no webhooks to update or just, but got: ${webhooksToUpdate.length}. Delete it first and rerun the process`);
+            throw new Error(`Expected to get no webhooks to update or just one, but got: ${webhooksToUpdate.length}. Delete them first and rerun the process`);
         }
     }
 
@@ -495,20 +498,20 @@ export class NewsletterWebhookSynchronizer {
             method: "GET",
             headers: ButtondownApi.withAuthorizationHeaders(this.#apiKey)
         });
-        return await response.json().results;
+        return (await response.json()).results;
     }
 
     async #createWebhook() {
         return fetch(this.#webhooksUrl(), {
             method: "POST",
             headers: ButtondownApi.withJsonContentTypeAndAuthorizationHeaders(this.#apiKey),
-            body: {
+            body: JSON.stringify({
                 status: "enabled",
                 event_types: NewsletterWebhookEventTypes,
                 url: this.#webhookUrl,
                 description: this.#webhookDescription,
                 signing_key: this.#signingKey
-            }
+            })
         });
     }
 
@@ -516,13 +519,13 @@ export class NewsletterWebhookSynchronizer {
         return fetch(this.#webhooksUrl(webhookId), {
             method: "PATCH",
             headers: ButtondownApi.withJsonContentTypeAndAuthorizationHeaders(this.#apiKey),
-            body: {
+            body: JSON.stringify({
                 status: "enabled",
                 event_types: NewsletterWebhookEventTypes,
                 url: this.#webhookUrl,
                 description: this.#webhookDescription,
                 signing_key: this.#signingKey
-            }
+            })
         });
     }
 

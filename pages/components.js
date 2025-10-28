@@ -111,8 +111,8 @@ function newsletterSignUp(placement, preface, additionalContainerClasses) {
     const inputHTML = `
     <input class="p-2 border-2 border-solid border-primary-text-faded rounded w-full bg-primary focus:outline-primary-text focus:outline-2 focus:outline placeholder:text-secondary-3" 
         placeholder="you@domain.ext" type="email" name="email" autocomplete="email">
-    <span class="text-error block my-1 hidden text-sm" data-email-error>Valid email is required.</span>
-    <span class="opacity-80 text-sm"><a href="/privacy-policy.html" class="underline">Privacy policy</a></span>`
+    <span class="text-error block my-2 hidden text-sm" data-email-error>Valid email is required.</span>
+    <div class="opacity-80 text-sm my-2"><a href="/privacy-policy.html" class="underline">Privacy policy</a></div>`;
     const footerHTML = `
     <div class="italic mt-8">Join other developers learning along the way.</div>
     <div class="italic">No spam, no fluff - pure signal. Unsubscribe anytime.</div>`;

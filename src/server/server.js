@@ -50,7 +50,7 @@ export async function start(appClock = new Clock(), appScheduler = new Scheduler
     const subscriberService = new SubscriberService(subscriberRepository, subscriberApi, clock);
     const newsletterWebhookHandler = new NewsletterWebhookHandler(subscriberService, config.buttondownWebhookSigningKey);
     const newsletterWebhookSynchronizer = new NewsletterWebhookSynchronizer(config.buttondownApiUrl, config.buttondownWebhookUrl,
-        config.buttondownApiKey, config.buttondownWebhookSigningKey);
+        config.buttondownWebhookDescription, config.buttondownApiKey, config.buttondownWebhookSigningKey);
 
     const analyticsRepository = new SqliteAnalyticsRepository(db);
 
@@ -234,7 +234,10 @@ export async function start(appClock = new Clock(), appScheduler = new Scheduler
         stop();
     });
 
-    return { eventsSaver, statsViews, subscriberRepository, subscriberService, newsletterWebhookHandler };
+    return {
+        config, eventsSaver, statsViews, subscriberRepository, subscriberService,
+        newsletterWebhookHandler, newsletterWebhookSynchronizer
+    };
 }
 
 let closing = false;

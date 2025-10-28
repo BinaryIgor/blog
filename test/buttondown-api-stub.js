@@ -141,7 +141,7 @@ export function signedWebhookEvent(eventType, data, signingKey = webhookSigningK
 let _nextGetWebhooksResponse = {
     status: 200,
     body: {
-        result: [],
+        results: [],
         count: 0
     }
 };
@@ -163,14 +163,14 @@ function getWebhooksHandler(req, res) {
 
 let _nextCreateWebhookResponse = {
     status: 201,
-    expectedBody: ''
+    assertReceivedExpectedBody: (received) => { }
 };
 export function nextCreateWebhookResponse(response) {
     _nextCreateWebhookResponse = response;
 }
 function createWebhookHandler(req, res) {
     if (isAuthenticated(req)) {
-        validateRequestMatchesSetResponseValue(req.body, _nextCreateWebhookResponse.body);
+        _nextCreateWebhookResponse.assertReceivedExpectedBody(req.body);
         res.sendStatus(_nextCreateWebhookResponse.status);
     } else {
         res.sendStatus(401);
@@ -180,7 +180,7 @@ function createWebhookHandler(req, res) {
 let _nextUpdateWebhookResponse = {
     status: 200,
     expectedId: '',
-    expectedBody: ''
+    assertReceivedExpectedBody: (received) => { }
 };
 export function nextUpdateWebhookResponse(response) {
     _nextUpdateWebhookResponse = response;
@@ -188,7 +188,7 @@ export function nextUpdateWebhookResponse(response) {
 function updateWebhookHandler(req, res) {
     if (isAuthenticated(req)) {
         validateRequestMatchesSetResponseValue(req.params.id, _nextUpdateWebhookResponse.expectedId);
-        validateRequestMatchesSetResponseValue(req.body, _nextUpdateWebhookResponse.body);
+        _nextUpdateWebhookResponse.assertReceivedExpectedBody(req.body);
         res.sendStatus(_nextCreateWebhookResponse.status);
     } else {
         res.sendStatus(401);

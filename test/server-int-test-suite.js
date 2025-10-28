@@ -13,15 +13,8 @@ import {
     webhookSigningKey as buttondownWebhookSigningKey
 } from './buttondown-api-stub.js';
 
-const TMP_DIR = `/tmp/${crypto.randomUUID()}`;
-const SERVER_PORT = 10_000 + Math.ceil(Math.random() * 10_000);
-const MOCK_SERVER_PORT = 10_000 + Math.ceil(Math.random() * 10_000);
-export const SERVER_URL = `http://localhost:${SERVER_PORT}`;
-export const MOCK_SERVER_URL = `http://localhost:${MOCK_SERVER_PORT}`;
-const DB_PATH = path.join(TMP_DIR, "analytics.db");
-
 export const testClock = new TestClock();
-export const testRequests = new TestRequests(SERVER_URL);
+export let testRequests;
 
 const POSTS = [
     {
@@ -35,12 +28,18 @@ let additionalPosts = [];
 
 let postsFetchesToFail = 0;
 
+export let appConfig;
+
 let eventsSaver = null;
 let statsViews = null;
 export let subscriberRepository = null;
 export let newsletterWebhookHandler = null;
+export let newsletterWebhookSynchronizer = null;
 
-function postsHandler(req, res) {
+let TMP_DIR;
+let DB_PATH;
+
+function postsHandler(_, res) {
     if (postsFetchesToFail > 0) {
         res.sendStatus(500);
         postsFetchesToFail--;
@@ -54,12 +53,21 @@ const NoOpScheduler = {
     close() { }
 };
 
-// TODO: just int test suite
+// TODO: refactor variables scope and naming
 export const serverIntTestSuite = (testsDescription, testsCallback) => {
     describe(testsDescription, function () {
         this.slow(250);
 
         before(async function () {
+            TMP_DIR = `/tmp/${crypto.randomUUID()}`;
+            const SERVER_PORT = 10_000 + Math.ceil(Math.random() * 10_000);
+            const MOCK_SERVER_PORT = 10_000 + Math.ceil(Math.random() * 10_000);
+            const SERVER_URL = `http://localhost:${SERVER_PORT}`;
+            const MOCK_SERVER_URL = `http://localhost:${MOCK_SERVER_PORT}`;
+            DB_PATH = path.join(TMP_DIR, "analytics.db");
+
+            testRequests = new TestRequests(SERVER_URL);
+
             fs.mkdirSync(TMP_DIR);
 
             process.env['SERVER_PORT'] = SERVER_PORT;
@@ -70,6 +78,7 @@ export const serverIntTestSuite = (testsDescription, testsCallback) => {
 
             process.env["BUTTONDOWN_API_URL"] = MOCK_SERVER_URL;
             process.env["BUTTONDOWN_API_KEY"] = buttondownApiKey;
+            process.env["BUTTONDOWN_WEBHOOK_URL"] = MOCK_SERVER_URL;
             process.env["BUTTONDOWN_WEBHOOK_SIGNING_KEY"] = buttondownWebhookSigningKey;
 
             MockServer.start({
@@ -83,10 +92,10 @@ export const serverIntTestSuite = (testsDescription, testsCallback) => {
                 ]
             });
             const app = await Server.start(testClock, NoOpScheduler, { retries: 3, initialDelay: 10, backoffMultiplier: 2 });
-            ({ eventsSaver, statsViews, subscriberRepository, newsletterWebhookHandler } = app);
+            ({ config: appConfig, eventsSaver, statsViews, subscriberRepository, newsletterWebhookHandler, newsletterWebhookSynchronizer } = app);
 
             // Currently, good enough hack to wait for MockServer and Server readiness
-            await delay(500);
+            await delay(250);
             //Read posts.json
             await testRequests.reloadPosts();
         });
