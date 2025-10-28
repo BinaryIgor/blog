@@ -93,20 +93,20 @@ function toExpectedSessions(views, scrolls, pings) {
 // keep in sync with SqliteAnalyticsRepository
 function sessionDurationThreshold(duration) {
     let threshold;
-    if (duration >= 720000) {
-        threshold = 7200000;
-    } else if (duration >= 360000) {
-        threshold = 3600000;
-    } else if (duration >= 180000) {
-        threshold = 1800000;
-    } else if (duration >= 600000) {
-        threshold = 600000;
-    } else if (duration >= 30000) {
-        threshold = 300000;
-    } else if (duration >= 180000) {
-        threshold = 180000;
-    } else if (duration >= 60000) {
-        threshold = 60000;
+    if (duration >= 7200_000) {
+        threshold = 7200_000;
+    } else if (duration >= 3600_000) {
+        threshold = 3600_000;
+    } else if (duration >= 1800_000) {
+        threshold = 1800_000;
+    } else if (duration >= 600_000) {
+        threshold = 600_000;
+    } else if (duration >= 300_000) {
+        threshold = 300_000;
+    } else if (duration >= 180_000) {
+        threshold = 180_000;
+    } else if (duration >= 60_000) {
+        threshold = 60_000;
     } else {
         threshold = 0;
     }

@@ -558,9 +558,9 @@ export class SqliteAnalyticsRepository {
         const sessionsThresholdsQuery = `
         SELECT 
             CASE 
-                WHEN duration >= 720000 THEN 7200000
-                WHEN duration >= 360000 THEN 3600000
-                WHEN duration >= 180000 THEN 1800000
+                WHEN duration >= 7200000 THEN 7200000
+                WHEN duration >= 3600000 THEN 3600000
+                WHEN duration >= 1800000 THEN 1800000
                 WHEN duration >= 600000 THEN 600000
                 WHEN duration >= 300000 THEN 300000
                 WHEN duration >= 180000 THEN 180000
