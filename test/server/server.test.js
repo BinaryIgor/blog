@@ -14,7 +14,7 @@ import { TestObjects, VIEW_EVENT_TYPE, SCROLL_EVENT_TYPE, PING_EVENT_TYPE } from
 import { StatsTestFixture } from "../stats-test-fixture.js";
 import { hashedIp } from "../../src/server/web.js";
 import crypto from 'crypto';
-import * as ButtonDownApiStub from '../button-down-api-stub.js';
+import * as ButtondownApiStub from '../buttondown-api-stub.js';
 import { ApiSubscriberType, Subscriber, SubscriberState } from "../../src/server/newsletter.js";
 
 serverIntTestSuite("Server integration tests", () => {
@@ -245,7 +245,7 @@ serverIntTestSuite("Server integration tests", () => {
         const subscriberSignUpContext = TestObjects.randomSubscriberSignUpContext();
         const createResponseBody = { id: crypto.randomUUID(), source: "Some source", type: "Some type" };
 
-        ButtonDownApiStub.nextCreateSubscriberResponse({
+        ButtondownApiStub.nextCreateSubscriberResponse({
             status: 201,
             body: createResponseBody
         });
@@ -276,7 +276,7 @@ serverIntTestSuite("Server integration tests", () => {
             const subscriber = TestObjects.randomSubscriber({ state });
             await saveSubscriberInDb(subscriber);
 
-            ButtonDownApiStub.nextCreateSubscriberResponse({ status: 409 });
+            ButtondownApiStub.nextCreateSubscriberResponse({ status: 409 });
 
             const createExistingSubscriberResponse = await testRequests.postNewsletterSubscriber({
                 email: subscriber.email, ...subscriber.signUpContext
@@ -302,7 +302,7 @@ serverIntTestSuite("Server integration tests", () => {
         // to have different signedUpAt than createdAt
         testClock.moveTimeByReasonableAmount();
 
-        ButtonDownApiStub.nextGetSubscriberResponse({
+        ButtondownApiStub.nextGetSubscriberResponse({
             status: 200,
             emailOrId: unsubscribedSubscriber.email,
             body: TestObjects.randomApiSubscriber({
@@ -311,7 +311,7 @@ serverIntTestSuite("Server integration tests", () => {
                 type: unsubscribedSubscriber.externalType
             })
         });
-        ButtonDownApiStub.nextUpdateSubscriberResponse({
+        ButtondownApiStub.nextUpdateSubscriberResponse({
             status: 200,
             emailOrId: unsubscribedSubscriber.email,
             type: ApiSubscriberType.Regular,
@@ -332,20 +332,20 @@ serverIntTestSuite("Server integration tests", () => {
     });
 
     it('accepts signed webhook newsletter event', async () => {
-        const { event, signature } = ButtonDownApiStub.signedWebhookEvent("dummy_type", { someData: "some data" });
+        const { event, signature } = ButtondownApiStub.signedWebhookEvent("dummy_type", { someData: "some data" });
         const postEventResponse = await testRequests.postWebhookNewsletterEvent(event,
             { "X-Buttondown-Signature": signature });
         assertOkResponseCode(postEventResponse);
     });
 
     it('rejects unsigned webhook newsletter event', async () => {
-        const { event } = ButtonDownApiStub.signedWebhookEvent("dummy_type", { someData: "some data" });
+        const { event } = ButtondownApiStub.signedWebhookEvent("dummy_type", { someData: "some data" });
         const postEventResponse = await testRequests.postWebhookNewsletterEvent(event);
         assertUnauthenticatedResponseCode(postEventResponse);
     });
 
     it('rejects webhook newsletter event with invalid signature', async () => {
-        const { event, signature } = ButtonDownApiStub.signedWebhookEvent("dummy_type", { someData: "some data" });
+        const { event, signature } = ButtondownApiStub.signedWebhookEvent("dummy_type", { someData: "some data" });
         const postEventResponse = await testRequests.postWebhookNewsletterEvent(event,
             { "X-Buttondown-Signature": signature + "0" }
         );
@@ -353,7 +353,7 @@ serverIntTestSuite("Server integration tests", () => {
     });
 
     it('rejects webhook newsletter event signed with a different key', async () => {
-        const { event, signature } = ButtonDownApiStub.signedWebhookEvent("dummy_type", { someData: "some data" },
+        const { event, signature } = ButtondownApiStub.signedWebhookEvent("dummy_type", { someData: "some data" },
             "some diferent key"
         );
         const postEventResponse = await testRequests.postWebhookNewsletterEvent(event,

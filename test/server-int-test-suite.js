@@ -8,10 +8,10 @@ import { SqliteDb } from "../src/server/db.js";
 import * as MockServer from "./mock-server.js";
 import { TestRequests } from "./web-tests.js";
 import {
-    routes as buttonDownApiRoutes,
-    authToken as buttonDownApiKey,
-    webhookSigningKey as buttonDownWebhookSigningKey
-} from './button-down-api-stub.js';
+    routes as buttondownApiRoutes,
+    authToken as buttondownApiKey,
+    webhookSigningKey as buttondownWebhookSigningKey
+} from './buttondown-api-stub.js';
 
 const TMP_DIR = `/tmp/${crypto.randomUUID()}`;
 const SERVER_PORT = 10_000 + Math.ceil(Math.random() * 10_000);
@@ -68,13 +68,13 @@ export const serverIntTestSuite = (testsDescription, testsCallback) => {
 
             process.env['POSTS_HOST'] = MOCK_SERVER_URL;
 
-            process.env["BUTTON_DOWN_API_URL"] = MOCK_SERVER_URL;
-            process.env["BUTTON_DOWN_API_KEY"] = buttonDownApiKey;
-             process.env["BUTTON_DOWN_WEBHOOK_SIGNING_KEY"] = buttonDownWebhookSigningKey;
+            process.env["BUTTONDOWN_API_URL"] = MOCK_SERVER_URL;
+            process.env["BUTTONDOWN_API_KEY"] = buttondownApiKey;
+            process.env["BUTTONDOWN_WEBHOOK_SIGNING_KEY"] = buttondownWebhookSigningKey;
 
             MockServer.start({
                 port: MOCK_SERVER_PORT, routes: [
-                    ...buttonDownApiRoutes,
+                    ...buttondownApiRoutes,
                     {
                         path: "/posts.json",
                         method: "GET",

@@ -60,9 +60,9 @@ export async function start(appClock = new Clock(), appScheduler = new Scheduler
     const analyticsService = new AnalyticsService(analyticsRepository, eventsSaver, postsSource, config.analyticsAllowedPaths, clock);
 
     const subscriberRepository = new SqliteSubscriberRepository(db);
-    const subscriberApi = new ButtondownSubscriberApi(config.buttonDownApiUrl, config.buttonDownApiKey);
+    const subscriberApi = new ButtondownSubscriberApi(config.buttondownApiUrl, config.buttondownApiKey);
     const subscriberService = new SubscriberService(subscriberRepository, subscriberApi, clock);
-    const newsletterWebhookHandler = new NewsletterWebhookHandler(subscriberService, config.buttonDownWebhookSigningKey);
+    const newsletterWebhookHandler = new NewsletterWebhookHandler(subscriberService, config.buttondownWebhookSigningKey);
 
     const app = express();
 

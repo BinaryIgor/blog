@@ -6,7 +6,7 @@ import {
 import { TestObjects } from "../test-objects.js";
 import { ApiSubscriberType, NewsletterWebhookEventType, Subscriber, SubscriberState } from "../../src/server/newsletter.js";
 import * as Dates from "../../src/shared/dates.js";
-import * as ButtonDownApiStub from '../button-down-api-stub.js';
+import * as ButtondownApiStub from '../buttondown-api-stub.js';
 
 serverIntTestSuite('NewsletterWebhookHandler integration tests', () => {
     it(`handles ${NewsletterWebhookEventType.SUBSCRIBER_CREATED} event when subscriber exists`, async () => {
@@ -14,7 +14,7 @@ serverIntTestSuite('NewsletterWebhookHandler integration tests', () => {
         await assertSubscriberSavedInDb(existingSubscriber);
 
         const externalId = crypto.randomUUID();
-        ButtonDownApiStub.nextGetSubscriberResponse({
+        ButtondownApiStub.nextGetSubscriberResponse({
             status: 200,
             emailOrId: externalId,
             body: TestObjects.randomApiSubscriber({ id: externalId, email_address: existingSubscriber.email })
@@ -29,7 +29,7 @@ serverIntTestSuite('NewsletterWebhookHandler integration tests', () => {
     it(`handles ${NewsletterWebhookEventType.SUBSCRIBER_CREATED} event when subscriber does not exist`, async () => {
         const subscriberId = crypto.randomUUID();
         const apiSubscriber = TestObjects.randomApiSubscriber({ id: subscriberId });
-        ButtonDownApiStub.nextGetSubscriberResponse({
+        ButtondownApiStub.nextGetSubscriberResponse({
             status: 200,
             emailOrId: subscriberId,
             body: apiSubscriber
@@ -51,7 +51,7 @@ serverIntTestSuite('NewsletterWebhookHandler integration tests', () => {
 
         const externalId = crypto.randomUUID();
         const apiSubscriber = TestObjects.randomApiSubscriber({ id: externalId, email_address: subscriber.email });
-        ButtonDownApiStub.nextGetSubscriberResponse({
+        ButtondownApiStub.nextGetSubscriberResponse({
             status: 200,
             emailOrId: externalId,
             body: apiSubscriber
@@ -76,7 +76,7 @@ serverIntTestSuite('NewsletterWebhookHandler integration tests', () => {
         const subscriber = await saveSubscriberInDb(TestObjects.randomSubscriber({ externalId, state: SubscriberState.CONFIRMED }));
 
         const apiSubscriber = TestObjects.randomApiSubscriber({ id: externalId, email_address: subscriber.email, type: ApiSubscriberType.Unsubscribed });
-        ButtonDownApiStub.nextGetSubscriberResponse({
+        ButtondownApiStub.nextGetSubscriberResponse({
             status: 200,
             emailOrId: externalId,
             body: apiSubscriber
@@ -113,7 +113,7 @@ serverIntTestSuite('NewsletterWebhookHandler integration tests', () => {
             id: externalId, email_address: subscriber.email,
             last_click_date: "2025-10-27T22:00:00+00:00"
         });
-        ButtonDownApiStub.nextGetSubscriberResponse({
+        ButtondownApiStub.nextGetSubscriberResponse({
             status: 200,
             emailOrId: externalId,
             body: apiSubscriber
@@ -137,7 +137,7 @@ serverIntTestSuite('NewsletterWebhookHandler integration tests', () => {
             id: externalId, email_address: subscriber.email,
             last_open_date: "2025-10-28T22:11:00+00:00"
         });
-        ButtonDownApiStub.nextGetSubscriberResponse({
+        ButtondownApiStub.nextGetSubscriberResponse({
             status: 200,
             emailOrId: externalId,
             body: apiSubscriber
@@ -168,5 +168,5 @@ async function assertSubscriberDoesNotExistInDb(email) {
 }
 
 function signedSubscriberEvent(type, subscriberId) {
-    return ButtonDownApiStub.signedWebhookEvent(type, { subscriber: subscriberId });
+    return ButtondownApiStub.signedWebhookEvent(type, { subscriber: subscriberId });
 }
