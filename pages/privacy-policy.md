@@ -1,7 +1,7 @@
 <h1>Privacy Policy</h1>    
 <div class="mt-2 my-0 text-2xl text-center text-secondary-3">2025-10-29</div>
 
-<p class="mt-2 mb-16 italic">In short: I do not do anything weird with your data. It is being processed in the absolute minimum way possible and I do my best to keep it secure.</p>
+<p class="mt-4 mb-16 italic">In short: I do not do anything weird with your data. It is being processed in the absolute minimum way possible and I do my best to keep it secure.</p>
 
 **If you subscribe to my newsletter**,  I have your email address as given by you. This address is used solely to send you messages related to this newsletter - I do not share it with any third party except as necessary to make the newsletter functionality possible. For that, there is my email platform provider - [Buttondown](https://buttondown.com/); they also know your email as they provide the infrastructure and software that allows me to manage subscriptions and send you emails. Additionally, I store your email address in my own database, for analytics and redundancy purposes. As described below, my blog is hosted on the [DigitalOcean](https://www.digitalocean.com/) infrastructure. 
 
