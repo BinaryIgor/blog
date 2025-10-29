@@ -47,16 +47,8 @@
         localStorage.setItem("NEWSLETTER_SUBSCRIBER", true);
     }
 
-    // TODO: eliminate this feature flag!
-    function isNewsletterFeatureEnabled() {
-        return localStorage.getItem("NEWSLETTER_FEATURE_ENABLED");
-    }
-
     function isNewsletterSubscriber() {
-        if (isNewsletterFeatureEnabled()) {
-            return localStorage.getItem("NEWSLETTER_SUBSCRIBER");
-        }
-        return true;
+        return localStorage.getItem("NEWSLETTER_SUBSCRIBER");
     }
 
     function setUpNewsletterSignUps() {
@@ -82,11 +74,6 @@
             } else {
                 signUp.classList.add("hidden");
             }
-            return;
-        }
-
-        if (!isNewsletterFeatureEnabled() && placement == 'LANDING') {
-            signUp.innerHTML = "Work in progress, launching soon! If you want to join already, shoot me an email at <strong>igor@binaryigor.com</strong> and I will add you to the waitlist.";
             return;
         }
 
