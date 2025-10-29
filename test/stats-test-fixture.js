@@ -2,7 +2,7 @@ import { Stats, ViewsBySource, PageStats, SessionsStats } from "../src/server/an
 import { randomBoolean, randomElement, randomElementOrNull, randomNumber, sortByField } from "./test-utils.js";
 import { SCROLL_EVENT_TYPE, PING_EVENT_TYPE, TestObjects } from "./test-objects.js";
 import { Event, PingStats, PingersStats } from "../src/server/analytics.js";
-import { SubscribersStats, SubscribersByPlacementStats, SubscribersBySourceStats } from "../src/server/shared.js";
+import { SubscribersStats } from "../src/server/shared.js";
 
 export const StatsTestFixture = {
     prepareRandomEvents({ fromTimestamp, toTimestamp, visitorIds, sessionIds, ipHashes, sources, mediums, campaigns, refs, paths, eventType, count }) {
@@ -118,12 +118,8 @@ function sessionDurationThreshold(duration) {
         threshold = 7200_000;
     } else if (duration >= 3600_000) {
         threshold = 3600_000;
-    } else if (duration >= 1800_000) {
-        threshold = 1800_000;
-    } else if (duration >= 600_000) {
-        threshold = 600_000;
-    } else if (duration >= 300_000) {
-        threshold = 300_000;
+    } else if (duration >= 900_000) {
+        threshold = 900_000;
     } else if (duration >= 180_000) {
         threshold = 180_000;
     } else if (duration >= 60_000) {
