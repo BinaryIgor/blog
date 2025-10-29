@@ -564,8 +564,15 @@ export class NewsletterWebhookHandler {
             .update(payload)
             .digest("hex");
 
-        return signature.length == expectedSignature.length &&
+        const asExpected = signature.length == expectedSignature.length &&
             crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expectedSignature));
+        if (asExpected) {
+            return true;
+        }
+
+        Logger.logWarn(`Expected ${expectedSignature} signature, but got ${signature}. Event:`, payload.toString());
+        
+        return false;
     }
 
     async handle(rawEvent, signatureHeader) {
