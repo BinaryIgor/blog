@@ -149,6 +149,7 @@ export async function start(appClock = new Clock(), appScheduler = new Scheduler
     app.post("/internal/synchronize-newsletter-webhook", async (_, res) => {
         try {
             await newsletterWebhookSynchronizer.synchronize();
+            res.sendStatus(200);
         } catch (e) {
             Logger.logError(`Failed to synchronize newsletter webhook`, e);
             res.sendStatus(500);
