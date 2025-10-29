@@ -192,12 +192,12 @@ async function prepareEventsAndSubscribersReturningExpectedStats(fromTimestamp, 
         placements: ["POST_MID", "LANDING"],
         count: 20
     });
-    await createSubscribers(subscribers);
+    await saveSubscribers(subscribers);
 
     if (!allTimeStats) {
         const { events, subscribers } = outsideTimePeriodRandomEventsAndSubscribers(fromTimestamp, toTimestamp);
         await analyticsRepository.saveEvents(events);
-        await createSubscribers(subscribers);
+        await saveSubscribers(subscribers);
     }
 
     return StatsTestFixture.eventsToExpectedStats({ views, scrolls, pings, subscribers });
@@ -245,7 +245,7 @@ async function assertStatsViewOfPeriodExists(period) {
     return actualStatsView[0];
 }
 
-async function createSubscribers(subscribers) {
+async function saveSubscribers(subscribers) {
     for (let s of subscribers) {
         await subscriberRepository.createReturningExisting(s);
     }

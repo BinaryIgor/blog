@@ -378,17 +378,17 @@
         }
 
         function subscribersComponent(stats, id) {
-            const byPlacementsHTML = stats.byPlacementStats.map(s => {
-                const createdShare = formattedPercentage(s.created, stats.created);
-                const confirmedShare = formattedPercentage(s.confirmed, stats.confirmed);
-                return `<div>${s.placement}: ${createdShare}/${confirmedShare}(%)
+            const byPlacementsHTML = stats.byPlacement.map(s => {
+                const createdPercentage = stats.created > 0 ? formattedPercentage(s.created, stats.created) : '-';
+                const confirmedPercentage = stats.confirmed > 0 ? formattedPercentage(s.confirmed, stats.confirmed) : '-';
+                return `<div>${s.placement}: ${createdPercentage}/${confirmedPercentage}(%)
                 </div>`})
                 .join("\n");
 
-            const bySourcesHTML = stats.bySourceStats.map(s => {
-                const createdShare = formattedPercentage(s.created, stats.created);
-                const confirmedShare = formattedPercentage(s.confirmed, stats.confirmed);
-                return `<div>${s.source}: ${createdShare}/${confirmedShare}(%)
+            const bySourcesHTML = stats.bySource.map(s => {
+                const createdPercentage = stats.created > 0 ? formattedPercentage(s.created, stats.created) : '-';
+                const confirmedPercentage = stats.confirmed > 0 ? formattedPercentage(s.confirmed, stats.confirmed) : '-';
+                return `<div>${s.source}: ${createdPercentage}/${confirmedPercentage}(%)
                 </div>`})
                 .join("\n");
 
@@ -396,7 +396,7 @@
             <div id=${id}><span class="cursor-pointer underline">Subscribers:</span> ${stats.created}/${stats.confirmed}</div>
             <div class="mt-1 mb-2">
               <div>Created: ${stats.created}</div>
-              <div>Confirmed: ${stats.created}</div>
+              <div>Confirmed: ${stats.confirmed}</div>
               <div>Unsubscribed: ${stats.unsubscribed}</div>
               <div class="my-1">
                 ${byPlacementsHTML}

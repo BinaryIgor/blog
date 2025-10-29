@@ -1,5 +1,7 @@
 FROM node:20-alpine
 
+ENV NODE_ENV=production
+
 COPY tmp/ /app
 COPY run_server_app.sh /app/run_app.sh
 

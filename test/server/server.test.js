@@ -1,7 +1,7 @@
 import { assert, expect } from "chai";
 import {
-    serverIntTestSuite, randomAllowedPostPath, allowedPostPaths,
-    testClock, testRequests, failNextNPostsFetches, addPosts,
+    serverIntTestSuite,
+    testClock, testRequests,
     assertAnalyticsEventsSavedAndStatsViewCalculated,
     assertAnalyticsEventsSaved,
     assertStatsViewsCalculated,
@@ -15,6 +15,7 @@ import { StatsTestFixture } from "../stats-test-fixture.js";
 import { hashedIp } from "../../src/server/web.js";
 import crypto from 'crypto';
 import * as ButtondownApiStub from '../buttondown-api-stub.js';
+import * as PostsApiStub from '../posts-api-stub.js';
 import { ApiSubscriberType, Subscriber, SubscriberState } from "../../src/server/newsletter.js";
 import { MAX_EMAIL_LENGTH } from "../../src/server/newsletter.js";
 import { SubscribersStats } from "../../src/server/shared.js";
@@ -93,7 +94,7 @@ serverIntTestSuite("Server integration tests", () => {
     it('rejects too frequent pings per visitor id, path', async () => {
         const visitor1Id = crypto.randomUUID();
         const visitor2Id = crypto.randomUUID();
-        const [path1, path2] = allowedPostPaths();
+        const [path1, path2] = PostsApiStub.allowedPostPaths();
 
         await assertPingEventAdded(visitor1Id, path1);
         await assertPingEventAdded(visitor1Id, path2);
@@ -137,7 +138,7 @@ serverIntTestSuite("Server integration tests", () => {
         const source1Url = "https://google.com?search=sth";
         const source2Url = "https://binaryigor.com";
 
-        const allowedPostPath = randomAllowedPostPath();
+        const allowedPostPath = PostsApiStub.randomAllowedPostPath();
 
         const ip1View1 = TestObjects.randomEvent({
             ipHash: ip1,
@@ -226,7 +227,7 @@ serverIntTestSuite("Server integration tests", () => {
 
     it(`allows to trigger post reload, retrying if necessary`, async () => {
         // 3 retries in test config. Next reload tests eventually successful reload
-        failNextNPostsFetches(5);
+        PostsApiStub.failNextNPostsFetches(5);
 
         const failedReload = await testRequests.reloadPosts();
 
@@ -234,7 +235,7 @@ serverIntTestSuite("Server integration tests", () => {
 
         const additionalPosts = ["a", "b"];
 
-        addPosts(additionalPosts);
+        PostsApiStub.setAdditionalPosts(additionalPosts);
 
         const successfulReload = await testRequests.reloadPosts();
 
@@ -268,7 +269,7 @@ serverIntTestSuite("Server integration tests", () => {
         assertSubscriberSavedInDb(expectedSubscriber);
 
 
-        //and when trying to create existing subscriber, return 409
+        // and when trying to create existing subscriber, return 409
         const createExistingSubscriberResponse = await testRequests.postNewsletterSubscriber({
             email: subscriberEmail, ...subscriberSignUpContext
         });
@@ -299,8 +300,6 @@ serverIntTestSuite("Server integration tests", () => {
     it('resubscribes previous subscriber', async () => {
         const unsubscribedSubscriber = TestObjects.randomSubscriber({ state: SubscriberState.UNSUBSCRIBED, externalType: ApiSubscriberType.Unsubscribed });
         await saveSubscriberInDb(unsubscribedSubscriber);
-        // to have different signedUpAt than createdAt
-        testClock.moveTimeByReasonableAmount();
 
         ButtondownApiStub.nextGetSubscriberResponse({
             status: 200,
@@ -353,7 +352,7 @@ serverIntTestSuite("Server integration tests", () => {
     });
 
     it('rejects webhook newsletter event signed with a different key', async () => {
-        const { event, signature } = ButtondownApiStub.signedWebhookEvent("dummy_type", { someData: "some data" },
+        const { event, signature } = ButtondownApiStub.signedWebhookEvent("dummy_type", { someData: "some data of different signature" },
             "some diferent key"
         );
         const postEventResponse = await testRequests.postWebhookNewsletterEvent(event,

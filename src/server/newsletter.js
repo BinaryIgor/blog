@@ -3,7 +3,7 @@ import * as Logger from "../shared/logger.js";
 import * as Dates from '../shared/dates.js';
 import * as Promises from '../shared/promises.js';
 import { snakeCasedObject } from './db.js';
-import { createHmac, timingSafeEqual } from 'crypto';
+import crypto from 'crypto';
 import { SubscribersStats, SubscribersByPlacementStats, SubscribersBySourceStats } from './shared.js';
 
 export const MAX_EMAIL_LENGTH = 125;
@@ -133,12 +133,12 @@ export class SubscriberService {
     }
 
     async onSubscriberDeleted(externalId) {
-        const subscriber = await this.#repository.ofExternalId(externalId);
-        if (subscriber) {
-            Logger.logInfo('Deleting subscriber:', subscriber);
-            await this.#repository.deleteOfEmail(subscriber.email);
+        const dbSubscriber = await this.#repository.ofExternalId(externalId);
+        if (dbSubscriber) {
+            Logger.logInfo('Deleting subscriber:', dbSubscriber);
+            await this.#repository.deleteOfEmail(dbSubscriber.email);
         } else {
-            Logger.logWarn('Received non existing subscribed deletion; ignoring it', subscriber);
+            Logger.logWarn('Received non existing subscriber deletion; ignoring it', dbSubscriber);
         }
     }
 
@@ -550,12 +550,12 @@ export class NewsletterWebhookHandler {
         if (!signature) {
             return false;
         }
-        const expectedSignature = createHmac('sha256', this.#signingKey)
+        const expectedSignature = crypto.createHmac('sha256', this.#signingKey)
             .update(payload)
             .digest("hex");
 
         return signature.length == expectedSignature.length &&
-            timingSafeEqual(Buffer.from(signature), Buffer.from(expectedSignature));
+            crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expectedSignature));
     }
 
     async handle(rawEvent, signatureHeader) {

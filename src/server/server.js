@@ -264,14 +264,14 @@ export function stop(exit = true) {
             if (exit) {
                 process.exit(0);
             } else {
-                Logger.logInfo("Exit disabled - process is owned somwhere in the upstream");
+                Logger.logInfo("Exit disabled - process is owned somewhere upstream");
             }
         } catch (e) {
             Logger.logError("Problem when stopping the app - exiting with the error code", e);
             if (exit) {
                 process.exit(1);
             } else {
-                Logger.logInfo("Exit disabled - process is owned somwhere in the upstream");
+                Logger.logInfo("Exit disabled - process is owned somewhere upstream");
             }
         }
     });

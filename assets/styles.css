@@ -126,23 +126,6 @@
 
     /* ==chrome before 121, safari scroll== */
 
-    /* mainly to disable autofills on chrome */
-    /* input:-webkit-autofill,
-    input:-webkit-autofill:hover,
-    input:-webkit-autofill:focus,
-    textarea:-webkit-autofill,
-    textarea:-webkit-autofill:hover,
-    textarea:-webkit-autofill:focus,
-    select:-webkit-autofill,
-    select:-webkit-autofill:hover,
-    select:-webkit-autofill:focus {
-        -webkit-text-fill-color: var(--primary-text-color) !important;
-        -webkit-box-shadow: 0 0 0px 1000px var(--primary-color) inset !important;
-        box-shadow: 0 0 0px 1000px var(--primary-color) inset;
-        transition: background-color 1000s ease-in-out 0s;
-        caret-color: var(--primary-text-color);
-    } */
-
     /* Keep in sync with other inputs - Newsletter mainly */
     input:-webkit-autofill,
     input:-webkit-autofill:hover,
@@ -198,10 +181,6 @@
 
 @utility border-primary-text-faded {
     border-color: var(--primary-text-color-faded);
-}
-
-@utility bg-primary-text-faded {
-    background-color: var(--primary-text-color-faded);
 }
 
 @utility outline-primary-text {

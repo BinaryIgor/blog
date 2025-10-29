@@ -76,7 +76,7 @@ export class SqliteDb {
     #dbs;
     #nextDbIdx = 0;
 
-    constructor(filePath, connections = 3) {
+    constructor(filePath, connections = 5) {
         if (!connections || connections < 1 || connections > 10) {
             throw new Error(`1 - 10 connections are supported but ${connections} were requested`);
         }
@@ -89,7 +89,7 @@ export class SqliteDb {
         return db;
     }
 
-    static async initInstance(filePath, connections = 3) {
+    static async initInstance(filePath, connections = 5) {
         const db = new SqliteDb(filePath, connections);
         await db.init();
         return db;
