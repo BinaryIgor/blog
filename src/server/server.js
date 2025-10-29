@@ -130,7 +130,7 @@ export async function start(appClock = new Clock(), appScheduler = new Scheduler
                 res.sendStatus(401);
             }
         } catch (e) {
-            Logger.logError(`Failed to handle webhook event`, req.body, e);
+            Logger.logError(`Failed to handle webhook event`, JSON.stringify(req.body), e);
             res.sendStatus(500);
         }
     });
