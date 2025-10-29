@@ -10,7 +10,7 @@ export async function envVarOrThrow(key) {
         throw new Error(`${key} ENV is required but wasn't supplied`);
     }
     if (value.startsWith("file:")) {
-        return await textFileContent(value.replace("file:", ""));
+        return (await textFileContent(value.replace("file:", ""))).trim();
     }
     return value;
 }

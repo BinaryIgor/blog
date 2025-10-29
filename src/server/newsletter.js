@@ -498,7 +498,17 @@ export class NewsletterWebhookSynchronizer {
             method: "GET",
             headers: ButtondownApi.withAuthorizationHeaders(this.#apiKey)
         });
-        return (await response.json()).results;
+        return (await response.json()).results.map(w => ({
+            ...w,
+            signing_key: this.#obfuscatedSecret(w.signing_key)
+        }));
+    }
+
+    #obfuscatedSecret(secret) {
+        if (!secret || secret.length <= 4) {
+            return secret;
+        }
+        return secret[0] + secret[1] + "****" + secret[secret.length - 2] + secret[secret.length - 1];
     }
 
     async #createWebhook() {
