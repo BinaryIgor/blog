@@ -103,19 +103,20 @@ export function newsletterSignUpLanding() {
 
 // TODO: refactor, commonize
 function newsletterSignUp(placement, preface, additionalContainerClasses) {
-    let headerMessage = `Get the <span class="font-bold">Binary Log</span> Newsletter - deep dives, discoveries and distilled insights from my latest work:`;
+    let headerMessage = `Get the <span class="font-bold">Binary Log</span> Newsletter - deep and broad dives, discoveries and distilled insights for driven developers who care about the craft:`;
     if (preface) {
         headerMessage = preface + " " + headerMessage;
     }
     const headerHTML = `<div class="mb-2">${headerMessage}</div>`;
     const inputHTML = `
-    <input class="p-2 border-2 border-solid border-primary-text-faded rounded w-full bg-primary focus:outline-primary-text focus:outline-2 focus:outline placeholder:text-secondary-3" 
+    <input class="p-2 border-2 border-solid border-primary-text-faded rounded w-full bg-primary focus:outline-primary-text-faded focus:outline-1 focus:outline placeholder:text-secondary-3" 
         placeholder="you@domain.ext" type="email" name="email" autocomplete="email">
-    <span class="text-error block my-1 hidden text-sm" data-email-error>Valid email is required.</span>
-    <span class="opacity-80 text-sm"><a href="/privacy-policy.html" class="underline">Privacy policy</a></span>`
+    <span class="text-error block my-2 hidden text-sm" data-email-error>Valid email is required.</span>
+    <div class="opacity-80 text-sm my-2"><a href="/privacy-policy.html" class="underline">Privacy Policy</a></div>`;
     const footerHTML = `
-    <div class="italic mt-8">Join other developers learning along the way.</div>
-    <div class="italic">No spam, no fluff - pure signal. Unsubscribe anytime.</div>`;
+    <div class="italic mt-8">
+        <div>No spam, no fluff - pure signal. Unsubscribe anytime.</div>
+    </div>`;
 
     let buttonsHTML;
     if (placement == NewsletterSignUpPlacement.LANDING) {

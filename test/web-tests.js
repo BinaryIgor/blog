@@ -1,46 +1,72 @@
-import request from 'supertest';
 import { assert } from "chai";
 
 export class TestRequests {
 
+    #serverUrl;
+
     constructor(serverUrl) {
-        this.serverUrl = serverUrl;
+        this.#serverUrl = serverUrl;
     }
 
-    async postEvent(request, headers={}) {
-        let req = this.#appRequest()
-            .post("/analytics/events");
-
-        for (let [k, v] of Object.entries(headers)) {
-            req.set(k, v);
-        }
-
-        return req.send(request);
+    async postEvent(request, headers = {}) {
+        return fetch(`${this.#serverUrl}/analytics/events`, {
+            method: "POST",
+            body: JSON.stringify(request),
+            headers: { ...headers, "content-type": "application/json" }
+        });
     }
 
     async getStats() {
-        return this.#appRequest().get("/meta/stats");
+        return fetch(`${this.#serverUrl}/meta/stats`);
     }
 
-    async reloadPosts() { 
-        return this.#appRequest().post("/internal/reload-posts");
+    async reloadPosts() {
+        return fetch(`${this.#serverUrl}/internal/reload-posts`, { method: "POST" });
     }
 
-    #appRequest() {
-        return request(this.serverUrl);
+    postNewsletterSubscriber(request, headers = {}) {
+        return fetch(`${this.#serverUrl}/newsletter/subscribers`, {
+            method: "POST",
+            body: JSON.stringify(request),
+            headers: { ...headers, "content-type": "application/json" }
+        });
+    }
+
+    postWebhookNewsletterEvent(request, headers = {}) {
+        return fetch(`${this.#serverUrl}/webhooks/newsletter`, {
+            method: "POST",
+            body: request,
+            headers: { ...headers, "content-type": "application/json" }
+        });
     }
 }
 
-export function assertJsonResponse(requestResponse, bodyAssert, responseCode = 200) {
+export async function assertJsonResponse(requestResponse, bodyAssert, responseCode = 200) {
     assertResponseCode(requestResponse, responseCode);
-    assert.isTrue(requestResponse.header['content-type'].startsWith("application/json"));
-    bodyAssert(requestResponse.body)
+    assert.isTrue(requestResponse.headers.get('content-type').startsWith("application/json"));
+    bodyAssert(await requestResponse.json())
 }
 
 export function assertResponseCode(requestResponse, responseCode) {
-    assert.equal(requestResponse.statusCode, responseCode);
+    assert.equal(requestResponse.status, responseCode);
 }
 
 export function assertOkResponseCode(requestResponse) {
     assertResponseCode(requestResponse, 200);
+}
+
+export function assertCreatedResponseCode(requestResponse) {
+    assertResponseCode(requestResponse, 201);
+}
+
+export function assertConflictResponseCode(requestResponse) {
+    assertResponseCode(requestResponse, 409);
+}
+
+export function assertUnprocessableContentResponseCode(requestResponse) {
+    assertResponseCode(requestResponse, 422);
+}
+
+export function assertUnauthenticatedResponseCode(requestResponse) {
+    assertResponseCode(requestResponse, 401);
 }

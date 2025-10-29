@@ -13,7 +13,7 @@
     {{ navigation.html }}
 
     <div id="get-newsletter-button"
-        class="bg-primary fixed bottom-4 right-4 border-2 border-solid border-primary-text-faded rounded p-4 cursor-pointer">
+        class="hidden bg-primary fixed bottom-4 right-4 border-2 border-solid border-primary-text-faded rounded p-4 cursor-pointer">
         <span class="font-bold">BL</span> Newsletter
     </div>
     {{ .js: newsletterSignUpPostFloating() }}
@@ -207,9 +207,8 @@
 
         function setUpFloatingNewsletterButton() {
             const getNewsletterButton = document.getElementById("get-newsletter-button");
-            if (isNewsletterSubscriber()) {
-                getNewsletterButton.classList.add("hidden");
-            } else {
+            if (!isNewsletterSubscriber()) {
+                getNewsletterButton.classList.remove("hidden");
                 getNewsletterButton.onclick = () => document.dispatchEvent(new CustomEvent("newsletter-modal-show"));
                 document.addEventListener("newsletter-modal-signed-up", () => getNewsletterButton.classList.add("hidden"));
                 document.addEventListener("newsletter-signed-up", () => getNewsletterButton.classList.add("hidden"));

@@ -1,8 +1,12 @@
-import bodyParser from "body-parser";
 import express from "express";
 import cors from "cors";
 import { AnalyticsService, DeferredEventsSaver, StatsViews, SqliteAnalyticsRepository, Event } from "./analytics.js";
-import { SubscriberService, SqliteSubscriberRepository, Subscriber, SubscriberSignUpContext, SubscribeResult, ButtondownSubscriberApi, ButtondownWebhookHandler } from "./newsletter.js";
+import {
+    SubscriberService, SqliteSubscriberRepository, Subscriber, SubscriberSignUpContext, ButtondownSubscriberApi, NewsletterWebhookHandler,
+    SubscriberExistsError, SubscriberValidationError,
+    NewsletterWebhookSynchronizer
+} from "./newsletter.js";
+import { subscribersStatsSupplierFactory } from './shared.js';
 import { Scheduler } from "./scheduler.js";
 import * as Logger from "../shared/logger.js";
 
@@ -41,9 +45,16 @@ export async function start(appClock = new Clock(), appScheduler = new Scheduler
     const postsSource = new PostsSource(config.postsPath, postsRetryConfig);
     postsSource.schedule(scheduler, config.postsReadInterval);
 
+    const subscriberRepository = new SqliteSubscriberRepository(db);
+    const subscriberApi = new ButtondownSubscriberApi(config.buttondownApiUrl, config.buttondownApiKey);
+    const subscriberService = new SubscriberService(subscriberRepository, subscriberApi, clock);
+    const newsletterWebhookHandler = new NewsletterWebhookHandler(subscriberService, config.buttondownWebhookSigningKey);
+    const newsletterWebhookSynchronizer = new NewsletterWebhookSynchronizer(config.buttondownApiUrl, config.buttondownWebhookUrl,
+        config.buttondownWebhookDescription, config.buttondownApiKey, config.buttondownWebhookSigningKey);
+
     const analyticsRepository = new SqliteAnalyticsRepository(db);
 
-    const statsViews = new StatsViews(analyticsRepository, db, clock);
+    const statsViews = new StatsViews(analyticsRepository, subscribersStatsSupplierFactory(subscriberRepository), db, clock);
     statsViews.schedule(scheduler, {
         shorterPeriodsViewsInterval: config.statsViewsCalculateShorterPeriodsInterval,
         longerPeriodsViewsInterval: config.statsViewsCalculateLongerPeriodsInterval,
@@ -57,14 +68,15 @@ export async function start(appClock = new Clock(), appScheduler = new Scheduler
 
     const analyticsService = new AnalyticsService(analyticsRepository, eventsSaver, postsSource, config.analyticsAllowedPaths, clock);
 
-    const subscriberRepository = new SqliteSubscriberRepository(db);
-    const subscriberApi = new ButtondownSubscriberApi(config.buttonDownApiUrl, config.buttonDownApiKey);
-    const subscriberService = new SubscriberService(subscriberRepository, subscriberApi, clock);
-    const newsletterWebhookHandler = new ButtondownWebhookHandler(subscriberService);
-
     const app = express();
 
-    app.use(bodyParser.json());
+    app.use((req, res, next) => {
+        if (req.originalUrl.startsWith("/webhooks/")) {
+            express.raw({ type: "application/json" })(req, res, next);
+        } else {
+            express.json()(req, res, next);
+        }
+    });
 
     const corsOptions = {
         origin: config.corsAllowedOrigin,
@@ -94,34 +106,39 @@ export async function start(appClock = new Clock(), appScheduler = new Scheduler
             const { email, placement, visitorId, sessionId, source, medium, campaign, ref } = req.body;
             const context = new SubscriberSignUpContext(visitorId, sessionId, source, medium, campaign, ref, placement);
             const subscriber = Subscriber.newOne(email, clock.nowTimestamp(), context);
-            const result = await subscriberService.subscribe(subscriber);
-            if (result == SubscribeResult.SUBSCRIBER_CREATED) {
-                res.sendStatus(201);
-            } else if (result == SubscribeResult.SUBSCRIBER_EXISTS) {
+            await subscriberService.subscribe(subscriber);
+            res.sendStatus(201);
+        } catch (e) {
+            if (e instanceof SubscriberExistsError) {
                 res.sendStatus(409);
-            } else if (result == SubscribeResult.INVALID_SUBSCRIBER_DATA) {
+            } else if (e instanceof SubscriberValidationError) {
                 res.sendStatus(422);
             } else {
+                Logger.logError('Failed to create subscriber:', req.body, e);
                 res.sendStatus(500);
             }
-        } catch (e) {
-            Logger.logError(`Failed to create subscriber ${JSON.stringify(req.body)}:`, e);
-            res.sendStatus(500);
         }
     });
 
     app.post("/webhooks/newsletter", async (req, res) => {
         try {
-            // const authorization = req.header("Authorization") ?? "";
-            // const token = authorization.replaceAll("Token ", "");
-            // if (config.buttonDownApiKey == token) {
-            //     await newsletterWebhookHandler.handle(req.body);
-            // } else {
-            //     Logger.logWarn(`Got invalid auth header (${authorization}) on /webhooks/newsletter endpoint - ignoring it. Other headers:`, req.headers);
-            //     res.sendStatus(404);
-            // }
-            Logger.logInfo(`Got event on /webhooks/newsletter endpoint. Headers:`, req.headers);
-            Logger.logInfo(`Got event on /webhooks/newsletter endpoint. Body:`, req.body);
+            const signature = req.header("X-Buttondown-Signature") ?? "";
+            if (await newsletterWebhookHandler.handle(req.body, signature)) {
+                res.sendStatus(200);
+            } else {
+                Logger.logWarn("Invalid signature for webhook - rejecting it. Headers: ", req.headers);
+                res.sendStatus(401);
+            }
+        } catch (e) {
+            Logger.logError(`Failed to handle webhook event`, req.body, e);
+            res.sendStatus(500);
+        }
+    });
+
+    app.post("/internal/webhooks/newsletter", async (req, res) => {
+        try {
+            const { event_type, data } = req.body;
+            await newsletterWebhookHandler.handleEvent(event_type, data);
             res.sendStatus(200);
         } catch (e) {
             Logger.logError(`Failed to handle webhook event ${JSON.stringify(req.body)}:`, e);
@@ -129,7 +146,16 @@ export async function start(appClock = new Clock(), appScheduler = new Scheduler
         }
     });
 
-    app.get("/meta/stats", async (req, res) => {
+    app.post("/internal/synchronize-newsletter-webhook", async (_, res) => {
+        try {
+            await newsletterWebhookSynchronizer.synchronize();
+        } catch (e) {
+            Logger.logError(`Failed to synchronize newsletter webhook`, e);
+            res.sendStatus(500);
+        }
+    });
+
+    app.get("/meta/stats", async (_, res) => {
         try {
             const stats = await statsViews.views();
             res.send(stats);
@@ -139,7 +165,7 @@ export async function start(appClock = new Clock(), appScheduler = new Scheduler
         }
     });
 
-    app.get("/meta/posts", async (req, res) => {
+    app.get("/meta/posts", async (_, res) => {
         try {
             res.send(postsSource.knownPosts());
         } catch (e) {
@@ -208,11 +234,14 @@ export async function start(appClock = new Clock(), appScheduler = new Scheduler
         stop();
     });
 
-    return { eventsSaver, statsViews };
+    return {
+        config, eventsSaver, statsViews, subscriberRepository, subscriberService,
+        newsletterWebhookHandler, newsletterWebhookSynchronizer
+    };
 }
 
 let closing = false;
-export function stop() {
+export function stop(exit = true) {
     if (!server || closing) {
         return;
     }
@@ -232,10 +261,18 @@ export function stop() {
 
             Logger.logInfo("Db closed as well - the whole processed is about to exit successfully");
 
-            process.exit(0);
+            if (exit) {
+                process.exit(0);
+            } else {
+                Logger.logInfo("Exit disabled - process is owned somewhere upstream");
+            }
         } catch (e) {
             Logger.logError("Problem when stopping the app - exiting with the error code", e);
-            process.exit(1);
+            if (exit) {
+                process.exit(1);
+            } else {
+                Logger.logInfo("Exit disabled - process is owned somewhere upstream");
+            }
         }
     });
 

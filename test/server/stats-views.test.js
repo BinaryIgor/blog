@@ -6,13 +6,15 @@ import fs from "fs";
 import crypto from 'crypto';
 import path from 'path';
 import {
-    SqliteAnalyticsRepository, StatsView, StatsViews,
+    SqliteAnalyticsRepository, Stats, StatsView, StatsViews,
     LAST_DAY_STATS_VIEW, LAST_7_DAYS_STATS_VIEW, LAST_30_DAYS_STATS_VIEW,
     LAST_90_DAYS_STATS_VIEW, LAST_180_DAYS_STATS_VIEW, LAST_365_DAYS_STATS_VIEW, ALL_TIME_STATS_VIEW
 } from "../../src/server/analytics.js";
 import { TestClock, randomNumber } from "../test-utils.js";
 import { TestObjects, VIEW_EVENT_TYPE, SCROLL_EVENT_TYPE, PING_EVENT_TYPE } from "../test-objects.js";
 import { StatsTestFixture } from "../stats-test-fixture.js";
+import { SqliteSubscriberRepository } from '../../src/server/newsletter.js';
+import { SubscribersStats, subscribersStatsSupplierFactory } from "../../src/server/shared.js";
 
 const DAY_SECONDS = 24 * 60 * 60;
 const SEVEN_DAYS_SECONDS = DAY_SECONDS * 7;
@@ -26,22 +28,22 @@ const DB_PATH = path.join("/tmp", `${crypto.randomUUID()}.db`);
 const db = new SqliteDb(DB_PATH);
 
 const analyticsRepository = new SqliteAnalyticsRepository(db);
-
+const subscriberRepository = new SqliteSubscriberRepository(db);
 const clock = new TestClock();
 
-const statsViews = new StatsViews(analyticsRepository, db, clock);
+const statsViews = new StatsViews(analyticsRepository, subscribersStatsSupplierFactory(subscriberRepository), db, clock);
 
 describe("StatsViews tests", function () {
     this.slow(250);
 
-    before(async () => {
+    before(async function () {
         await db.init();
         await initSchema(db);
     });
 
-    afterEach(async () => {
+    afterEach(async function () {
         await deleteEvents();
-        await deleteViews();
+        await deleteSubscribers();
     });
 
     after(() => {
@@ -52,18 +54,19 @@ describe("StatsViews tests", function () {
         it(`saves views of ${testCase.viewPeriod} period`, async () => {
             const toTimestamp = clock.nowTimestamp();
             const fromTimestamp = timestampMovedBySeconds(toTimestamp, -testCase.beforeNowOffset);
-            const expectedStats1 = await prepareEventsReturningExpectedStats(fromTimestamp, toTimestamp);
+            const expectedStats1 = await prepareEventsAndSubscribersReturningExpectedStats(fromTimestamp, toTimestamp);
 
             await triggerLastPeriodsViewsSave();
 
             await assertStatsViewEqual(testCase.viewPeriod, expectedStats1);
 
             await deleteEvents();
+            await deleteSubscribers();
 
             const secondsToMoveTime = randomNumber(1, 100_000);
             clock.moveTimeBy(secondsToMoveTime);
 
-            const expectedStats2 = await prepareEventsReturningExpectedStats(
+            const expectedStats2 = await prepareEventsAndSubscribersReturningExpectedStats(
                 timestampMovedBySeconds(fromTimestamp, secondsToMoveTime),
                 timestampMovedBySeconds(toTimestamp, secondsToMoveTime));
 
@@ -75,11 +78,20 @@ describe("StatsViews tests", function () {
     it(`saves allTime period view`, async () => {
         const toTimestamp = clock.nowTimestamp();
         const fromTimestamp = timestampMovedBySeconds(toTimestamp, -ALL_TIME_STATS_DAYS_SECONDS);
-        const expectedStats = await prepareEventsReturningExpectedStats(fromTimestamp, toTimestamp, true);
+        const expectedStats = await prepareEventsAndSubscribersReturningExpectedStats(fromTimestamp, toTimestamp, true);
 
         await statsViews.saveAllTimeView();
 
         await assertStatsViewEqual(ALL_TIME_STATS_VIEW, expectedStats);
+    });
+
+    it(`prepares and returns empty stats`, async () => {
+        await deleteEvents();
+        await deleteSubscribers();
+
+        await statsViews.saveAllTimeView();
+
+        await assertStatsViewEqual(ALL_TIME_STATS_VIEW, { ...Stats.empty(), subscribers: SubscribersStats.empty() });
     });
 });
 
@@ -122,7 +134,7 @@ async function triggerLastPeriodsViewsSave() {
     await statsViews.saveViewsForLongerPeriods();
 }
 
-async function prepareEventsReturningExpectedStats(fromTimestamp, toTimestamp, allTimeStats = false) {
+async function prepareEventsAndSubscribersReturningExpectedStats(fromTimestamp, toTimestamp, allTimeStats = false) {
     const visitorIds = [
         crypto.randomUUID(),
         crypto.randomUUID(),
@@ -175,30 +187,47 @@ async function prepareEventsReturningExpectedStats(fromTimestamp, toTimestamp, a
     const allEvents = [...views, ...scrolls, ...pings];
     await analyticsRepository.saveEvents(allEvents);
 
+    const subscribers = StatsTestFixture.prepareRandomSubscribers({
+        fromTimestamp, toTimestamp, sources,
+        placements: ["POST_MID", "LANDING"],
+        count: 20
+    });
+    await saveSubscribers(subscribers);
+
     if (!allTimeStats) {
-        await analyticsRepository.saveEvents(outsideTimePeriodRandomEvents(fromTimestamp, toTimestamp));
+        const { events, subscribers } = outsideTimePeriodRandomEventsAndSubscribers(fromTimestamp, toTimestamp);
+        await analyticsRepository.saveEvents(events);
+        await saveSubscribers(subscribers);
     }
 
-    return StatsTestFixture.eventsToExpectedStats({ views, scrolls, pings });
+    return StatsTestFixture.eventsToExpectedStats({ views, scrolls, pings, subscribers });
 }
 
 function timestampMovedBySeconds(timestamp, seconds) {
     return timestamp + (seconds * 1000);
 }
 
-function outsideTimePeriodRandomEvents(fromTimestamp, toTimestamp) {
+function outsideTimePeriodRandomEventsAndSubscribers(fromTimestamp, toTimestamp) {
     const randomBeforeFromTimestamp = randomNumber(timestampMovedBySeconds(fromTimestamp, -DAY_SECONDS), fromTimestamp);
     const randomAfterToTimestamp = randomNumber(toTimestamp, timestampMovedBySeconds(toTimestamp, DAY_SECONDS));
 
     const rightBeforeFromTimestamp = timestampMovedBySeconds(fromTimestamp, -1);
     const rightAfterToTimestamp = timestampMovedBySeconds(toTimestamp, 1);
 
-    return [
+    const events = [
         TestObjects.randomEvent({ timestamp: randomBeforeFromTimestamp }),
         TestObjects.randomEvent({ timestamp: rightBeforeFromTimestamp }),
         TestObjects.randomEvent({ timestamp: rightAfterToTimestamp }),
         TestObjects.randomEvent({ timestamp: randomAfterToTimestamp })
     ]
+    const subscribers = [
+        TestObjects.randomSubscriber({ createdAt: randomBeforeFromTimestamp, confirmedAt: null, unsubscribedAt: null }),
+        TestObjects.randomSubscriber({ createdAt: rightBeforeFromTimestamp, confirmedAt: rightBeforeFromTimestamp, unsubscribedAt: rightBeforeFromTimestamp }),
+        TestObjects.randomSubscriber({ createdAt: rightAfterToTimestamp, confirmedAt: rightAfterToTimestamp, unsubscribedAt: rightAfterToTimestamp }),
+        TestObjects.randomSubscriber({ createdAt: randomAfterToTimestamp, confirmedAt: null, unsubscribedAt: null })
+    ];
+
+    return { events, subscribers };
 }
 
 async function assertStatsViewEqual(viewPeriod, expectedStats) {
@@ -216,10 +245,16 @@ async function assertStatsViewOfPeriodExists(period) {
     return actualStatsView[0];
 }
 
+async function saveSubscribers(subscribers) {
+    for (let s of subscribers) {
+        await subscriberRepository.createReturningExisting(s);
+    }
+}
+
 function deleteEvents() {
     return db.execute("DELETE FROM event");
 }
 
-function deleteViews() {
-    return db.execute("DELETE FROM stats_view");
+function deleteSubscribers() {
+    return db.execute("DELETE FROM subscriber");
 }

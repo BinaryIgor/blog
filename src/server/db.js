@@ -19,11 +19,13 @@ export function initSchema(db) {
     
         CREATE INDEX IF NOT EXISTS event_timestamp ON event(timestamp);
 
+        -- migrations --
         -- ALTER TABLE event ADD COLUMN medium TEXT; --
         -- ALTER TABLE event ADD COLUMN campaign TEXT; --
         -- ALTER TABLE event ADD COLUMN ref TEXT; --
         -- ALTER TABLE event ADD COLUMN session_id TEXT NOT NULL DEFAULT ''; --
-    
+        -- migrations --
+
         CREATE VIEW IF NOT EXISTS view AS SELECT * FROM event WHERE type = 'VIEW';
         CREATE VIEW IF NOT EXISTS scroll AS SELECT * FROM event WHERE type = 'SCROLL';
         CREATE VIEW IF NOT EXISTS ping AS SELECT * FROM event WHERE type = 'PING';
@@ -34,7 +36,39 @@ export function initSchema(db) {
             stats TEXT NOT NULL,
             calculated_at INTEGER(8) NOT NULL
         );
+
+        CREATE TABLE IF NOT EXISTS subscriber (
+            email TEXT NOT NULL UNIQUE,
+            external_id TEXT UNIQUE,
+            external_source TEXT,
+            external_type TEXT,
+            created_at INTEGER(8) NOT NULL,
+            signed_up_at INTEGER(8) NOT NULL,
+            confirmed_at INTEGER(8),
+            unsubscribed_at INTEGER(8),
+            unsubscribed_reason TEXT,
+            last_opened_at INTEGER(8),
+            last_clicked_at INTEGER(8),
+            state TEXT NOT NULL,
+            sign_up_context_visitor_id TEXT,
+            sign_up_context_session_id TEXT,
+            sign_up_context_source TEXT,
+            sign_up_context_medium TEXT,
+            sign_up_context_campaign TEXT,
+            sign_up_context_ref TEXT,
+            sign_up_context_placement TEXT
+        );
         `);
+}
+
+const CAMEL_CASE_REGEX = /([a-z0-9])([A-Z])/g;
+export function snakeCasedObject(object) {
+    const snakeCased = {};
+    for (let f in object) {
+        const scField = f.replace(CAMEL_CASE_REGEX, '$1_$2').toLowerCase();
+        snakeCased[scField] = object[f];
+    }
+    return snakeCased;
 }
 
 export class SqliteDb {
@@ -42,7 +76,7 @@ export class SqliteDb {
     #dbs;
     #nextDbIdx = 0;
 
-    constructor(filePath, connections = 3) {
+    constructor(filePath, connections = 5) {
         if (!connections || connections < 1 || connections > 10) {
             throw new Error(`1 - 10 connections are supported but ${connections} were requested`);
         }
@@ -55,7 +89,7 @@ export class SqliteDb {
         return db;
     }
 
-    static async initInstance(filePath, connections = 3) {
+    static async initInstance(filePath, connections = 5) {
         const db = new SqliteDb(filePath, connections);
         await db.init();
         return db;
@@ -95,11 +129,11 @@ export class SqliteDb {
 
     #execute(db, sql, params = []) {
         return new Promise((resolve, reject) => {
-            db.run(sql, params, err => {
+            db.run(sql, params, function(err) {
                 if (err) {
                     reject(err);
                 } else {
-                    resolve();
+                    resolve(this.changes);
                 }
             });
         });
