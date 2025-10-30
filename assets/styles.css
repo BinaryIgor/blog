@@ -130,7 +130,7 @@
     input:-webkit-autofill,
     input:-webkit-autofill:hover,
     input:-webkit-autofill:focus {
-        @apply border-primary-text-faded text-primary bg-primary outline-1 outline-primary-text-faded;
+        @apply border-primary-text-faded text-primary bg-primary outline-2 outline-primary-text;
         -webkit-box-shadow: 0 0 0px 1000px var(--primary-color) inset !important;
         -webkit-text-fill-color: var(--primary-text-color) !important;
         caret-color: var(--primary-text-color) !important;
@@ -185,10 +185,6 @@
 
 @utility outline-primary-text {
     outline-color: var(--primary-text-color);
-}
-
-@utility outline-primary-text-faded {
-    outline-color: var(--primary-text-color-faded);
 }
 
 .object-position-50 {
