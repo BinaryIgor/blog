@@ -19,7 +19,7 @@ HTMX is a promising technology that simplifies many things when building web app
 * it does not require any additional dependencies and complex tools to build and use
 * because of its simplicity, it is extremely easy to learn and use
 
-(*if you are interested, I have described HTMX in more detail [here](/htmx-simpler-web-based-app-or-system.html), and also how it pairs nicely with Web Components [here](/htmx-and-web-components-a-perfect-match.html)*)
+*(if you are interested, I have described HTMX in more detail [here](/htmx-simpler-web-based-app-or-system.html), and also how it pairs nicely with Web Components [here](/htmx-and-web-components-a-perfect-match.html))*
 
 That is great when it comes to local development and simple experiments, but what about [Production](/kubernetes-maybe-a-few-bash-python-scripts-is-enough.html)? Let's find out!
 
