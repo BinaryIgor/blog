@@ -120,26 +120,25 @@ function newsletterSignUp(placement, preface, additionalContainerClasses) {
     </div>`
     .trim();
 
-    const buttonClasses = "cursor-pointer text-secondary-3 hover:text-primary active:text-primary";
     let buttonsHTML;
     if (placement == NewsletterSignUpPlacement.LANDING) {
         buttonsHTML = `
         <div class="flex justify-end mt-8">
-            <div class="${buttonClasses} ml-4" data-join-button>Join Log</div>
+            <div class="newsletter-sign-up-button" data-join-button>Join Log</div>
         </div>`
         .trim();
     } else if (placement == NewsletterSignUpPlacement.POST_FLOATING) {
         buttonsHTML = `
         <div class="flex justify-between mt-8">
-            <div class="${buttonClasses} mr-4" data-close-button>Not Yet</div>
-            <div class="${buttonClasses} ml-4" data-join-button>Join Log</div>
+            <div class="newsletter-sign-up-button mr-4" data-close-button>Not Yet</div>
+            <div class="newsletter-sign-up-button ml-4" data-join-button>Join Log</div>
         </div>`
         .trim();
     } else {
         buttonsHTML = `
         <div class="flex justify-between mt-8">
-            <div class="${buttonClasses} mr-4" data-joined-already-button>Already In</div>
-            <div class="${buttonClasses} ml-4" data-join-button>Join Log</div>
+            <div class="newsletter-sign-up-button mr-4" data-joined-already-button>Already In</div>
+            <div class="newsletter-sign-up-button ml-4" data-join-button>Join Log</div>
         </div>`
         .trim();
     }

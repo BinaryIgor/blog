@@ -296,4 +296,8 @@
     #post-extras {
         @apply m-0 p-0;
     }
+
+    .newsletter-sign-up-button {
+        @apply cursor-pointer text-secondary-3 hover:text-primary active:text-primary;
+    }
 }
