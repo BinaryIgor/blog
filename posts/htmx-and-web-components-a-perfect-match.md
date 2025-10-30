@@ -85,6 +85,8 @@ For the sake of completeness, let's give a short definition:
 \
 It is highly interesting, useful and a promising technology. It simplifies many things and allows us to build *SPA* or *SPA-like* applications without complex tooling, dependencies, frameworks and mostly without writing application-specific JavaScript code. In a way, it is a JavaScript library thanks to which we do not need to write our own JavaScript. We can just have one application, no frontend/backend distinction, and that is it (simplifying a little of course, but <a href="https://www.ufried.com/blog/simplify_1/">it simplifies soo many things</a>). There is one thing that I find missing though. There is no straightforward way to create isolated and reusable components where we can encapsulate HTML templates and JavaScript (if needed) related to a given component. **Wouldn't it be amazing, if we can create a library of reusable, framework-agnostic components that can be then used in all HTMX-based applications?** All of that is perfectly doable with Web Components, so let's dive in!
 
+{{ .js: newsletterSignUpPostMid() }}
+
 ## Assumptions
 
 In our solution, we make the following assumptions:

@@ -184,6 +184,8 @@ If we search for rows with *timestamp=<span class="nowrap">2023-10-05T01:33:00</
 
 **<a href="https://www.postgresql.org/docs/current/storage-page-layout.html">If our table is sorted on the disk, is stored on 100 pages</a> and we have 10 page ranges in the index, for any single value we will only need to check a single page range, which is just 10% of the whole table**. Sounds familiar? It is because the mechanism and performance benefits are quite similar to a *table partitioning*, where the table is divided into smaller, more manageable sections (subtables) for improved query performance. 
 
+{{ .js: newsletterSignUpPostMid() }}
+
 ## Clustered, Primary and Secondary Indexes
 
 There is also a distinction between index types depending on how a particular database decides to store data on the disk.
