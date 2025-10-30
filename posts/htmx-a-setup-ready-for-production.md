@@ -128,6 +128,8 @@ export DB_PASSWORD=$(cat /home/deploy/.secrets/db-password.txt)
 ```
 ...to read them and have available as environment variables.
 
+{{ .js: newsletterSignUpPostMid() }}
+
 ## Local development
 
 No production setup is complete without a great local development experience. What do we need in our case?

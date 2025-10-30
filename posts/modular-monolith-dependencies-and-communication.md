@@ -82,6 +82,8 @@ We have three modules: shared, user and project. We have `UserClient` interface 
 
 **These are relatively minor drawbacks; especially if we avoid cross-module transactions, which is feasible with good module design, this approach offers excellent tradeoffs.** Even if we ever need to migrate some of our modules to a separate application/service, it will be quite easy to do, since dependencies are clearly defined and encapsulated in dedicated abstractions. Besides, let's be realistic: [in the vast majority of cases, we can and should stick with just a single unit of deployment - Modular Monolith](/modular-monolith-and-microservices-modularity-is-what-truly-matters.html).
 
+{{ .js: newsletterSignUpPostMid() }}
+
 ## Application Events
 
 On their own, useful and applicable only in some cases: when something that other modules might be interested in happens, we just send an in-memory event. For example:

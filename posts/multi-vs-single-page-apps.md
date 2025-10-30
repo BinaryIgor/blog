@@ -34,7 +34,6 @@ To establish what these differences are, we will go through two implementations 
 * page changes do not trigger full page reloads - routing is handled mostly by JavaScript
 * there is a sharp backend/frontend distinction - usually, there is a server (backend) that exposes *JSON API* used by UI (frontend) to display data and modify it
 
-
 ## User experience
 
 [To see exactly how (and whether) both implementations feel differently, refer to the video on my YouTube channel](https://www.youtube.com/watch?v=vNzk9trrqy0&t=677s); I would say that they alike behave very smoothly and feel fast. This is mostly because:
@@ -79,6 +78,8 @@ For SPA, we need to:
 
 \
 As we now know that the user experience differences are minor (MPA has a slight advantage), let's measure page load performance in a more objective manner.
+
+{{ .js: newsletterSignUpPostMid() }}
 
 ## Performance
 

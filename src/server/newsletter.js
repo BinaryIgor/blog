@@ -84,6 +84,7 @@ export class SubscriberService {
         }
         await this.#repository.updateOfEmail(subscriber.email, {
             externalType: ApiSubscriberType.Regular,
+            state: SubscriberState.CONFIRMED,
             signedUpAt: this.#clock.nowTimestamp()
         });
     }

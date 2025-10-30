@@ -261,7 +261,7 @@
                 if (millis == 0) {
                     return "<1m"
                 }
-                if (millis <= hourMillis) {
+                if (millis < hourMillis) {
                     const minutes = Math.round(millis / minuteMillis);
                     return `${minutes}m`;
                 }

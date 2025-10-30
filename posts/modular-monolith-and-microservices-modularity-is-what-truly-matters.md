@@ -59,6 +59,8 @@ There are many ways and strategies of implementing modularity in practice. To re
 
 Let's then consider different strategies that we can employ based on these and other factors.
 
+{{ .js: newsletterSignUpPostMid() }}
+
 ### Simple Modular Monolith: modules as folders {#implementations-of-modularity-simple-modular-monolith-modules-as-folders}
 
 This is the simplest and most straightforward way of modularization. **Here, we just treat folders as separate modules, we do not version them independently and do not have any additional boundaries between them, but we must have a contract/convention of how they are allowed to communicate with each other.** Its biggest advantage - simplicity, can also be its biggest disadvantage. We need to take additional precautions so that our modules boundaries are respected and we do not turn our *modular monolith (modulith)* into just a *monolith* - a big pile of mud, hard to understand, test and change. To guard ourselves against such an unfortunate scenario, we should establish and respect some conventions, like:

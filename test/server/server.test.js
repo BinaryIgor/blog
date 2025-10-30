@@ -325,6 +325,7 @@ serverIntTestSuite("Server integration tests", () => {
         const expectedSubscriber = {
             ...unsubscribedSubscriber,
             externalType: ApiSubscriberType.Regular,
+            state: SubscriberState.CONFIRMED,
             signedUpAt: testClock.nowTimestamp()
         };
         assertSubscriberSavedInDb(expectedSubscriber);

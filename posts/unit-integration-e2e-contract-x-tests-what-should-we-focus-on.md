@@ -41,6 +41,8 @@ Ideally, our tests should:
 \
 **Sadly, all of these characteristics are almost never achieved in practice.** That is why we have various test types and each of them gives us a different set of tradeoffs, which also differ depending on the type of software that we work on. The tradeoffs could be completely different depending on whether we write server-rendered web app, a single page application consuming REST API, monolithic REST API with multiple clients, microservices-based REST API or a software library/tool that does something very specific, and is intended to be used by other machines/software, not humans. Let's then explore different test types and see what exactly they bring to the table.
 
+{{ .js: newsletterSignUpPostMid() }}
+
 ## Unit Tests
 
 These are the most basic tests that check whether a single unit works in isolation. What is a unit? It is a function or an object/class. 

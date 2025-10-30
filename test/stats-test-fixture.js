@@ -114,8 +114,8 @@ function toExpectedSessions(views, scrolls, pings) {
 // keep in sync with SqliteAnalyticsRepository
 function sessionDurationThreshold(duration) {
     let threshold;
-    if (duration >= 7200_000) {
-        threshold = 7200_000;
+    if (duration >= 10800_000) {
+        threshold = 10800_000;
     } else if (duration >= 3600_000) {
         threshold = 3600_000;
     } else if (duration >= 900_000) {

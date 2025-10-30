@@ -149,6 +149,7 @@ Based on these assumptions and above tests, it comes down to:
 As we can see, the performance of SQLite is more than enough for the vast majority of applications/systems out there. 
 But what about the availability of a single machine system?
 
+{{ .js: newsletterSignUpPostMid() }}
 
 ## Availability: is it really a problem?
 

@@ -60,8 +60,8 @@
 
     // TODO: refactor a bit
     const newSubsriberMessage = "Almost there - check your inbox for confirmation and we are all set!";
-    const alreadyJoinedMessageHTML = `Seems like you have already joined the <a href="/newsletter.html" class='no-underline'><strong>Binary Log</strong> Newsletter</a>. Thanks!`;
-    const justJoinedMessageHTML = `Seems like you have just joined the <strong>Binary Log</strong> Newsletter. Thanks!`;
+    const alreadyJoinedMessageHTML = `Seems like you have already joined the <a href="/newsletter.html"><strong>Binary Log</strong> Newsletter</a>. Thanks!`;
+    const justJoinedMessageHTML = `Seems like you have just joined the <a href="/newsletter.html"><strong>Binary Log</strong> Newsletter</a>. Thanks!`;
     const joiningMessage = "Joining...";
     const sendNewSubscriberFailureMessage = "Failed to join - network or server error. Try again later.";
     const sendNewSubscriberInvalidEmailMessage = "Invalid email - make sure that both username and domain parts of the address have intended values.";
@@ -83,6 +83,14 @@
         const joinButton = signUp.querySelector('[data-join-button]');
         const initialJoinButtonText = joinButton.textContent;
         const joinedAlreadyButton = signUp.querySelector('[data-joined-already-button]');
+
+        input.oninput = () => {
+            if (isEmailValid(input.value)) {
+                emailError.classList.add("hidden");
+            } else {
+                emailError.classList.remove("hidden");
+            }
+        };
 
         let joining = false;
         joinButton.onclick = async () => {
@@ -164,6 +172,14 @@
         const joinButton = signUp.querySelector('[data-join-button]');
         const initialJoinButtonText = joinButton.textContent;
 
+        input.oninput = () => {
+            if (isEmailValid(input.value)) {
+                emailError.classList.add("hidden");
+            } else {
+                emailError.classList.remove("hidden");
+            }
+        };
+
         let joining = false;
         joinButton.onclick = async () => {
             if (joining) {
@@ -190,7 +206,7 @@
                 signUpContent.innerHTML = `
                     <div>${message}</div>
                     <div class="flex justify-end mt-8">
-                        <div class="cursor-pointer text-secondary-3 hover:text-primary" data-after-join-button>Got it</div>
+                        <div class="newsletter-sign-up-button" data-after-join-button>Got It</div>
                     </div>`;
                 signUpContent.querySelector('[data-after-join-button]').onclick = () => signUp.classList.add("hidden");
                 document.dispatchEvent(new CustomEvent("newsletter-modal-signed-up"));

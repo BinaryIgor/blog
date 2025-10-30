@@ -106,6 +106,8 @@ To test *sustained load* and see whether we experience a performance degradation
 
 [All test results](https://github.com/BinaryIgor/code-examples/tree/master/single-machine-tests/load-test-results) shown below come from 1 test machine. Therefore, we need to multiply the request rate by 4, as tests were always run on 4 machines in parallel.
 
+{{ .js: newsletterSignUpPostMid() }}
+
 ### Small machine - 1 CPU, 2 GB of memory {#test-results-small-machine-1-cpu-2-gb-of-memory}
 
 **low_load**: not worth showing, since average load performed so well.
