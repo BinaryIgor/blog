@@ -101,7 +101,6 @@ export function newsletterSignUpLanding() {
     return newsletterSignUp(NewsletterSignUpPlacement.LANDING);
 }
 
-// TODO: refactor, commonize
 function newsletterSignUp(placement, preface, additionalContainerClasses) {
     let headerMessage = `Get the <span class="font-bold">Binary Log</span> Newsletter - deep and broad dives, discoveries and distilled insights for driven developers who care about the craft:`;
     if (preface) {

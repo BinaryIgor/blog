@@ -47,6 +47,7 @@ export async function read() {
         buttondownWebhookUrl: envVarOrDefault("BUTTONDOWN_WEBHOOK_URL", "https://api.binaryigor.com/webhooks/newsletter"),
         buttondownWebhookDescription: envVarOrDefault("BUTTONDOWN_WEBHOOK_DESCRIPTION", "Primary API managed webhook for automation"),
         buttondownWebhookSigningKey: await envVarOrThrow("BUTTONDOWN_WEBHOOK_SIGNING_KEY"),
+        fixedNewsletterSubscribeResponseStatus: process.env["FIXED_NEWSLETTER_SUBSCRIBE_RESPONSE_STATUS"]
     }
 }
 

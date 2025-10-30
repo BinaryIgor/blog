@@ -106,8 +106,12 @@ export async function start(appClock = new Clock(), appScheduler = new Scheduler
             const { email, placement, visitorId, sessionId, source, medium, campaign, ref } = req.body;
             const context = new SubscriberSignUpContext(visitorId, sessionId, source, medium, campaign, ref, placement);
             const subscriber = Subscriber.newOne(email, clock.nowTimestamp(), context);
-            await subscriberService.subscribe(subscriber);
-            res.sendStatus(201);
+            if (config.fixedNewsletterSubscribeResponseStatus) {
+                setTimeout(() => res.sendStatus(config.fixedNewsletterSubscribeResponseStatus), 1000);
+            } else {
+                await subscriberService.subscribe(subscriber);
+                res.sendStatus(201);
+            }
         } catch (e) {
             if (e instanceof SubscriberExistsError) {
                 res.sendStatus(409);
