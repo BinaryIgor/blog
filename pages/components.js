@@ -101,6 +101,7 @@ export function newsletterSignUpLanding() {
     return newsletterSignUp(NewsletterSignUpPlacement.LANDING);
 }
 
+// trimming is crucial: without it, markdown -> html conversion is broken when embedding this component inside markdown!
 function newsletterSignUp(placement, preface, additionalContainerClasses) {
     let headerMessage = `Get the <span class="font-bold">Binary Log</span> Newsletter - deep and broad dives, discoveries and distilled insights for driven developers who care about the craft:`;
     if (preface) {
@@ -111,11 +112,13 @@ function newsletterSignUp(placement, preface, additionalContainerClasses) {
     <input class="p-2 border-2 border-solid border-primary-text-faded rounded w-full bg-primary focus:outline-primary-text focus:outline-2 focus:outline placeholder:text-secondary-3" 
         placeholder="you@domain.ext" type="email" name="email" autocomplete="email">
     <span class="text-error block my-2 hidden text-sm" data-email-error>Valid email is required.</span>
-    <div class="opacity-80 text-sm my-2"><a href="/privacy-policy.html" class="underline">Privacy Policy</a></div>`;
+    <div class="opacity-80 text-sm my-2"><a href="/privacy-policy.html" class="underline">Privacy Policy</a></div>`
+    .trim();
     const footerHTML = `
     <div class="italic mt-8">
         <div>No spam, no fluff - pure signal. Unsubscribe anytime.</div>
-    </div>`;
+    </div>`
+    .trim();
 
     const buttonClasses = "cursor-pointer text-secondary-3 hover:text-primary active:text-primary";
     let buttonsHTML;
@@ -123,19 +126,22 @@ function newsletterSignUp(placement, preface, additionalContainerClasses) {
         buttonsHTML = `
         <div class="flex justify-end mt-8">
             <div class="${buttonClasses} ml-4" data-join-button>Join Log</div>
-        </div>`;
+        </div>`
+        .trim();
     } else if (placement == NewsletterSignUpPlacement.POST_FLOATING) {
         buttonsHTML = `
         <div class="flex justify-between mt-8">
             <div class="${buttonClasses} mr-4" data-close-button>Not Yet</div>
             <div class="${buttonClasses} ml-4" data-join-button>Join Log</div>
-        </div>`;
+        </div>`
+        .trim();
     } else {
         buttonsHTML = `
         <div class="flex justify-between mt-8">
             <div class="${buttonClasses} mr-4" data-joined-already-button>Already In</div>
             <div class="${buttonClasses} ml-4" data-join-button>Join Log</div>
-        </div>`;
+        </div>`
+        .trim();
     }
 
     if (placement == NewsletterSignUpPlacement.POST_FLOATING) {
@@ -143,12 +149,13 @@ function newsletterSignUp(placement, preface, additionalContainerClasses) {
         <div class="bg-modal hidden fixed top-0 left-0 h-full w-full z-10" data-newsletter-sign-up-modal
             data-newsletter-sign-up-placement="${placement}">
             <div data-modal-content class="max-content-width w-11/12 top-1/2 left-1/2 absolute -translate-x-1/2 -translate-y-1/2 bg-primary border-2 border-solid border-primary-text-faded rounded p-6">
-                ${headerHTML}
-                ${inputHTML}
-                ${footerHTML}
-                ${buttonsHTML}
+            ${headerHTML}
+            ${inputHTML}
+            ${footerHTML}
+            ${buttonsHTML}
             </div>
-        </div>`;
+        </div>`
+        .trim();
     }
 
     let containerClasses = "border-2 border-solid border-primary-text-faded rounded p-6";
@@ -158,11 +165,12 @@ function newsletterSignUp(placement, preface, additionalContainerClasses) {
 
     return `
     <div class="${containerClasses}" data-newsletter-sign-up data-newsletter-sign-up-placement="${placement}">
-        ${headerHTML}
-        ${inputHTML}
-        ${footerHTML}
-        ${buttonsHTML}
-    </div>`;
+    ${headerHTML}
+    ${inputHTML}
+    ${footerHTML}
+    ${buttonsHTML}
+    </div>`
+    .trim();
 }
 
 export function feedUpdatedAt({ posts, lastFeedUpdateAtAfterLatestPost = null }) {
