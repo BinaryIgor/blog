@@ -86,7 +86,7 @@ export function allPostsPreview({ posts }) {
 }
 
 export function newsletterSignUpPostMid() {
-    return newsletterSignUp(NewsletterSignUpPlacement.POST_MID, "Enjoying this piece?");
+    return newsletterSignUp(NewsletterSignUpPlacement.POST_MID, "Enjoying this piece?", "my-6");
 }
 
 export function newsletterSignUpPostEnd() {

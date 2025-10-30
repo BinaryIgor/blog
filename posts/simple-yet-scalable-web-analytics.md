@@ -171,6 +171,8 @@ export function getDevice() {
 \
 As we now know how it works, let's generate some data and run analytical queries - that is the whole purpose after all!
 
+{{ .js: newsletterSignUpPostMid() }}
+
 ## Example data and analytics
 
 ### Data {#example-data-and-analytics-data}

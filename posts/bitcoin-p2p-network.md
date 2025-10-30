@@ -92,6 +92,8 @@ Summing it up, to join the Bitcoin Network:
 
 **Thanks to this strategy, predefined DNS seeds and seed nodes are used only when absolutely necessary, which minimizes the load placed on them while maximizing the use of a discovered and variable set of peers.**
 
+{{ .js: newsletterSignUpPostMid() }}
+
 ## Reachability: where am I?
 
 Once we have joined the network, we are faced with another problem:

@@ -97,6 +97,8 @@ When performing an insert, this is what happens:
 
 It is at least one I/O operation more for Postgres but as noted, inserting into Clustered Index might be costlier if B-tree has to be rebalanced or leaf node pages move around. Also worth noting, inserting table data on a heap is really cheap for Postgres - it is an appending operation, no movement or sorting is required. For deletes it is similar, because we need to delete data from the same places we have previously inserted it; primary index + two secondary indexes for MySQL, heap table + three indexes referencing it for Postgres. For updates, if we change all columns, behavior of both databases is similar - all indexes must be updated + heap table for Postgres. **Where the MySQL model shines are partial updates.** If we were to update only the name column for example, MySQL needs only to update table data in the Clustered Index + delete and insert one entry into the name index. In Postgres, because of how it approaches *Multiversion Concurrency Control (MVCC)* - allowing concurrent access to the same row possibly existing in multiple versions - every update is really an *insert + delete*. Let's then end by acknowledging that for some write operations MySQL (InnoDB) model has an edge and see how both databases solve the *MVCC* problem.
 
+{{ .js: newsletterSignUpPostMid() }}
+
 ## Multiversion Concurrency Control (MVCC): Dead Tuples vs Undo Logs
 
 We mentioned it briefly above but let's fully define what the Multiversion Concurrency Control is:

@@ -128,6 +128,8 @@ We must override a few shoelace-specific variables to have consistent colors acr
 
 **To sum it up, I think that Shadow DOM is not worth its complexity, in the vast majority of cases.** Given that, I want to emphasize that Shoelace library authors made a superb effort of documenting how to customize their components using this new browser API. Having it in mind, let's finally dive into the HTMX + Shoelace example Books App!
 
+{{ .js: newsletterSignUpPostMid() }}
+
 ## An example Books App
 
 ### Setup {#an-example-books-app-setup}

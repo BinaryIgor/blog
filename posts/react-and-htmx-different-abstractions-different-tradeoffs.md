@@ -77,6 +77,8 @@ Frontend (client) applications are written in JavaScript (TypeScript increasingl
 
 **To sum this history up, Single Page Applications usually offer better user experience at the cost of increased development and maintenance complexity.** Tools needed to support these efforts grew in number and complexity as well; also, expertise, knowledge and technology stacks of people developing frontend and backend applications diverged sharply. In this model, it becomes increasingly harder and rarer to find somebody who operates productively both on the frontend and backend side of development.
 
+{{ .js: newsletterSignUpPostMid() }}
+
 ## Simple Single Page Applications, driven by HTML
 
 Can we get a better user experience of Single Page Applications while retaining Multi Page Applications simplicity?

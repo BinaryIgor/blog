@@ -106,6 +106,7 @@ Summing it up:
 * If devices are in the same network, they can be connected directly just by using IP addresses. The same network means the same physical infrastructure
 * If devices are in different networks, which means different physical infrastructures, we need to locate them and somehow connect these two independent networks. Networks are identified by the *Autonomous System Number*, they announce supported *IP addresses* and they connect with each other either directly or by using shared *Internet Exchange Points (IXPs)*
 
+{{ .js: newsletterSignUpPostMid() }}
 
 ## Domain Name System (DNS)
 
