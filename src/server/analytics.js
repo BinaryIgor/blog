@@ -138,14 +138,14 @@ export class Event {
 }
 
 export class Stats {
-    constructor(views, visitors, ipHashes, sessions, scrolls, pings, viewsBySource, pages) {
+    constructor(views, visitors, ipHashes, sessions, scrolls, pings, visitorsBySource, pages) {
         this.views = views;
         this.visitors = visitors;
         this.sessions = sessions;
         this.ipHashes = ipHashes;
         this.scrolls = scrolls;
         this.pings = pings;
-        this.viewsBySource = viewsBySource;
+        this.visitorsBySource = visitorsBySource;
         this.pages = pages;
     }
 
@@ -229,10 +229,10 @@ export class PingersStats {
     }
 }
 
-export class ViewsBySource {
-    constructor(source, views) {
+export class VisitorsBySource {
+    constructor(source, visitors) {
         this.source = source;
-        this.views = views;
+        this.visitors = visitors;
     }
 }
 
@@ -474,13 +474,13 @@ export class SqliteAnalyticsRepository {
         const scrolls = this._scrollStats(fromTimestamp, toTimestamp);
         const pings = this._pingsStats(fromTimestamp, toTimestamp);
 
-        const viewsBySource = this._viewsByTopSourceStats(fromTimestamp, toTimestamp, 25);
+        const visitorsBySource = this.#visitorsByTopSourcesStats(fromTimestamp, toTimestamp, 25);
         const pages = this._pagesStats(fromTimestamp, toTimestamp);
 
         const { views, visitors, ipHashes } = await viewsVisitorsIpHashes;
 
         return new Stats(views, visitors, ipHashes, await sessions,
-            await scrolls, await pings, await viewsBySource, await pages);
+            await scrolls, await pings, await visitorsBySource, await pages);
     }
 
     _viewsVisitorsIpHashesStats(fromTimestamp, toTimestamp) {
@@ -810,13 +810,13 @@ export class SqliteAnalyticsRepository {
         return this._allAndByPositionStats(pings, pingsByPosition);
     }
 
-    _viewsByTopSourceStats(fromTimestamp, toTimestamp, limit) {
+    #visitorsByTopSourcesStats(fromTimestamp, toTimestamp, limit) {
         const query = `${this._queryWithOptionalWhereInTimestampsClause(
-            'SELECT source, COUNT(*) AS views FROM view',
+            'SELECT source, COUNT(DISTINCT visitor_id) AS visitors FROM view',
             fromTimestamp, toTimestamp
-        )} GROUP BY source ORDER BY views DESC, source ASC LIMIT ${limit}`;
+        )} GROUP BY source ORDER BY visitors DESC, source ASC LIMIT ${limit}`;
 
-        return this.db.query(query).then(rows => rows.map(r => new ViewsBySource(r['source'], r['views'])));
+        return this.db.query(query).then(rows => rows.map(r => new VisitorsBySource(r['source'], r['visitors'])));
     }
 
     async _pagesStats(fromTimestamp, toTimestamp) {
