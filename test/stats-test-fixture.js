@@ -1,4 +1,4 @@
-import { Stats, ViewsBySource, PageStats, SessionsStats } from "../src/server/analytics.js";
+import { Stats, VisitorsBySource, PageStats, SessionsStats } from "../src/server/analytics.js";
 import { randomBoolean, randomElement, randomElementOrNull, randomNumber, sortByField } from "./test-utils.js";
 import { SCROLL_EVENT_TYPE, PING_EVENT_TYPE, TestObjects } from "./test-objects.js";
 import { Event, PingStats, PingersStats } from "../src/server/analytics.js";
@@ -48,7 +48,7 @@ export const StatsTestFixture = {
 
         const analyticsStats = new Stats(views.length, eventVisitors, eventIpHashes, toExpectedSessions(views, scrolls, pings),
             toExpectedScrolls(scrolls), toExpectedPings(pings),
-            toExpectedViewsBySource(views),
+            toExpectedVistorsBySource(views),
             toExpectedStatsByPath({ paths, views, scrolls, pings }));
         const subscribersStats = toExpectedSubscribersStats(subscribers);
 
@@ -241,27 +241,30 @@ function pingPositionBucket(position) {
     return 100;
 }
 
-function toExpectedViewsBySource(events) {
-    const viewsBySource = new Map();
+function toExpectedVistorsBySource(events) {
+    const visitorIdsBySource = new Map();
 
     events.forEach(e => {
         const source = e.source;
-        const views = viewsBySource.get(source) ?? { source, views: 0 };
-        views.views += 1;
-        viewsBySource.set(source, views);
+        const visitorIds = visitorIdsBySource.get(source) ?? [];
+        visitorIds.push(e.visitorId);
+        visitorIdsBySource.set(source, visitorIds);
     });
 
-    // first by views desc, then source asc
-    return [...viewsBySource.values()]
+    const visitorsBySource = [...visitorIdsBySource.entries()]
+        .map(kv => ({source: kv[0], visitors: countDistinct(kv[1])}));
+
+    // first by visitors desc, then source asc
+    return visitorsBySource
         .sort((a, b) => {
-            if (a.views > b.views) {
+            if (a.visitors > b.visitors) {
                 return -1;
             }
-            if (b.views > a.views) {
+            if (b.visitors > a.visitors) {
                 return 1;
             }
             return a.source > b.source ? 1 : -1;
-        }).map(e => new ViewsBySource(e.source, e.views));
+        }).map(e => new VisitorsBySource(e.source, e.visitors));
 }
 
 function toExpectedStatsByPath({ paths, views, scrolls, pings }) {

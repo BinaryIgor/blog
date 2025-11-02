@@ -19,7 +19,7 @@
 
     {{ init-script.html }}
     <script type="module">
-        const TOP_VIEWS_BY_SOURCE = 15;
+        const TOP_VISITORS_BY_SOURCE = 15;
         const statsContainer = document.getElementById("stats-container");
         const statsLoader = document.getElementById("stats-loader");
 
@@ -89,18 +89,16 @@
         }
 
         function statsOfPeriodView(stats, calculatedAtTimestamp, postsByPath) {
-            const allViews = stats.views;
-
-            const limitedViewsBySource = stats.viewsBySource.length > TOP_VIEWS_BY_SOURCE ?
-                stats.viewsBySource.slice(0, TOP_VIEWS_BY_SOURCE) : stats.viewsBySource;
+            const limitedVisitorsBySource = stats.visitorsBySource.length > TOP_VISITORS_BY_SOURCE ?
+                stats.visitorsBySource.slice(0, TOP_VISITORS_BY_SOURCE) : stats.visitorsBySource;
 
             return {
                 ...stats,
                 calculatedAt: new Date(calculatedAtTimestamp).toISOString(),
-                topViewsBySource: limitedViewsBySource.map(v => {
+                topVisitorsBySource: limitedVisitorsBySource.map(v => {
                     return {
                         source: v.source,
-                        views: `${formattedPercentage(v.views, allViews)}%`
+                        visitors: `${formattedPercentage(v.visitors, stats.visitors)}%`
                     }
                 }),
                 posts: stats.pages.filter(p => postsByPath.has(p.path))
@@ -226,8 +224,8 @@
                     ${scrollsComponent(stats.scrolls, `${id}-scrolls`)}
                     ${pingsComponent(stats.pings, `${id}-pings`)}
                     ${subscribersComponent(stats.subscribers, `${id}-subscribers`)}
-                    <h3 class="text-2xl mt-16 mb-4 font-bold">View Sources</h3>
-                    ${viewsBySourceComponent(stats.topViewsBySource)}
+                    <h3 class="text-2xl mt-16 mb-4 font-bold">Visitor Sources</h3>
+                    ${visitorsBySourceComponent(stats.topVisitorsBySource)}
                     <h3 class="text-2xl mt-16 mb-4 font-bold">Posts</h3>
                     ${postsStatsComponent(id, stats.posts)}
                     <h3 class="text-2xl mt-16 mb-4 font-bold">Pages</h3>
@@ -407,16 +405,8 @@
             </div>`;
         }
 
-        function viewsBySourceComponent(viewsBySource) {
-            return `<div>${viewsBySource.map(viewsOfSourceComponent).join('\n')}</div>`;
-        }
-
-        function viewsOfSourceComponent(views, idx) {
-            return `
-            <div>
-                <div>${views.source}: ${views.views}</div>
-            </div>
-            `;
+        function visitorsBySourceComponent(visitorsBySource) {
+            return `<div>${visitorsBySource.map(v => `<div>${v.source}: ${v.visitors}</div>`).join('\n')}</div>`;
         }
 
         function postsStatsComponent(periodId, posts) {
