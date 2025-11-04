@@ -645,6 +645,7 @@ export class Subscriber {
     }
 }
 
+// TODO: path as well to see what posts perform the best!
 export class SubscriberSignUpContext {
     constructor(visitorId, sessionId, source, medium, campaign, ref, placement) {
         this.visitorId = visitorId;
