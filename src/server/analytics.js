@@ -2,7 +2,6 @@ import * as Dates from "../shared/dates.js";
 import * as Logger from "../shared/logger.js";
 import * as Validator from "./validator.js";
 
-export const MAX_PATH_LENGTH = 100;
 export const DAY_SECONDS = 24 * 60 * 60;
 export const SEVEN_DAYS_SECONDS = DAY_SECONDS * 7;
 export const THIRTY_DAYS_SECONDS = DAY_SECONDS * 30;
@@ -53,10 +52,6 @@ export class AnalyticsService {
 
     #validatedEvent(event) {
         Validator.validateEventContext(event);
-
-        if (!event.path || event.path.length > MAX_PATH_LENGTH) {
-            throw new Error(`Path can't be empty and must be less than ${MAX_PATH_LENGTH} of length, but was: ${event.path}`);
-        }
 
         const supportedEvent = event.type == VIEW_TYPE || event.type == SCROLL_TYPE || event.type == PING_TYPE;
         if (!supportedEvent) {

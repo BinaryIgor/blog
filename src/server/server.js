@@ -103,8 +103,8 @@ export async function start(appClock = new Clock(), appScheduler = new Scheduler
 
     app.post("/newsletter/subscribers", async (req, res) => {
         try {
-            const { email, placement, visitorId, sessionId, source, medium, campaign, ref } = req.body;
-            const context = new SubscriberSignUpContext(visitorId, sessionId, source, medium, campaign, ref, placement);
+            const { email, placement, visitorId, sessionId, source, medium, campaign, ref, path } = req.body;
+            const context = new SubscriberSignUpContext(visitorId, sessionId, source, medium, campaign, ref, path, placement);
             const subscriber = Subscriber.newOne(email, clock.nowTimestamp(), context);
             if (config.fixedNewsletterSubscribeResponseStatus) {
                 setTimeout(() => res.sendStatus(config.fixedNewsletterSubscribeResponseStatus), 1000);

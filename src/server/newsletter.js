@@ -206,7 +206,8 @@ export class SqliteSubscriberRepository {
         }
         return new SubscriberSignUpContext(visitorId, row['sign_up_context_session_id'],
             row['sign_up_context_source'], row['sign_up_context_medium'], row['sign_up_context_campaign'],
-            row['sign_up_context_ref'], row['sign_up_context_placement']
+            row['sign_up_context_ref'], row['sign_up_context_path'],
+            row['sign_up_context_placement']
         );
     }
 
@@ -226,8 +227,9 @@ export class SqliteSubscriberRepository {
             sign_up_context_medium,
             sign_up_context_campaign,
             sign_up_context_ref,
+            sign_up_context_path,
             sign_up_context_placement)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ON CONFLICT (email)
         DO UPDATE
         SET signed_up_at = EXCLUDED.signed_up_at
@@ -240,6 +242,7 @@ export class SqliteSubscriberRepository {
         subscriber.signUpContext?.medium,
         subscriber.signUpContext?.campaign,
         subscriber.signUpContext?.ref,
+        subscriber.signUpContext?.path,
         subscriber.signUpContext?.placement
         ]);
         return this.#rowToSubscriber(row);
@@ -572,7 +575,7 @@ export class NewsletterWebhookHandler {
         }
 
         Logger.logWarn(`Expected ${expectedSignature} signature, but got ${signature}. Event:`, payload.toString());
-        
+
         return false;
     }
 
@@ -645,15 +648,15 @@ export class Subscriber {
     }
 }
 
-// TODO: path as well to see what posts perform the best!
 export class SubscriberSignUpContext {
-    constructor(visitorId, sessionId, source, medium, campaign, ref, placement) {
+    constructor(visitorId, sessionId, source, medium, campaign, ref, path, placement) {
         this.visitorId = visitorId;
         this.sessionId = sessionId;
         this.source = source;
         this.medium = medium;
         this.campaign = campaign;
         this.ref = ref;
+        this.path = path;
         this.placement = placement;
     }
 }

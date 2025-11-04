@@ -24,6 +24,8 @@ function invalidEventContextsWithExpectedErrors() {
     const invalidMediumError = `Medium can have up to ${Validator.MAX_MEDIUM_LENGTH} characters`;
     const invalidCampaignError = `Campaign can have up to ${Validator.MAX_CAMPAIGN_LENGTH} characters`;
     const invalidRefError = `Ref can have up to ${Validator.MAX_REF_LENGTH} characters`;
+    const invalidPathError = `Path should not be empty and have max ${Validator.MAX_PATH_LENGTH} characters`;
+
     return [
         {
             ctx: {},
@@ -97,11 +99,27 @@ function invalidEventContextsWithExpectedErrors() {
             ctx: { ...validEventContext(), ref: randomString(Validator.MAX_REF_LENGTH + 1) },
             error: invalidRefError
         },
+        {
+            ctx: { ...validEventContext(), path: null },
+            error: invalidPathError
+        },
+        {
+            ctx: { ...validEventContext(), path: undefined },
+            error: invalidPathError
+        },
+        {
+            ctx: { ...validEventContext(), path: "" },
+            error: invalidPathError
+        },
+        {
+            ctx: { ...validEventContext(), path: randomString(Validator.MAX_PATH_LENGTH + 1) },
+            error: invalidPathError
+        },
     ]
 }
 
 function validEventContext() {
-    return { visitorId: crypto.randomUUID(), sessionId: crypto.randomUUID(), source: "some source" };
+    return { visitorId: crypto.randomUUID(), sessionId: crypto.randomUUID(), source: "some source", path: "/" };
 }
 
 function validEventContexts() {

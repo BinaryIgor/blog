@@ -58,9 +58,10 @@ export const TestObjects = {
         medium = randomElementOrNull(MEDIUMS),
         campaign = randomElementOrNull(CAMPAIGNS),
         ref = randomElementOrNull(REFS),
+        path = "/index.html",
         placement = randomElement(SUBSCRIBER_SIGN_UP_PLACEMENTS)
     } = {}) {
-        return new SubscriberSignUpContext(visitorId, sessionId, source, medium, campaign, ref, placement);
+        return new SubscriberSignUpContext(visitorId, sessionId, source, medium, campaign, ref, path, placement);
     },
     randomEmail() {
         return `${randomString()}@email.com`;

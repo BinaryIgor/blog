@@ -56,6 +56,7 @@ export function initSchema(db) {
             sign_up_context_medium TEXT,
             sign_up_context_campaign TEXT,
             sign_up_context_ref TEXT,
+            sign_up_context_path TEXT,
             sign_up_context_placement TEXT
         );
         `);

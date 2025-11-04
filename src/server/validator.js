@@ -5,6 +5,7 @@ export const MAX_MEDIUM_LENGTH = 100;
 export const MAX_CAMPAIGN_LENGTH = 100;
 // could be longer - domain + path; see pages/init-script.html implementation
 export const MAX_REF_LENGTH = 300;
+export const MAX_PATH_LENGTH = 100;
 
 /**
  * @typedef EventContext
@@ -14,13 +15,14 @@ export const MAX_REF_LENGTH = 300;
  * @property {string} medium 
  * @property {string} campaign 
  * @property {string} ref 
+ * @property {string} path
  */
 
 /**
  * @param {EventContext} context
  */
 export function validateEventContext(context) {
-    const { visitorId, sessionId, source, medium, campaign, ref } = context;
+    const { visitorId, sessionId, source, medium, campaign, ref, path } = context;
 
     validateId(visitorId, "VisitorId");
     validateId(sessionId, "SessionId");
@@ -39,6 +41,10 @@ export function validateEventContext(context) {
 
     if (ref && ref.length > MAX_REF_LENGTH) {
         throw new Error(`Ref can have up to ${MAX_REF_LENGTH} characters`);
+    }
+
+    if (!path || path.length > MAX_PATH_LENGTH) {
+        throw new Error(`Path should not be empty and have max ${MAX_PATH_LENGTH} characters`);
     }
 }
 
