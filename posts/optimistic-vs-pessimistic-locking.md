@@ -71,7 +71,9 @@ CREATE TABLE campaign (
   version BIGINT NOT NULL
 );
 
-record Campaign(UUID id, ... long version) {}
+record Campaign(UUID id, 
+                ... 
+                long version) {}
 ```
 *(this is an SQL example, but the principle stays the same for a key-value, object-oriented, document-oriented or any other database; version must be saved together with the related data)*
 
@@ -131,7 +133,8 @@ For this strategy, there is no need to modify the schema in any way. Using our *
 ```
 BEGIN TRANSACTION;
 
-SELECT * FROM budget WHERE id = 1;
+SELECT * FROM budget
+WHERE id = 1;
 
 UPDATE budget
 SET available_amount = <40 or 50>
@@ -153,7 +156,9 @@ To fix it, we simply, pessimistically, lock the budget under modification for th
 -- click1 is first --
 BEGIN;
 
-SELECT * FROM budget WHERE id = 1 FOR UPDATE;
+SELECT * FROM budget 
+WHERE id = 1 
+FOR UPDATE;
 
 UPDATE budget
 SET available_amount = 50
@@ -165,7 +170,9 @@ COMMIT;
 BEGIN;
 
 -- transaction locks here until the end of click1 transaction --
-SELECT * FROM budget WHERE id = 1 FOR UPDATE;
+SELECT * FROM budget 
+WHERE id = 1 
+FOR UPDATE;
 -- transaction resumes here after click1 transaction commits/rollbacks, --
 -- with always up-to-date budget --
 
@@ -195,8 +202,12 @@ There are two ways of doing it.
 First:
 ```
 BEGIN;
+
 SELECT ... FOR UPDATE NOWAIT;
 -- locks or fails immediately --
+
+UPDATE ...
+
 COMMIT:
 ```
 if another process has already acquired the lock, an error is thrown. We might then simply catch it and inform the user/client that there already was an update in progress and they have to do something about it - in the exact same way as we do in the optimistic locking!
@@ -204,8 +215,12 @@ if another process has already acquired the lock, an error is thrown. We might t
 Second, very similar:
 ```
 BEGIN;
+
 SELECT ... FOR UPDATE SKIP LOCKED;
 -- not locked entity or empty result --
+
+UPDATE ...
+
 COMMIT;
 ```
 if another process has already acquired the lock, we simply get only not locked entities, which in most cases means zero, no entities. If this is the case, we can again throw a special exception and inform the user/client about the conflict.
@@ -277,7 +292,7 @@ That being said, **let's keep our concurrency control in check: lock entities pr
 1. Concurrency Control problem:
     1. https://en.wikipedia.org/wiki/Concurrency_control
     2. https://www.baeldung.com/cs/concurrency-control-lost-update-problem
-2. It might seem odd that NoSQL databases (MongoDB, Cassandra, DynamoDB, Redis, etc.) usually do not support pessimistic locking, but they are built on a different set of principles. Most of them are designed to support tremendous workloads and encourage us to run them in multiple physical instances, as a cluster, from the very  start. If we follow this [unnecessary for most systems advice](/how-many-http-requests-can-a-single-machine-handle.html), then worse performance of optimistic locking for write-heavy workloads with many conflicts is not an issue, since there is much more resources available by having multiple physical db instances (nodes) in the cluster.
+2. It might seem odd that NoSQL databases (MongoDB, Apache Cassandra, DynamoDB, Redis, etc.) usually do not support pessimistic locking, but they are built on a different set of principles. Most of them are designed to support tremendous workloads and encourage us to run them in multiple physical instances, as a cluster, from the very  start. If we follow this [unnecessary for most systems advice](/how-many-http-requests-can-a-single-machine-handle.html), then worse performance of optimistic locking for write-heavy workloads with many conflicts is not an issue, since there is much more resources available by having multiple physical db instances (nodes) in the cluster.
 3. Interestingly, in SQLite there is at most one writer and `SELECT FOR UPDATE` is not supported. We might emulate its behavior by starting transactions as `BEGIN IMMEDIATE` which immediately blocks other potential writers: https://www.sqlite.org/lang_transaction.html#deferred_immediate_and_exclusive_transactions
 4. `SELECT FOR UPDATE` support:
     1. https://www.postgresql.org/docs/current/sql-select.html
