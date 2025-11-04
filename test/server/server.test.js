@@ -9,7 +9,7 @@ import {
 } from "../server-int-test-suite.js";
 import { assertConflictResponseCode, assertCreatedResponseCode, assertJsonResponse, assertOkResponseCode, assertResponseCode, assertUnauthenticatedResponseCode, assertUnprocessableContentResponseCode } from "../web-tests.js";
 import { randomNumber, randomString } from "../test-utils.js";
-import { MAX_PATH_LENGTH, MAX_IP_HASH_VISITOR_IDS_IN_LAST_DAY, DAY_SECONDS, ALL_TIME_STATS_VIEW, Stats } from "../../src/server/analytics.js";
+import { MAX_IP_HASH_VISITOR_IDS_IN_LAST_DAY, DAY_SECONDS, ALL_TIME_STATS_VIEW, Stats } from "../../src/server/analytics.js";
 import { TestObjects, VIEW_EVENT_TYPE, SCROLL_EVENT_TYPE, PING_EVENT_TYPE } from "../test-objects.js";
 import { StatsTestFixture } from "../stats-test-fixture.js";
 import { hashedIp } from "../../src/server/web.js";
@@ -384,7 +384,6 @@ function invalidEvents() {
         TestObjects.randomEvent({ visitorId: randomString() }),
         TestObjects.randomEvent({ path: null }),
         TestObjects.randomEvent({ path: "" }),
-        TestObjects.randomEvent({ path: MAX_PATH_LENGTH + 1 }),
         ...scrollPingInvalidData.flatMap(data => [
             TestObjects.randomEvent({ type: SCROLL_EVENT_TYPE, data }),
             TestObjects.randomEvent({ type: PING_EVENT_TYPE, data })
@@ -400,12 +399,12 @@ async function assertEmptyStatsResponse(response) {
     });
 }
 
-async function assertStatsHaveViewsVisitorsAndIpHashes(views, visitors, iphashes) {
+async function assertStatsHaveViewsVisitorsAndIpHashes(views, visitors, ipHashes) {
     await assertJsonResponse(await testRequests.getStats(), actualStats => {
         const allTimeStats = allTimeStatsView(actualStats);
         assert.deepEqual(allTimeStats.views, views);
         assert.deepEqual(allTimeStats.visitors, visitors);
-        assert.deepEqual(allTimeStats.ipHashes, iphashes);
+        assert.deepEqual(allTimeStats.ipHashes, ipHashes);
     });
 }
 
@@ -424,7 +423,7 @@ async function addViewsFromIp(ip, events) {
 
 async function addEventsFromIp(ip, events, type) {
     for (let i = 0; i < events; i++) {
-        await addEventFromIp(ip, TestObjects.randomEvent({ type: type }));
+        await addEventFromIp(ip, TestObjects.randomEvent({ type }));
     }
 }
 

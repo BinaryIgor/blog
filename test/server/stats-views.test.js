@@ -188,7 +188,7 @@ async function prepareEventsAndSubscribersReturningExpectedStats(fromTimestamp, 
     await analyticsRepository.saveEvents(allEvents);
 
     const subscribers = StatsTestFixture.prepareRandomSubscribers({
-        fromTimestamp, toTimestamp, sources,
+        fromTimestamp, toTimestamp, sources, paths,
         placements: ["POST_MID", "LANDING"],
         count: 20
     });

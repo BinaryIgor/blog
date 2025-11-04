@@ -24,7 +24,7 @@ export const StatsTestFixture = {
         }
         return events;
     },
-    prepareRandomSubscribers({ fromTimestamp, toTimestamp, sources, placements, count }) {
+    prepareRandomSubscribers({ fromTimestamp, toTimestamp, sources, paths, placements, count }) {
         const subscribers = [];
         for (let i = 0; i < count; i++) {
             subscribers.push(TestObjects.randomSubscriber(
@@ -34,6 +34,7 @@ export const StatsTestFixture = {
                     unsubscribedAt: randomBoolean() ? randomNumber(fromTimestamp, toTimestamp) : null,
                     signUpContext: TestObjects.randomSubscriberSignUpContext({
                         source: randomElementOrNull(sources),
+                        path: randomElement(paths),
                         placement: randomElementOrNull(placements)
                     })
                 }
