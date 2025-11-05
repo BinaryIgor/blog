@@ -98,7 +98,8 @@
                 topVisitorsBySource: limitedVisitorsBySource.map(v => {
                     return {
                         source: v.source,
-                        visitors: `${formattedPercentage(v.visitors, stats.visitors)}%`
+                        visitors: v.visitors,
+                        visitorsPercentage: `${formattedPercentage(v.visitors, stats.visitors)}%`
                     }
                 }),
                 posts: stats.pages.filter(p => postsByPath.has(p.path))
@@ -390,23 +391,27 @@
                 </div>`})
                 .join("\n");
 
+            const byPathsHTML = stats.byPath.map(s => {
+                const createdPercentage = stats.created > 0 ? formattedPercentage(s.created, stats.created) : '-';
+                const confirmedPercentage = stats.confirmed > 0 ? formattedPercentage(s.confirmed, stats.confirmed) : '-';
+                return `<div>${s.path}: ${createdPercentage}/${confirmedPercentage}(%)
+                </div>`})
+                .join("\n");
+
             return `
             <div id=${id}><span class="cursor-pointer underline">Subscribers:</span> ${stats.created}/${stats.confirmed}</div>
             <div class="mt-1 mb-2">
               <div>Created: ${stats.created}</div>
               <div>Confirmed: ${stats.confirmed}</div>
               <div>Unsubscribed: ${stats.unsubscribed}</div>
-              <div class="my-1">
-                ${byPlacementsHTML}
-              </div>
-              <div class="my-1">
-                ${bySourcesHTML}
-              </div>
+              <div class="my-1">${byPlacementsHTML}</div>
+              <div class="my-1">${bySourcesHTML}</div>
+              <div class="my-1">${byPathsHTML}</div>
             </div>`;
         }
 
         function visitorsBySourceComponent(visitorsBySource) {
-            return `<div>${visitorsBySource.map(v => `<div>${v.source}: ${v.visitors}</div>`).join('\n')}</div>`;
+            return `<div>${visitorsBySource.map(v => `<div>${v.source}: ${v.visitors} (${v.visitorsPercentage})</div>`).join('\n')}</div>`;
         }
 
         function postsStatsComponent(periodId, posts) {

@@ -4,7 +4,7 @@ import * as Dates from '../shared/dates.js';
 import * as Promises from '../shared/promises.js';
 import { snakeCasedObject } from './db.js';
 import crypto from 'crypto';
-import { SubscribersStats, SubscribersByPlacementStats, SubscribersBySourceStats } from './shared.js';
+import { SubscribersStats, SubscribersByPlacementStats, SubscribersBySourceStats, SubscribersByPathStats } from './shared.js';
 
 export const MAX_EMAIL_LENGTH = 125;
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -276,8 +276,9 @@ export class SqliteSubscriberRepository {
     /**
      * @param {number?} fromTimestamp 
      * @param {number} toTimestamp 
+     * @param {number} [limit=10] bySource and byPath limits
      */
-    async subscribersStats(fromTimestamp, toTimestamp) {
+    async subscribersStats(fromTimestamp, toTimestamp, limit = 10) {
         const createdAtClause = fromTimestamp ?
             `created_at >= ${fromTimestamp} AND created_at <= ${toTimestamp}` :
             `created_at <= ${toTimestamp}`;
@@ -311,7 +312,7 @@ export class SqliteSubscriberRepository {
         ORDER BY created DESC, confirmed DESC, placement ASC`)
             .then(rows => rows.map(r => new SubscribersByPlacementStats(r['placement'], r['created'], r['confirmed'])));
 
-        const subscribersBySourceQuery = this.#db.query(`
+        const subscribersBySourcePromise = this.#db.query(`
         SELECT 
             CASE WHEN sign_up_context_source IS NULL THEN 'other' ELSE sign_up_context_source END AS source,
             SUM(CASE WHEN ${createdAtClause} THEN 1 ELSE 0 END) AS created,
@@ -319,13 +320,28 @@ export class SqliteSubscriberRepository {
         FROM subscriber
         WHERE (${createdAtClause}) OR (${confirmedAtClause})
         GROUP BY source
-        ORDER BY created DESC, confirmed DESC, source ASC`)
+        ORDER BY created DESC, confirmed DESC, source ASC
+        LIMIT ${limit}`)
             .then(rows => rows.map(r => new SubscribersBySourceStats(r['source'], r['created'], r['confirmed'])));
+
+        const subscribersByPathPromise = this.#db.query(`
+        SELECT 
+            CASE WHEN sign_up_context_path IS NULL THEN '/other' ELSE sign_up_context_path END AS path,
+            SUM(CASE WHEN ${createdAtClause} THEN 1 ELSE 0 END) AS created,
+            SUM(CASE WHEN ${confirmedAtClause} THEN 1 ELSE 0 END) AS confirmed
+        FROM subscriber
+        WHERE (${createdAtClause}) OR (${confirmedAtClause})
+        GROUP BY path
+        ORDER BY created DESC, confirmed DESC, path ASC
+        LIMIT ${limit}`)
+            .then(rows => rows.map(r => new SubscribersByPathStats(r['path'], r['created'], r['confirmed'])));
 
         const { created, confirmed, unsubscribed } = await subscribersCountPromise;
 
         return new SubscribersStats(created, confirmed, unsubscribed,
-            await subscribersByPlacementPromise, await subscribersBySourceQuery);
+            await subscribersByPlacementPromise,
+            await subscribersBySourcePromise,
+            await subscribersByPathPromise);
     }
 }
 
