@@ -34,7 +34,7 @@ export const StatsTestFixture = {
                     unsubscribedAt: randomBoolean() ? randomNumber(fromTimestamp, toTimestamp) : null,
                     signUpContext: TestObjects.randomSubscriberSignUpContext({
                         source: randomElementOrNull(sources),
-                        path: randomElement(paths),
+                        path: randomElementOrNull(paths),
                         placement: randomElementOrNull(placements)
                     })
                 }
@@ -253,7 +253,7 @@ function toExpectedVistorsBySource(events) {
     });
 
     const visitorsBySource = [...visitorIdsBySource.entries()]
-        .map(kv => ({source: kv[0], visitors: countDistinct(kv[1])}));
+        .map(kv => ({ source: kv[0], visitors: countDistinct(kv[1]) }));
 
     // first by visitors desc, then source asc
     return visitorsBySource
@@ -302,6 +302,7 @@ function toExpectedSubscribersStats(subscribers) {
 
     const subscribersByPlacement = new Map();
     const subscribersBySource = new Map();
+    const subscribersByPath = new Map();
     subscribers.forEach(s => {
         const placement = s.signUpContext.placement ?? "OTHER";
         let ofPlacement = subscribersByPlacement.get(placement);
@@ -324,9 +325,21 @@ function toExpectedSubscribersStats(subscribers) {
         } else {
             subscribersBySource.set(source, { source, created: 1, confirmed: s.confirmedAt ? 1 : 0 });
         }
+
+        const path = s.signUpContext.path ?? "/other";
+        let ofPath = subscribersByPath.get(path);
+        if (ofPath) {
+            ofPath.created = ofPath.created + 1;
+            if (s.confirmedAt) {
+                ofPath.confirmed = ofPath.confirmed + 1;
+            }
+        } else {
+            subscribersByPath.set(path, { path, created: 1, confirmed: s.confirmedAt ? 1 : 0 });
+        }
     });
 
     return new SubscribersStats(created, confirmed, unsubscribed,
         sortByField([...subscribersByPlacement.values()], "created", true, "confirmed", true, "placement"),
-        sortByField([...subscribersBySource.values()], "created", true, "confirmed", true, "source"));
+        sortByField([...subscribersBySource.values()], "created", true, "confirmed", true, "source"),
+        sortByField([...subscribersByPath.values()], "created", true, "confirmed", true, "path"));
 }
