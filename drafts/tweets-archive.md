@@ -189,4 +189,12 @@ For real time updates, there essentially are two approaches:
 
 As with everything, there are different tradeoffs to both approaches. Which one do you guys prefer? When? Why?
 
+For Real-time Updates, there are two main ways to do it:
+1. Push: the server keeps direct connections with clients and sends new data immediately.
+2. Pull: clients ask the server periodically, “Is there anything new?” If yes, they get it; if not, they try again later.
+
+Both have tradeoffs. Most of the time, Pull is enough. It works especially well when combined with long polling, like Kafka does, and can scale surprisingly well.
+
+But if you need truly real-time updates, where delays are simply not acceptable, Push is the only way.
+
 
