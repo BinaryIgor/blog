@@ -113,7 +113,7 @@ export async function start(appClock = new Clock(), appScheduler = new Scheduler
             if (config.fixedNewsletterSubscribeResponseStatus) {
                 setTimeout(() => res.sendStatus(config.fixedNewsletterSubscribeResponseStatus), 1000);
             } else {
-                await subscriberService.subscribe(subscriber);
+                await subscriberService.subscribe(subscriber, Web.sourceIp(req));
                 res.sendStatus(201);
             }
         } catch (e) {

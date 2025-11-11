@@ -28,7 +28,7 @@ export class SubscriberService {
     /**
      * @param {Subscriber} subscriber
      */
-    async subscribe(subscriber) {
+    async subscribe(subscriber, sourceIp) {
         try {
             this.#validateSubscriber(subscriber);
         } catch (e) {
@@ -45,7 +45,7 @@ export class SubscriberService {
             throw SubscriberExistsError.ofEmail(subscriber.email);
         }
 
-        const apiSubscriber = await this.#api.create(dbSubscriber.email);
+        const apiSubscriber = await this.#api.create(dbSubscriber.email, sourceIp);
 
         await this.#repository.updateOfEmail(dbSubscriber.email, {
             externalId: apiSubscriber.id,
@@ -359,8 +359,8 @@ export class ButtondownSubscriberApi {
         this.#maxRetry = maxRetry;
     }
 
-    async create(email) {
-        const response = await this.#executeRequestRetrying(() => this.#createRequest(email));
+    async create(email, ip) {
+        const response = await this.#executeRequestRetrying(() => this.#createRequest(email, ip));
         if (response.ok) {
             return await response.json();
         }
@@ -379,11 +379,11 @@ export class ButtondownSubscriberApi {
         throw new SubscriberValidationError("Invalid or suspicious subscriber data");
     }
 
-    #createRequest(email) {
+    #createRequest(email, ip) {
         return fetch(this.#subscribersUrl(), {
             method: "POST",
             headers: ButtondownApi.withJsonContentTypeAndAuthorizationHeaders(this.#apiKey),
-            body: JSON.stringify({ email_address: email })
+            body: JSON.stringify({ email_address: email, ip_address: ip })
         });
     }
 

@@ -41,6 +41,7 @@ export const routes = [
 let _nextCreateSubscriberResponse = {
     status: 201,
     expectedEmailAddress: '',
+    expectedIpAddress: '',
     body: {
         id: crypto.randomUUID(),
         source: "API",
@@ -54,6 +55,7 @@ export function nextCreateSubscriberResponse(response) {
 function createSubscriberHandler(req, res) {
     if (isAuthenticated(req)) {
         validateRequestMatchesSetResponseValue(req.body.email_address, _nextCreateSubscriberResponse.expectedEmailAddress);
+        validateRequestMatchesSetResponseValue(req.body.ip_address, _nextCreateSubscriberResponse.expectedIpAddress);
         if (_nextCreateSubscriberResponse.body) {
             res.status(_nextCreateSubscriberResponse.status)
                 .send(_nextCreateSubscriberResponse.body);
