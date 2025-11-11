@@ -96,7 +96,7 @@ export async function start(appClock = new Clock(), appScheduler = new Scheduler
             await analyticsService.addEvent(event);
         } catch (e) {
             if (e instanceof PingsFrequencyError) {
-                // known issue; there is some kind of edge case, not worth investigating (for know)
+                // known issue; there is some kind of repeating edge case that spams logs , not worth investigating (for know)
             } else {
                 Logger.logError(`Failed to add event ${JSON.stringify(req.body)}, ignoring it.`, e);
             }

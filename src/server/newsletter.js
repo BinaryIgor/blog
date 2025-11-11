@@ -27,6 +27,7 @@ export class SubscriberService {
 
     /**
      * @param {Subscriber} subscriber
+     * @param {string} sourceIp
      */
     async subscribe(subscriber, sourceIp) {
         try {
