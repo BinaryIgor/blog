@@ -111,7 +111,7 @@ export class AnalyticsService {
         const timestampAgoToCheck = Dates.timestampSecondsAgo(this.clock.nowTimestamp(), NO_PINGS_WINDOW_SECONDS);
         const notAllowedPings = await this.analyticsRepository.countPingsAfterTimestamp(event.visitorId, event.path, timestampAgoToCheck);
         if (notAllowedPings > 0) {
-            throw new Error(`No pings are allowed in the last ${NO_PINGS_WINDOW_SECONDS} seconds, but ${event.visitorId} has ${notAllowedPings} for ${event.path} path`);
+            throw new PingsFrequencyError(`No pings are allowed in the last ${NO_PINGS_WINDOW_SECONDS} seconds, but ${event.visitorId} has ${notAllowedPings} for ${event.path} path`);
         }
     }
 }
@@ -129,6 +129,13 @@ export class Event {
         this.path = path;
         this.type = type;
         this.data = data;
+    }
+}
+
+export class PingsFrequencyError extends Error {
+    constructor(message) {
+        super(message);
+        this.name = this.constructor.name;
     }
 }
 

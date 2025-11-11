@@ -246,18 +246,20 @@ serverIntTestSuite("Server integration tests", () => {
 
     it('creates new subscriber idempotently', async () => {
         const subscriberEmail = TestObjects.randomEmail();
+        const subscriberSourceIp = randomString();
         const subscriberSignUpContext = TestObjects.randomSubscriberSignUpContext();
         const createResponseBody = { id: crypto.randomUUID(), source: "Some source", type: "Some type" };
 
         ButtondownApiStub.nextCreateSubscriberResponse({
             status: 201,
             expectedEmailAddress: subscriberEmail,
+            expectedIpAddress: subscriberSourceIp,
             body: createResponseBody
         });
 
         const createSubscriberResponse = await testRequests.postNewsletterSubscriber({
             email: subscriberEmail, ...subscriberSignUpContext
-        });
+        }, { "X-Real-Ip": subscriberSourceIp });
         assertCreatedResponseCode(createSubscriberResponse);
 
         const expectedSubscriber = Subscriber.newOne(subscriberEmail, testClock.nowTimestamp(), subscriberSignUpContext,
@@ -394,7 +396,7 @@ function invalidEvents() {
 async function assertEmptyStatsResponse(response) {
     await assertJsonResponse(response, actualStats => {
         actualStats.forEach(as => {
-            assert.deepEqual(as.stats, { ...Stats.empty(), subscribers: SubscribersStats.empty()});
+            assert.deepEqual(as.stats, { ...Stats.empty(), subscribers: SubscribersStats.empty() });
         });
     });
 }
