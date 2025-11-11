@@ -1,6 +1,6 @@
 import express from "express";
 import cors from "cors";
-import { AnalyticsService, DeferredEventsSaver, StatsViews, SqliteAnalyticsRepository, Event } from "./analytics.js";
+import { AnalyticsService, DeferredEventsSaver, StatsViews, SqliteAnalyticsRepository, Event, PingsFrequencyError } from "./analytics.js";
 import {
     SubscriberService, SqliteSubscriberRepository, Subscriber, SubscriberSignUpContext, ButtondownSubscriberApi, NewsletterWebhookHandler,
     SubscriberExistsError, SubscriberValidationError,
@@ -95,7 +95,11 @@ export async function start(appClock = new Clock(), appScheduler = new Scheduler
                 reqBody.path, reqBody.type, reqBody.data);
             await analyticsService.addEvent(event);
         } catch (e) {
-            Logger.logError(`Failed to add event ${JSON.stringify(req.body)}, ignoring it.`, e);
+            if (e instanceof PingsFrequencyError) {
+                // known issue; there is some kind of edge case, not worth investigating (for know)
+            } else {
+                Logger.logError(`Failed to add event ${JSON.stringify(req.body)}, ignoring it.`, e);
+            }
         }
 
         res.sendStatus(200);
