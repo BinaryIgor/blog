@@ -283,7 +283,7 @@ Let's summarize the most important consequences of taking HTMX versus traditiona
 12. If we have a larger team of people working on the project, the development could be slower, since it is harder to parallelize the work. While frontend/backend separation that comes with SPA approach creates more abstractions, it does allow more people to work in parallel since they often just need to agree on the API contract and can then work largely independently
 13. If the server has multiple clients, we will need to write json (most likely) REST API for its other clients, be it mobile apps or other backends (machines). We could still use the HTMX approach, but if we have to expose an API for non-HTML clients anyway, it defeats the major purpose of HTMX and it is more natural to just write SPA
 
-Overall, HTMX looks like a great technology and an interesting paradigm that we can use to write our web-based apps/systems faster while making them simpler, thus easier to change and maintain. **As said, there are few caveats, and cases where it is just not a good fit, but I highly, highly recommend trying it out. 
+Overall, HTMX looks like a great technology and an interesting paradigm that we can use to write our web-based apps/systems faster while making them simpler, thus easier to change and maintain. **As said, there are few caveats and cases where it is just not a good fit, but I highly, highly recommend trying it out. 
 Let's simplify web development!**
 
 <div id="post-extras">
