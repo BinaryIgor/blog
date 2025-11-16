@@ -377,33 +377,28 @@
         }
 
         function subscribersComponent(stats, id) {
-            const byPlacementsHTML = stats.byPlacement.map(s => {
+            const byFormattedData = (prefix, s, stats) => {
                 const createdPercentage = stats.created > 0 ? formattedPercentage(s.created, stats.created) : '-';
-                const confirmedPercentage = stats.confirmed > 0 ? formattedPercentage(s.confirmed, stats.confirmed) : '-';
-                return `<div>${s.placement}: ${createdPercentage}/${confirmedPercentage}(%)
-                </div>`})
-                .join("\n");
+                let confirmationRate;
+                if (s.created > 0 && s.confirmed > 0) {
+                    confirmationRate = formattedPercentage(s.confirmed, s.created);
+                } else {
+                    confirmationRate = '-';
+                }
+                return `<div>${prefix}: ${s.created} (${createdPercentage}%), ${confirmationRate}% crate</div>`;
+            }
+            const byPlacementsHTML = stats.byPlacement.map(s => byFormattedData(s.placement, s, stats)).join("\n");
+            const bySourcesHTML = stats.bySource.map(s => byFormattedData(s.source, s, stats)).join("\n");
+            const byPathsHTML = stats.byPath.map(s => byFormattedData(s.path, s, stats)).join("\n");
 
-            const bySourcesHTML = stats.bySource.map(s => {
-                const createdPercentage = stats.created > 0 ? formattedPercentage(s.created, stats.created) : '-';
-                const confirmedPercentage = stats.confirmed > 0 ? formattedPercentage(s.confirmed, stats.confirmed) : '-';
-                return `<div>${s.source}: ${createdPercentage}/${confirmedPercentage}(%)
-                </div>`})
-                .join("\n");
-
-            const byPathsHTML = stats.byPath.map(s => {
-                const createdPercentage = stats.created > 0 ? formattedPercentage(s.created, stats.created) : '-';
-                const confirmedPercentage = stats.confirmed > 0 ? formattedPercentage(s.confirmed, stats.confirmed) : '-';
-                return `<div>${s.path}: ${createdPercentage}/${confirmedPercentage}(%)
-                </div>`})
-                .join("\n");
-
+            const active = stats.confirmed - stats.unsubscribed;
             return `
-            <div id=${id}><span class="cursor-pointer underline">Subscribers:</span> ${stats.created}/${stats.confirmed}</div>
+            <div id=${id}><span class="cursor-pointer underline">Subscribers:</span> ${stats.created}/${stats.confirmed}/${active}</div>
             <div class="mt-1 mb-2">
               <div>Created: ${stats.created}</div>
               <div>Confirmed: ${stats.confirmed}</div>
               <div>Unsubscribed: ${stats.unsubscribed}</div>
+              <div>Active: ${active}</div>
               <div class="my-1">${byPlacementsHTML}</div>
               <div class="my-1">${bySourcesHTML}</div>
               <div class="my-1">${byPathsHTML}</div>
