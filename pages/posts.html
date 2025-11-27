@@ -4,8 +4,23 @@
 <head>
     {{ head-tags.html }}
     <link rel="canonical" href="{{httpsDomain}}/posts.html">
-    {{ head-default-description-tag.html }}
+    <meta name="description" content="{{metaDescription}}">
     <title>Posts</title>
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Posts">
+    <meta property="og:description" content="{{metaDescription}}">
+    <meta property="og:url" content="{{httpsDomain}}/posts.html">
+    <meta property="og:image" content="{{ogImageUrl}}">
+    <meta property="og:site_name" content="{{siteName}}">
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebPage",
+        "url": "{{httpsDomain}}/posts.html"",
+        "name": "Posts",
+        "description": "{{metaDescription}}"
+    }
+    </script>
     {{ theme-script.html }}
 </head>
 

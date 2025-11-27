@@ -5,7 +5,32 @@
     {{ head-tags.html }}
     <link rel="canonical" href="{{httpsDomain}}/{{slug}}.html">
     <title>{{ title }}</title>
-    <meta name="description" content="{{ .js: postHtmlDescription() }}">
+    <meta name="description" content="{{ .js: postMetaDescription() }}">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="{{title}}">
+    <meta property="og:description" content="{{ .js: postMetaDescription() }}">
+    <meta property="og:url" content="{{httpsDomain}}/{{slug}}.html">
+    <meta property="og:image" content="{{ .js: postMetaImage() }}">
+    <meta property="og:site_name" content="{{siteName}}">
+    <meta property="article:author" content="{{httpsDomain}}/about.html">
+    {{ .js: postOgDatesMetaTags() }}
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "BlogPosting",
+        "headline": "{{ title }}",
+        "description": "{{ .js: postMetaDescription() }}",
+        "image": "{{ .js: postMetaImage() }}",
+        "url": "{{httpsDomain}}/{{slug}}.html",
+        {{ .js: postLdDates() }},
+        "author": {
+            "@id": "{{httpsDomain}}/#igor"
+        },
+        "publisher": {
+            "@id": "{{httpsDomain}}/#igor"
+        }
+    }
+    </script>
     {{ theme-script.html }}
 </head>
 

@@ -402,7 +402,7 @@ Even though they do not know anything about HTMX, it turns out that it is a bree
 
 {{ .js: newsletterSignUpPostEnd() }}
 
-### Related videos on my [YouTube channel]({{ youtubeChannelUrl }})
+### Related videos on my [YouTube channel]({{ youTubeChannelUrl }})
 1. [Similar concept, live coded on the video](https://www.youtube.com/watch?v=M4i-JQVLgfE)
 2. [Simple index.html with HTMX](https://www.youtube.com/watch?v=A3UB3tyDWa4)
 

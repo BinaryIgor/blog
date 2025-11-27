@@ -4,8 +4,35 @@
 <head>
     {{ head-tags.html }}
     <link rel="canonical" href="{{httpsDomain}}/about.html">
-    {{ head-default-description-tag.html }}
+    <meta name="description" content="Binary Igor about page - Igor Roztropiński, Software Developer and the author the blog.">
     <title>About Binary Igor</title>
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Person",
+        "@id": "{{httpsDomain}}/#igor",
+        "name": "Igor Roztropiński",
+        "url": "{{httpsDomain}}/about.html",
+        "sameAs": [
+            "https://github.com/BinaryIgor",
+            "https://www.linkedin.com/in/igroztr/",
+            "https://www.reddit.com/user/BinaryIgor",
+            "{{youTubeChannelUrl}}"
+        ]
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebPage",
+        "url": "{{httpsDomain}}/about.html",
+        "name": "About Igor Roztropiński",
+        "description": "Binary Igor about page - Igor Roztropiński, Software Developer and the author the blog.",
+        "mainEntity": {
+            "@id": "{{httpsDomain}}/#igor"
+        }
+    }
+    </script>
 </head>
 
 <body>

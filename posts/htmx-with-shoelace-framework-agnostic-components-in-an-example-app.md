@@ -403,7 +403,7 @@ In conclusion, as of now, *Shoelace Library* is the best and most comprehensive 
 
 {{ .js: newsletterSignUpPostEnd() }}
 
-### Related videos on my [YouTube channel]({{ youtubeChannelUrl }})
+### Related videos on my [YouTube channel]({{ youTubeChannelUrl }})
 1. [HTMX + Web Components](https://www.youtube.com/watch?v=M4i-JQVLgfE)
 2. [Flexible Web Components: Modal Container example](https://www.youtube.com/watch?v=eUQ5ne292Rk)
 3. [Extension of this blog post](https://www.youtube.com/watch?v=E9fRUi_kZyc) (*added 2024-10-19*)

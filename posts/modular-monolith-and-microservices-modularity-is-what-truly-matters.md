@@ -180,7 +180,7 @@ We should thoughtfully consider which strategy meets our particular requirements
 
 {{ .js: newsletterSignUpPostEnd() }}
 
-### Related videos on my [YouTube channel]({{ youtubeChannelUrl }})
+### Related videos on my [YouTube channel]({{ youTubeChannelUrl }})
 1. [Modular Monolith with Independently Deployable Modules in Java](https://www.youtube.com/watch?v=onV4449vs1g)
 
 ### Notes and resources

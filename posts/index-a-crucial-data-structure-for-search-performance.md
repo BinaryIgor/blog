@@ -444,7 +444,7 @@ As we saw, **Index is a crucial data structure for search performance**. Simple 
 
 {{ .js: newsletterSignUpPostEnd() }}
 
-### Related videos on my [YouTube channel]({{ youtubeChannelUrl }})
+### Related videos on my [YouTube channel]({{ youTubeChannelUrl }})
 1. <a href="https://www.youtube.com/watch?v=edAvauoS3L0">Index vs Inverted Index performance in Postgres</a>
 
 ### Notes and resources
