@@ -15,7 +15,7 @@
 
 **As [we already know](/modular-monolith-and-microservices-modularity-is-what-truly-matters.html), modularity matters more than whether we have one or many deployment units - single monolith or multiple services.** The principles used to decide how many modules a system should have, and what exactly they are, should be based on the functionalities the system provides and the responsibilities it carries. Module design should have little or nothing to do with whether we would like to have one, two, three or ten separate services (deployment units). Systems should be divided into logical, functional modules that are as independent as possible; in an ideal world, every module would not know anything about other modules and contain everything required to provide its functionality and fulfill its responsibilities.
 
-Today, we will not focus on the principles and heuristics by which to decide on the exact module structure. We will not reiterate well-known facts: **[microservices are not a cure for bad design (architecture)](https://www.ufried.com/blog/microservices_fallacy_5_design/) and are [rarely needed for performance reasons](/how-many-http-requests-can-a-single-machine-handle.html); they mostly serve as an organizational tool, allowing many teams to work in parallel more easily**. It is also debatable whether completely separate units of deployment (processes) are required to achieve this; I will address it in a future post/article (link will follow).
+Today, we will not focus on the principles and heuristics by which to decide on the exact module structure. We will not reiterate well-known facts: **[microservices are not a cure for bad design (architecture)](https://www.ufried.com/blog/microservices_fallacy_5_design/) and are [rarely needed for performance reasons](/how-many-http-requests-can-a-single-machine-handle.html); they mostly serve as an organizational tool, allowing many teams to work in parallel more easily**. It is also debatable whether completely separate units of deployment (processes) are required to achieve this; [I will address it in a future post/article](/modular-monolith-and-microservices-work-deployments-scalability.html) (*added 2025-11-28*).
 
 Instead, let's talk about *the Data - its ownership, boundaries, consistency and synchronization*.
 
@@ -299,7 +299,7 @@ As we have seen, **lack of clear data ownership and boundaries leads to opaque d
 \
 As we have also seen, **a couple of constraints and conventions are all that is needed to follow these rules**. As a consequence, dependencies of our modules are transparent. Each module internals are encapsulated; implementation details are hidden, preventing accidental coupling and keeping dependencies loose rather than tight. A module is defined as a data consistency unit, but we also have a clear way to synchronize data between them, accepting that it will be consistent, but *eventually*. This constraint is a crucial design factor in our system's overall module architecture.
 
-Let's then **build modules that own their data and respect the boundaries of others - getting systems that are simple, predictable, scalable and flexible in return!**
+**Let's then build modules that own their data and respect the boundaries of others - getting systems that are simple, predictable, scalable and flexible in return!**
 
 <div id="post-extras">
 
@@ -308,7 +308,7 @@ Let's then **build modules that own their data and respect the boundaries of oth
 
 ### Notes and resources
 
-1. [Modularity Posts](modularity-posts.html)
+1. [Modularity Posts](/modularity-posts.html)
 2. Some of the microservices fallacies:
     1. https://www.ufried.com/blog/microservices_fallacy_2_scalability/
     2. https://www.ufried.com/blog/microservices_fallacy_3_simplicity/

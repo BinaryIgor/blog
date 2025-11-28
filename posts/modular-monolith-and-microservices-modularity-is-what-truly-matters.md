@@ -129,7 +129,7 @@ To sum it up - **this architecture style should be used only if we really, reall
 ### Constrained microservices - just Services/Microliths {#implementations-of-modularity-constrained-microservices-just-services-microliths}
 
 We can eliminate many, most in fact, problems of microservices by adhering to one, simple rule:
-> When serving any external network request, synchronous or asynchronous, service can not make any network calls to other services, synchronous or asynchronous.
+> When serving any external network request, synchronous or asynchronous, a service can not make any network calls to other services, synchronous or asynchronous.
 
 Why this constraint is so powerful?
 * It forces us to split services in such a way that they have all data needed for their functionality, often simplifying and improving design of our system
@@ -184,21 +184,23 @@ We should thoughtfully consider which strategy meets our particular requirements
 1. [Modular Monolith with Independently Deployable Modules in Java](https://www.youtube.com/watch?v=onV4449vs1g)
 
 ### Notes and resources
-1. Excellent article about the consequences of different cohesion and coupling degrees in software architecture: https://codeopinion.com/solid-nope-just-coupling-and-cohesion/
-2. Highly pragmatic take on modularity: https://lorisleiva.com/on-modules-and-separation-of-concerns
-3. Why we should split workloads in our glorious, modular monolith: https://incident.io/blog/monolith. I did not touch on this dimension: we can deploy our modular monolith in a few different instances with profiles based on different workloads. For example: http server, scheduled jobs and events consumer.
-4. More about modular monoliths:
+
+1. [Modularity Posts](/modularity-posts.html)
+2. Excellent article about the consequences of different cohesion and coupling degrees in software architecture: https://codeopinion.com/solid-nope-just-coupling-and-cohesion/
+3. Highly pragmatic take on modularity: https://lorisleiva.com/on-modules-and-separation-of-concerns
+4. Why we should split workloads in our glorious, modular monolith: https://incident.io/blog/monolith. I did not touch on this dimension: we can deploy our modular monolith in a few different instances with profiles based on different workloads. For example: http server, scheduled jobs and events consumer.
+5. More about modular monoliths:
     1. https://www.kamilgrzybek.com/blog/posts/modular-monolith-primer
     2. https://microservices.io/post/architecture/2023/07/31/how-modular-can-your-monolith-go-part-1.html
     3. https://www.ufried.com/blog/microservices_fallacy_9_moduliths/
     4. https://www.youtube.com/watch?v=5OjqD-ow8GE
-5. Shopify still runs on a modular monolith: https://shopify.engineering/deconstructing-monolith-designing-software-maximizes-developer-productivity
-6. Interesting approach of having a modular monolith by default, but with the ability to deploy every module as a separate service on demand: https://www.nfsmith.ca/articles/monolith_by_default/
-7. More in-depth explanation, advantages and disadvantages of *microliths*: https://www.ufried.com/blog/microservices_fallacy_10_microliths/
-8. Why microservices do not improve team autonomy by default: https://www.ufried.com/blog/microservices_fallacy_4_reusability_autonomy/
-9. Why microservices do not lead to better design by default: https://www.ufried.com/blog/microservices_fallacy_5_design/
-10. A little exaggerated, but currently much needed criticism of microservices architecture and why most companies will never achieve the scale and have other factors in place that justifies using them: https://renegadeotter.com/2023/09/10/death-by-a-thousand-microservices.html
-11. More about micro frontends:
+6. Shopify still runs on a modular monolith: https://shopify.engineering/deconstructing-monolith-designing-software-maximizes-developer-productivity
+7. Interesting approach of having a modular monolith by default, but with the ability to deploy every module as a separate service on demand: https://www.nfsmith.ca/articles/monolith_by_default/
+8. More in-depth explanation, advantages and disadvantages of *microliths*: https://www.ufried.com/blog/microservices_fallacy_10_microliths/
+9. Why microservices do not improve team autonomy by default: https://www.ufried.com/blog/microservices_fallacy_4_reusability_autonomy/
+10. Why microservices do not lead to better design by default: https://www.ufried.com/blog/microservices_fallacy_5_design/
+11. A little exaggerated, but currently much needed criticism of microservices architecture and why most companies will never achieve the scale and have other factors in place that justifies using them: https://renegadeotter.com/2023/09/10/death-by-a-thousand-microservices.html
+12. More about micro frontends:
     1. https://martinfowler.com/articles/micro-frontends.html
     2. https://frontendmastery.com/posts/understanding-micro-frontends/
     3. https://micro-frontends.org
