@@ -67,22 +67,19 @@ export function postsPreview({ posts }) {
 }
 
 export function htmxPostsPreview({ posts }) {
-    return tagPostsPreview(posts, "htmx");
-}
-
-export function dbsPostsPreview({ posts }) {
-    return tagPostsPreview(posts, "dbs");
+    return tagPostsPreview({ posts, tag: "htmx" });
 }
 
 export function modularityPostsPreview({ posts }) {
-    return tagPostsPreview(posts, "modularity");
+    return tagPostsPreview({ posts, tag: "modularity" });
 }
 
 export function networksPostsPreview({ posts }) {
-    return tagPostsPreview(posts, "networks");
+    return tagPostsPreview({ posts, tag: "networks" });
 }
 
-function tagPostsPreview(posts, tag) {
+export function tagPostsPreview({ posts, tag }) {
+    console.log("Tag: ", tag);
     return postsPreview({ posts: posts.filter(p => p.tags && p.tags.includes(tag)) });
 }
 

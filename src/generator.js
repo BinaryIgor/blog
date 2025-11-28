@@ -89,15 +89,27 @@ async function allPages(pagesDir, postsData) {
     const fileNames = fs.readdirSync(pagesDir);
 
     let pages = {};
+    let pagesVariables = {};
 
     for (const fn of fileNames) {
-        const content = await fileContent(path.join(pagesDir, fn));
+        const rawContent = await fileContent(path.join(pagesDir, fn));
+        const fMatterContent = fontMatterRegex.exec(rawContent);
+
+        let content;
+        if (fMatterContent) {
+            content = rawContent.replace(fMatterContent[0], '');
+            pagesVariables[fn] = JSON.parse(fMatterContent[1]);
+        } else {
+            content = rawContent;
+        }
+
         pages[fn] = content;
     }
 
-    pages = pagesWithReplacedVariables(pages, config);
+    pages = pagesWithReplacedVariables(pages, pagesVariables, config);
 
     for (const [k, v] of Object.entries(pages)) {
+        const pageVariables = pagesVariables[k] ?? {};
         const matches = v.matchAll(templateVariablesRegex);
 
         let renderedPage = v;
@@ -112,7 +124,7 @@ async function allPages(pagesDir, postsData) {
             let templ = pages[trimmedName];
             if (!templ) {
                 if (isJsComponent(trimmedName)) {
-                    templ = renderedJsComponent(trimmedName, { ...config, posts: postsData });
+                    templ = renderedJsComponent(trimmedName, { ...config, posts: postsData, ...pageVariables });
                 }
                 if (!templ) {
                     throw new Error(`There is no page of ${trimmedName} name , but was expected by ${k} page`);
@@ -132,10 +144,11 @@ async function allPages(pagesDir, postsData) {
     return pages;
 }
 
-function pagesWithReplacedVariables(pages, variables) {
-    const replacedVariablesPages = { ...pages };
+function pagesWithReplacedVariables(pages, pagesVariables, variables) {
+    const replacedVariablesPages = {};
     for (const [k, v] of Object.entries(pages)) {
-        replacedVariablesPages[k] = templateWithReplacedVariables(v, variables, { skipMissing: true });
+        const pageVariables = { ...variables, ...(pagesVariables[k] ?? {}) };
+        replacedVariablesPages[k] = templateWithReplacedVariables(v, pageVariables, { skipMissing: true });
     }
     return replacedVariablesPages;
 }
