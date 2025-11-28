@@ -1,18 +1,23 @@
+---
+"title": "About Binary Igor",
+"slug": "about"
+---
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
     {{ head-tags.html }}
-    <link rel="canonical" href="{{httpsDomain}}/about.html">
-    <meta name="description" content="Binary Igor about page - Igor Roztropiński, Software Developer and the author the blog.">
-    <title>About Binary Igor</title>
+    {{ .js: linkCanonicalTag }}
+    <title>{{title}}</title>
+    {{ meta-default-description-tag.html }}
+    {{ .js: metaOgTags }}
     <script type="application/ld+json">
     {
         "@context": "https://schema.org",
         "@type": "Person",
         "@id": "{{ldIdentityUrl}}",
         "name": "Igor Roztropiński",
-        "url": "{{httpsDomain}}/about.html",
+        "url": "{{httpsDomain}}/{{slug}}.html",
         "sameAs": [
             "{{gitHubProfileUrl}}",
             "{{linkedInProfileUrl}}",
@@ -23,16 +28,17 @@
     </script>
     <script type="application/ld+json">
     {
-        "@context": "https://schema.org",
-        "@type": "WebPage",
-        "url": "{{httpsDomain}}/about.html",
-        "name": "About Igor Roztropiński",
-        "description": "Binary Igor about page - Igor Roztropiński, Software Developer and the author the blog.",
-        "mainEntity": {
-            "@id": "{{httpsDomain}}/#igor"
-        }
+      "@context": "https://schema.org",
+      "@type": "WebPage",
+      "url": "{{httpsDomain}}/{{slug}}.html",
+      "name": "{{title}},
+      "description": "{{metaDescription}}",
+      "mainEntity": {
+        "@id": "{{ldIdentityUrl}}"
+      }
     }
     </script>
+    {{ theme-script.html }}
 </head>
 
 <body>

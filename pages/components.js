@@ -7,6 +7,33 @@ const NewsletterSignUpPlacement = {
     LANDING: "LANDING"
 };
 
+export function linkCanonicalTag({ httpsDomain, slug }) {
+    return `<link rel="canonical" href="${httpsDomain}/${slug}.html">`;
+}
+
+export function metaOgTags({ title, metaDescription, description, httpsDomain, slug, ogImageUrl, siteName }) {
+    return `
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="${title}">
+    <meta property="og:description" content="${description ?? metaDescription}">
+    <meta property="og:url" content="${slug ? `${httpsDomain}/${slug}.html` : `${httpsDomain}/`}">
+    <meta property="og:image" content="${ogImageUrl}">
+    <meta property="og:site_name" content="${siteName}">`.trim();
+}
+
+export function ldJsonScriptTag({ httpsDomain, slug, title, metaDescription, description }) {
+    return `
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebPage",
+      "url": "${httpsDomain}/${slug}.html",
+      "name": "${title}",
+      "description": "${description ?? metaDescription}"
+    }
+    </script>`.trim();
+}
+
 export function postMetadata({ publishedAt }) {
     if (!publishedAt) {
         throw new Error("Published at is required, but wasn't supplied!");
@@ -19,22 +46,21 @@ export function postUpdatedAt({ publishedAt, updatedAt }) {
 }
 
 export function postOgTimeMetaTags({ publishedAt, updatedAt }) {
-    if (updatedAt) {
-        // formatting issue
-        return `
-        <meta property="article:published_time" content="${dateToIsoDateTime(publishedAt)}">
-    <meta property="article:modified_time" content="${dateToIsoDateTime(updatedAt)}">`.trim();
+    if (!updatedAt) {
+        return `<meta property="article:published_time" content="${dateToIsoDateTime(publishedAt)}">`;
     }
-    return `<meta property="article:published_time" content="${dateToIsoDateTime(publishedAt)}">`;
+    return `
+    <meta property="article:published_time" content="${dateToIsoDateTime(publishedAt)}">
+    <meta property="article:modified_time" content="${dateToIsoDateTime(updatedAt)}">`.trim();
 }
 
 export function postLdDates({ publishedAt, updatedAt }) {
-    if (updatedAt) {
-        return `
-        "datePublished": "${dateToIsoDateTime(publishedAt)}",
-        "dateModified": "${dateToIsoDateTime(updatedAt)}`.trim();
+    if (!updatedAt) {
+        return `"datePublished": "${dateToIsoDateTime(publishedAt)}"`;
     }
-    return `"datePublished": "${dateToIsoDateTime(publishedAt)}"`;
+    return `
+    "datePublished": "${dateToIsoDateTime(publishedAt)}",
+      "dateModified": "${dateToIsoDateTime(updatedAt)}`.trim();
 }
 
 export function postMetaDescription({ excerpt, description }) {
@@ -66,20 +92,7 @@ export function postsPreview({ posts }) {
     </ul>`;
 }
 
-export function htmxPostsPreview({ posts }) {
-    return tagPostsPreview({ posts, tag: "htmx" });
-}
-
-export function modularityPostsPreview({ posts }) {
-    return tagPostsPreview({ posts, tag: "modularity" });
-}
-
-export function networksPostsPreview({ posts }) {
-    return tagPostsPreview({ posts, tag: "networks" });
-}
-
 export function tagPostsPreview({ posts, tag }) {
-    console.log("Tag: ", tag);
     return postsPreview({ posts: posts.filter(p => p.tags && p.tags.includes(tag)) });
 }
 

@@ -1,33 +1,24 @@
+---
+"title": "Posts",
+"slug": "posts"
+---
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
     {{ head-tags.html }}
-    <link rel="canonical" href="{{httpsDomain}}/posts.html">
-    <meta name="description" content="{{metaDescription}}">
-    <title>Posts</title>
-    <meta property="og:type" content="website">
-    <meta property="og:title" content="Posts">
-    <meta property="og:description" content="{{metaDescription}}">
-    <meta property="og:url" content="{{httpsDomain}}/posts.html">
-    <meta property="og:image" content="{{ogImageUrl}}">
-    <meta property="og:site_name" content="{{siteName}}">
-    <script type="application/ld+json">
-    {
-        "@context": "https://schema.org",
-        "@type": "WebPage",
-        "url": "{{httpsDomain}}/posts.html"",
-        "name": "Posts",
-        "description": "{{metaDescription}}"
-    }
-    </script>
+    {{ .js: linkCanonicalTag }}
+    <title>{{title}}</title>
+    {{ meta-default-description-tag.html }}
+    {{ .js: metaOgTags }}
+    {{ .js: ldJsonScriptTag }}
     {{ theme-script.html }}
 </head>
 
 <body>
     {{ navigation.html }}
     <div class="py-6 px-4 text-center">
-        <h1 class="text-4xl font-bold mb-6">Posts</h1>
+        <h1 class="text-4xl font-bold mb-6">{{title}}</h1>
         <div class="max-content-width m-auto mb-16">
             <p class="my-6">Collection of all posts/articles published on the blog, ordered from the latest ones.</p>
             <p>For a more structured experience, here are some recurring themes:</p>

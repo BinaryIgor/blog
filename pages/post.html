@@ -16,19 +16,19 @@
     {{ .js: postOgTimeMetaTags() }}
     <script type="application/ld+json">
     {
-        "@context": "https://schema.org",
-        "@type": "BlogPosting",
-        "headline": "{{ title }}",
-        "description": "{{ .js: postMetaDescription() }}",
-        "image": "{{ .js: postMetaImage() }}",
-        "url": "{{httpsDomain}}/{{slug}}.html",
-        {{ .js: postLdDates() }},
-        "author": {
-            "@id": "{{ldIdentityUrl}}"
-        },
-        "publisher": {
-            "@id": "{{ldIdentityUrl}}"
-        }
+      "@context": "https://schema.org",
+      "@type": "BlogPosting",
+      "headline": "{{ title }}",
+      "description": "{{ .js: postMetaDescription() }}",
+      "image": "{{ .js: postMetaImage() }}",
+      "url": "{{httpsDomain}}/{{slug}}.html",
+      {{ .js: postLdDates() }},
+      "author": {
+        "@id": "{{ldIdentityUrl}}"
+      },
+      "publisher": {
+        "@id": "{{ldIdentityUrl}}"
+      }
     }
     </script>
     {{ theme-script.html }}

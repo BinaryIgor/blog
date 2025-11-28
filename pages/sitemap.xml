@@ -8,4 +8,7 @@
     <url>
         <loc>{{httpsDomain}}/about.html</loc>
     </url>
+    <url>
+        <loc>{{httpsDomain}}/newsletter.html</loc>
+    </url>
 </urlset>

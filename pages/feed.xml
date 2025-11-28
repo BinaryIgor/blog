@@ -2,16 +2,16 @@
 <feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">
   <link href="{{httpsDomain}}/feed.xml" rel="self" type="application/atom+xml" />
   <link href="{{httpsDomain}}/" rel="alternate" type="text/html" hreflang="en"/>
-  <id>{{httpsDomain}}</id>
+  <id>{{httpsDomain}}/</id>
   
-  <title>Binary Igor</title>
-  <subtitle>{{ descriptionLine1 }} {{ descriptionLine2 }}</subtitle>
-  <updated>{{ .js: feedUpdatedAt }}</updated>
+  <title>{{siteName}}</title>
+  <subtitle>{{descriptionLine1}} {{descriptionLine2}}</subtitle>
+  <updated>{{.js: feedUpdatedAt}}</updated>
 
   <author>
-    <name>Igor Roztropiński</name>
-    <email>{{ contactEmail }}</email>
+    <name>{{author}}</name>
+    <email>{{contactEmail}}</email>
   </author>
 
-  {{ .js: postsAtomFeed }}
+  {{.js: postsAtomFeed}}
 </feed>

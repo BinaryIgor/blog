@@ -97,8 +97,9 @@ async function allPages(pagesDir, postsData) {
 
         let content;
         if (fMatterContent) {
-            content = rawContent.replace(fMatterContent[0], '');
-            pagesVariables[fn] = JSON.parse(fMatterContent[1]);
+            content = rawContent.replace(fMatterContent[0], '').trim();
+            const fMatter = fMatterContent[1].trim();
+            pagesVariables[fn] = JSON.parse(fMatter.startsWith("{") ? fMatter : "{ " + fMatter + " }");
         } else {
             content = rawContent;
         }

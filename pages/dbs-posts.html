@@ -1,18 +1,18 @@
 ---
-{
-  "title": "DBs Posts",
-  "slug": "dbs-posts.html",
-  "tag": "dbs"
-}
+"title": "DBs Posts",
+"slug": "dbs-posts",
+"tag": "dbs"
 ---
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
     {{ head-tags.html }}
-    <link rel="canonical" href="{{httpsDomain}}/{{slug}}">
-    {{ head-default-description-tag.html }}
+    {{ .js: linkCanonicalTag }}
     <title>{{title}}</title>
+    {{ meta-default-description-tag.html }}
+    {{ .js: metaOgTags }}
+    {{ .js: ldJsonScriptTag }}
     {{ theme-script.html }}
 </head>
 

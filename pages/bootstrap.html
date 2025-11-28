@@ -1,11 +1,18 @@
+---
+"title": "Bootstrap",
+"slug": "bootstrap"
+---
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
     {{ head-tags.html }}
-    <link rel="canonical" href="{{httpsDomain}}/bootstrap.html">
-    {{ head-default-description-tag.html }}
-    <title>Bootstrap</title>
+    {{ .js: linkCanonicalTag }}
+    <title>{{title}}</title>
+    {{ meta-default-description-tag.html }}
+    {{ .js: metaOgTags }}
+    {{ .js: ldJsonScriptTag }}
+    {{ theme-script.html }}
 </head>
 
 <body>

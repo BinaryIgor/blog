@@ -1,17 +1,25 @@
+---
+"title": "Newsletter",
+"slug": "newsletter",
+"description": "Binary Log Newsletter - deep and broad dives, discoveries and distilled insights for driven developers who care about the craft."
+---
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
     {{ head-tags.html }}
-    <link rel="canonical" href="{{httpsDomain}}/newsletter.html">
-    {{ head-default-description-tag.html }}
-    <title>Newsletter</title>
+    {{ .js: linkCanonicalTag }}
+    <title>{{title}}</title>
+    <meta name="description" content="{{description}}">
+    {{ .js: metaOgTags }}
+    {{ .js: ldJsonScriptTag }}
+    {{ theme-script.html }}
 </head>
 
 <body>
     {{ navigation.html }}
     <div class="post py-6 px-4">
-        <h1 class="text-4xl font-bold mb-6">Newsletter</h1>
+        <h1 class="text-4xl font-bold mb-6">{{title}}</h1>
         <div class="max-content-width m-auto">
             {{ .js: newsletterSignUpLanding }}
         </div>
