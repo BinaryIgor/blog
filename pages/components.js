@@ -18,11 +18,12 @@ export function postUpdatedAt({ publishedAt, updatedAt }) {
     return updatedAt ? updatedAt : publishedAt;
 }
 
-export function postOgDatesMetaTags({ publishedAt, updatedAt }) {
+export function postOgTimeMetaTags({ publishedAt, updatedAt }) {
     if (updatedAt) {
+        // formatting issue
         return `
         <meta property="article:published_time" content="${dateToIsoDateTime(publishedAt)}">
-        <meta property="article:modified_time" content="${dateToIsoDateTime(updatedAt)}">`.trim();
+    <meta property="article:modified_time" content="${dateToIsoDateTime(updatedAt)}">`.trim();
     }
     return `<meta property="article:published_time" content="${dateToIsoDateTime(publishedAt)}">`;
 }
@@ -36,14 +37,13 @@ export function postLdDates({ publishedAt, updatedAt }) {
     return `"datePublished": "${dateToIsoDateTime(publishedAt)}"`;
 }
 
-export function postMetaDescription({ excerpt, metaDescription }) {
-    const description = metaDescription ? metaDescription : excerpt;
-    return stripHtml(description);
+export function postMetaDescription({ excerpt, description }) {
+    const metaDescription = description ? description : excerpt;
+    return stripHtml(metaDescription);
 }
 
-// TODO
-export function postMetaImage({ httpsDomain, defaultMetaImage, metaImage }) {
-    return metaImage ? `${httpsDomain}/${metaImage}` : `${httpsDomain}/todo.jpg`;
+export function postMetaImage({ httpsDomain, metaImage, ogImageUrl }) {
+    return metaImage ? `${httpsDomain}/${metaImage}` : ogImageUrl;
 }
 
 // Also used in post.html js, remember to keep in sync!

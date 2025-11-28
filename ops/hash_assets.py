@@ -8,7 +8,7 @@ ASSETS_DIRECTORY = os.environ.get('ASSETS_DIRECTORY',
                                   path.join(os.getcwd(), "..", "dist"))
 
 IMAGES_EXTENSIONS = ['jpg', 'jpeg', 'png', 'svg']
-EXCLUDE_PATHS = ["favicon.svg", "favicon-light.svg"]
+EXCLUDE_PATHS = ["favicon.svg", "favicon-light.svg", "og-image.png"]
 
 LINK_TAG = "link"
 HREF_ATTR = "href"

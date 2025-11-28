@@ -1,6 +1,6 @@
 Hey there! 
 
-I am Igor Roztropiński, a programmer passionate about unraveling the mysteries of programming, software engineering, software development, computer science, networks and the inner workings of binary and digital machines. In a nutshell, I want to become the absolute best software developer that my potential allows me to be. Here, I invite you to this journey.
+I am Igor Roztropiński, a programmer passionate about unraveling the mysteries of programming, software development, software engineering, computer science, networks and the inner workings of binary machines. In a nutshell, I want to become the absolute best software developer that my potential allows me to be. Here, I invite you to this journey.
 
 <figure>
     <img id="profile-image" src="{{ imagesPath }}/profile.png">
