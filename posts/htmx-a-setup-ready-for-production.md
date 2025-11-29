@@ -37,16 +37,16 @@ We have three main components:
 Simple app that has users and allows them to add notes to every day, and also to browse their history. This is how it looks:
 
 <figure>
-    <img src="{{ imagesPath }}/htmx-a-setup-ready-for-production/signing-in.png" loading="lazy">
+    <img src="{{ imagesPath }}/htmx-a-setup-ready-for-production/signing-in.png" loading="lazy" alt="Signing in">
     <figcaption>Signing in</figcaption>
 </figure>
 
 <figure>
-    <img src="{{ imagesPath }}/htmx-a-setup-ready-for-production/adding-note-to-day.png" loading="lazy">
+    <img src="{{ imagesPath }}/htmx-a-setup-ready-for-production/adding-note-to-day.png" loading="lazy" alt="Adding note to day">
     <figcaption>Adding note to day</figcaption>
 </figure>
 <figure>
-    <img src="{{ imagesPath }}/htmx-a-setup-ready-for-production/days-history.png" loading="lazy">
+    <img src="{{ imagesPath }}/htmx-a-setup-ready-for-production/days-history.png" loading="lazy" alt="Days history">
     <figcaption>Days history</figcaption>
 </figure>
 
