@@ -204,7 +204,7 @@ Server has started on port 8080!
 
 As we are now running the app locally on http://localhost:8080, we can see its main page:
 <figure>
-  <img src="{{ imagesPath }}/htmx-with-shoelace/main-page.png" loading="lazy">
+  <img src="{{ imagesPath }}/htmx-with-shoelace/main-page.png" loading="lazy" alt="Books main page with some categories to choose from">
   <figcaption>Books main page with some categories to choose from</figcaption>
 </figure>
 
@@ -265,7 +265,7 @@ What is most interesting here:
   * dynamically change `goToCategoryButton` HTMX attributes so it works with a newly selected category
 
 <figure>
-  <img src="{{ imagesPath }}/htmx-with-shoelace/category-selected.png" loading="lazy">
+  <img src="{{ imagesPath }}/htmx-with-shoelace/category-selected.png" loading="lazy" alt="Books main page with category selected">
   <figcaption>Books main page with category selected</figcaption>
 </figure>
 
@@ -273,14 +273,14 @@ What is most interesting here:
 After selecting one of the categories, HTMX issues a request to the `/books/:category` endpoint and replaces the `#page` div content with received category's books:
 
 <figure>
-  <img src="{{ imagesPath }}/htmx-with-shoelace/books-list.png" loading="lazy">
+  <img src="{{ imagesPath }}/htmx-with-shoelace/books-list.png" loading="lazy" alt="Some philosophy books">
   <figcaption>Some philosophy books</figcaption>
 </figure>
 
 We can also click on the *"Book Error Trigger: Code of Shadows"* book to see how an error might look:
 
 <figure>
-  <img src="{{ imagesPath }}/htmx-with-shoelace/book-error.png" loading="lazy">
+  <img src="{{ imagesPath }}/htmx-with-shoelace/book-error.png" loading="lazy" alt="Something just went wrong">
   <figcaption>Something just went wrong</figcaption>
 </figure>
 
@@ -311,21 +311,21 @@ document.addEventListener("htmx:responseError", e => {
 After clicking on a book, we can enjoy its page:
 
 <figure>
-  <img src="{{ imagesPath }}/htmx-with-shoelace/book-page.png" loading="lazy">
+  <img src="{{ imagesPath }}/htmx-with-shoelace/book-page.png" loading="lazy" alt="Book page">
   <figcaption>Book page</figcaption>
 </figure>
 
 By clicking on the *Purchase* button, we might get an offer (`<sl-dialog>` again):
 
 <figure>
-  <img src="{{ imagesPath }}/htmx-with-shoelace/get-book-offer.png" loading="lazy">
+  <img src="{{ imagesPath }}/htmx-with-shoelace/get-book-offer.png" loading="lazy" alt="About to get a book offer">
   <figcaption>About to get a book offer</figcaption>
 </figure>
 
 For input, we use `<sl-input>`. There is some inline validation as well:
 
 <figure>
-  <img src="{{ imagesPath }}/htmx-with-shoelace/get-book-offer-error.png" loading="lazy">
+  <img src="{{ imagesPath }}/htmx-with-shoelace/get-book-offer-error.png" loading="lazy" alt="Some data is required to get an offer">
   <figcaption>Some data is required to get an offer</figcaption>
 </figure>
 
@@ -370,7 +370,7 @@ What is worth noting here:
 \
 Finally, after submitting the form we will get an offer:
 <figure>
-  <img src="{{ imagesPath }}/htmx-with-shoelace/get-book-offer-success.png" loading="lazy">
+  <img src="{{ imagesPath }}/htmx-with-shoelace/get-book-offer-success.png" loading="lazy" alt="We got an offer!">
   <figcaption>We got an offer!</figcaption>
 </figure>
 

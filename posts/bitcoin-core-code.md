@@ -28,7 +28,7 @@ Let's take a look and find out!
 
 [As we can see on GitHub](https://github.com/bitcoin/bitcoin), code is mostly C/C++ with some Python (functional/integration tests) and scripts:
 <figure>
-  <img src="{{ imagesPath }}/bitcoin-core-code/repo-structure.png" loading="lazy">
+  <img src="{{ imagesPath }}/bitcoin-core-code/repo-structure.png" loading="lazy" alt="Bitcoin Core repo structure">
   <figcaption>Bitcoin Core repo structure</figcaption>
 </figure>
 
@@ -218,7 +218,7 @@ cmake \
 ```
  Test (code) coverage report:
 <figure>
-  <img src="{{ imagesPath }}/bitcoin-core-code/test-coverage-summary.png" loading="lazy">
+  <img src="{{ imagesPath }}/bitcoin-core-code/test-coverage-summary.png" loading="lazy" alt="Bitcoin Core test coverage summary">
   <figcaption>Bitcoin Core test coverage summary</figcaption>
 </figure>
 
@@ -233,7 +233,7 @@ Branches      51.7%  224711  116177
 
 More detailed view:
 <figure>
-  <img src="{{ imagesPath }}/bitcoin-core-code/test-coverage-details.png" loading="lazy">
+  <img src="{{ imagesPath }}/bitcoin-core-code/test-coverage-details.png" loading="lazy" alt="Bitcoin Core test coverage details">
   <figcaption>Bitcoin Core test coverage details</figcaption>
 </figure>
 
