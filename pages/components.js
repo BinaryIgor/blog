@@ -60,7 +60,7 @@ export function postLdDates({ publishedAt, updatedAt }) {
     }
     return `
     "datePublished": "${dateToIsoDateTime(publishedAt)}",
-      "dateModified": "${dateToIsoDateTime(updatedAt)}`.trim();
+      "dateModified": "${dateToIsoDateTime(updatedAt)}"`.trim();
 }
 
 export function postMetaDescription({ excerpt, description }) {
