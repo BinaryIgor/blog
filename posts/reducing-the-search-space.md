@@ -234,7 +234,7 @@ We just went over most commonly used strategies to reduce the search space of ou
 
 {{ .js: newsletterSignUpPostEnd() }}
 
-### Related videos on my [YouTube channel]({{ youtubeChannelUrl }})
+### Related videos on my [YouTube channel]({{ youTubeChannelUrl }})
 1. [Partitioning](https://www.youtube.com/watch?v=xVZsFpYa1Yc)
 2. [Sharding](https://www.youtube.com/watch?v=B5aHDQFDiuw)
 

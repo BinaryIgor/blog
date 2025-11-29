@@ -1,1 +1,1 @@
-Sitemap: https://{{domain}}/sitemap.xml
+Sitemap: {{httpsDomain}}/sitemap.xml

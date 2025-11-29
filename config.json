@@ -1,9 +1,12 @@
 {
     "author": "Igor Roztropiński",
+    "siteName": "Binary Igor",
     "descriptionLine1": "Some things are either 0 or I.",
     "descriptionLine2": "Deeper and broader thinking on commanding binary machines; for programmers and developers driven not just to implement, but to understand deeply, innovate, design and lead.",
-    "domain": "binaryigor.com",
+    "metaDescription": "Binary Igor is a blog about programming, software development, software engineering, computer science, networks and the inner workings of binary machines.",
     "httpsDomain": "https://binaryigor.com",
+    "ogImageUrl": "https://binaryigor.com/assets/og-image.png",
+    "ldIdentityUrl": "https://binaryigor.com/#igor",
     "pagesToRender": [
         "index.html",
         "posts.html",
@@ -26,6 +29,9 @@
     "assetsPath": "/assets",
     "imagesPath": "/assets/images",
     "contactEmail": "igor@binaryigor.com",
-    "youtubeChannelUrl": "https://www.youtube.com/@BinaryIgor",
+    "gitHubProfileUrl": "https://github.com/BinaryIgor",
+    "redditProfileUrl": "https://www.reddit.com/user/BinaryIgor/",
+    "linkedInProfileUrl": "https://www.linkedin.com/in/igroztr/",
+    "youTubeChannelUrl": "https://www.youtube.com/@BinaryIgor",
     "lastFeedUpdateAtAfterLatestPost": "2025-02-06T16:45:00Z"
 }

@@ -53,7 +53,6 @@
             let last7DaysStats = null;
             let last30DaysStats = null;
             let last90DaysStats = null;
-            let last180DaysStats = null;
             let last365DaysStats = null;
             let allTimeStats = null;
 
@@ -66,8 +65,6 @@
                     last30DaysStats = statsOfPeriodView(s.stats, s.calculatedAt, postsByPath);
                 } else if (s.period == "last90Days") {
                     last90DaysStats = statsOfPeriodView(s.stats, s.calculatedAt, postsByPath);
-                } else if (s.period == "last180Days") {
-                    last180DaysStats = statsOfPeriodView(s.stats, s.calculatedAt, postsByPath);
                 } else if (s.period == "last365Days") {
                     last365DaysStats = statsOfPeriodView(s.stats, s.calculatedAt, postsByPath);
                 } else if (s.period == "allTime") {
@@ -82,7 +79,6 @@
                 last7Days: last7DaysStats,
                 last30Days: last30DaysStats,
                 last90Days: last90DaysStats,
-                last180Days: last180DaysStats,
                 last365Days: last365DaysStats,
                 allTime: allTimeStats
             };
@@ -143,11 +139,6 @@
                     id: "last-90-days",
                     title: "Last 90 days",
                     stats: stats.last90Days
-                },
-                {
-                    id: "last-180-days",
-                    title: "Last 180 days",
-                    stats: stats.last180Days
                 },
                 {
                     id: "last-365-days",
@@ -463,12 +454,16 @@
             const pings = Math.round(stats.pings.all.events / days);
             const pingers = Math.round(stats.pings.all.ids / days);
 
+            const activeSubscribers = stats.subscribers.confirmed - stats.subscribers.unsubscribed;
+            const subscribers = Math.round(activeSubscribers * 10 / days) / 10;
+
             return `
             <h3 class="text-2xl font-bold mt-8 mb-2">Daily, ${period}</h3>
             <div>Views/Visitors: ${eventsIdsString({ events: views, ids: visitors })}</div>
             <div>Ip hashes: ${scaledNumber(ipHashes)}</div>
             <div>Scrolls/Scrollers: ${eventsIdsString({ events: scrolls, ids: scrollers })}</div>
-            <div>Pings/Pingers: ${eventsIdsString({ events: pings, ids: pingers })}</div>`;
+            <div>Pings/Pingers: ${eventsIdsString({ events: pings, ids: pingers })}</div>
+            <div>Subscribers: ${scaledNumber(subscribers)}</div>`;
         }
 
         // on purpose, for better "Loading..." UX

@@ -1,6 +1,6 @@
 Hey there! 
 
-I am Igor Roztropiński, a programmer passionate about unraveling the mysteries of programming, software engineering, software development, computer science, networks and the inner workings of binary and digital machines. In a nutshell, I want to become the absolute best software developer that my potential allows me to be. Here, I invite you to this journey.
+I am Igor Roztropiński, a programmer passionate about unraveling the mysteries of programming, software development, software engineering, computer science, networks and the inner workings of binary machines. In a nutshell, I want to become the absolute best software developer that my potential allows me to be. Here, I invite you to this journey.
 
 <figure>
     <img id="profile-image" src="{{ imagesPath }}/profile.png">
@@ -17,7 +17,7 @@ If you, like me, possess an insatiable curiosity and a relentless desire to dive
 
 If some of that sounds a little too vague or abstract, worry not! I have been working in the industry since 2017 and have shipped, collaborated on and maintained many production-ready and production-used systems - both at work, for companies, and in my own ventures and projects. I am deeply, deeply curious about answers to those questions, but ultimately, they serve us to architect and deliver software that provides value in the real world, for real people.
 
-You can also join my **[Newsletter](/newsletter.html)**, check out my code on **[GitHub](https://github.com/BinaryIgor)** or find me on **[Reddit](https://www.reddit.com/user/BinaryIgor/)** and **[LinkedIn](https://www.linkedin.com/in/igroztr/)**. And if you like videos more, I sometimes post on **[YouTube]({{youtubeChannelUrl}})** under the same name (Binary Igor) as well.
+You can also join my **[Newsletter](/newsletter.html)**, check out my code on **[GitHub]({{gitHubProfileUrl}})** or find me on **[Reddit]({{redditProfileUrl}})** and **[LinkedIn]({{linkedInProfileUrl}})**. And if you like videos more, I sometimes post on **[YouTube]({{youTubeChannelUrl}})** under the same name (Binary Igor) as well.
 
 Finally, if you have valuable feedback, questions, corrections or an extension of my work, or just want to get in touch, shoot me an email at <span id="contact-email" class="font-bold">{{ contactEmail }}</span>. 
 

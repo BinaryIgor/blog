@@ -7,6 +7,33 @@ const NewsletterSignUpPlacement = {
     LANDING: "LANDING"
 };
 
+export function linkCanonicalTag({ httpsDomain, slug }) {
+    return `<link rel="canonical" href="${httpsDomain}/${slug}.html">`;
+}
+
+export function metaOgTags({ title, metaDescription, description, httpsDomain, slug, ogImageUrl, siteName }) {
+    return `
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="${title}">
+    <meta property="og:description" content="${description ?? metaDescription}">
+    <meta property="og:url" content="${slug ? `${httpsDomain}/${slug}.html` : `${httpsDomain}/`}">
+    <meta property="og:image" content="${ogImageUrl}">
+    <meta property="og:site_name" content="${siteName}">`.trim();
+}
+
+export function ldJsonScriptTag({ httpsDomain, slug, title, metaDescription, description }) {
+    return `
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebPage",
+      "url": "${httpsDomain}/${slug}.html",
+      "name": "${title}",
+      "description": "${description ?? metaDescription}"
+    }
+    </script>`.trim();
+}
+
 export function postMetadata({ publishedAt }) {
     if (!publishedAt) {
         throw new Error("Published at is required, but wasn't supplied!");
@@ -14,9 +41,35 @@ export function postMetadata({ publishedAt }) {
     return `<span>${publishedAt}</span>`;
 }
 
-export function postHtmlDescription({ excerpt, htmlDescription }) {
-    const description = htmlDescription ? htmlDescription : excerpt;
-    return stripHtml(description);
+export function postUpdatedAt({ publishedAt, updatedAt }) {
+    return updatedAt ? updatedAt : publishedAt;
+}
+
+export function postOgTimeMetaTags({ publishedAt, updatedAt }) {
+    if (!updatedAt) {
+        return `<meta property="article:published_time" content="${dateToIsoDateTime(publishedAt)}">`;
+    }
+    return `
+    <meta property="article:published_time" content="${dateToIsoDateTime(publishedAt)}">
+    <meta property="article:modified_time" content="${dateToIsoDateTime(updatedAt)}">`.trim();
+}
+
+export function postLdDates({ publishedAt, updatedAt }) {
+    if (!updatedAt) {
+        return `"datePublished": "${dateToIsoDateTime(publishedAt)}"`;
+    }
+    return `
+    "datePublished": "${dateToIsoDateTime(publishedAt)}",
+      "dateModified": "${dateToIsoDateTime(updatedAt)}`.trim();
+}
+
+export function postMetaDescription({ excerpt, description }) {
+    const metaDescription = description ? description : excerpt;
+    return stripHtml(metaDescription);
+}
+
+export function postMetaImage({ httpsDomain, metaImage, ogImageUrl }) {
+    return metaImage ? `${httpsDomain}/${metaImage}` : ogImageUrl;
 }
 
 // Also used in post.html js, remember to keep in sync!
@@ -39,23 +92,7 @@ export function postsPreview({ posts }) {
     </ul>`;
 }
 
-export function htmxPostsPreview({ posts }) {
-    return tagPostsPreview(posts, "htmx");
-}
-
-export function dbsPostsPreview({ posts }) {
-    return tagPostsPreview(posts, "dbs");
-}
-
-export function modularityPostsPreview({ posts }) {
-    return tagPostsPreview(posts, "modularity");
-}
-
-export function networksPostsPreview({ posts }) {
-    return tagPostsPreview(posts, "networks");
-}
-
-function tagPostsPreview(posts, tag) {
+export function tagPostsPreview({ posts, tag }) {
     return postsPreview({ posts: posts.filter(p => p.tags && p.tags.includes(tag)) });
 }
 
@@ -113,12 +150,12 @@ function newsletterSignUp(placement, preface, additionalContainerClasses) {
         placeholder="you@domain.ext" type="email" name="email" autocomplete="email">
     <span class="text-error block my-2 hidden text-sm" data-email-error>Valid email is required.</span>
     <div class="opacity-80 text-sm my-2"><a href="/privacy-policy.html" class="underline">Privacy Policy</a></div>`
-    .trim();
+        .trim();
     const footerHTML = `
     <div class="italic mt-8">
         <div>No spam, no fluff - pure signal. Unsubscribe anytime.</div>
     </div>`
-    .trim();
+        .trim();
 
     let buttonsHTML;
     if (placement == NewsletterSignUpPlacement.LANDING) {
@@ -126,21 +163,21 @@ function newsletterSignUp(placement, preface, additionalContainerClasses) {
         <div class="flex justify-end mt-8">
             <div class="newsletter-sign-up-button" data-join-button>Join Log</div>
         </div>`
-        .trim();
+            .trim();
     } else if (placement == NewsletterSignUpPlacement.POST_FLOATING) {
         buttonsHTML = `
         <div class="flex justify-between mt-8">
             <div class="newsletter-sign-up-button mr-4" data-close-button>Not Yet</div>
             <div class="newsletter-sign-up-button ml-4" data-join-button>Join Log</div>
         </div>`
-        .trim();
+            .trim();
     } else {
         buttonsHTML = `
         <div class="flex justify-between mt-8">
             <div class="newsletter-sign-up-button mr-4" data-joined-already-button>Already In</div>
             <div class="newsletter-sign-up-button ml-4" data-join-button>Join Log</div>
         </div>`
-        .trim();
+            .trim();
     }
 
     if (placement == NewsletterSignUpPlacement.POST_FLOATING) {
@@ -154,7 +191,7 @@ function newsletterSignUp(placement, preface, additionalContainerClasses) {
             ${buttonsHTML}
             </div>
         </div>`
-        .trim();
+            .trim();
     }
 
     let containerClasses = "border-2 border-solid border-primary-text-faded rounded p-6";
@@ -169,18 +206,18 @@ function newsletterSignUp(placement, preface, additionalContainerClasses) {
     ${footerHTML}
     ${buttonsHTML}
     </div>`
-    .trim();
+        .trim();
 }
 
 export function feedUpdatedAt({ posts, lastFeedUpdateAtAfterLatestPost = null }) {
-    const latestPostPublishedAt = dateToAtomFeedDateTime(posts[0].publishedAt);
+    const latestPostPublishedAt = dateToIsoDateTime(posts[0].publishedAt);
     if (lastFeedUpdateAtAfterLatestPost == null) {
         return latestPostPublishedAt;
     }
     return latestPostPublishedAt > lastFeedUpdateAtAfterLatestPost ? latestPostPublishedAt : lastFeedUpdateAtAfterLatestPost;
 }
 
-function dateToAtomFeedDateTime(date) {
+function dateToIsoDateTime(date) {
     return `${date}T00:00:00Z`;
 }
 
@@ -203,8 +240,8 @@ export function postsAtomFeed({ httpsDomain, posts }) {
         <title>${p.title}</title>
         <id>${httpsDomain}/${p.slug}</id>
         <link href="${httpsDomain}/${p.slug}.html" rel="alternate" type="text/html" />
-        <published>${dateToAtomFeedDateTime(p.publishedAt)}</published>
-        <updated>${dateToAtomFeedDateTime(p.updatedAt ? p.updatedAt : p.publishedAt)}</updated>
+        <published>${dateToIsoDateTime(p.publishedAt)}</published>
+        <updated>${dateToIsoDateTime(p.updatedAt ? p.updatedAt : p.publishedAt)}</updated>
         <summary>${stripHtml(p.excerpt)}</summary>
     </entry>`).join("\n");
 }

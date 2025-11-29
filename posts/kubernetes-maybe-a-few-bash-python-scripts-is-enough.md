@@ -131,7 +131,7 @@ So, let's forge ahead and keep simplifying!
 
 {{ .js: newsletterSignUpPostEnd() }}
 
-### Related videos on my [YouTube channel]({{ youtubeChannelUrl }})
+### Related videos on my [YouTube channel]({{ youTubeChannelUrl }})
 1. [Collecting metrics and logs from Docker containers](https://www.youtube.com/watch?v=68PzQNsuSWc)
 2. [Visualizing container metrics in Grafana](https://www.youtube.com/watch?v=YGJN8lsiWvk)
 3. [How many HTTP requests can a Single Machine handle?](https://www.youtube.com/watch?v=NsdDIBll-Lw)
