@@ -8,7 +8,7 @@ import path from 'path';
 import {
     SqliteAnalyticsRepository, Stats, StatsView, StatsViews,
     LAST_DAY_STATS_VIEW, LAST_7_DAYS_STATS_VIEW, LAST_30_DAYS_STATS_VIEW,
-    LAST_90_DAYS_STATS_VIEW, LAST_180_DAYS_STATS_VIEW, LAST_365_DAYS_STATS_VIEW, ALL_TIME_STATS_VIEW
+    LAST_90_DAYS_STATS_VIEW, LAST_365_DAYS_STATS_VIEW, ALL_TIME_STATS_VIEW
 } from "../../src/server/analytics.js";
 import { TestClock, randomNumber } from "../test-utils.js";
 import { TestObjects, VIEW_EVENT_TYPE, SCROLL_EVENT_TYPE, PING_EVENT_TYPE } from "../test-objects.js";
@@ -20,7 +20,6 @@ const DAY_SECONDS = 24 * 60 * 60;
 const SEVEN_DAYS_SECONDS = DAY_SECONDS * 7;
 const THIRTY_DAYS_SECONDS = DAY_SECONDS * 30;
 const NINENTY_DAYS_SECONDS = DAY_SECONDS * 90;
-const ONE_HUNDRED_EIGHTY_DAYS_SECONDS = DAY_SECONDS * 180;
 const THREE_HUNDRED_SIXTY_FIVE_DAYS_SECONDS = DAY_SECONDS * 365;
 const ALL_TIME_STATS_DAYS_SECONDS = THREE_HUNDRED_SIXTY_FIVE_DAYS_SECONDS * 5;
 const DB_PATH = path.join("/tmp", `${crypto.randomUUID()}.db`);
@@ -115,11 +114,6 @@ function statsViewTestCases() {
 
             beforeNowOffset: NINENTY_DAYS_SECONDS,
             viewPeriod: LAST_90_DAYS_STATS_VIEW
-        },
-        {
-
-            beforeNowOffset: ONE_HUNDRED_EIGHTY_DAYS_SECONDS,
-            viewPeriod: LAST_180_DAYS_STATS_VIEW
         },
         {
 
