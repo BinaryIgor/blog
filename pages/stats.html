@@ -19,7 +19,6 @@
 
     {{ init-script.html }}
     <script type="module">
-        const TOP_VISITORS_BY_SOURCE = 15;
         const statsContainer = document.getElementById("stats-container");
         const statsLoader = document.getElementById("stats-loader");
 
@@ -85,13 +84,10 @@
         }
 
         function statsOfPeriodView(stats, calculatedAtTimestamp, postsByPath) {
-            const limitedVisitorsBySource = stats.visitorsBySource.length > TOP_VISITORS_BY_SOURCE ?
-                stats.visitorsBySource.slice(0, TOP_VISITORS_BY_SOURCE) : stats.visitorsBySource;
-
             return {
                 ...stats,
                 calculatedAt: new Date(calculatedAtTimestamp).toISOString(),
-                topVisitorsBySource: limitedVisitorsBySource.map(v => {
+                topVisitorsBySource: stats.visitorsBySource.map(v => {
                     return {
                         source: v.source,
                         visitors: v.visitors,
