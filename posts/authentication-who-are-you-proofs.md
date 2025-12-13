@@ -6,7 +6,8 @@
     "publishedAt": "2025-12-14",
     "excerpt": "In many software systems, various actions can be performed only as some kind of Identity. We must <em>authenticate</em> ourselves by proving who we are. Authentication fundamentally is just an answer to this question: <em>who are you and can you prove it is true?</em>",
     "researchLog": [ 1, 1.5, 1, 0.5, 1 ],
-    "writingLog": [ 4, 1, 3, 2, 2, 1.5, 1, 1, 3, 3, 2.5, 4, 1, 6.5 ]
+    "writingLog": [ 4, 1, 3, 2, 2, 1.5, 1, 1, 3, 3, 2.5, 4, 1, 6.5 ],
+    "tags": ["auth"]
 }
 ---
 
@@ -170,7 +171,7 @@ Here, *Temporary Identity Proofs* are not involved. We simply generate static [A
 
 ## Delegated Authentication
 
-This is where service A delegates authentication to service B. The most widely used example of this strategy is the `Sign In with X` feature: allowing signing in to a website/app using existing account (identity) from Google, Apple, LinkedIn, Facebook, GitHub, etc.
+Lastly, service A may delegate authentication to service B, putting trust in its process. The most widely used example of this strategy is the `Sign In with X` feature: allowing signing in to a website/app using existing account (identity) from Google, Apple, LinkedIn, Facebook, GitHub, etc.
 
 In this context, [OpenID Connect (OIDC) standard/protocol](https://en.wikipedia.org/wiki/OpenID) is often taken advantage of, but the principle is more universal:
 * service A wants to use service B as identity provider (IDP)
