@@ -123,7 +123,7 @@
         const params = new URLSearchParams(location.search);
         const paramsSource = params.get("source") ?? params.get("utm_source");
         if (paramsSource) {
-            newSource = paramsSource;
+            newSource = limitedString(paramsSource);
         } else if (document.referrer) {
             newSource = new URL(document.referrer).host;
         } else {
@@ -147,6 +147,10 @@
         return null;
     }
 
+    function limitedString(s, limit = 80) {
+        return s && s.length > limit ? s.substring(0, limit) : s;
+    }
+
     function sessionMedium() {
         const savedMedium = sessionMediumFromStorage();
         if (savedMedium) {
@@ -154,7 +158,7 @@
         }
 
         const params = new URLSearchParams(location.search);
-        let newMedium = params.get("medium") ?? params.get("utm_medium");
+        const newMedium = limitedString(params.get("medium") ?? params.get("utm_medium"));
 
         if (newMedium) {
             localStorage.setItem(SESSION_MEDIUM_KEY, JSON.stringify({ medium: newMedium, sessionId: getOrGenerateSessionId() }));
@@ -185,7 +189,7 @@
         }
 
         const params = new URLSearchParams(location.search);
-        let newCampaign = params.get("campaign") ?? params.get("utm_campaign");
+        const newCampaign = limitedString(params.get("campaign") ?? params.get("utm_campaign"));
 
         if (newCampaign) {
             localStorage.setItem(SESSION_CAMPAIGN_KEY, JSON.stringify({ campaign: newCampaign, sessionId: getOrGenerateSessionId() }));

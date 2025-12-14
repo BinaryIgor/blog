@@ -109,7 +109,8 @@
             emailError.classList.add("hidden");
             joinButton.textContent = joiningMessage;
 
-            const subscriberResult = await sendNewSubscriber(input.value, placement);
+            const emailToSend = input.value.trim();
+            const subscriberResult = await sendNewSubscriber(emailToSend, placement);
             if (subscriberResult == sendSubscriberResult.FAILURE ||
                 subscriberResult == sendSubscriberResult.INVALID_EMAIL
             ) {
@@ -195,7 +196,8 @@
 
             emailError.classList.add("hidden");
             joinButton.textContent = joiningMessage;
-            const subscriberResult = await sendNewSubscriber(input.value, placement);
+            const emailToSend = input.value.trim();
+            const subscriberResult = await sendNewSubscriber(emailToSend, placement);
             if (subscriberResult == sendSubscriberResult.FAILURE ||
                 subscriberResult == sendSubscriberResult.INVALID_EMAIL
             ) {
