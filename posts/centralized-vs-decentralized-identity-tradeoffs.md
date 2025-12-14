@@ -7,7 +7,7 @@
     "excerpt": "Social media and various other online platforms require some sort of identity to provide their services and to customize experience to us. What does it mean exactly and how does it work in practice? Currently most, if not all, of these platforms - Twitter/X, YouTube, Reddit, LinkedIn, Facebook, Instagram, GitHub, Amazon, Spotify and the like - are <em>account-based</em>.",
     "researchLog": [ 2, 1, 1, 1 ], 
     "writingLog": [ 1, 2, 1, 1, 1, 1.5, 1.5, 1.5, 3, 1.5, 2, 3, 2.5, 1.5],
-    "tags": ["networks"]
+    "tags": ["networks", "auth"]
 }
 ---
 
