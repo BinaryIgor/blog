@@ -8,7 +8,7 @@
     "excerpt": "I love simplicity. Complexity is our eternal enemy and Simplicity is beautiful; rarely something is as simple as SQLite: a single-file, in-process database. It runs inside our application, there is no need for a separate database server.",
     "researchLog": [ 1, 3, 4.5, 7, 2, 2.5 ],
     "writingLog": [ 4.5, 1.5, 8, 3, 2, 1, 3, 1.5, 3 ],
-    "tags": ["dbs", "performance"]
+    "tags": ["dbs", "performance", "deep-dive"]
 }
 ---
 

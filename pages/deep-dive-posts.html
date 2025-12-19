@@ -1,0 +1,30 @@
+---
+"title": "DeepDive Posts",
+"slug": "deep-dive-posts",
+"tag": "deep-dive"
+---
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    {{ head-tags.html }}
+    {{ .js: linkCanonicalTag }}
+    <title>{{title}}</title>
+    {{ meta-default-description-tag.html }}
+    {{ .js: metaOgTags }}
+    {{ .js: ldJsonScriptTag }}
+    {{ theme-script.html }}
+</head>
+
+<body>
+    {{ navigation.html }}
+    <div class="pt-6 px-4 text-center">
+        <h1 class="text-4xl font-bold mb-8">{{title}}</h1>
+        {{ .js: tagPostsPreview }}
+        {{ all-posts-footer.html }}
+    </div>
+    {{ footer.html }}
+    {{ init-script.html }}
+</body>
+
+</html>
