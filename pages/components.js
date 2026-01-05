@@ -235,13 +235,15 @@ function stripHtml(text) {
 }
 
 export function postsAtomFeed({ httpsDomain, posts }) {
+    const sanitizeForXml = text => text.replaceAll("&", "&amp;");
+    
     return posts.map(p => `
     <entry xml:lang="en">
-        <title>${p.title}</title>
+        <title>${sanitizeForXml(p.title)}</title>
         <id>${httpsDomain}/${p.slug}</id>
         <link href="${httpsDomain}/${p.slug}.html" rel="alternate" type="text/html" />
         <published>${dateToIsoDateTime(p.publishedAt)}</published>
         <updated>${dateToIsoDateTime(p.updatedAt ? p.updatedAt : p.publishedAt)}</updated>
-        <summary>${stripHtml(p.excerpt)}</summary>
+        <summary>${sanitizeForXml(stripHtml(p.excerpt))}</summary>
     </entry>`).join("\n");
 }
