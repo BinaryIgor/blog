@@ -184,7 +184,7 @@ function newsletterSignUp(placement, preface, additionalContainerClasses) {
         return `
         <div class="bg-modal hidden fixed top-0 left-0 h-full w-full z-40" data-newsletter-sign-up-modal
             data-newsletter-sign-up-placement="${placement}">
-            <div data-modal-content class="max-content-width w-11/12 top-1/2 left-1/2 absolute -translate-x-1/2 -translate-y-1/2 bg-primary border-2 border-solid border-primary-text-faded rounded p-6">
+            <div data-modal-content class="max-content-width w-11/12 max-h-11/12 overflow-auto top-1/2 left-1/2 absolute -translate-x-1/2 -translate-y-1/2 bg-primary border-2 border-solid border-primary-text-faded rounded p-6">
             ${headerHTML}
             ${inputHTML}
             ${footerHTML}
@@ -236,7 +236,7 @@ function stripHtml(text) {
 
 export function postsAtomFeed({ httpsDomain, posts }) {
     const sanitizeForXml = text => text.replaceAll("&", "&amp;");
-    
+
     return posts.map(p => `
     <entry xml:lang="en">
         <title>${sanitizeForXml(p.title)}</title>
