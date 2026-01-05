@@ -5,7 +5,8 @@
     "publishedAt": "2023-11-04",
     "excerpt": "When we write software, we intend it to be used in some, usually predefined and desirable, way. All software has some specification, either explicitly described or implicitly assumed. How do we know that it (software) works? We can test it manually, using all of its features and functionalities. Unfortunately, this approach breaks down pretty fast.",
     "researchLog": [1, 3, 2],
-    "writingLog": [ 1, 3, 5, 3.5, 1.5, 3, 1 ]
+    "writingLog": [ 1, 3, 5, 3.5, 1.5, 3, 1 ],
+    "tags": ["deep-dive"]
 }
 ---
 

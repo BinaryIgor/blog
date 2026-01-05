@@ -7,7 +7,8 @@
     "updatedAt": "2025-09-01",
     "excerpt": "As we have recently analyzed how the Bitcoin P2P Network works, let's delve into arguably its most important software component - the Bitcoin Core, the reference client and the reference implementation of all aspects of the Bitcoin system. With the main goal of having a few questions answered...",
     "researchLog": [ 2.5, 2.5, 1, 2.5, 1, 7.5, 5, 3, 3, 2.5, 4, 7, 1.5, 3.5, 1.5, 3.5, 3, 1.5, 4, 1 ], 
-    "writingLog": [ 1, 2, 2, 2, 1, 2, 2, 1.5, 1, 4, 1.5, 3, 3, 0.5, 2, 6, 1.5, 2, 1, 1, 1 ]
+    "writingLog": [ 1, 2, 2, 2, 1, 2, 2, 1.5, 1, 4, 1.5, 3, 3, 0.5, 2, 6, 1.5, 2, 1, 1, 1 ],
+    "tags": ["deep-dive"]
 }
 ---
 

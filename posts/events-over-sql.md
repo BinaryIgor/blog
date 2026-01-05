@@ -7,7 +7,7 @@
     "excerpt": "<em>Events</em>, and messages more broadly, are a battle-tested way of component to component, process to process, and/or application to application communication ... What if we were able to just use a type of SQL database already managed on our infrastructure to build a scalable <em>Events Platform</em> on top of it?",
     "researchLog": [ 2, 1, 1 ], 
     "writingLog": [ 1, 1, 2, 1.5, 1, 3, 1.5, 2, 1, 2.5, 1, 4 ],
-    "tags": [ "dbs" ]
+    "tags": [ "dbs", "performance"]
 }
 ---
 

@@ -7,7 +7,7 @@
     "excerpt": "In many systems, various actions can only be performed as some kind of Identity. We must <em>authenticate</em> ourselves by proving <em>who we are</em>. Authentication fundamentally is just an answer to this question: <em>who are you and can you prove it is true?</em>",
     "researchLog": [ 1, 1.5, 1, 0.5, 1 ],
     "writingLog": [ 4, 1, 3, 2, 2, 1.5, 1, 1, 3, 3, 2.5, 4, 1, 6.5, 3.5 ],
-    "tags": ["auth"]
+    "tags": ["auth", "deep-dive"]
 }
 ---
 

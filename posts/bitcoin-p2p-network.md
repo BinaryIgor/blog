@@ -7,7 +7,7 @@
     "excerpt": "<em>Peer-to-Peer (P2P) Networks</em> introduce a completely new set of challenges. In the traditional <em>Client-Server Architecture</em>, there is a server and client ... Things work completely differently in the <em>Peer-to-Peer (P2P) Networks</em>. These networks consist of equal peers that communicate directly with each other. Their goal is to be as decentralized as possible and not to have any single point of control or failure.",
     "researchLog": [ 2, 2, 1 ], 
     "writingLog": [ 2, 5, 2, 2.5, 3, 1.25, 3, 3.5, 0.5, 1, 1],
-    "tags": ["networks"]
+    "tags": ["networks", "deep-dive"]
 }
 ---
 

@@ -290,7 +290,7 @@
     }
 
     .post a {
-        @apply break-words underline;
+        @apply wrap-break-word underline;
     }
 
     #post-extras {

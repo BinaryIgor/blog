@@ -65,6 +65,8 @@ function analyticsAllowedPaths() {
         "/bootstrap.html",
         "/dbs-posts.html",
         "/modularity-posts.html",
+        "/deep-dive-posts.html",
+        "/performance-posts.html",
         "/htmx-posts.html",
         "/auth-posts.html",
         "/networks-posts.html",

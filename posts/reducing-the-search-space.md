@@ -5,7 +5,7 @@
     "publishedAt": "2023-09-09",
     "excerpt": "Whenever I think about optimizing certain data query, be it SQL (mostly) or NoSQL, I find it useful to think about these problems as search space problems. In other words, how much data need to be scanned/checked in order for my query to be fulfilled?",
     "writingLog": [ 1, 2, 3.5, 4, 1, 1.5 ],
-    "tags": ["dbs"]
+    "tags": ["dbs", "performance"]
 }
 ---
 
