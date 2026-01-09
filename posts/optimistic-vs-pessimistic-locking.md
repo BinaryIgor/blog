@@ -208,7 +208,7 @@ SELECT ... FOR UPDATE NOWAIT;
 
 UPDATE ...
 
-COMMIT:
+COMMIT;
 ```
 if another process has already acquired the lock, an error is thrown. We might then simply catch it and inform the user/client that there already was an update in progress and they have to do something about it - in the exact same way as we do in the optimistic locking!
 
