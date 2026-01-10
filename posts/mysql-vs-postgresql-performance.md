@@ -938,7 +938,7 @@ And here is a much more detailed summary of all test cases:
 
 ### Notes and resources
 
-1. Setup and tests source code, so you can experiment, run tests on your own and compare the results: https://github.com/BinaryIgor/code-examples/tree/master/sql-dbs-performance
+1. Setup and tests source code, so you can experiment, run tests on your own and compare the results  (*MariaDB added on 2026-01-08*): https://github.com/BinaryIgor/code-examples/tree/master/sql-dbs-performance
 2. Deep dive into [MySQL and PostgreSQL differences](/mysql-and-postgresql-different-approaches.html)
 3. [Performance Posts](/performance-posts.html)
 4. Batch inserts (100 rows) of the `item` table were characterized by significantly lower throughput than of the `order` table, for both DBs - *200 QPS vs 1883 QPS* for MySQL and *211 QPS vs 3535 QPS* for Postgres. It is attributable to the fact that the `item` has the `name VARCHAR(255)` column as well as the `description TEXT` column. Especially the description column, as it stores descriptions of 5 to 1000 in length texts in our case, which significantly impacts inserts  performance (most likely updates too).   
