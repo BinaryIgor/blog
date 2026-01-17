@@ -1,47 +1,83 @@
 #!/bin/bash
 set -euo pipefail
 
-USERNAME=binaryigor
-
-# Create user and setup passwordless sudo to simplify admin tasks
-useradd --create-home --shell "/bin/bash" --groups sudo "${USERNAME}"
-echo "${USERNAME} ALL=(ALL) NOPASSWD: ALL" | EDITOR='tee -a' visudo
+# Create user and set up passwordless sudo to simplify admin tasks
+useradd --create-home --shell "/bin/bash" --groups sudo "ops"
+echo "ops ALL=(ALL) NOPASSWD: ALL" | EDITOR='tee -a' visudo
 
 # Create SSH directory for sudo user and move keys over
-home_directory="$(eval echo ~${USERNAME})"
+home_directory="$(eval echo ~ops)"
 mkdir --parents "${home_directory}/.ssh"
-cp /root/.ssh/authorized_keys "${home_directory}/.ssh"
-chmod 0700 "${home_directory}/.ssh"
-chmod 0600 "${home_directory}/.ssh/authorized_keys"
-chown --recursive "${USERNAME}":"${USERNAME}" "${home_directory}/.ssh"
+cp /root/.ssh/authorized_keys "$home_directory/.ssh"
+chmod 0700 "$home_directory/.ssh"
+chmod 0600 "$home_directory/.ssh/authorized_keys"
+chown --recursive "ops":"ops" "$home_directory/.ssh"
 
-# Disable root SSH login with password
-sed --in-place 's/^PermitRootLogin.*/PermitRootLogin no/g' /etc/ssh/sshd_config
+# SSH hardening; files are processed in lexical order, lower-numbered ones taking precedence
+ssh_hardening_file="/etc/ssh/sshd_config.d/00-hardening.conf"
+
+cat > "$ssh_hardening_file" <<EOF
+# Authentication
+PermitRootLogin no
+PasswordAuthentication no
+ChallengeResponseAuthentication no
+KerberosAuthentication no
+GSSAPIAuthentication no
+PubkeyAuthentication yes
+AuthenticationMethods publickey
+
+# Authorization
+AllowUsers ops
+
+# Reduce attack surface
+AllowAgentForwarding no
+AllowTcpForwarding no
+X11Forwarding no
+PermitTunnel no
+# allow interactive sessions
+PermitTTY yes
+
+# Session hygiene
+ClientAliveInterval 300
+# If two keepalive probes are sent and no response is received, SSH daemon will terminate the session;
+# with the config, a dead session lives for at most ~10 minutes
+ClientAliveCountMax 2
+# After the TCP connection is established, the client has 30 seconds to successfully authenticate
+LoginGraceTime 30
+MaxAuthTries 5
+EOF
+
+chmod 0644 "$ssh_hardening_file"
+
 if sshd -t -q; then systemctl restart ssh; fi
 
-# Install docker & allow non sudo access
-apt update
-# install a few prerequisite packages which let apt use packages over HTTPS:
-apt install apt-transport-https ca-certificates curl software-properties-common -y
-# Then add the GPG key for the official Docker repository to your system
-curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
-# Add the Docker repository to APT sources
-add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu focal stable"
-# This will also update our package database with the Docker packages from the newly added repo.
-# Make sure you are about to install from the Docker repo instead of the default Ubuntu repo:
-apt-cache policy docker-ce
-# Finally, install Docker:
-apt install docker-ce -y
+# Install docker & allow non-sudo access
+apt-get update
+apt-get install ca-certificates curl
+install -m 0755 -d /etc/apt/keyrings
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+chmod a+r /etc/apt/keyrings/docker.asc
 
-# Allow non root access to a docker
-usermod -aG docker ${USERNAME}
-# limit docker logs size
+# Add the repository to apt sources:
+echo \
+  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
+  $(. /etc/os-release && echo "${UBUNTU_CODENAME:-$VERSION_CODENAME}") stable" | \
+  sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+apt-get update
+
+# Finally, install docker:
+apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin -y
+
+# Allow non-root access to docker;
+# the docker group is created automatically during Docker installation on most Linux distributions
+usermod -aG docker ops
+# Limit docker logs size
 echo '{
   "log-driver": "json-file",
   "log-opts": {
-    "max-size": "20m",
+    "max-size": "10m",
     "max-file": "5"
   }
 }' > /etc/docker/daemon.json
-# Restart to use new config
+# Restart docker so that changes can take an effect
 systemctl restart docker
