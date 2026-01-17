@@ -140,7 +140,7 @@ export function newsletterSignUpLanding() {
 
 // trimming is crucial: without it, markdown -> html conversion is broken when embedding this component inside markdown!
 function newsletterSignUp(placement, preface, additionalContainerClasses) {
-    let headerMessage = `Get the <span class="font-bold">Binary Log</span> Newsletter - deep dives, broad explorations, hard-won insights and rigorous thinking. For developers driven to master the craft:`;
+    let headerMessage = `Get the <span class="font-bold">Binary Log</span> Newsletter - deep dives, broad explorations and distilled insights. For curious developers driven to master the craft:`;
     if (preface) {
         headerMessage = preface + " " + headerMessage;
     }
