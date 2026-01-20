@@ -257,7 +257,7 @@ We can imagine more complex processes as well:
     2. rollback or compensate first state change in module A, in response to the failure event
     3. if failure in A, retry
 
-**Here, we have a process that not only spans two modules, but might also need to be rolled back or compensated; it is perfectly doable and we have an established, battle-proven way of doing so: the [Saga Pattern](https://microservices.io/patterns/data/saga.html)**. Essentially, it is a sequence of local (per-module) transactions, the course of which is coordinated by events. I plan to write a dedicated, more detailed post about long running processes and distributed transactions of this kind, so stay tuned (link will follow).
+**Here, we have a process that not only spans two modules, but might also need to be rolled back or compensated; it is perfectly doable and we have an established, battle-proven way of doing so: the [Saga Pattern](https://microservices.io/patterns/data/saga.html)**. Essentially, it is a sequence of local (per-module) transactions, the course of which is coordinated by events. I plan to write [a dedicated, more detailed post about long-running processes and distributed transactions](/data-consistency-transactions-delays-processes.html) of this kind, so stay tuned (*added 2026-01-26*).
 
 ### Non-transactional data {#synchronization-non-transactional-data}
 
