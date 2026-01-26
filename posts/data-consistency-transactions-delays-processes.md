@@ -192,7 +192,7 @@ Eventual consistency is still there, it is unavoidable - neither *commit* nor *r
 **Another crucial part of Sagas are *compensations*: they handle state transitions in case of failures, at any possible step of the process.** Opposite to simple database transactions, they are not general but concrete and specific to the process. Why is it so? *Sagas* operate on the higher abstraction level - reversing them means rolling back one or a few already committed database transactions. To make it crystal clear, let's work on another example:
 * there is some Order Creation Process (Saga), spanning a few services: *order-service*, *inventory-service*, *payment-service* and *shipment-service*
 * it starts in *order-service* - order is created and the associated `OrderCreated` event gets published
-* on `OrderCreated` event: *inventory-service* checks if needed products are available; if yes, `InvetoryReservationAccepted` event is published; if not, `InvetoryReservationRejected` event is published
+* on `OrderCreated` event: *inventory-service* checks if needed products are available; if yes, `InventoryReservationAccepted` event is published; if not, `InventoryReservationRejected` event is published
 * on `InventoryReservationRejected` event: associated order is soft deleted by being marked with CANCELLED state and INVENTORY_NOT_AVAILABLE status; it is no longer active but possible to read and analyze
 * on `InventoryReservationAccepted` event: *order-service* updates related order state and publishes `PaymentRequested` event
 * on `PaymentRequested` event: *payment-service* prepares payment request and sends back instructions in `PaymentPrepared` event
