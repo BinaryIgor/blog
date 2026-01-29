@@ -95,7 +95,7 @@ Then, there is the [SqlDbPerformanceTests.java](https://github.com/BinaryIgor/co
 
 The test cases are designed to run in a few rounds - executing set `QUERIES_RATE` per second for the configured `QUERIES_TO_EXECUTE` in total. Depending on the specific scenario, these numbers range from a few hundreds per second to tens of thousands; in most cases, `QUERIES_TO_EXECUTE = 10 * QUERIES_RATE`.
 
-To run tests (locally), there are a few scripts that spin up MySQL and PostgreSQL instances in Docker and build and run the `SqlDbPerformanceTests.java` in Docker as well, with the chosen test case & DB. It all comes down to executing:
+To run tests (locally), there are a few scripts that spin up MySQL and PostgreSQL instances in Docker and build and run `SqlDbPerformanceTests.java` in Docker as well, with the chosen test case & DB. It all comes down to executing:
 ```
 # builds and runs MySQL in Docker
 ./build_and_run_mysql.bash
@@ -338,7 +338,7 @@ Percentile 90: 2.665 ms | 0.921 ms
 Percentile 99: 12.721 ms | 2.59 ms
 Percentile 99.9: 25.143 ms | 14.47 m
 ```
-The Elephant seems to have some steam left; reruning it with `75 000 QPS`:
+The Elephant seems to have some steam left; rerunning it with `75 000 QPS`:
 ```
 PostgreSQL
 
