@@ -7,7 +7,7 @@
     "excerpt": "HTMX is a promising technology that simplifies many things when building web applications/systems ... That is great when it comes to local development and simple experiments, but what about Production?",
     "researchLog": [ ],
     "writingLog": [ 2.5, 1, 1, 8, 8, 3, 4 ],
-    "tags": [ "htmx" ]
+    "tags": [ "htmx", "ui" ]
 }
 ---
 

@@ -5,7 +5,7 @@
     "publishedAt": "2023-09-22",
     "excerpt": "Nowadays, when we develop web-based app/system it is most likely built as SPA, which is a single page application. We should ask, why have we done that? Why have we switched from multi page applications, where the browser supported all of these functions out of the box, functions that we now need to recreate by writing custom JavaScript code?",
     "writingLog": [ 1.5, 4.5, 1.5, 0.5, 4, 1.5, 2.5, 1],
-    "tags": [ "htmx", "deep-dive"] 
+    "tags": [ "htmx", "deep-dive", "ui" ] 
 }
 ---
 
@@ -77,7 +77,7 @@ Response: {
 ```
 After establishing this contract we would then need to:
 * implement it by writing and testing backend app
-* implement it by writing and testing fronted app
+* implement it by writing and testing frontend app
 * test it all together
 
 **That is... complexity, lots of moving parts**. In practice, most often it is either two people/teams doing that, or if you do it on your own (respect for all generalists/fullstacks!), there is a lot of mental gymnastics and context switching involved (different programming models, often also languages, development and runtime environments etc.). Fundamentally, there is just tons of code to write and test. We have to model, implement and test our domain and its rules two times. Certainly there are some contextual differences, but many things do duplicate, as we need to work in the following flow (more or less):
