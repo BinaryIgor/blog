@@ -2,7 +2,6 @@ import os
 from os import path
 from hashlib import sha256
 import re
-import codecs
 
 ASSETS_DIRECTORY = os.environ.get('ASSETS_DIRECTORY',  
                                   path.join(os.getcwd(), "..", "dist"))
@@ -157,13 +156,20 @@ def new_css_line(old_line, css_names_map):
 
 
 def replace_in_line(tag_idx, attr_idx, old_line, names_map):
+    last_name_idx = -1
+    last_name = None
     if 0 < tag_idx < attr_idx:
         for name in names_map:
             name_idx = old_line.find(name)
             if name_idx > attr_idx:
-                old_name_len = len(name)
-                new_line = f'{old_line[0:name_idx]}{names_map[name]}{old_line[(name_idx + old_name_len):]}'
-                return new_line
+                last_name_idx = name_idx
+                last_name = name
+
+    if last_name_idx > -1:
+        old_name_len = len(last_name)
+        new_line = f'{old_line[0:last_name_idx]}{names_map[last_name]}{old_line[(last_name_idx + old_name_len):]}'
+        return new_line
+
     return ''
 
 

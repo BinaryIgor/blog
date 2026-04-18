@@ -5,7 +5,8 @@
   "startedAt": "2025-03-02",
   "publishedAt": "2025-03-08",
   "excerpt": "To establish what these differences are, we will go through two implementations of <em>Projects App</em> - one as <em>HTMX MPA</em> and the other as <em>React SPA</em>. This makes our comparison more concrete and objective, since the same functionalities were implemented twice, only approach - MPA vs SPA - is what makes these cases different.",
-  "writingLog": [ 2, 1.5, 2.5, 3.5, 2.25, 5, 2 ]
+  "writingLog": [ 2, 1.5, 2.5, 3.5, 2.25, 5, 2 ],
+  "tags": ["ui"]
 }
 ---
 
