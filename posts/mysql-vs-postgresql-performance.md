@@ -175,8 +175,6 @@ for the upcoming select, update, delete and mixed test cases.
 
 Let's then finally run the tests and inspect results!
 
-{{ .js: newsletterSignUpPostMid() }}
-
 ### Inserts {#results-inserts}
 
 **INSERT USERS** - inserts `500 000` users with `10 000 QPS` (queries per second) rate wanted, one by one:
@@ -933,8 +931,7 @@ And here is a much more detailed summary of all test cases:
     * *Postgres wins with 3.72x higher throughput, latency lower 9.34x by mean and 8.77x by 99th percentile*
 
 <div id="post-extras">
-
-{{ .js: newsletterSignUpPostEnd() }}
+<hr class="post-delimiter">
 
 ### Notes and resources
 

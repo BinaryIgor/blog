@@ -42,8 +42,6 @@ Ideally, our tests should:
 \
 **Sadly, all of these characteristics are almost never achieved in practice.** That is why we have various test types and each of them gives us a different set of tradeoffs, which also differ depending on the type of software that we work on. The tradeoffs could be completely different depending on whether we write server-rendered web app, a single page application consuming REST API, monolithic REST API with multiple clients, microservices-based REST API or a software library/tool that does something very specific, and is intended to be used by other machines/software, not humans. Let's then explore different test types and see what exactly they bring to the table.
 
-{{ .js: newsletterSignUpPostMid() }}
-
 ## Unit Tests
 
 These are the most basic tests that check whether a single unit works in isolation. What is a unit? It is a function or an object/class. 
@@ -180,8 +178,7 @@ If they are used mostly in isolation, it makes tremendous sense to unit test the
 As we have learned, tests are a crucial component of the software development process. They secure the present and future correctness of our code, help us understand it, promote good design of the codebase and support its evolution as the requirements change, if done correctly. If done badly, they give us a false impression of correctness and hamper future changes and evolution. Let's then do them correctly, by focusing on how our software is used in reality, and not on vanity metrics like *90%+ code coverage*. If we succeed at that, we can rest assured that our software works right now and will work in the future as we continue to change it.
 
 <div id="post-extras">
-
-{{ .js: newsletterSignUpPostEnd() }}
+<hr class="post-delimiter">
 
 ### Related videos on my [YouTube channel]({{ youTubeChannelUrl }})
 1. [Integration tests of REST API in Java 21](https://www.youtube.com/watch?v=rBoZfQ3z3gU)

@@ -51,8 +51,6 @@ Some of my choices might seem arbitrary, so a few words of comment might be help
 \
 In general, I would argue that many, if not most, systems that we create these days are highly over-engineered and can be greatly simplified, without taking away any of their functionality or ability to handle load. I acknowledge that there are edge cases, when we do need nearly infinite scalability and resources, but the reality is that 99% of systems are neither Google nor Amazon or Netflix. Keeping this in mind, let's assess how Kubernetes aligns with our infrastructure requirements and needs.
 
-{{ .js: newsletterSignUpPostMid() }}
-
 ## Kubernetes - why so much Complexity?
 
 Before we can answer this question, let's try to define what Kubernetes is:
@@ -129,8 +127,7 @@ In conclusion: if we have a single or few teams, we should just build a modular 
 So, let's forge ahead and keep simplifying!
 
 <div id="post-extras">
-
-{{ .js: newsletterSignUpPostEnd() }}
+<hr class="post-delimiter">
 
 ### Related videos on my [YouTube channel]({{ youTubeChannelUrl }})
 1. [Collecting metrics and logs from Docker containers](https://www.youtube.com/watch?v=68PzQNsuSWc)

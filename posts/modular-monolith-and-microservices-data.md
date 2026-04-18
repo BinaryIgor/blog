@@ -110,8 +110,6 @@ Not only are we coupled to the users DB schema as before, but we also modify the
 
 The last thing we want is to work in a mess of this kind - where nobody owns the data, and it is difficult to tell who modifies it or who is affected by changes in its schema, format or source. **Without clear data ownership, dependencies become opaque and hidden; modules are tightly coupled and it is unclear how changes in one module's data may affect others.** What is the solution to this chaos?
 
-{{ .js: newsletterSignUpPostMid() }}
-
 ## Boundaries 
 
 **Each module - folder or versioned package in a modular monolith, separately deployed microservice - should own its data and establish boundaries, exposing it to others only through dedicated public interfaces and types, in a controlled and intentional way.**
@@ -302,9 +300,7 @@ As we have also seen, **a couple of constraints and conventions are all that is 
 **Let's then build modules that own their data and respect the boundaries of others - getting systems that are simple, predictable, scalable and flexible in return!**
 
 <div id="post-extras">
-
-{{ .js: newsletterSignUpPostEnd() }}
-
+<hr class="post-delimiter">
 
 ### Notes and resources
 

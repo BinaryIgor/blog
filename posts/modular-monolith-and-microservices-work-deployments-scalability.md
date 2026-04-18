@@ -78,8 +78,6 @@ The `profileImageUrl` field is added to the `User` type that is defined in some 
 
 Summing it up, **a properly modularized system allows many people and teams to modify and develop its different parts in parallel, with little to no conflict and minimal coordination - irrespective of whether modules are folders, versioned packages or separately deployed services**. Clearly then, multiple deployment units (services) are not required for people and teams to work autonomously and in parallel. Are they needed to support independent deployments?
 
-{{ .js: newsletterSignUpPostMid() }}
-
 ## Independent Deployments
 
 As a properly modularized system has modules with the minimum and loose dependencies on other modules, it should follow that it is easy to deploy each of its modules independently. Is it?
@@ -157,8 +155,7 @@ Irrespective of whether our chosen architecture is modular monolith, microservic
 **Let's then choose *the proper Modularity path* and enjoy the benefits of parallel work, independent deployments and organization scalability!**
 
 <div id="post-extras">
-
-{{ .js: newsletterSignUpPostEnd() }}
+<hr class="post-delimiter">
 
 ### Notes and resources
 

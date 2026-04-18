@@ -10,8 +10,6 @@
     "pagesToRender": [
         "index.html",
         "posts.html",
-        "newsletter.html",
-        "privacy-policy.html",
         "bootstrap.html",
         "dbs-posts.html",
         "modularity-posts.html",
@@ -36,6 +34,7 @@
     "gitHubProfileUrl": "https://github.com/BinaryIgor",
     "redditProfileUrl": "https://www.reddit.com/user/BinaryIgor/",
     "linkedInProfileUrl": "https://www.linkedin.com/in/igroztr/",
+    "lobstersProfileUrl": "https://lobste.rs/~BinaryIgor",
     "youTubeChannelUrl": "https://www.youtube.com/@BinaryIgor",
     "lastFeedUpdateAtAfterLatestPost": "2025-02-06T16:45:00Z"
 }

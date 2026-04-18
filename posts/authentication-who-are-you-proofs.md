@@ -80,8 +80,6 @@ In summary, **sessions and tokens work in a slightly different fashion, but the 
 
 Let's now get back to other than `username:password` authentication methods - there are a couple of them and each comes with different mechanics and tradeoffs.
 
-{{ .js: newsletterSignUpPostMid() }}
-
 ## Codes
 
 These are various techniques that generate random and time-limited codes of different lengths - usually numeric or alfanumeric. [They are often used as a second factor in Multi-Factor Authentication (MFA) setups](#factors-single-vs-multi), but not only - another popular application are *Magic Links*. How does it work there?
@@ -198,8 +196,7 @@ Which allows to decouple authentication process details and all its complexity f
 Let's then close by answering the authentication question - **we prove *who we are* by providing various factors: passwords, codes and keys; one, two and sometimes more even. In exchange, a session, token or ephemeral secret is created and sent; it serves as a more flexible and temporary proof of our identity, for every action/request we make**.
 
 <div id="post-extras">
-
-{{ .js: newsletterSignUpPostEnd() }}
+<hr class="post-delimiter">
 
 ### Notes and resources
 
