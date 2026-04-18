@@ -183,7 +183,7 @@ Let's start with `hx-` mechanics.
 When we click on the *Details* or *Buy* option, the browser url is changed by HTMX using [standard History API](https://developer.mozilla.org/en-US/docs/Web/API/History/pushState). At the same time, HTMX makes GET request to `/devices/9b0d5f33-6f9e-4aef-bb81-a57a045fb1aa` or `/buy-device/9b0d5f33-6f9e-4aef-bb81-a57a045fb1aa` accordingly. Content of the HTML element identified by `app` id is swapped with the HTML fragment, received from the server. As a result, we see a new HTML page without full page reload - in the exact same way as it works in the [traditional, client-heavy & JSON-oriented SPAs](/react-and-htmx-different-abstractions-different-tradeoffs.html).
 
 <figure>
-  <img src="{{ imagesPath }}/modern-frontend-complexity/device-details-page.png" loading="lazy" alt="Details option page">
+  <img src="{{ imagesPath }}/modern-frontend-complexity/device-page.png" loading="lazy" alt="Details option page">
   <figcaption>Details option</figcaption>
 </figure>
 
