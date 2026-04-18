@@ -36,29 +36,6 @@ export function initSchema(db) {
             stats TEXT NOT NULL,
             calculated_at INTEGER(8) NOT NULL
         );
-
-        CREATE TABLE IF NOT EXISTS subscriber (
-            email TEXT NOT NULL UNIQUE,
-            external_id TEXT UNIQUE,
-            external_source TEXT,
-            external_type TEXT,
-            created_at INTEGER(8) NOT NULL,
-            signed_up_at INTEGER(8) NOT NULL,
-            confirmed_at INTEGER(8),
-            unsubscribed_at INTEGER(8),
-            unsubscribed_reason TEXT,
-            last_opened_at INTEGER(8),
-            last_clicked_at INTEGER(8),
-            state TEXT NOT NULL,
-            sign_up_context_visitor_id TEXT,
-            sign_up_context_session_id TEXT,
-            sign_up_context_source TEXT,
-            sign_up_context_medium TEXT,
-            sign_up_context_campaign TEXT,
-            sign_up_context_ref TEXT,
-            sign_up_context_path TEXT,
-            sign_up_context_placement TEXT
-        );
         `);
 }
 

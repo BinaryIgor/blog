@@ -5,20 +5,15 @@ import {
     assertAnalyticsEventsSavedAndStatsViewCalculated,
     assertAnalyticsEventsSaved,
     assertStatsViewsCalculated,
-    subscriberRepository
 } from "../server-int-test-suite.js";
-import { assertConflictResponseCode, assertCreatedResponseCode, assertJsonResponse, assertOkResponseCode, assertResponseCode, assertUnauthenticatedResponseCode, assertUnprocessableContentResponseCode } from "../web-tests.js";
+import { assertJsonResponse, assertOkResponseCode, assertResponseCode } from "../web-tests.js";
 import { randomNumber, randomString } from "../test-utils.js";
 import { MAX_IP_HASH_VISITOR_IDS_IN_LAST_DAY, DAY_SECONDS, ALL_TIME_STATS_VIEW, Stats } from "../../src/server/analytics.js";
 import { TestObjects, VIEW_EVENT_TYPE, SCROLL_EVENT_TYPE, PING_EVENT_TYPE } from "../test-objects.js";
 import { StatsTestFixture } from "../stats-test-fixture.js";
 import { hashedIp } from "../../src/server/web.js";
 import crypto from 'crypto';
-import * as ButtondownApiStub from '../buttondown-api-stub.js';
 import * as PostsApiStub from '../posts-api-stub.js';
-import { ApiSubscriberType, Subscriber, SubscriberState } from "../../src/server/newsletter.js";
-import { MAX_EMAIL_LENGTH } from "../../src/server/newsletter.js";
-import { SubscribersStats } from "../../src/server/shared.js";
 
 serverIntTestSuite("Server integration tests", () => {
     invalidEvents().forEach(e => {
@@ -215,8 +210,7 @@ serverIntTestSuite("Server integration tests", () => {
         const expectedAllTimeStats = StatsTestFixture.eventsToExpectedStats({
             views: [ip1View1, ip1View2, ip2View1, ip2View2, ip3View1],
             scrolls: [ip2Scroll1],
-            pings: [ip1Ping1, ip2Ping1, ip3Ping1],
-            subscribers: []
+            pings: [ip1Ping1, ip2Ping1, ip3Ping1]
         });
 
         await assertJsonResponse(statsResponse, actualStats => {
@@ -242,126 +236,6 @@ serverIntTestSuite("Server integration tests", () => {
         await assertJsonResponse(successfulReload, actualResponse => {
             expect(actualResponse.knownPosts).to.include("/a.html", "/b.html");
         });
-    });
-
-    it('creates new subscriber idempotently', async () => {
-        const subscriberEmail = TestObjects.randomEmail();
-        const subscriberSourceIp = randomString();
-        const subscriberSignUpContext = TestObjects.randomSubscriberSignUpContext();
-        const createResponseBody = { id: crypto.randomUUID(), source: "Some source", type: "Some type" };
-
-        ButtondownApiStub.nextCreateSubscriberResponse({
-            status: 201,
-            expectedEmailAddress: subscriberEmail,
-            expectedIpAddress: subscriberSourceIp,
-            body: createResponseBody
-        });
-
-        const createSubscriberResponse = await testRequests.postNewsletterSubscriber({
-            email: subscriberEmail, ...subscriberSignUpContext
-        }, { "X-Real-Ip": subscriberSourceIp });
-        assertCreatedResponseCode(createSubscriberResponse);
-
-        const expectedSubscriber = Subscriber.newOne(subscriberEmail, testClock.nowTimestamp(), subscriberSignUpContext,
-            {
-                externalId: createResponseBody.id,
-                externalSource: createResponseBody.source,
-                externalType: createResponseBody.type
-            });
-        assertSubscriberSavedInDb(expectedSubscriber);
-
-
-        // and when trying to create existing subscriber, return 409
-        const createExistingSubscriberResponse = await testRequests.postNewsletterSubscriber({
-            email: subscriberEmail, ...subscriberSignUpContext
-        });
-        assertConflictResponseCode(createExistingSubscriberResponse);
-    });
-
-    [SubscriberState.CREATED, SubscriberState.CONFIRMED].forEach(state =>
-        it('creates new subscriber returning 409 if it exists in the API', async () => {
-            const subscriber = TestObjects.randomSubscriber({ state });
-            await saveSubscriberInDb(subscriber);
-
-            ButtondownApiStub.nextCreateSubscriberResponse({ status: 409, expectedEmailAddress: subscriber.email });
-
-            const createExistingSubscriberResponse = await testRequests.postNewsletterSubscriber({
-                email: subscriber.email, ...subscriber.signUpContext
-            });
-            assertConflictResponseCode(createExistingSubscriberResponse);
-        }));
-
-    invalidSubscribers().forEach(s => {
-        it(`returns 422 when trying to create subscriber with invalid data ${JSON.stringify(s)}`, async () => {
-            const createSubscriberResponse = await testRequests.postNewsletterSubscriber(s);
-            assertUnprocessableContentResponseCode(createSubscriberResponse);
-            assertSubscriberNotSavedInDb(s.email);
-        })
-    });
-
-    it('resubscribes previous subscriber', async () => {
-        const unsubscribedSubscriber = TestObjects.randomSubscriber({ state: SubscriberState.UNSUBSCRIBED, externalType: ApiSubscriberType.Unsubscribed });
-        await saveSubscriberInDb(unsubscribedSubscriber);
-
-        ButtondownApiStub.nextGetSubscriberResponse({
-            status: 200,
-            expectedEmailOrId: unsubscribedSubscriber.email,
-            body: TestObjects.randomApiSubscriber({
-                id: unsubscribedSubscriber.externalId,
-                email_address: unsubscribedSubscriber.email,
-                type: unsubscribedSubscriber.externalType
-            })
-        });
-        ButtondownApiStub.nextUpdateSubscriberResponse({
-            status: 200,
-            expectedEmailOrId: unsubscribedSubscriber.email,
-            expectedType: ApiSubscriberType.Regular,
-            body: {}
-        });
-
-        const createSubscriberResponse = await testRequests.postNewsletterSubscriber({
-            email: unsubscribedSubscriber.email, ...TestObjects.randomSubscriberSignUpContext()
-        });
-        assertCreatedResponseCode(createSubscriberResponse);
-
-        const expectedSubscriber = {
-            ...unsubscribedSubscriber,
-            externalType: ApiSubscriberType.Regular,
-            state: SubscriberState.CONFIRMED,
-            signedUpAt: testClock.nowTimestamp()
-        };
-        assertSubscriberSavedInDb(expectedSubscriber);
-    });
-
-    it('accepts signed webhook newsletter event', async () => {
-        const { event, signature } = someSignedWebhookEvent();
-        const postEventResponse = await testRequests.postWebhookNewsletterEvent(event,
-            { "X-Buttondown-Signature": signature });
-        assertOkResponseCode(postEventResponse);
-    });
-
-    it('rejects unsigned webhook newsletter event', async () => {
-        const { event } = someSignedWebhookEvent();
-        const postEventResponse = await testRequests.postWebhookNewsletterEvent(event);
-        assertUnauthenticatedResponseCode(postEventResponse);
-    });
-
-    it('rejects webhook newsletter event with invalid signature', async () => {
-        const { event, signature } = someSignedWebhookEvent();
-        const postEventResponse = await testRequests.postWebhookNewsletterEvent(event,
-            { "X-Buttondown-Signature": signature + "0" }
-        );
-        assertUnauthenticatedResponseCode(postEventResponse);
-    });
-
-    it('rejects webhook newsletter event signed with a different key', async () => {
-        const { event, signature } = ButtondownApiStub.signedWebhookEvent("dummy_type", { someData: "some data of different signature" },
-            "some diferent key"
-        );
-        const postEventResponse = await testRequests.postWebhookNewsletterEvent(event,
-            { "X-Buttondown-Signature": signature }
-        );
-        assertUnauthenticatedResponseCode(postEventResponse);
     });
 });
 
@@ -396,7 +270,7 @@ function invalidEvents() {
 async function assertEmptyStatsResponse(response) {
     await assertJsonResponse(response, actualStats => {
         actualStats.forEach(as => {
-            assert.deepEqual(as.stats, { ...Stats.empty(), subscribers: SubscribersStats.empty() });
+            assert.deepEqual(as.stats, Stats.empty());
         });
     });
 }
@@ -453,53 +327,4 @@ function statsViewOfPeriod(statsViews, period) {
 
 function allTimeStatsView(statsView) {
     return statsViewOfPeriod(statsView, ALL_TIME_STATS_VIEW).stats;
-}
-
-async function assertSubscriberSavedInDb(expectedSubscriber) {
-    const dbSubscriber = await subscriberRepository.ofEmail(expectedSubscriber.email);
-    assert.deepEqual(dbSubscriber, expectedSubscriber);
-}
-
-async function assertSubscriberNotSavedInDb(email) {
-    assert.isNull(await subscriberRepository.ofEmail(email));
-}
-
-async function saveSubscriberInDb(subscriber) {
-    await subscriberRepository.createReturningExisting(subscriber);
-}
-
-function invalidSubscribers() {
-    return [
-        {
-            email: null, ...TestObjects.randomSubscriberSignUpContext()
-        },
-        {
-            email: '', ...TestObjects.randomSubscriberSignUpContext()
-        },
-        {
-            email: '2355', ...TestObjects.randomSubscriberSignUpContext()
-        },
-        {
-            email: '@com.c', ...TestObjects.randomSubscriberSignUpContext()
-        },
-        {
-            email: 'ala@com', ...TestObjects.randomSubscriberSignUpContext()
-        },
-        {
-            email: "a".repeat(MAX_EMAIL_LENGTH) + "@email.com", ...TestObjects.randomSubscriberSignUpContext()
-        },
-        {
-            email: TestObjects.randomEmail(), ...TestObjects.randomSubscriberSignUpContext({ source: null })
-        },
-        {
-            email: TestObjects.randomEmail(), ...TestObjects.randomSubscriberSignUpContext({ placement: null })
-        },
-        {
-            email: TestObjects.randomEmail(), ...TestObjects.randomSubscriberSignUpContext({ placement: "not in allowed set" })
-        }
-    ];
-}
-
-function someSignedWebhookEvent() {
-    return ButtondownApiStub.signedWebhookEvent("dummy_type", { someData: "some data" });
 }

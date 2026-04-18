@@ -300,15 +300,13 @@ export class StatsViews {
 
     #analyticsRepository;
     #db;
-    #subscribersStatsSupplier;
     #clock;
     #lastShorterPeriodsViewsSaveTimestamp;
     #lastLongerPeriodsViewsSaveTimestamp;
     #lastAllTimeViewSaveTimestamp;
 
-    constructor(analyticsRepository, subscribersStatsSupplier, db, clock) {
+    constructor(analyticsRepository, db, clock) {
         this.#analyticsRepository = analyticsRepository;
-        this.#subscribersStatsSupplier = subscribersStatsSupplier;
         this.#db = db;
         this.#clock = clock;
         this.#lastShorterPeriodsViewsSaveTimestamp = null;
@@ -355,10 +353,10 @@ export class StatsViews {
         const now = this.#clock.nowTimestamp();
 
         const timestampDayAgo = Dates.timestampSecondsAgo(now, DAY_SECONDS);
-        const lastDayStats = await this.#statsViewForPeriod(timestampDayAgo, now);
+        const lastDayStats = await this.#analyticsRepository.stats(timestampDayAgo, now);
 
         const timestampSevenDaysAgo = Dates.timestampSecondsAgo(now, SEVEN_DAYS_SECONDS);
-        const lastSevenDaysStats = await this.#statsViewForPeriod(timestampSevenDaysAgo, now);
+        const lastSevenDaysStats = await this.#analyticsRepository.stats(timestampSevenDaysAgo, now);
 
         await this.#saveView(new StatsView(LAST_DAY_STATS_VIEW, lastDayStats, now));
         await this.#saveView(new StatsView(LAST_7_DAYS_STATS_VIEW, lastSevenDaysStats, now));
@@ -366,23 +364,17 @@ export class StatsViews {
         this.#lastShorterPeriodsViewsSaveTimestamp = now;
     }
 
-    async #statsViewForPeriod(fromTimestamp, toTimestamp) {
-        const analyticsStats = this.#analyticsRepository.stats(fromTimestamp, toTimestamp);
-        const subscribersStats = this.#subscribersStatsSupplier(fromTimestamp, toTimestamp);
-        return { ...await analyticsStats, subscribers: await subscribersStats };
-    }
-
     async saveViewsForLongerPeriods() {
         const now = this.#clock.nowTimestamp();
 
         const timestampThirtyDaysAgo = Dates.timestampSecondsAgo(now, THIRTY_DAYS_SECONDS);
-        const lastThirtyDaysStats = await this.#statsViewForPeriod(timestampThirtyDaysAgo, now);
+        const lastThirtyDaysStats = await this.#analyticsRepository.stats(timestampThirtyDaysAgo, now);
 
         const timestampNinentyDaysAgo = Dates.timestampSecondsAgo(now, NINENTY_DAYS_SECONDS);
-        const lastNinentyDaysStats = await this.#statsViewForPeriod(timestampNinentyDaysAgo, now);
+        const lastNinentyDaysStats = await this.#analyticsRepository.stats(timestampNinentyDaysAgo, now);
 
         const timestampThreeHundredSixtyFiveDaysAgo = Dates.timestampSecondsAgo(now, THREE_HUNDRED_SIXTY_FIVE_DAYS_SECONDS);
-        const lastThreeHundredSixtyFiveDaysStats = await this.#statsViewForPeriod(timestampThreeHundredSixtyFiveDaysAgo, now);
+        const lastThreeHundredSixtyFiveDaysStats = await this.#analyticsRepository.stats(timestampThreeHundredSixtyFiveDaysAgo, now);
 
         await this.#saveView(new StatsView(LAST_30_DAYS_STATS_VIEW, lastThirtyDaysStats, now));
         await this.#saveView(new StatsView(LAST_90_DAYS_STATS_VIEW, lastNinentyDaysStats, now));
@@ -393,7 +385,7 @@ export class StatsViews {
 
     async saveAllTimeView() {
         const now = this.#clock.nowTimestamp();
-        const allTimeStats = await this.#statsViewForPeriod(null, now);
+        const allTimeStats = await await this.#analyticsRepository.stats(null, now);
         await this.#saveView(new StatsView(ALL_TIME_STATS_VIEW, allTimeStats, now));
 
         this.#lastAllTimeViewSaveTimestamp = now;
