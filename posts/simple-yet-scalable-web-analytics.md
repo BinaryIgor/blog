@@ -171,8 +171,6 @@ export function getDevice() {
 \
 As we now know how it works, let's generate some data and run analytical queries - that is the whole purpose after all!
 
-{{ .js: newsletterSignUpPostMid() }}
-
 ## Example data and analytics
 
 ### Data {#example-data-and-analytics-data}
@@ -501,8 +499,7 @@ As we saw, creating a simple yet scalable web analytics solution from scratch is
 Have a great time collecting and analyzing your events!
 
 <div id="post-extras">
-
-{{ .js: newsletterSignUpPostEnd() }}
+<hr class="post-delimiter">
 
 ### Links
 

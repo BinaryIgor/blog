@@ -190,8 +190,6 @@ Summing the solution up:
 * **we always get up-to-date data** - every process locks the entity first (tries to) and only then modifies it 
 * **client/user is not aware of parallel, *potentially conflicting*, updates** - every process first acquires the lock on entity, but there is no straightforward way of knowing that a conflicting update has happened in the meantime; we simply wait for our turn
 
-{{ .js: newsletterSignUpPostMid() }}
-
 ## Pessimistic emulation of Optimistic Locking
 
 Interestingly, it is possible to emulate some of the optimistic locking functionality with pessimistic locks.
@@ -283,9 +281,7 @@ Whether to lock *Optimistically* or *Pessimistically* depends on the functional 
 That being said, **let's keep our concurrency control in check: lock entities properly and be resilient to the randomness of time!**
 
 <div id="post-extras">
-
-{{ .js: newsletterSignUpPostEnd() }}
-
+<hr class="post-delimiter">
 
 ### Notes and resources
 

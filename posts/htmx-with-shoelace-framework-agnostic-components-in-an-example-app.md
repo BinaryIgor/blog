@@ -128,8 +128,6 @@ We must override a few shoelace-specific variables to have consistent colors acr
 
 **To sum it up, I think that Shadow DOM is not worth its complexity, in the vast majority of cases.** Given that, I want to emphasize that Shoelace library authors made a superb effort of documenting how to customize their components using this new browser API. Having it in mind, let's finally dive into the HTMX + Shoelace example Books App!
 
-{{ .js: newsletterSignUpPostMid() }}
-
 ## An example Books App
 
 ### Setup {#an-example-books-app-setup}
@@ -400,8 +398,7 @@ However, I do not find styling and customizing Shoelace components intuitive. Mo
 In conclusion, as of now, *Shoelace Library* is the best and most comprehensive collection of framework-agnostic components for the Web. It can be used seamlessly with HTMX to create fully functional web applications. **But, there are better approaches for creating framework-agnostic components out there, they are just not at the Sholeace's size and level of maturity.**
 
 <div id="post-extras">
-
-{{ .js: newsletterSignUpPostEnd() }}
+<hr class="post-delimiter">
 
 ### Related videos on my [YouTube channel]({{ youTubeChannelUrl }})
 1. [HTMX + Web Components](https://www.youtube.com/watch?v=M4i-JQVLgfE)

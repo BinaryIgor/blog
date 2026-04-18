@@ -73,8 +73,6 @@ As a result, **accounts are still scoped to a single server instance, but there 
  
 Analyzing the consequences, we are still at the mercy of the service owner - it is just more spread, if we are using multiple servers. If only one is used - there basically is no difference between this and the centralized model. What is more, because servers might for whatever reason not like each other - we are at the mercy of their owners after all - they can simply refuse to exchange data, not allowing us to interact with their users. On top of that, **virtually all the drawbacks of the centralized model apply here as well, but the federated model is significantly more complex**. I do not see a compelling use case for it.
 
-{{ .js: newsletterSignUpPostMid() }}
-
 ## Decentralized
 
 This model differs substantially from centralized, account-based approach. **Here, there are no accounts; there is [public key cryptography](https://en.wikipedia.org/wiki/Public-key_cryptography) instead.**
@@ -182,8 +180,7 @@ We have gone through all possible *Identity Models* used when building digital p
 **As we have learned, each approach represents a various set of incentives and tradeoffs and is better suited for different use cases.** The centralized approach was first and is still the best for the vast majority of software systems and platforms. For creating digital public squares, social media and networks though - systems that by definition should be neutral and open to a variety of different opinions and point of views - the centralized model has proven to be problematic time and time again. **Here, decentralized and delegated approaches represent a promising alternative.**
 
 <div id="post-extras">
-
-{{ .js: newsletterSignUpPostEnd() }}
+<hr class="post-delimiter">
 
 ### Notes and resources
 

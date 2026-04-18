@@ -49,7 +49,7 @@ A templating engine - just a library available in the server runtime/environment
 ```
 A little more complicated than static collections of `.html` documents, but still fairly straightforward. What has happened next?
 
-**[Then came AJAX](https://en.wikipedia.org/wiki/Ajax_(programming)) - weird acronym for *Asynchronous JavaScript and XML*.** It brought a completely new possibility to update HTML document content in the background, asynchronously - without reloading the whole page. From this point onwards, more and more of websites functionality started to be delegated to increasingly complex JavaScript - especially for partial updates, triggered mostly by more sophisticated user interactions, to avoid full page reloads. Not long after that, [the concept of Single Page Application (SPA)](/multi-vs-single-page-apps.html#definitions) and first frameworks arrived: *Backbone.js (2010)*, *Knockout.js (2010) and AngularJS (2010)*. In this model, the source code we work on is very remote from what finally lands in the browser environment. More elaborate abstractions came here as well - *complexifying* needed tooling as a result.
+**[Then came AJAX](https://en.wikipedia.org/wiki/Ajax_(programming)) - weird acronym for *Asynchronous JavaScript and XML*.** It brought a completely new possibility to update HTML document content in the background, asynchronously - without reloading the whole page. From this point onwards, more and more of websites functionality started to be delegated to increasingly complex JavaScript - especially for partial updates, triggered mostly by more sophisticated user interactions, to avoid full page reloads. Not long after that, [the concept of Single Page Application (SPA)](/multi-vs-single-page-apps.html#definitions) and first frameworks arrived: *Backbone.js (2010)*, *Knockout.js (2010)print(images_names_map) and AngularJS (2010)*. In this model, the source code we work on is very remote from what finally lands in the browser environment. More elaborate abstractions came here as well - *complexifying* needed tooling as a result.
 
 That is how, more or less, we ended up with today's *Complexity* - where **most apps are built with React, Vue, Angular or Svelte**, requiring a whole toolchain to build and develop, such as [Vite](https://vite.dev/) or [Webpack](https://webpack.js.org/). **How they work is inherently different from what browsers were designed to do.**
 
@@ -473,8 +473,7 @@ We can utilize [HTMX](https://localhost/htmx-simpler-web-based-app-or-system.htm
 **I then invite you to [experiment with this simpler alternative](#a-simpler-alternative)**: let's destroy the *Tower of Babel Complexity* and make web development simple and productive again!
 
 <div id="post-extras">
-
-{{ .js: newsletterSignUpPostEnd() }}
+<hr class="post-delimiter">
 
 ### Notes and resources
 

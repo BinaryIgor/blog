@@ -90,8 +90,6 @@ What is stored in *task-service* DB is completely independent of the *worker-ser
 
 *What is the solution? Is it really a (distributed) transaction?*
 
-{{ .js: newsletterSignUpPostMid() }}
-
 ## Transactions vs Long-running processes
 
 Cases of this kind, at first glance looking like (distributed) transactions,  can often be designed and thought of as long-running processes. What is the difference?
@@ -215,8 +213,7 @@ As we have also learned, **delays and the resulting eventual consistency lie at 
 In summary, **true transactions are possible only locally; globally, we must embrace delays and eventual consistency as fundamental laws of nature**. What follows is designing and building resilient systems, handling this reality openly and gracefully; they might be synchronizing constantly, but always arriving at the same conclusion, eventually. 
 
 <div id="post-extras">
-
-{{ .js: newsletterSignUpPostEnd() }}
+<hr class="post-delimiter">
 
 ### Notes and resources
 

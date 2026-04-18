@@ -87,8 +87,6 @@ As we most likely already use it in our application/system, we know that there a
 
 Having it all in mind, let's see how we are able to leverage those features of SQL to build a simple, performant and highly reliable events platform on top of it.
 
-{{ .js: newsletterSignUpPostMid() }}
-
 ## Overview 
 
 We just need to have a few tables. Column names should be prefixed because some of the names are reserved keywords in some databases (Postgres syntax, schema is fully managed by EventSQL):
@@ -459,8 +457,7 @@ Is it all roses? Of course not, nothing really is. Some of the most important tr
 As we have seen, **we can make an even better use of battle-tested SQL databases to run simple, yet highly reliable and scalable *Events Platform* on top of them**. As a consequence, we simplify our infrastructure by optimizing the use of what we already have, without making any compromises when it comes to reliability, performance or scalability. For all these reasons, if you need to publish and consume events, I highly encourage you to give EventSQL a try!
 
 <div id="post-extras">
-
-{{ .js: newsletterSignUpPostEnd() }}
+<hr class="post-delimiter">
 
 ### Notes and resources
 

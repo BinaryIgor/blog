@@ -149,8 +149,6 @@ Based on these assumptions and above tests, it comes down to:
 As we can see, the performance of SQLite is more than enough for the vast majority of applications/systems out there. 
 But what about the availability of a single machine system?
 
-{{ .js: newsletterSignUpPostMid() }}
-
 ## Availability: is it really a problem?
 
 Virtual Private Server (VPS) is not really a single physical machine - it is a single logical machine, with many levels of redundancy, both hardware and software, implemented by cloud providers to deliver high availability. 
@@ -389,8 +387,7 @@ To sum it up, for virtually every Minimum Viable Product (MVP), Proof of Concept
 I highly recommend SQLite - it is more than enough; and when we outgrow it, it is fairly straightforward to switch to a full relational database management system (RDBMS), like Postgres. **In the meantime, let's enjoy the benefits of having everything on a single, beefy machine and forget about network problems and all the operational complexity!**
 
 <div id="post-extras">
-
-{{ .js: newsletterSignUpPostEnd() }}
+<hr class="post-delimiter">
 
 ### Notes and resources
 

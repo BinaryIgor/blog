@@ -106,8 +106,6 @@ Summing it up:
 * If devices are in the same network, they can be connected directly just by using IP addresses. The same network means the same physical infrastructure
 * If devices are in different networks, which means different physical infrastructures, we need to locate them and somehow connect these two independent networks. Networks are identified by the *Autonomous System Number*, they announce supported *IP addresses* and they connect with each other either directly or by using shared *Internet Exchange Points (IXPs)*
 
-{{ .js: newsletterSignUpPostMid() }}
-
 ## Domain Name System (DNS)
 
 When we interact with the Internet, we do not use strange numbers like `142.250.203.142`, `216.58.215.110` or `2001:0:130f::9c0:876a:130b`. We use *memorable Domain Names* like `google.com` or `youtube.com`. But as we have established, devices in the Internet are identified by the IP addresses, not human-friendly domain names. How then `youtube.com` is translated to an IP address, so we can locate this machine and get desired data from it?
@@ -220,8 +218,7 @@ Also worth mentioning, the *Internet Engineering Task Force (IETF)* is responsib
 Fortunately, there is no single entity that controls the Internet; there are many, cooperating with each other to various degrees and at various levels. There are and always will be some issues with the Internet, especially where more corrupt governments and special interest groups try to have their way; but as a whole, it works surprisingly well. **Together, these diverse entities create one of the most complex, one of the most useful, but also one of the most disruptive technologies that humans have ever created: a decentralized network of digital information and services that knows almost no physical boundaries.**
 
 <div id="post-extras">
-
-{{ .js: newsletterSignUpPostEnd() }}
+<hr class="post-delimiter">
 
 ### Notes and resources
 

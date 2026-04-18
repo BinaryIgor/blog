@@ -80,8 +80,6 @@ For SPA, we need to:
 \
 As we now know that the user experience differences are minor (MPA has a slight advantage), let's measure page load performance in a more objective manner.
 
-{{ .js: newsletterSignUpPostMid() }}
-
 ## Performance
 
 Here, we are mostly interested in:
@@ -418,8 +416,7 @@ On the other hand, Single Page Applications take advantage of a rich and mature 
 **In conclusion, Multi Page Applications offer simpler and often more performant default choice.** Unless we have an application with clear requirements that justify SPA - such as highly complex client-side interactions and state management or sophisticated offline capabilities - starting with MPA is a wiser move.
 
 <div id="post-extras">
-
-{{ .js: newsletterSignUpPostEnd() }}
+<hr class="post-delimiter">
 
 ### Notes and resources
 

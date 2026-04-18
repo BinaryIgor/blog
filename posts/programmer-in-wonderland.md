@@ -71,6 +71,4 @@ It is that simple. **Learn your fundamentals and by all means use various tools 
 
 In conclusion, be *A Great Programmer*, not *The Lost One*: have your basics and fundamentals covered and study the tools you regularly use deeply and broadly. Then, you know exactly what you and them are doing; **you are in control and they truly are your tools, not masters**.
 
-<div id="post-extras">
-{{ .js: newsletterSignUpPostEnd() }}
-</div>
+<hr class="post-delimiter">

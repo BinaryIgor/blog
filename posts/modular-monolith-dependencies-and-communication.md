@@ -82,8 +82,6 @@ We have three modules: shared, user and project. We have `UserClient` interface 
 
 **These are relatively minor drawbacks; especially if we avoid cross-module transactions, which is feasible with good module design, this approach offers excellent tradeoffs.** Even if we ever need to migrate some of our modules to a separate application/service, it will be quite easy to do, since dependencies are clearly defined and encapsulated in dedicated abstractions. Besides, let's be realistic: [in the vast majority of cases, we can and should stick with just a single unit of deployment - Modular Monolith](/modular-monolith-and-microservices-modularity-is-what-truly-matters.html).
 
-{{ .js: newsletterSignUpPostMid() }}
-
 ## Application Events
 
 On their own, useful and applicable only in some cases: when something that other modules might be interested in happens, we just send an in-memory event. For example:
@@ -321,8 +319,7 @@ We have also learned that **the most important thing to focus on is to have grea
 Having great module design and applying communication patterns wisely, will not only simplify our *Modular Monolith*, but also make it more flexible and easier to change. Additionally, when and if the need arises to migrate some or all modules to multiple applications, it can be done with minimal effort.
 
 <div id="post-extras">
-
-{{ .js: newsletterSignUpPostEnd() }}
+<hr class="post-delimiter">
 
 ### Notes and resources 
 

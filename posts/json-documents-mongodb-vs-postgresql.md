@@ -243,8 +243,6 @@ As said, we will run lots of cases, testing all kinds of queries and workloads. 
 
 Let's then finally run the tests and inspect results!
 
-{{ .js: newsletterSignUpPostMid() }}
-
 ### Inserts {#performance-results-inserts}
 
 **INSERT ACCOUNTS** - inserts `200 000` accounts with `20 000 QPS` (queries per second) rate wanted, one by one:
@@ -1236,8 +1234,7 @@ Given these performance results, SQL universality and a comprehensive support fo
 I do not think so.
 
 <div id="post-extras">
-
-{{ .js: newsletterSignUpPostEnd() }}
+<hr class="post-delimiter">
 
 ### Notes and resources
 

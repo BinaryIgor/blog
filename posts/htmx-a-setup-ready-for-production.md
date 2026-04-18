@@ -128,8 +128,6 @@ export DB_PASSWORD=$(cat /home/deploy/.secrets/db-password.txt)
 ```
 ...to read them and have available as environment variables.
 
-{{ .js: newsletterSignUpPostMid() }}
-
 ## Local development
 
 No production setup is complete without a great local development experience. What do we need in our case?
@@ -466,8 +464,7 @@ As we have seen, HTMX is absolutely ready to be used in Production:
 **Taking it all into consideration, I highly recommend using HTMX in production, as a tool to build simpler and more maintainable systems.**
 
 <div id="post-extras">
-
-{{ .js: newsletterSignUpPostEnd() }}
+<hr class="post-delimiter">
 
 ### Notes and resources
 1. Code repo: https://github.com/BinaryIgor/code-examples/tree/master/htmx-production-setup

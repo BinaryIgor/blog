@@ -60,8 +60,6 @@ function analyticsAllowedPaths() {
         "/index.html",
         "/about.html",
         "/posts.html",
-        "/newsletter.html",
-        "/privacy-policy.html",
         "/bootstrap.html",
         "/dbs-posts.html",
         "/modularity-posts.html",

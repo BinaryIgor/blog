@@ -8,7 +8,3 @@ Here are a few of my posts/articles that might be of interest to you, as a solid
 * [Load Testing](/how-many-http-requests-can-a-single-machine-handle.html): how many HTTP requests/second can a Single Machine handle?
 * [Multi vs Single Page Apps](/multi-vs-single-page-apps.html): user experience, performance, complexity and more
 * [MySQL vs PostgreSQL Performance](/mysql-vs-postgresql-performance.html): throughput & latency, reads & writes
-
-You have probably already subscribed to the [**Binary Log** Newsletter](/newsletter.html); all published entries are available [in the archive](https://buttondown.com/BinaryIgor/archive/).
-
-See you in the next post, discussion, newsletter issue or whatever else comes next first!
