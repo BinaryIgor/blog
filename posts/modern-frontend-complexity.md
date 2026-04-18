@@ -88,9 +88,6 @@ What programmers want:
 * testability - how do we know whether it works?
 * easy to introduce translations & internationalization
 
-\
-Given these requirements, let's see whether we can meet them with a much simpler approach.
-
 ## A simpler alternative
 
 Here is an idea:
