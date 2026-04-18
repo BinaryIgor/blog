@@ -1,12 +1,6 @@
 import express from "express";
 import cors from "cors";
 import { AnalyticsService, DeferredEventsSaver, StatsViews, SqliteAnalyticsRepository, Event, PingsFrequencyError } from "./analytics.js";
-import {
-    SubscriberService, SqliteSubscriberRepository, Subscriber, SubscriberSignUpContext, ButtondownSubscriberApi, NewsletterWebhookHandler,
-    SubscriberExistsError, SubscriberValidationError,
-    NewsletterWebhookSynchronizer
-} from "./newsletter.js";
-import { subscribersStatsSupplierFactory } from './shared.js';
 import { Scheduler } from "./scheduler.js";
 import * as Logger from "../shared/logger.js";
 
@@ -45,16 +39,9 @@ export async function start(appClock = new Clock(), appScheduler = new Scheduler
     const postsSource = new PostsSource(config.postsPath, postsRetryConfig);
     postsSource.schedule(scheduler, config.postsReadInterval);
 
-    const subscriberRepository = new SqliteSubscriberRepository(db);
-    const subscriberApi = new ButtondownSubscriberApi(config.buttondownApiUrl, config.buttondownApiKey);
-    const subscriberService = new SubscriberService(subscriberRepository, subscriberApi, clock);
-    const newsletterWebhookHandler = new NewsletterWebhookHandler(subscriberService, config.buttondownWebhookSigningKey);
-    const newsletterWebhookSynchronizer = new NewsletterWebhookSynchronizer(config.buttondownApiUrl, config.buttondownWebhookUrl,
-        config.buttondownWebhookDescription, config.buttondownApiKey, config.buttondownWebhookSigningKey);
-
     const analyticsRepository = new SqliteAnalyticsRepository(db);
 
-    const statsViews = new StatsViews(analyticsRepository, subscribersStatsSupplierFactory(subscriberRepository), db, clock);
+    const statsViews = new StatsViews(analyticsRepository, db, clock);
     statsViews.schedule(scheduler, {
         shorterPeriodsViewsInterval: config.statsViewsCalculateShorterPeriodsInterval,
         longerPeriodsViewsInterval: config.statsViewsCalculateLongerPeriodsInterval,
@@ -103,65 +90,6 @@ export async function start(appClock = new Clock(), appScheduler = new Scheduler
         }
 
         res.sendStatus(200);
-    });
-
-    app.post("/newsletter/subscribers", async (req, res) => {
-        try {
-            const { email, placement, visitorId, sessionId, source, medium, campaign, ref, path } = req.body;
-            const context = new SubscriberSignUpContext(visitorId, sessionId, source, medium, campaign, ref, path, placement);
-            const subscriber = Subscriber.newOne(email, clock.nowTimestamp(), context);
-            if (config.fixedNewsletterSubscribeResponseStatus) {
-                setTimeout(() => res.sendStatus(config.fixedNewsletterSubscribeResponseStatus), 1000);
-            } else {
-                await subscriberService.subscribe(subscriber, Web.sourceIp(req));
-                res.sendStatus(201);
-            }
-        } catch (e) {
-            if (e instanceof SubscriberExistsError) {
-                res.sendStatus(409);
-            } else if (e instanceof SubscriberValidationError) {
-                res.sendStatus(422);
-            } else {
-                Logger.logError('Failed to create subscriber:', req.body, e);
-                res.sendStatus(500);
-            }
-        }
-    });
-
-    app.post("/webhooks/newsletter", async (req, res) => {
-        try {
-            const signature = req.header("X-Buttondown-Signature") ?? "";
-            if (await newsletterWebhookHandler.handle(req.body, signature)) {
-                res.sendStatus(200);
-            } else {
-                Logger.logWarn("Invalid signature for webhook - rejecting it. Headers: ", req.headers);
-                res.sendStatus(401);
-            }
-        } catch (e) {
-            Logger.logError(`Failed to handle webhook event`, JSON.stringify(req.body), e);
-            res.sendStatus(500);
-        }
-    });
-
-    app.post("/internal/webhooks/newsletter", async (req, res) => {
-        try {
-            const { event_type, data } = req.body;
-            await newsletterWebhookHandler.handleEvent(event_type, data);
-            res.sendStatus(200);
-        } catch (e) {
-            Logger.logError(`Failed to handle webhook event ${JSON.stringify(req.body)}:`, e);
-            res.sendStatus(500);
-        }
-    });
-
-    app.post("/internal/synchronize-newsletter-webhook", async (_, res) => {
-        try {
-            await newsletterWebhookSynchronizer.synchronize();
-            res.sendStatus(200);
-        } catch (e) {
-            Logger.logError(`Failed to synchronize newsletter webhook`, e);
-            res.sendStatus(500);
-        }
     });
 
     app.get("/meta/stats", async (_, res) => {
@@ -243,10 +171,7 @@ export async function start(appClock = new Clock(), appScheduler = new Scheduler
         stop();
     });
 
-    return {
-        config, eventsSaver, statsViews, subscriberRepository, subscriberService,
-        newsletterWebhookHandler, newsletterWebhookSynchronizer
-    };
+    return { config, eventsSaver, statsViews };
 }
 
 let closing = false;

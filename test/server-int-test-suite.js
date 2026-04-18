@@ -7,11 +7,6 @@ import { TestClock } from "./test-utils.js";
 import { SqliteDb } from "../src/server/db.js";
 import * as MockServer from "./mock-server.js";
 import { TestRequests } from "./web-tests.js";
-import {
-    routes as buttondownApiRoutes,
-    authToken as buttondownApiKey,
-    webhookSigningKey as buttondownWebhookSigningKey
-} from './buttondown-api-stub.js';
 import { route as postsRoute } from './posts-api-stub.js';
 
 export const testClock = new TestClock();
@@ -21,9 +16,6 @@ export let appConfig;
 
 let eventsSaver = null;
 let statsViews = null;
-export let subscriberRepository = null;
-export let newsletterWebhookHandler = null;
-export let newsletterWebhookSynchronizer = null;
 
 let tmpDir;
 let dbPath;
@@ -55,17 +47,12 @@ export const serverIntTestSuite = (testsDescription, testsCallback) => {
 
             process.env['POSTS_HOST'] = mockServerlUrl;
 
-            process.env["BUTTONDOWN_API_URL"] = mockServerlUrl;
-            process.env["BUTTONDOWN_API_KEY"] = buttondownApiKey;
-            process.env["BUTTONDOWN_WEBHOOK_URL"] = mockServerlUrl;
-            process.env["BUTTONDOWN_WEBHOOK_SIGNING_KEY"] = buttondownWebhookSigningKey;
-
             MockServer.start({
                 port: mockServerPort,
-                routes: [...buttondownApiRoutes, postsRoute]
+                routes: [postsRoute]
             });
             const app = await Server.start(testClock, NoOpScheduler, { retries: 3, initialDelay: 10, backoffMultiplier: 2 });
-            ({ config: appConfig, eventsSaver, statsViews, subscriberRepository, newsletterWebhookHandler, newsletterWebhookSynchronizer } = app);
+            ({ config: appConfig, eventsSaver, statsViews } = app);
 
             // Currently, good enough hack to wait for MockServer and Server readiness
             await delay(250);
@@ -76,7 +63,6 @@ export const serverIntTestSuite = (testsDescription, testsCallback) => {
         afterEach(async () => {
             const db = new SqliteDb(dbPath);
             await db.execute("DELETE FROM event");
-            await db.execute("DELETE FROM subscriber");
             await db.execute("DELETE FROM stats_view");
         });
 
