@@ -3,8 +3,8 @@ from os import path
 from hashlib import sha256
 import re
 
-ASSETS_DIRECTORY = os.environ.get('ASSETS_DIRECTORY',  
-                                  path.join(os.getcwd(), "..", "dist"))
+ASSETS_DIR = os.environ.get('ASSETS_DIR', path.join(os.getcwd(), "..", "dist"))
+ASSETS_DIR_ABS_PATH = os.path.abspath(ASSETS_DIR)
 
 IMAGES_EXTENSIONS = ['jpg', 'jpeg', 'png', 'svg']
 EXCLUDE_PATHS = ["favicon.svg", "favicon-light.svg", "og-image.png"]
@@ -66,22 +66,17 @@ def set_files_data_tuple(files_data, key, extension, root_dir, file_path, file_n
     new_name = f'{file_name[0:-(extension_len + 1)]}.{file_hash}.{extension}'
     new_path = to_path(root_dir, new_name)
     data = files_data.get(key, ({}, {}))
-    data[0][file_name] = new_name
+
+    relative_path_name = file_path.replace(ASSETS_DIR_ABS_PATH, "")
+    relative_path_new_name = new_path.replace(ASSETS_DIR_ABS_PATH, "")
+
+    data[0][relative_path_name] = relative_path_new_name
     data[1][file_path] = new_path
     files_data[key] = data
 
 
 def to_path(directory, name):
     return f'{directory}/{name}'
-
-
-def change_imports(path, names_map):
-    with open(path) as f:
-        content = f.readlines()
-        changed_content = create_new_content(content, names_map)
-    if changed_content:
-        with open(path, "w") as cf:
-            cf.writelines(changed_content)
 
 
 def create_new_content(lines, names_map):
@@ -155,7 +150,6 @@ def new_css_line(old_line, css_names_map):
     return replace_in_line(link_idx, href_idx, old_line, css_names_map)
 
 
-# TODO: fix it to not require globally unique names, but just paths
 def replace_in_line(tag_idx, attr_idx, old_line, names_map):
     if 0 < tag_idx < attr_idx:
         for name in names_map:
@@ -212,7 +206,7 @@ def new_css_background_line(old_line, url, images_names_map):
 
 
 print('Searching for assets...')
-files_data = walk_dir_recursively(ASSETS_DIRECTORY)
+files_data = walk_dir_recursively(ASSETS_DIR)
 
 js_names_map, js_paths_map = files_data.get(JS_KEY, ({}, {}))
 css_names_map, css_paths_map = files_data.get(CSS_KEY, ({}, {}))
@@ -227,8 +221,6 @@ for k in css_paths_map:
 for k in images_paths_map:
     os.rename(k, images_paths_map[k])
 
-for p in js_paths_map.values():
-    change_imports(p, js_names_map)
 for p in css_paths_map.values():
     change_css(p, images_names_map)
 for h in html_paths:
