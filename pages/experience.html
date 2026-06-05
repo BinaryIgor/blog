@@ -43,6 +43,12 @@
 
 <body>
     {{ navigation.html }}
+    <div id="gallery-container" class="gallery bg-gallery fixed hidden top-0 left-0 h-full w-full z-40 flex flex-col">
+        <div id="close-gallery-button" class="p-4 text-3xl cursor-pointer text-right">X</div>
+        <div id="gallery" class="overflow-auto flex-1">
+            <div id="gallery-images-container" class="flex flex-col gap-8 mx-4 mb-8"></div>
+        </div>
+    </div>
     <div class="post py-6 px-4">
         <div class="max-content-width">
             {{ experience.md }}
@@ -63,6 +69,112 @@
                 }
             }
         });
+
+        function openGallery(galleryHTML) {
+            document.body.classList.add("overflow-hidden");
+            galleryImagesContainer.innerHTML = galleryHTML;
+            galleryContainer.classList.remove("hidden");
+            // needed for animation to work
+            setTimeout(() => galleryContainer.classList.add("opened"), 1);
+        }
+
+        const galleryContainer = document.getElementById("gallery-container");
+        const gallery = document.getElementById("gallery");
+        const galleryImagesContainer = document.getElementById("gallery-images-container");
+
+        const _img_modivoImage1Url = "{{ imagesPath }}/experience/modivo-ads-1.png";
+        const _img_modivoImage2Url = "{{ imagesPath }}/experience/modivo-ads-2.png";
+        const _img_modivoImage3Url = "{{ imagesPath }}/experience/modivo-eobuwie-ads-1.png";
+        const _img_modivoImage4Url = "{{ imagesPath }}/experience/modivo-eobuwie-ads-2.png";
+        document.getElementById("modivo-gallery-link").onclick = () => {
+            const galleryHTML = `
+                <figure>
+                    <img src="${_img_modivoImage1Url}" loading="lazy">
+                    <figcaption>Banner and first two offers are sponsored.</figcaption>
+                </figure>
+               <img src="${_img_modivoImage2Url}" loading="lazy">
+               <img src="${_img_modivoImage3Url}" loading="lazy">
+               <img src="${_img_modivoImage4Url}" loading="lazy">`;
+            openGallery(galleryHTML);
+        };
+
+        const _img_collybriImage1Url = "{{ imagesPath }}/experience/collybri-1.png";
+        const _img_collybriImage2Url = "{{ imagesPath }}/experience/collybri-2.png";
+        const _img_collybriImage3Url = "{{ imagesPath }}/experience/collybri-3.png";
+        const _img_collybriImage4Url = "{{ imagesPath }}/experience/collybri-4.png";
+        const _img_collybriImage5Url = "{{ imagesPath }}/experience/collybri-5.png";
+        const _img_collybriImage6Url = "{{ imagesPath }}/experience/collybri-6.png";
+        const _img_collybriImage7Url = "{{ imagesPath }}/experience/collybri-7.png";
+        const _img_collybriImage8Url = "{{ imagesPath }}/experience/collybri-8.png";
+        const _img_collybriImage9Url = "{{ imagesPath }}/experience/collybri-9.png";
+        const _img_collybriImage10Url = "{{ imagesPath }}/experience/collybri-10.png";
+        document.getElementById("collybri-gallery-link").onclick = () => {
+            const galleryHTML = [_img_collybriImage1Url, _img_collybriImage2Url, _img_collybriImage3Url,
+                _img_collybriImage4Url, _img_collybriImage5Url, _img_collybriImage6Url,
+                _img_collybriImage7Url, _img_collybriImage8Url, _img_collybriImage9Url,
+                _img_collybriImage10Url]
+                .map(url => `<img src="${url}" loading="lazy">`)
+                .join('\n');
+            openGallery(galleryHTML);
+        };
+
+        const _img_hairoImage1Url = "{{ imagesPath }}/experience/hairo-create-account.jpg";
+        const _img_hairoImage2Url = "{{ imagesPath }}/experience/hairo-active-orders.jpg";
+        const _img_hairoImage3Url = "{{ imagesPath }}/experience/hairo-order-a-search.jpg";
+        const _img_hairoImage4Url = "{{ imagesPath }}/experience/hairo-user.jpg";
+        const _img_hairoImage5Url = "{{ imagesPath }}/experience/hairo-emoticons.jpg";
+        const _img_hairoImage6Url = "{{ imagesPath }}/experience/hairo-friendship-room.jpg";
+        const _img_hairoImage7Url = "{{ imagesPath }}/experience/hairo-bot-settings.jpg";
+        const _img_hairoImage8Url = "{{ imagesPath }}/experience/hairo-tags-popular.jpg";
+        const _img_hairoImage9Url = "{{ imagesPath }}/experience/hairo-tags-special.jpg";
+        const _img_hairoImage10Url = "{{ imagesPath }}/experience/hairo-tags-modal.jpg";
+        document.getElementById("hairo-gallery-link").onclick = () => {
+            const galleryHTML = [_img_hairoImage1Url, _img_hairoImage2Url, _img_hairoImage3Url,
+                _img_hairoImage4Url, _img_hairoImage5Url, _img_hairoImage6Url, _img_hairoImage7Url,
+                _img_hairoImage8Url, _img_hairoImage9Url, _img_hairoImage10Url]
+                .map(url => `<img src="${url}" loading="lazy">`)
+                .join('\n');
+            openGallery(galleryHTML);
+        };
+
+        const _img_linkuroImage1Url = "{{ imagesPath }}/experience/linkuro-1.png";
+        const _img_linkuroImage2Url = "{{ imagesPath }}/experience/linkuro-2.png";
+        const _img_linkuroImage3Url = "{{ imagesPath }}/experience/linkuro-3.png";
+        const _img_linkuroImage4Url = "{{ imagesPath }}/experience/linkuro-4.png";
+        const _img_linkuroImage5Url = "{{ imagesPath }}/experience/linkuro-5.png";
+        const _img_linkuroImage6Url = "{{ imagesPath }}/experience/linkuro-6.png";
+        const _img_linkuroImage7Url = "{{ imagesPath }}/experience/linkuro-7.png";
+        const _img_linkuroImage8Url = "{{ imagesPath }}/experience/linkuro-8.png";
+        const _img_linkuroImage9Url = "{{ imagesPath }}/experience/linkuro-9.png";
+        const _img_linkuroImage10Url = "{{ imagesPath }}/experience/linkuro-10.png";
+        const _img_linkuroImage11Url = "{{ imagesPath }}/experience/linkuro-11.png";
+        const _img_linkuroImage12Url = "{{ imagesPath }}/experience/linkuro-12.png";
+        const _img_linkuroImage13Url = "{{ imagesPath }}/experience/linkuro-13.png";
+        const _img_linkuroImage14Url = "{{ imagesPath }}/experience/linkuro-14.png";
+        const _img_linkuroImage15Url = "{{ imagesPath }}/experience/linkuro-15.png";
+        document.getElementById("linkuro-gallery-link").onclick = () => {
+            const galleryHTML = [_img_linkuroImage1Url, _img_linkuroImage2Url, _img_linkuroImage3Url,
+                _img_linkuroImage4Url, _img_linkuroImage5Url, _img_linkuroImage6Url,
+                _img_linkuroImage7Url, _img_linkuroImage8Url, _img_linkuroImage9Url,
+                _img_linkuroImage10Url, _img_linkuroImage11Url, _img_linkuroImage12Url,
+                _img_linkuroImage13Url, _img_linkuroImage14Url, _img_linkuroImage15Url]
+                .map(url => `<img src="${url}" loading="lazy">`)
+                .join('\n');
+            openGallery(galleryHTML);
+        };
+
+
+        document.getElementById("close-gallery-button").onclick = () => {
+            galleryImagesContainer.innerHTML = null;
+            galleryContainer.classList.add("closed");
+            // CSS timing dependency
+            setTimeout(() => {
+                galleryContainer.classList.add("hidden");
+                document.body.classList.remove("overflow-hidden");
+                galleryContainer.classList.remove("closed");
+                galleryContainer.classList.remove("opened");
+            }, 1000);
+        };
     </script>
 </body>
 

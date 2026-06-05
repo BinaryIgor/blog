@@ -84,6 +84,8 @@ For the **2022.10 - 2024.12** period, I was involved in building a custom advert
 
 Working in a small team of a few people, I was responsible for delivering features end-to-end: from refining requirements, organizing work through tickets & tasks to designing technical solutions and the actual implementation. **It was one of the very best experiences of my career** - I got to be at the very start of the product & system design, be involved in the technical implementation and then maintenance and evolution on production.
 
+<p id="modivo-gallery-link" class="underline cursor-pointer">This is how it looked.</p>
+
 **As a side quest**, at the end, I worked on an interesting proof of concept: *let's create a product search based on image and/or text description, using vector embeddings*. The results were very promising, but due to structural changes in the company, the project was unfortunately shut down. Nevertheless, at the time I became more interested in the topic of vector embeddings - [even making a YouTube video about it](https://www.youtube.com/watch?v=r7GNyEdizoc).
 
 **Tech stack:** Microservices & Modular Monolith, Kotlin, Spring Boot, Spring Data JDBC, PostgreSQL, Testcontainers, GCP, Google Cloud SQL, BigQuery, Google Cloud Pub/Sub, Protocol Buffers, Apache Kafka, Kubernetes, Argo CD, Terraform, GitLab Pipelines, Grafana, Prometheus, Keycloak, TypeScript and Vue.js.
@@ -97,6 +99,8 @@ In the short span of **2023.04 - 2023.06**, together with my brother, we designe
 * designing - and then implementing - a frictionless *invite to the event & create account flow*
 
 Sadly, due to personal problems of the third Co-Founder, the project was not fully launched - we only ran a few test events. But technically, it was ready to be used with the established date of the first official event.
+
+<p id="collybri-gallery-link" class="underline cursor-pointer">This is how it looked.</p>
 
 A lot of technology that we - me and my brother - have designed and implemented while [creating Hairo](#co-founder-at-hairo) (especially around video calls) was reused here. **Tech stack:** Modular Monolith, Java, Spring Boot, PostgreSQL, Testcontainers, WebRTC, Coturn, Docker, Prometheus, Grafana, Python/Bash scripts, TypeScript and Vue.js.
 
@@ -112,6 +116,8 @@ From **2022.04 - 2023.05** I was building - together with my brother - [Hairo: a
 * devising and then managing a user verification process to make sure that we have real, genuine people on the platform
 
 There were only two of us, working on everything - design, marketing, technical implementation as well as customer support. This was truly a life-changing experience and the deepest form of learning: I got to be a marketer, product owner and customer assistant while being architect & developer at the same time.  *After a year of its publication and gathering close to 1500 users, we decided to archive Hairo on May 31, 2023.*
+
+<p id="hairo-gallery-link" class="underline cursor-pointer">This is how it looked.</p>
 
 **Tech stack:** Modular Monolith, Java, Vert.x, PostgreSQL, Testcontainers, WebRTC, Coturn, WebSockets, RabbitMQ, Docker, Grafana, Python/Bash scripts, TypeScript and Vue.js.
 
@@ -155,7 +161,7 @@ Later on, I was involved in developing algorithms for [the autonomous forklift p
 ### Other projects
 
 In a random order:
-* Linkuro - it was a slight variation of [Collybri](#co-founder-at-collybri) that we launched again with my brother; unfortunately, we did not find an effective-enough way of promoting it
+* <span id="linkuro-gallery-link" class="underline cursor-pointer">Linkuro</span> - it was a slight variation of [Collybri](#co-founder-at-collybri) that we launched again with my brother; unfortunately, we did not find an effective-enough way of promoting it
 * [This blog]({{httpsDomain}}) and [related YouTube channel]({{youTubeChannelUrl}}) - sharing my knowledge, experience and insights, as well as having a platform for constant learning, improvement and exploration of various approaches & ideas
 * [EventSQL](/events-over-sql.html) - events over SQL
 * [Flexible Components](https://github.com/BinaryIgor/Flexible-Components) - configurable and flexible, framework-agnostic Web Components collection
