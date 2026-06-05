@@ -31,7 +31,7 @@ Most of the projects I was engaged in were web-based and available through the b
 * Spring Boot, Node.js and React
 * PostgreSQL, MySQL, SQLite, BigQuery and MongoDB
 * WebRTC and WebSockets
-* [Microservices and Modular Monoliths](/modularity-posts.html)
+* [Modular Monolith and Microservices](/modularity-posts.html)
 * Docker, Kubernetes, Grafana, Prometheus
 * CI/CD solutions - GitLab, GitHub, Argo CD, Terraform, custom scripts & pipelines 
 * managed services in the clouds: AWS, GCP and DigitalOcean
