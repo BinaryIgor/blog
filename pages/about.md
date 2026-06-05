@@ -15,10 +15,12 @@ If you, like me, possess an insatiable curiosity and a relentless desire to dive
 
 ...and if you also think these are all fascinating questions, but they do not matter at all, if we do not deliver results effectively and productively, then you will feel at home here!
 
-If some of that sounds a little too vague or abstract, worry not! I have been working in the industry since 2017 and have shipped, collaborated on and maintained many production-ready and production-used systems - both at work, for companies, and in my own ventures and projects. I am deeply, deeply curious about answers to those questions, but ultimately, they serve us to architect and deliver software that provides value in the real world, for real people.
+If some of that sounds a little too vague or abstract, worry not.
+
+**[I have been working in the industry since 2017](/experience.html)** and have shipped, collaborated on and maintained many production-ready and production-used systems - both at work, for companies, and in my own ventures and projects. I am deeply, deeply curious about answers to those questions, but ultimately, they serve us to architect and deliver software that provides value in the real world, for real people.
 
 You can also check out my code on **[GitHub]({{gitHubProfileUrl}})** or find me on **[Lobsters]({{lobstersProfileUrl}})**, **[Reddit]({{redditProfileUrl}})** and **[LinkedIn]({{linkedInProfileUrl}})**. And if you like videos more, I sometimes post on **[YouTube]({{youTubeChannelUrl}})** under the same name (Binary Igor) as well.
 
-Finally, if you have valuable feedback, questions, corrections or an extension of my work, or just want to get in touch, shoot me an email at <span id="contact-email" class="font-bold">{{ contactEmail }}</span>. 
+Finally, if you have valuable feedback, questions, corrections or an extension of my work, or just want to get in touch, shoot me an email at <span id="contact-email" class="font-bold">{{ contactEmail }}</span>. I am likewise available for consultations, system design, debugging and general software-related advice sessions.
 
 I hope you will enjoy this journey as much as I do!

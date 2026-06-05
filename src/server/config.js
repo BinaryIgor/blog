@@ -53,6 +53,7 @@ function analyticsAllowedPaths() {
     return ["/",
         "/index.html",
         "/about.html",
+        "/experience.html",
         "/posts.html",
         "/bootstrap.html",
         "/dbs-posts.html",
