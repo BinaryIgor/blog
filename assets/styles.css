@@ -70,7 +70,6 @@
         --secondary-3-text-color: rgb(156, 163, 175);
         --scrollbar-color: var(--primary-text-color);
         --scrollbar-hover-color: var(--secondary-3-text-color);
-        --gallery-bg-color: rgba(15, 15, 15, 0.9);
         --error-color: rgb(250, 115, 115);
     }
 
@@ -86,7 +85,6 @@
         --secondary-3-text-color: rgb(75, 85, 99);
         --scrollbar-color: var(--primary-text-color);
         --scrollbar-hover-color: var(--secondary-3-text-color);
-        --gallery-bg-color: rgba(250, 250, 250, 0.9);
         --error-color: rgb(170, 20, 20);
     }
 
@@ -167,10 +165,6 @@
     border-color: var(--primary-text-color-faded);
 }
 
-.bg-gallery {
-    background-color: var(--gallery-bg-color);
-}
-
 .object-position-50 {
     object-position: 50% 50%;
 }
@@ -184,6 +178,10 @@
 
 .nowrap {
     white-space: nowrap;
+}
+
+.scrollbar-gutter-stable {
+    scrollbar-gutter: stable;
 }
 
 /* keep in sync with .post img below! */
@@ -269,6 +267,10 @@
         @apply object-contain m-auto rounded-sm max-h-[750px] max-w-[1250px] w-full;
     }
 
+    #gallery {
+        scrollbar-width: thin;
+    }
+
     #gallery-container {
         opacity: 0;
         transition: opacity 1.5s ease-out;
@@ -280,7 +282,11 @@
 
     #gallery-container.closed {
         opacity: 0;
-        transition: opacity 1s ease-in;
+        transition: opacity 0.75s ease-in;
+    }
+
+    .gallery-link {
+        @apply underline cursor-pointer font-bold;
     }
 
     #profile-image {

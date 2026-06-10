@@ -3,7 +3,7 @@
 "slug": "experience"
 ---
 <!DOCTYPE html>
-<html lang="en" class="scroll-smooth">
+<html lang="en" class="scroll-smooth scrollbar-gutter-stable">
 
 <head>
     {{ head-tags.html }}
@@ -43,10 +43,11 @@
 
 <body>
     {{ navigation.html }}
-    <div id="gallery-container" class="gallery bg-gallery fixed hidden top-0 left-0 h-full w-full z-40 flex flex-col">
-        <div id="close-gallery-button" class="p-4 text-3xl cursor-pointer text-right">X</div>
+    <div id="gallery-container" class="gallery bg-primary fixed hidden top-0 left-0 h-full w-full z-40 flex flex-col select-none">
+        <div id="gallery-title" class="text-3xl text-center p-4"></div>
+        <div id="gallery-close-button" class="p-4 text-3xl cursor-pointer absolute absolute top-0 right-0">X</div>
         <div id="gallery" class="overflow-auto flex-1">
-            <div id="gallery-images-container" class="flex flex-col gap-8 mx-4 mb-8"></div>
+            <div id="gallery-images-container" class="flex flex-col gap-6 mx-4 mb-6"></div>
         </div>
     </div>
     <div class="post py-6 px-4">
@@ -70,7 +71,13 @@
             }
         });
 
-        function openGallery(galleryHTML) {
+        const galleryContainer = document.getElementById("gallery-container");
+        const galleryTitle = document.getElementById("gallery-title");
+        const gallery = document.getElementById("gallery");
+        const galleryImagesContainer = document.getElementById("gallery-images-container");
+
+        function openGallery(galleryHTML, title) {
+            galleryTitle.innerHTML = title;
             document.body.classList.add("overflow-hidden");
             galleryImagesContainer.innerHTML = galleryHTML;
             galleryContainer.classList.remove("hidden");
@@ -78,9 +85,19 @@
             setTimeout(() => galleryContainer.classList.add("opened"), 1);
         }
 
-        const galleryContainer = document.getElementById("gallery-container");
-        const gallery = document.getElementById("gallery");
-        const galleryImagesContainer = document.getElementById("gallery-images-container");
+        function closeGallery() {
+            galleryContainer.classList.add("closed");
+            // CSS timing dependency
+            setTimeout(() => {
+                document.body.classList.remove("overflow-hidden");
+                galleryImagesContainer.innerHTML = null;
+                galleryContainer.classList.add("hidden");
+                galleryContainer.classList.remove("closed");
+                galleryContainer.classList.remove("opened");
+            }, 750);
+        }
+
+        document.getElementById("gallery-close-button").onclick = closeGallery;
 
         const _img_modivoImage1Url = "{{ imagesPath }}/experience/modivo-ads-1.png";
         const _img_modivoImage2Url = "{{ imagesPath }}/experience/modivo-ads-2.png";
@@ -95,7 +112,7 @@
                <img src="${_img_modivoImage2Url}" loading="lazy">
                <img src="${_img_modivoImage3Url}" loading="lazy">
                <img src="${_img_modivoImage4Url}" loading="lazy">`;
-            openGallery(galleryHTML);
+            openGallery(galleryHTML, "Modivo");
         };
 
         const _img_collybriImage1Url = "{{ imagesPath }}/experience/collybri-1.png";
@@ -115,7 +132,7 @@
                 _img_collybriImage10Url]
                 .map(url => `<img src="${url}" loading="lazy">`)
                 .join('\n');
-            openGallery(galleryHTML);
+            openGallery(galleryHTML, "Collybri");
         };
 
         const _img_hairoImage1Url = "{{ imagesPath }}/experience/hairo-create-account.jpg";
@@ -134,7 +151,7 @@
                 _img_hairoImage8Url, _img_hairoImage9Url, _img_hairoImage10Url]
                 .map(url => `<img src="${url}" loading="lazy">`)
                 .join('\n');
-            openGallery(galleryHTML);
+            openGallery(galleryHTML, "Hairo");
         };
 
         const _img_linkuroImage1Url = "{{ imagesPath }}/experience/linkuro-1.png";
@@ -160,20 +177,7 @@
                 _img_linkuroImage13Url, _img_linkuroImage14Url, _img_linkuroImage15Url]
                 .map(url => `<img src="${url}" loading="lazy">`)
                 .join('\n');
-            openGallery(galleryHTML);
-        };
-
-
-        document.getElementById("close-gallery-button").onclick = () => {
-            galleryImagesContainer.innerHTML = null;
-            galleryContainer.classList.add("closed");
-            // CSS timing dependency
-            setTimeout(() => {
-                galleryContainer.classList.add("hidden");
-                document.body.classList.remove("overflow-hidden");
-                galleryContainer.classList.remove("closed");
-                galleryContainer.classList.remove("opened");
-            }, 1000);
+            openGallery(galleryHTML, "Linkuro");
         };
     </script>
 </body>
