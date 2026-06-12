@@ -14,8 +14,8 @@ HREF_ATTR = "href"
 SCRIPT_TAG = "script"
 SRC_ATTR = "src"
 IMG_TAG = "img"
-BACKGROUND_PROPERTY = "background"
-URL_PROPERTY = 'url'
+JS_IMG_VAR = "_img_"
+
 CSS_URL_REGEX = re.compile("(.*)url\\((.*)\\)")
 
 JS_KEY = "js"
@@ -140,6 +140,10 @@ def resolve_new_line(old_line, css_names_map, js_names_map, images_names_map):
     img_l = new_img_line(old_line, images_names_map)
     if img_l:
         return img_l
+    
+    js_img_l = new_js_img_line(old_line, images_names_map)
+    if js_img_l:
+        return js_img_l
 
     return ''
 
@@ -151,7 +155,7 @@ def new_css_line(old_line, css_names_map):
 
 
 def replace_in_line(tag_idx, attr_idx, old_line, names_map):
-    if 0 < tag_idx < attr_idx:
+    if 0 < tag_idx <= attr_idx:
         for name in names_map:
             name_idx = old_line.find(name)
             if name_idx > attr_idx:
@@ -171,6 +175,11 @@ def new_img_line(old_line, img_names_map):
     img_idx = old_line.find(IMG_TAG)
     src_idx = old_line.find(SRC_ATTR)
     return replace_in_line(img_idx, src_idx, old_line, img_names_map)
+
+
+def new_js_img_line(old_line, img_names_map):
+    img_idx = old_line.find(JS_IMG_VAR)
+    return replace_in_line(img_idx, img_idx, old_line, img_names_map)
 
 
 def change_css(path, images_names_map):
