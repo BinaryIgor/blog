@@ -8,3 +8,4 @@ Here are a few of my posts/articles that might be of interest to you, as a solid
 * [Load Testing](/how-many-http-requests-can-a-single-machine-handle.html): how many HTTP requests/second can a Single Machine handle?
 * [Multi vs Single Page Apps](/multi-vs-single-page-apps.html): user experience, performance, complexity and more
 * [MySQL vs PostgreSQL Performance](/mysql-vs-postgresql-performance.html): throughput & latency, reads & writes
+* [The Joy and Power of Understanding](/the-joy-and-power-of-understanding.html)

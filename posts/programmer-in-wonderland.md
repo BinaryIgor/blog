@@ -4,7 +4,8 @@
     "slug": "programmer-in-wonderland",
     "publishedAt": "2024-09-15",
     "excerpt": "There are hundreds and thousands of tools and frameworks out there, often solving the same problems or struggling to explain what the problem they are trying to solve is ... Because of this diversity and how powerful some of these tools are, it often feels like <em>Magic</em>. So many things possible, so fast and seemingly without a cost, without tradeoffs. But is it really the case?",
-    "writingLog": [ 1, 1.5, 1, 2.5, 0.5, 1 ]
+    "writingLog": [ 1, 1.5, 1, 2.5, 0.5, 1 ],
+    "tags": [ "thoughts" ]
 }
 ---
 
@@ -59,7 +60,7 @@ As we can imagine, **consequences of this approach can be rather dire but not im
 They are also lost in the sense of being tied to the tool they now primarily use. If they do not understand how their tools work, they are not in control. They cannot recreate a part of their functionality themselves and if they want to change the tool, it can often feel like starting all over again; with the lack of understanding of fundamentals, they are bound to learn ever-changing and ephemeral abstractions that hide them. Additionally, they can be easily intimidated by all the buzzwords and marketing campaigns of the tools, since they do not know what is under the hood and how it all works. It truly is magic to them.
 
 To sum it up:
-> Tools used in the right context are great and makes programmers life easier. What is more, in many cases, without such tools complex software projects would simply not be possible to complete. On the other hand, too many tools and often shallow, superficial understanding of them, especially as to why and when to use them and why and when to avoid them, can lead to some serious issues.
+> Tools used in the right context are great and make programmers' lives easier. What is more, in many cases, without such tools complex software projects would simply not be possible to complete. On the other hand, too many tools and often shallow, superficial understanding of them, especially as to why and when to use them and why and when to avoid them, can lead to some serious issues.
 
 So, we would rather not be *The Lost Programmer*. What is the solution then?
 

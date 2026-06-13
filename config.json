@@ -19,6 +19,7 @@
         "htmx-posts.html",
         "auth-posts.html",    
         "networks-posts.html",
+        "thoughts-posts.html",
         "about.html",
         "experience.html",
         "stats.html",
