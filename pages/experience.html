@@ -43,7 +43,8 @@
 
 <body>
     {{ navigation.html }}
-    <div id="gallery-container" class="gallery bg-primary fixed hidden top-0 left-0 h-full w-full z-40 flex flex-col select-none">
+    <div id="gallery-container"
+        class="gallery bg-primary fixed hidden top-0 left-0 h-dvh w-full z-40 flex flex-col select-none">
         <div id="gallery-title" class="text-3xl text-center p-4"></div>
         <div id="gallery-close-button" class="p-4 text-3xl cursor-pointer absolute absolute top-0 right-0">X</div>
         <div id="gallery" class="overflow-auto flex-1">
@@ -79,10 +80,31 @@
         function openGallery(galleryHTML, title) {
             galleryTitle.innerHTML = title;
             document.body.classList.add("overflow-hidden");
-            galleryImagesContainer.innerHTML = galleryHTML;
+            galleryImagesContainer.innerHTML = `
+                <div class="py-8 absolute left-1/2 -translate-x-1/2" data-images-loader>Loading...</div>
+                ${galleryHTML}`.trim();
             galleryContainer.classList.remove("hidden");
             // needed for animation to work
             setTimeout(() => galleryContainer.classList.add("opened"), 1);
+
+            const imagesLoader = galleryImagesContainer.querySelector("[data-images-loader]");
+            const images = [...galleryImagesContainer.querySelectorAll("img")];
+            let loadedImages = 0;
+            const hideImagesLoaderThreshold = 1;
+            images.forEach(img => {
+                img.addEventListener("load", () => {
+                    img.classList.add("loaded");
+                    const imgDescriptionElementId = img.getAttribute("data-img-description-element-id");
+                    if (imgDescriptionElementId) {
+                        galleryImagesContainer.querySelector(`#${imgDescriptionElementId}`).classList.remove("hidden");
+                    }
+                    loadedImages++;
+                    if (loadedImages == hideImagesLoaderThreshold) {
+                        // has fade-out effect
+                        imagesLoader.classList.add("images-loader-hidden");
+                    }
+                });
+            });
         }
 
         function closeGallery() {
@@ -94,7 +116,7 @@
                 galleryContainer.classList.add("hidden");
                 galleryContainer.classList.remove("closed");
                 galleryContainer.classList.remove("opened");
-            }, 750);
+            }, 500);
         }
 
         document.getElementById("gallery-close-button").onclick = closeGallery;
@@ -106,12 +128,12 @@
         document.getElementById("modivo-gallery-link").onclick = () => {
             const galleryHTML = `
                 <figure>
-                    <img src="${_img_modivoImage1Url}" loading="lazy">
-                    <figcaption>Banner and first two offers are sponsored.</figcaption>
+                    <img src="${_img_modivoImage1Url}" loading="lazy" data-img-description-element-id="modivo-img-1-description">
+                    <figcaption class="hidden" id="modivo-img-1-description">Banner and first two offers are sponsored.</figcaption>
                 </figure>
-               <img src="${_img_modivoImage2Url}" loading="lazy">
-               <img src="${_img_modivoImage3Url}" loading="lazy">
-               <img src="${_img_modivoImage4Url}" loading="lazy">`;
+                <img src="${_img_modivoImage2Url}" loading="lazy">
+                <img src="${_img_modivoImage3Url}" loading="lazy">
+                <img src="${_img_modivoImage4Url}" loading="lazy">`;
             openGallery(galleryHTML, "Modivo");
         };
 
