@@ -92,7 +92,7 @@ Working in a small team of a few people, I was responsible for delivering featur
 
 ### Co-Founder at Collybri
 
-In the short span of **2023.04 - 2023.06**, together with my brother, we designed and implemented *the idea of a third Co-Founder* - business speed dating app, allowing hosting online events for networking purposes.
+In the short span of **2023.04 - 2023.06**, together with my brother, we designed and implemented *the idea of the third Co-Founder* - business speed dating app, allowing hosting online events for networking purposes.
 
 **Major challenges:**
 * devising - and then implementing - an algorithm to match people for video calls, in real time, on the event - taking their availability and meeting history into account
@@ -106,7 +106,7 @@ A lot of technology that we - me and my brother - have designed and implemented 
 
 ### Co-Founder at Hairo
 
-From **2022.04 - 2023.05** I was building - together with my brother - [Hairo: automated system for meeting new people](https://hairo.io/archive). 
+From **2022.04 - 2023.05** I was building - together with my brother - *Hairo: automated system for meeting new people*. 
 
 **Major challenges:**
 * designing easy to understand and at the same time useful and practical algorithm of matching users
