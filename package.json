@@ -28,8 +28,7 @@
     },
     "dependencies": {
         "cors": "^2.8.5",
-        "express": "^4.19.2",
-        "sqlite3": "^5.1.7"
+        "express": "^4.19.2"
     },
     "devDependencies": {
         "@tailwindcss/cli": "^4.1.16",
