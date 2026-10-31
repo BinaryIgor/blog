@@ -39,16 +39,6 @@ export function initSchema(db) {
         `);
 }
 
-const CAMEL_CASE_REGEX = /([a-z0-9])([A-Z])/g;
-export function snakeCasedObject(object) {
-    const snakeCased = {};
-    for (let f in object) {
-        const scField = f.replace(CAMEL_CASE_REGEX, '$1_$2').toLowerCase();
-        snakeCased[scField] = object[f];
-    }
-    return snakeCased;
-}
-
 export class SqliteDb {
 
     #db;
@@ -58,7 +48,7 @@ export class SqliteDb {
         this.#db = new DatabaseSync(filePath);
     }
 
-    static async initInstance(filePath) {
+    static initInstance(filePath) {
         const db = new SqliteDb(filePath);
         db.init();
         return db;
@@ -90,7 +80,7 @@ export class SqliteDb {
         return this.#db.prepare(sql).all(...params);
     }
 
-    backup(backupPath) {
+    async backup(backupPath) {
         const backupPromise = sqliteBackup(this.#db, backupPath);
         this.#backups.add(backupPromise);
         return backupPromise.finally(() => this.#backups.delete(backupPromise));

@@ -34,18 +34,18 @@ export class AnalyticsService {
         this.allowedPaths = allowedPaths;
     }
 
-    async addEvent(event) {
+    addEvent(event) {
         const validatedEvent = this.#validatedEvent(event);
 
-        await this.#validatePathExists(validatedEvent);
+        this.#validatePathExists(validatedEvent);
 
-        await this.#validateIpHashUniqueVisitorsLimit(validatedEvent);
+        this.#validateIpHashUniqueVisitorsLimit(validatedEvent);
 
         if (event.type == PING_TYPE) {
-            await this.#validateVisitorPingsFrequency(validatedEvent);
+            this.#validateVisitorPingsFrequency(validatedEvent);
         }
 
-        await this.eventsSaver.addEvent(validatedEvent);
+        this.eventsSaver.addEvent(validatedEvent);
     }
 
     #validatedEvent(event) {
@@ -83,10 +83,10 @@ export class AnalyticsService {
         }
     }
 
-    async #validateIpHashUniqueVisitorsLimit(event) {
+    #validateIpHashUniqueVisitorsLimit(event) {
         const timestampAgoToCheck = Dates.timestampSecondsAgo(this.clock.nowTimestamp(), DAY_SECONDS);
 
-        const uniqueVisitorIdsOfIp = await this.analyticsRepository
+        const uniqueVisitorIdsOfIp = this.analyticsRepository
             .countDistinctVisitorIdsAfterTimestamp(event.ipHash, timestampAgoToCheck);
 
         if (uniqueVisitorIdsOfIp >= MAX_IP_HASH_VISITOR_IDS_IN_LAST_DAY) {
@@ -94,7 +94,7 @@ export class AnalyticsService {
         }
     }
 
-    async #validatePathExists(event) {
+    #validatePathExists(event) {
         const inAllowedPaths = this.allowedPaths.some(p => p === event.path);
         if (inAllowedPaths) {
             return;
@@ -105,9 +105,9 @@ export class AnalyticsService {
         }
     }
 
-    async #validateVisitorPingsFrequency(event) {
+    #validateVisitorPingsFrequency(event) {
         const timestampAgoToCheck = Dates.timestampSecondsAgo(this.clock.nowTimestamp(), NO_PINGS_WINDOW_SECONDS);
-        const notAllowedPings = await this.analyticsRepository.countPingsAfterTimestamp(event.visitorId, event.path, timestampAgoToCheck);
+        const notAllowedPings = this.analyticsRepository.countPingsAfterTimestamp(event.visitorId, event.path, timestampAgoToCheck);
         if (notAllowedPings > 0) {
             throw new PingsFrequencyError(`No pings are allowed in the last ${NO_PINGS_WINDOW_SECONDS} seconds, but ${event.visitorId} has ${notAllowedPings} for ${event.path} path`);
         }
@@ -264,19 +264,19 @@ export class DeferredEventsSaver {
     }
 
     schedule(scheduler, writeDelay) {
-        scheduler.schedule(async () => this.saveEvents(), writeDelay);
+        scheduler.schedule(() => this.saveEvents(), writeDelay);
     }
 
-    async saveEvents() {
+    saveEvents() {
         const toSave = [...this.eventsToSave];
 
         if (toSave.length > 0) {
             try {
                 this.eventsToSave = [];
-                await this.analyticsRepository.saveEvents(toSave);
+                this.analyticsRepository.saveEvents(toSave);
                 this.lastSaveTimestamp = this.clock.nowTimestamp();
             } catch (e) {
-                console.error("Failed to save events:", e);
+                Logger.logError("Failed to save events:", e);
                 this.eventsToSave.push(...toSave);
             }
         } else {
@@ -284,14 +284,14 @@ export class DeferredEventsSaver {
         }
     }
 
-    async addEvent(event) {
+    addEvent(event) {
         this.eventsToSave.push(event);
         if (this.eventsToSave.length >= this.maxInMemoryEvents) {
-            await this.saveEvents();
+            this.saveEvents();
         }
     }
 
-    async close() {
+    close() {
         this.saveEvents();
     }
 }
@@ -305,13 +305,10 @@ export class StatsViews {
     #lastLongerPeriodsViewsSaveTimestamp;
     #lastAllTimeViewSaveTimestamp;
 
-    constructor(db, clock, statsWorker) {
-        if (!statsWorker) {
-            throw new Error("StatsViews requires a StatsWorker");
-        }
+    constructor(db, statsWorker, clock) {
         this.#db = db;
-        this.#clock = clock;
         this.#statsWorker = statsWorker;
+        this.#clock = clock;
         this.#lastShorterPeriodsViewsSaveTimestamp = null;
         this.#lastLongerPeriodsViewsSaveTimestamp = null;
         this.#lastAllTimeViewSaveTimestamp = null;
@@ -381,6 +378,26 @@ export class StatsViews {
     }
 }
 
+export class StatsViewSaver {
+
+    #db;
+
+    constructor(db) {
+        this.#db = db;
+    }
+
+    save(view) {
+        this.#db.execute(`
+            INSERT INTO stats_view (period, stats, calculated_at)
+            VALUES (?, ?, json(?))
+            ON CONFLICT (period)
+            DO UPDATE SET
+            stats = EXCLUDED.stats,
+            calculated_at = EXCLUDED.calculated_at
+            `, [view.period, JSON.stringify(view.stats), view.calculatedAt]);
+    }
+}
+
 export class SqliteAnalyticsRepository {
 
     constructor(db) {
@@ -415,20 +432,20 @@ export class SqliteAnalyticsRepository {
         return row ? row["pings"] : 0;
     }
 
-    async stats(fromTimestamp, toTimestamp) {
-        const { views, visitors, ipHashes } = await this._viewsVisitorsIpHashesStats(fromTimestamp, toTimestamp);
-        const sessions = await this.#sessionsStats(fromTimestamp, toTimestamp);
-        const scrolls = await this._scrollStats(fromTimestamp, toTimestamp);
-        const pings = await this._pingsStats(fromTimestamp, toTimestamp);
-        const visitorsBySource = await this.#visitorsByTopSourcesStats(fromTimestamp, toTimestamp, 25);
-        const pages = await this._pagesStats(fromTimestamp, toTimestamp);
+    stats(fromTimestamp, toTimestamp) {
+        const { views, visitors, ipHashes } = this.#viewsVisitorsIpHashesStats(fromTimestamp, toTimestamp);
+        const sessions = this.#sessionsStats(fromTimestamp, toTimestamp);
+        const scrolls = this.#scrollStats(fromTimestamp, toTimestamp);
+        const pings = this.#pingsStats(fromTimestamp, toTimestamp);
+        const visitorsBySource = this.#visitorsByTopSourcesStats(fromTimestamp, toTimestamp, 25);
+        const pages = this.#pagesStats(fromTimestamp, toTimestamp);
 
         return new Stats(views, visitors, ipHashes, sessions,
             scrolls, pings, visitorsBySource, pages);
     }
 
-    _viewsVisitorsIpHashesStats(fromTimestamp, toTimestamp) {
-        const query = this._queryWithOptionalWhereInTimestampsClause(`
+    #viewsVisitorsIpHashesStats(fromTimestamp, toTimestamp) {
+        const query = this.#queryWithOptionalWhereInTimestampsClause(`
         SELECT 
             COUNT(*) AS views, 
             COUNT(DISTINCT visitor_id) AS unique_visitors,
@@ -446,8 +463,8 @@ export class SqliteAnalyticsRepository {
         return { views: 0, visitors: 0, iphashes: 0 };
     }
 
-    _queryWithOptionalWhereInTimestampsClause(query, fromTimestamp, toTimestamp, additionalClause = undefined) {
-        const whereInTimestampsClause = this._whereInTimestampsClause(fromTimestamp, toTimestamp);
+    #queryWithOptionalWhereInTimestampsClause(query, fromTimestamp, toTimestamp, additionalClause = undefined) {
+        const whereInTimestampsClause = this.#whereInTimestampsClause(fromTimestamp, toTimestamp);
         if (whereInTimestampsClause) {
             const withWhereQuery = `${query} ${whereInTimestampsClause}`;
             if (additionalClause) {
@@ -461,7 +478,7 @@ export class SqliteAnalyticsRepository {
         return query;
     }
 
-    _whereInTimestampsClause(fromTimestamp, toTimestamp) {
+    #whereInTimestampsClause(fromTimestamp, toTimestamp) {
         let fromClause = fromTimestamp ? `timestamp >= ${fromTimestamp}` : '';
         let toClause = toTimestamp ? `timestamp <= ${toTimestamp}` : '';
 
@@ -483,8 +500,8 @@ export class SqliteAnalyticsRepository {
         return whereClause;
     }
 
-    _viewsByPathStatsUnmapped(fromTimestamp, toTimestamp) {
-        const query = `${this._queryWithOptionalWhereInTimestampsClause(`
+    #viewsByPathStatsUnmapped(fromTimestamp, toTimestamp) {
+        const query = `${this.#queryWithOptionalWhereInTimestampsClause(`
             SELECT path, COUNT(*) AS views, COUNT(DISTINCT visitor_id) AS unique_viewers
             FROM view`,
             fromTimestamp, toTimestamp
@@ -494,16 +511,16 @@ export class SqliteAnalyticsRepository {
         return this.db.query(query);
     }
 
-    _emptyEventsIds() {
+    #emptyEventsIds() {
         return { events: 0, ids: 0 };
     }
 
-    async #sessionsStats(fromTimestamp, toTimestamp) {
-        const sessionsQuery = this._queryWithOptionalWhereInTimestampsClause(`
+    #sessionsStats(fromTimestamp, toTimestamp) {
+        const sessionsQuery = this.#queryWithOptionalWhereInTimestampsClause(`
             SELECT COUNT(DISTINCT session_id) AS sessions FROM event`,
             fromTimestamp, toTimestamp, "session_id !=''"
         );
-        const sessionsDurationQuery = this._queryWithOptionalWhereInTimestampsClause(`
+        const sessionsDurationQuery = this.#queryWithOptionalWhereInTimestampsClause(`
             SELECT session_id, MAX(timestamp) - MIN(timestamp) AS duration FROM event`,
             fromTimestamp, toTimestamp, "session_id != ''"
         ) + " GROUP BY session_id";
@@ -544,13 +561,13 @@ export class SqliteAnalyticsRepository {
         return new SessionsStats(sessions, meanDuration, maxDuration, minDuration, thresholds);
     }
 
-    async _scrollStats(fromTimestamp, toTimestamp) {
-        const query = this._queryWithOptionalWhereInTimestampsClause(`
+    #scrollStats(fromTimestamp, toTimestamp) {
+        const query = this.#queryWithOptionalWhereInTimestampsClause(`
             SELECT COUNT(*) AS scrolls, COUNT(DISTINCT visitor_id) AS unique_scrollers 
             FROM scroll`,
             fromTimestamp, toTimestamp
         );
-        const queryByPosition = `${this._queryWithOptionalWhereInTimestampsClause(`
+        const queryByPosition = `${this.#queryWithOptionalWhereInTimestampsClause(`
             SELECT 
                 CAST(data AS INTEGER) AS position,
                 COUNT(*) AS scrolls, 
@@ -560,27 +577,27 @@ export class SqliteAnalyticsRepository {
         )} GROUP BY position ORDER BY position`;
 
         const row = this.db.queryOne(query);
-        const all = row ? { events: row['scrolls'], ids: row["unique_scrollers"] } : this._emptyEventsIds();
+        const all = row ? { events: row['scrolls'], ids: row["unique_scrollers"] } : this.#emptyEventsIds();
         const byPosition = this.db.query(queryByPosition).map(r => ({
             position: r['position'],
             events: r['scrolls'],
             ids: r['unique_scrollers']
         }));
 
-        return this._allAndByPositionStats(all, byPosition);
+        return this.#allAndByPositionStats(all, byPosition);
     }
 
-    _allAndByPositionStats(all, byPosition) {
+    #allAndByPositionStats(all, byPosition) {
         return { all, byPosition };
     }
 
-    async _scrollsByPathStats(fromTimestamp, toTimestamp) {
-        const query = `${this._queryWithOptionalWhereInTimestampsClause(`
+    #scrollsByPathStats(fromTimestamp, toTimestamp) {
+        const query = `${this.#queryWithOptionalWhereInTimestampsClause(`
             SELECT path, COUNT(*) AS scrolls, COUNT(DISTINCT visitor_id) AS unique_scrollers 
             FROM scroll`,
             fromTimestamp, toTimestamp
         )} GROUP BY path ORDER BY path`;
-        const queryByPosition = `${this._queryWithOptionalWhereInTimestampsClause(`
+        const queryByPosition = `${this.#queryWithOptionalWhereInTimestampsClause(`
             SELECT 
                 path, 
                 CAST(data AS INTEGER) AS position,
@@ -590,18 +607,15 @@ export class SqliteAnalyticsRepository {
             fromTimestamp, toTimestamp
         )} GROUP BY path, position ORDER BY path, position`;
 
-        const queryPromise = this.db.query(query);
-        const queryByPositionPromise = this.db.query(queryByPosition);
-
         const scrolls = new Map();
-        (await queryPromise).forEach(r => {
+        this.db.query(query).forEach(r => {
             scrolls.set(r['path'], {
                 events: r['scrolls'],
                 ids: r['unique_scrollers']
             });
         });
         const scrollsByPosition = new Map();
-        (await queryByPositionPromise).forEach(r => {
+        this.db.query(queryByPosition).forEach(r => {
             const path = r['path'];
             let pScrolls = scrollsByPosition.get(path);
             if (!pScrolls) {
@@ -615,26 +629,26 @@ export class SqliteAnalyticsRepository {
             });
         });
 
-        return this._allAndByPositionStats(scrolls, scrollsByPosition);
+        return this.#allAndByPositionStats(scrolls, scrollsByPosition);
     }
 
-    async _pingsStats(fromTimestamp, toTimestamp) {
+    #pingsStats(fromTimestamp, toTimestamp) {
         const query = `
         SELECT COALESCE(SUM(pings), 0) AS pings, 
           COUNT(visitor_id) AS unique_pingers,
           COALESCE(MIN(pings), 0) AS min_pings,
           COALESCE(MAX(pings), 0) AS max_pings,
           COALESCE(AVG(pings), 0) AS mean_pings,
-          ${this._pingerSumsClauses()}
+          ${this.#pingerSumsClauses()}
         FROM (
-          ${this._queryWithOptionalWhereInTimestampsClause(`
+          ${this.#queryWithOptionalWhereInTimestampsClause(`
           SELECT visitor_id, COUNT(*) AS pings 
           FROM ping`, fromTimestamp, toTimestamp)}
           GROUP BY visitor_id
         )`;
-        const queryByPosition = `${this._queryWithOptionalWhereInTimestampsClause(`
+        const queryByPosition = `${this.#queryWithOptionalWhereInTimestampsClause(`
             SELECT 
-                ${this._aggregatedPositionClause()} AS position,
+                ${this.#aggregatedPositionClause()} AS position,
                 COUNT(*) AS pings, 
                 COUNT(DISTINCT visitor_id) AS unique_pingers 
             FROM ping`,
@@ -651,17 +665,17 @@ export class SqliteAnalyticsRepository {
             ids: r['unique_pingers']
         }));
 
-        return this._allAndByPositionStats(all, byPosition);
+        return this.#allAndByPositionStats(all, byPosition);
     }
 
-    _pingerSumsClauses() {
+    #pingerSumsClauses() {
         return `
         COALESCE(SUM(CASE WHEN pings >= 6 THEN 1 ELSE 0 END), 0) AS pingers6,
         COALESCE(SUM(CASE WHEN pings >= 20 THEN 1 ELSE 0 END), 0) AS pingers20,
         COALESCE(SUM(CASE WHEN pings >= 60 THEN 1 ELSE 0 END), 0) AS pingers60`;
     }
 
-    _aggregatedPositionClause() {
+    #aggregatedPositionClause() {
         return `
         CASE
           WHEN CAST(data AS INTEGER) < 25 THEN
@@ -677,7 +691,7 @@ export class SqliteAnalyticsRepository {
           END`;
     }
 
-    async _pingsByPathStats(fromTimestamp, toTimestamp) {
+    #pingsByPathStats(fromTimestamp, toTimestamp) {
         const query = `
         SELECT path,
           COALESCE(SUM(pings), 0) AS pings, 
@@ -685,36 +699,33 @@ export class SqliteAnalyticsRepository {
           COALESCE(MIN(pings), 0) AS min_pings,
           COALESCE(MAX(pings), 0) AS max_pings,
           COALESCE(AVG(pings), 0) AS mean_pings,
-          ${this._pingerSumsClauses()}
+          ${this.#pingerSumsClauses()}
         FROM (
-          ${this._queryWithOptionalWhereInTimestampsClause(`
+          ${this.#queryWithOptionalWhereInTimestampsClause(`
           SELECT path, visitor_id, COUNT(*) AS pings 
           FROM ping`, fromTimestamp, toTimestamp)}
           GROUP BY path, visitor_id
         ) 
         GROUP BY path
         ORDER BY path`;
-        const queryByPosition = `${this._queryWithOptionalWhereInTimestampsClause(`
+        const queryByPosition = `${this.#queryWithOptionalWhereInTimestampsClause(`
             SELECT 
                 path, 
-                ${this._aggregatedPositionClause()} AS position,
+                ${this.#aggregatedPositionClause()} AS position,
                 COUNT(*) AS pings,
                 COUNT(DISTINCT visitor_id) AS unique_pingers
             FROM ping`,
             fromTimestamp, toTimestamp
         )} GROUP BY path, position ORDER BY path, position`;
 
-        const queryPromise = this.db.query(query);
-        const queryByPositionPromise = this.db.query(queryByPosition);
-
         const pings = new Map();
-        (await queryPromise).forEach(r => {
+        this.db.query(query).forEach(r => {
             pings.set(r['path'], new PingStats(r['pings'], r['unique_pingers'],
                 r['min_pings'], r['max_pings'], r['mean_pings'],
                 PingersStats.atLeastStats(r)));
         });
         const pingsByPosition = new Map();
-        (await queryByPositionPromise).forEach(r => {
+        this.db.query(queryByPosition).forEach(r => {
             const path = r['path'];
             let pPings = pingsByPosition.get(path);
             if (!pPings) {
@@ -728,11 +739,11 @@ export class SqliteAnalyticsRepository {
             });
         });
 
-        return this._allAndByPositionStats(pings, pingsByPosition);
+        return this.#allAndByPositionStats(pings, pingsByPosition);
     }
 
     #visitorsByTopSourcesStats(fromTimestamp, toTimestamp, limit) {
-        const query = `${this._queryWithOptionalWhereInTimestampsClause(
+        const query = `${this.#queryWithOptionalWhereInTimestampsClause(
             'SELECT source, COUNT(DISTINCT visitor_id) AS visitors FROM view',
             fromTimestamp, toTimestamp
         )} GROUP BY source ORDER BY visitors DESC, source ASC LIMIT ${limit}`;
@@ -740,11 +751,11 @@ export class SqliteAnalyticsRepository {
         return this.db.query(query).map(r => new VisitorsBySource(r['source'], r['visitors']));
     }
 
-    async _pagesStats(fromTimestamp, toTimestamp) {
-        const { all: scrollsAll, byPosition: scrollsByPosition } = await this._scrollsByPathStats(fromTimestamp, toTimestamp);
-        const { all: pingsAll, byPosition: pingsByPosition } = await this._pingsByPathStats(fromTimestamp, toTimestamp);
+    #pagesStats(fromTimestamp, toTimestamp) {
+        const { all: scrollsAll, byPosition: scrollsByPosition } = this.#scrollsByPathStats(fromTimestamp, toTimestamp);
+        const { all: pingsAll, byPosition: pingsByPosition } = this.#pingsByPathStats(fromTimestamp, toTimestamp);
 
-        const viewsRaw = await this._viewsByPathStatsUnmapped(fromTimestamp, toTimestamp);
+        const viewsRaw = this.#viewsByPathStatsUnmapped(fromTimestamp, toTimestamp);
 
         return viewsRaw.map(r => {
             const path = r['path'];
@@ -757,10 +768,10 @@ export class SqliteAnalyticsRepository {
 
             return new PageStats(path,
                 { events: r["views"], ids: r["unique_viewers"] },
-                this._allAndByPositionStats(
-                    pScrollsAll ? pScrollsAll : this._emptyEventsIds(),
+                this.#allAndByPositionStats(
+                    pScrollsAll ? pScrollsAll : this.#emptyEventsIds(),
                     pScrollsByPosition ? pScrollsByPosition : []),
-                this._allAndByPositionStats(
+                this.#allAndByPositionStats(
                     pPingsAll ? pPingsAll : PingStats.empty(),
                     pPingsByPosition ? pPingsByPosition : []));
         });

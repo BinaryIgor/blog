@@ -23,30 +23,23 @@ const THREE_HUNDRED_SIXTY_FIVE_DAYS_SECONDS = DAY_SECONDS * 365;
 const ALL_TIME_STATS_DAYS_SECONDS = THREE_HUNDRED_SIXTY_FIVE_DAYS_SECONDS * 5;
 const DB_PATH = path.join("/tmp", `${crypto.randomUUID()}.db`);
 
-const db = new SqliteDb(DB_PATH);
+const db = SqliteDb.initInstance(DB_PATH);
 
 const analyticsRepository = new SqliteAnalyticsRepository(db);
 const clock = new TestClock();
 
-let statsWorker;
-let statsViews;
+const statsWorker = new StatsWorker(DB_PATH);
+const statsViews = new StatsViews(db, statsWorker, clock);
 
 describe("StatsViews tests", function () {
     this.slow(250);
 
-    it(`requires a stats worker`, () => {
-        assert.throws(() => new StatsViews(db, clock), /StatsViews requires a StatsWorker/);
+    before(function () {
+        initSchema(db);
     });
 
-    before(async function () {
-        await db.init();
-        await initSchema(db);
-        statsWorker = new StatsWorker(DB_PATH);
-        statsViews = new StatsViews(db, clock, statsWorker);
-    });
-
-    afterEach(async function () {
-        await deleteEvents();
+    afterEach(function () {
+        deleteEvents();
     });
 
     after(async () => {
@@ -59,18 +52,18 @@ describe("StatsViews tests", function () {
         it(`saves views of ${testCase.viewPeriod} period`, async () => {
             const toTimestamp = clock.nowTimestamp();
             const fromTimestamp = timestampMovedBySeconds(toTimestamp, -testCase.beforeNowOffset);
-            const expectedStats1 = await prepareEventsReturningExpectedStats(fromTimestamp, toTimestamp);
+            const expectedStats1 = prepareEventsReturningExpectedStats(fromTimestamp, toTimestamp);
 
             await triggerLastPeriodsViewsSave();
 
-            await assertStatsViewEqual(testCase.viewPeriod, expectedStats1);
+            assertStatsViewEqual(testCase.viewPeriod, expectedStats1);
 
-            await deleteEvents();
+            deleteEvents();
 
             const secondsToMoveTime = randomNumber(1, 100_000);
             clock.moveTimeBy(secondsToMoveTime);
 
-            const expectedStats2 = await prepareEventsReturningExpectedStats(
+            const expectedStats2 = prepareEventsReturningExpectedStats(
                 timestampMovedBySeconds(fromTimestamp, secondsToMoveTime),
                 timestampMovedBySeconds(toTimestamp, secondsToMoveTime));
 
@@ -82,19 +75,19 @@ describe("StatsViews tests", function () {
     it(`saves allTime period view`, async () => {
         const toTimestamp = clock.nowTimestamp();
         const fromTimestamp = timestampMovedBySeconds(toTimestamp, -ALL_TIME_STATS_DAYS_SECONDS);
-        const expectedStats = await prepareEventsReturningExpectedStats(fromTimestamp, toTimestamp, true);
+        const expectedStats = prepareEventsReturningExpectedStats(fromTimestamp, toTimestamp, true);
 
         await statsViews.saveAllTimeView();
 
-        await assertStatsViewEqual(ALL_TIME_STATS_VIEW, expectedStats);
+        assertStatsViewEqual(ALL_TIME_STATS_VIEW, expectedStats);
     });
 
     it(`prepares and returns empty stats`, async () => {
-        await deleteEvents();
+        deleteEvents();
 
         await statsViews.saveAllTimeView();
 
-        await assertStatsViewEqual(ALL_TIME_STATS_VIEW, Stats.empty());
+        assertStatsViewEqual(ALL_TIME_STATS_VIEW, Stats.empty());
     });
 
     it(`serializes overlapping stats calculations`, async () => {
@@ -104,7 +97,7 @@ describe("StatsViews tests", function () {
             statsViews.saveAllTimeView()
         ]);
 
-        const views = await statsViews.views();
+        const views = statsViews.views();
         assert.sameMembers(views.map(view => view.period), [
             LAST_DAY_STATS_VIEW,
             LAST_7_DAYS_STATS_VIEW,
@@ -177,7 +170,7 @@ async function triggerLastPeriodsViewsSave() {
     await statsViews.saveViewsForLongerPeriods();
 }
 
-async function prepareEventsReturningExpectedStats(fromTimestamp, toTimestamp, allTimeStats = false) {
+function prepareEventsReturningExpectedStats(fromTimestamp, toTimestamp, allTimeStats = false) {
     const visitorIds = [
         crypto.randomUUID(),
         crypto.randomUUID(),
@@ -228,11 +221,11 @@ async function prepareEventsReturningExpectedStats(fromTimestamp, toTimestamp, a
     });
 
     const allEvents = [...views, ...scrolls, ...pings];
-    await analyticsRepository.saveEvents(allEvents);
+    analyticsRepository.saveEvents(allEvents);
 
     if (!allTimeStats) {
         const events = outsideTimePeriodRandomEvents(fromTimestamp, toTimestamp);
-        await analyticsRepository.saveEvents(events);
+        analyticsRepository.saveEvents(events);
     }
 
     return StatsTestFixture.eventsToExpectedStats({ views, scrolls, pings });
@@ -257,14 +250,14 @@ function outsideTimePeriodRandomEvents(fromTimestamp, toTimestamp) {
     ];
 }
 
-async function assertStatsViewEqual(viewPeriod, expectedStats) {
-    const actualStatsView = await assertStatsViewOfPeriodExists(viewPeriod);
+function assertStatsViewEqual(viewPeriod, expectedStats) {
+    const actualStatsView = assertStatsViewOfPeriodExists(viewPeriod);
     const expectedStatsView = new StatsView(viewPeriod, expectedStats, clock.nowTimestamp());
     assert.deepEqual(actualStatsView, expectedStatsView);
 }
 
-async function assertStatsViewOfPeriodExists(period) {
-    const views = await statsViews.views();
+function assertStatsViewOfPeriodExists(period) {
+    const views = statsViews.views();
 
     const actualStatsView = views.filter(v => v.period == period);
     assert.lengthOf(actualStatsView, 1);

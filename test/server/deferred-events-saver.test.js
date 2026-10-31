@@ -50,13 +50,13 @@ describe("DeferredEventsSaver tests", () => {
     });
 
     it('saves events immediately after reaching configured in-memory limits', async () => {
-        await saver.addEvent(TestObjects.randomEvent());
-        await saver.addEvent(TestObjects.randomEvent());
+        saver.addEvent(TestObjects.randomEvent());
+        saver.addEvent(TestObjects.randomEvent());
 
         assert.lengthOf(repository.savedEvents, 0);
         assertSaveTimestampEqual(null);
 
-        await saver.addEvent(TestObjects.randomEvent());
+        saver.addEvent(TestObjects.randomEvent());
 
         assert.lengthOf(repository.savedEvents, 3);
         assertSaveTimestampEqual(clock.nowTimestamp());
@@ -77,9 +77,8 @@ export class FakeAnalyticsRepository {
 
     saveEvents(events) {
         if (this.error) {
-            return Promise.reject(this.error);
+            throw this.error;
         }
         this.savedEvents.push(...events);
-        return Promise.resolve();
     }
 }
