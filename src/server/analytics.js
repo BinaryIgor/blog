@@ -298,7 +298,6 @@ export class DeferredEventsSaver {
 
 export class StatsViews {
 
-    #analyticsRepository;
     #db;
     #clock;
     #statsWorker;
@@ -306,8 +305,10 @@ export class StatsViews {
     #lastLongerPeriodsViewsSaveTimestamp;
     #lastAllTimeViewSaveTimestamp;
 
-    constructor(analyticsRepository, db, clock, statsWorker = null) {
-        this.#analyticsRepository = analyticsRepository;
+    constructor(db, clock, statsWorker) {
+        if (!statsWorker) {
+            throw new Error("StatsViews requires a StatsWorker");
+        }
         this.#db = db;
         this.#clock = clock;
         this.#statsWorker = statsWorker;
@@ -354,72 +355,22 @@ export class StatsViews {
     async saveViewsForShorterPeriods() {
         const now = this.#clock.nowTimestamp();
 
-        if (this.#statsWorker) {
-            await this.#statsWorker.calculateShorterPeriods(now);
-            this.#lastShorterPeriodsViewsSaveTimestamp = now;
-            return;
-        }
-
-        const timestampDayAgo = Dates.timestampSecondsAgo(now, DAY_SECONDS);
-        const lastDayStats = await this.#analyticsRepository.stats(timestampDayAgo, now);
-
-        const timestampSevenDaysAgo = Dates.timestampSecondsAgo(now, SEVEN_DAYS_SECONDS);
-        const lastSevenDaysStats = await this.#analyticsRepository.stats(timestampSevenDaysAgo, now);
-
-        await this.#saveView(new StatsView(LAST_DAY_STATS_VIEW, lastDayStats, now));
-        await this.#saveView(new StatsView(LAST_7_DAYS_STATS_VIEW, lastSevenDaysStats, now));
-
+        await this.#statsWorker.calculateShorterPeriods(now);
         this.#lastShorterPeriodsViewsSaveTimestamp = now;
     }
 
     async saveViewsForLongerPeriods() {
         const now = this.#clock.nowTimestamp();
 
-        if (this.#statsWorker) {
-            await this.#statsWorker.calculateLongerPeriods(now);
-            this.#lastLongerPeriodsViewsSaveTimestamp = now;
-            return;
-        }
-
-        const timestampThirtyDaysAgo = Dates.timestampSecondsAgo(now, THIRTY_DAYS_SECONDS);
-        const lastThirtyDaysStats = await this.#analyticsRepository.stats(timestampThirtyDaysAgo, now);
-
-        const timestampNinentyDaysAgo = Dates.timestampSecondsAgo(now, NINENTY_DAYS_SECONDS);
-        const lastNinentyDaysStats = await this.#analyticsRepository.stats(timestampNinentyDaysAgo, now);
-
-        const timestampThreeHundredSixtyFiveDaysAgo = Dates.timestampSecondsAgo(now, THREE_HUNDRED_SIXTY_FIVE_DAYS_SECONDS);
-        const lastThreeHundredSixtyFiveDaysStats = await this.#analyticsRepository.stats(timestampThreeHundredSixtyFiveDaysAgo, now);
-
-        await this.#saveView(new StatsView(LAST_30_DAYS_STATS_VIEW, lastThirtyDaysStats, now));
-        await this.#saveView(new StatsView(LAST_90_DAYS_STATS_VIEW, lastNinentyDaysStats, now));
-        await this.#saveView(new StatsView(LAST_365_DAYS_STATS_VIEW, lastThreeHundredSixtyFiveDaysStats, now));
-
+        await this.#statsWorker.calculateLongerPeriods(now);
         this.#lastLongerPeriodsViewsSaveTimestamp = now;
     }
 
     async saveAllTimeView() {
         const now = this.#clock.nowTimestamp();
 
-        if (this.#statsWorker) {
-            await this.#statsWorker.calculateAllTime(now);
-            this.#lastAllTimeViewSaveTimestamp = now;
-            return;
-        }
-        const allTimeStats = await await this.#analyticsRepository.stats(null, now);
-        await this.#saveView(new StatsView(ALL_TIME_STATS_VIEW, allTimeStats, now));
-
+        await this.#statsWorker.calculateAllTime(now);
         this.#lastAllTimeViewSaveTimestamp = now;
-    }
-
-    #saveView(statsView) {
-        return this.#db.execute(`
-            INSERT INTO stats_view (period, stats, calculated_at)
-            VALUES (?, ?, json(?))
-            ON CONFLICT (period) 
-            DO UPDATE SET 
-            stats = EXCLUDED.stats,
-            calculated_at = EXCLUDED.calculated_at
-            `, [statsView.period, JSON.stringify(statsView.stats), statsView.calculatedAt]);
     }
 
     views() {

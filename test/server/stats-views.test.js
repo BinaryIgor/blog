@@ -34,11 +34,15 @@ let statsViews;
 describe("StatsViews tests", function () {
     this.slow(250);
 
+    it(`requires a stats worker`, () => {
+        assert.throws(() => new StatsViews(db, clock), /StatsViews requires a StatsWorker/);
+    });
+
     before(async function () {
         await db.init();
         await initSchema(db);
         statsWorker = new StatsWorker(DB_PATH);
-        statsViews = new StatsViews(analyticsRepository, db, clock, statsWorker);
+        statsViews = new StatsViews(db, clock, statsWorker);
     });
 
     afterEach(async function () {

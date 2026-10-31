@@ -45,7 +45,7 @@ export async function start(appClock = new Clock(), appScheduler = new Scheduler
 
     const analyticsRepository = new SqliteAnalyticsRepository(db);
 
-    const statsViews = new StatsViews(analyticsRepository, db, clock, statsWorker);
+    const statsViews = new StatsViews(db, clock, statsWorker);
     statsViews.schedule(scheduler, {
         shorterPeriodsViewsInterval: config.statsViewsCalculateShorterPeriodsInterval,
         longerPeriodsViewsInterval: config.statsViewsCalculateLongerPeriodsInterval,
