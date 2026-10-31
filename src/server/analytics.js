@@ -422,7 +422,7 @@ export class StatsViews {
             `, [statsView.period, JSON.stringify(statsView.stats), statsView.calculatedAt]);
     }
 
-    async views() {
+    views() {
         return this.#db.query("SELECT * FROM stats_view").map(r => {
             const stats = JSON.parse(r["stats"]);
             return new StatsView(r["period"], stats, r["calculated_at"]);
@@ -436,7 +436,7 @@ export class SqliteAnalyticsRepository {
         this.db = db;
     }
 
-    async saveEvents(events) {
+    saveEvents(events) {
         if (events.length > 0) {
             const argsPlaceholders = events.map(_ => "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
                 .join(",\n");
@@ -449,7 +449,7 @@ export class SqliteAnalyticsRepository {
         }
     }
 
-    async countDistinctVisitorIdsAfterTimestamp(ipHash, timestamp) {
+    countDistinctVisitorIdsAfterTimestamp(ipHash, timestamp) {
         const row = this.db.queryOne(
             `SELECT COUNT(DISTINCT visitor_id) AS visitor_ids 
             FROM event
@@ -458,7 +458,7 @@ export class SqliteAnalyticsRepository {
         return row ? row["visitor_ids"] : 0;
     }
 
-    async countPingsAfterTimestamp(visitorId, path, timestamp) {
+    countPingsAfterTimestamp(visitorId, path, timestamp) {
         const row = this.db.queryOne("SELECT COUNT(*) AS pings FROM ping WHERE visitor_id = ? AND path = ? AND timestamp >= ?",
             [visitorId, path, timestamp]);
         return row ? row["pings"] : 0;
@@ -476,7 +476,7 @@ export class SqliteAnalyticsRepository {
             scrolls, pings, visitorsBySource, pages);
     }
 
-    async _viewsVisitorsIpHashesStats(fromTimestamp, toTimestamp) {
+    _viewsVisitorsIpHashesStats(fromTimestamp, toTimestamp) {
         const query = this._queryWithOptionalWhereInTimestampsClause(`
         SELECT 
             COUNT(*) AS views, 
@@ -780,7 +780,7 @@ export class SqliteAnalyticsRepository {
         return this._allAndByPositionStats(pings, pingsByPosition);
     }
 
-    async #visitorsByTopSourcesStats(fromTimestamp, toTimestamp, limit) {
+    #visitorsByTopSourcesStats(fromTimestamp, toTimestamp, limit) {
         const query = `${this._queryWithOptionalWhereInTimestampsClause(
             'SELECT source, COUNT(DISTINCT visitor_id) AS visitors FROM view',
             fromTimestamp, toTimestamp
