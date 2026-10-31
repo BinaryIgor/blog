@@ -9,6 +9,7 @@ import * as Web from "./web.js"
 import * as Config from "./config.js";
 
 import { initSchema, SqliteDb, SqliteDbBackuper } from "./db.js";
+import { StatsWorker } from "./stats-worker.js";
 
 import { Clock } from "../shared/dates.js";
 import { PostsSource } from "./posts.js";
@@ -17,6 +18,7 @@ let server;
 let scheduler;
 let eventsSaver;
 let db;
+let statsWorker;
 
 export async function start(appClock = new Clock(), appScheduler = new Scheduler(),
     postsRetryConfig = {
@@ -33,6 +35,8 @@ export async function start(appClock = new Clock(), appScheduler = new Scheduler
 
     await initSchema(db);
 
+    statsWorker = new StatsWorker(config.dbPath);
+
     const dbBackuper = new SqliteDbBackuper(db, config.dbBackupPath, clock);
     dbBackuper.schedule(scheduler, config.dbBackupInterval, config.dbBackupScheduleDelay);
 
@@ -41,7 +45,7 @@ export async function start(appClock = new Clock(), appScheduler = new Scheduler
 
     const analyticsRepository = new SqliteAnalyticsRepository(db);
 
-    const statsViews = new StatsViews(analyticsRepository, db, clock);
+    const statsViews = new StatsViews(analyticsRepository, db, clock, statsWorker);
     statsViews.schedule(scheduler, {
         shorterPeriodsViewsInterval: config.statsViewsCalculateShorterPeriodsInterval,
         longerPeriodsViewsInterval: config.statsViewsCalculateLongerPeriodsInterval,
@@ -190,7 +194,10 @@ export function stop(exit = true) {
             Logger.logInfo("Scheduler closed - saving potentially pending events");
             await eventsSaver.close();
 
-            Logger.logInfo("All events saved - closing db");
+            Logger.logInfo("All events saved - closing stats worker");
+            await statsWorker.close();
+
+            Logger.logInfo("Stats worker closed - closing db");
             await db.close();
 
             Logger.logInfo("Db closed as well - the whole processed is about to exit successfully");

@@ -1,4 +1,5 @@
 import { initSchema, SqliteDb } from "../../src/server/db.js";
+import { StatsWorker } from "../../src/server/stats-worker.js";
 
 import { assert } from "chai";
 
@@ -27,7 +28,8 @@ const db = new SqliteDb(DB_PATH);
 const analyticsRepository = new SqliteAnalyticsRepository(db);
 const clock = new TestClock();
 
-const statsViews = new StatsViews(analyticsRepository, db, clock);
+let statsWorker;
+let statsViews;
 
 describe("StatsViews tests", function () {
     this.slow(250);
@@ -35,13 +37,17 @@ describe("StatsViews tests", function () {
     before(async function () {
         await db.init();
         await initSchema(db);
+        statsWorker = new StatsWorker(DB_PATH);
+        statsViews = new StatsViews(analyticsRepository, db, clock, statsWorker);
     });
 
     afterEach(async function () {
         await deleteEvents();
     });
 
-    after(() => {
+    after(async () => {
+        await statsWorker.close();
+        await db.close();
         fs.rmSync(DB_PATH);
     });
 
@@ -85,6 +91,51 @@ describe("StatsViews tests", function () {
         await statsViews.saveAllTimeView();
 
         await assertStatsViewEqual(ALL_TIME_STATS_VIEW, Stats.empty());
+    });
+
+    it(`serializes overlapping stats calculations`, async () => {
+        await Promise.all([
+            statsViews.saveViewsForShorterPeriods(),
+            statsViews.saveViewsForLongerPeriods(),
+            statsViews.saveAllTimeView()
+        ]);
+
+        const views = await statsViews.views();
+        assert.sameMembers(views.map(view => view.period), [
+            LAST_DAY_STATS_VIEW,
+            LAST_7_DAYS_STATS_VIEW,
+            LAST_30_DAYS_STATS_VIEW,
+            LAST_90_DAYS_STATS_VIEW,
+            LAST_365_DAYS_STATS_VIEW,
+            ALL_TIME_STATS_VIEW
+        ]);
+    });
+
+    it(`propagates worker calculation errors`, async () => {
+        const uninitializedDbPath = path.join("/tmp", `${crypto.randomUUID()}.db`);
+        const uninitializedWorker = new StatsWorker(uninitializedDbPath);
+
+        try {
+            await uninitializedWorker.calculateShorterPeriods(clock.nowTimestamp());
+            assert.fail("Expected a worker calculation error");
+        } catch (error) {
+            assert.match(error.message, /no such table:/);
+        } finally {
+            await uninitializedWorker.close();
+            fs.rmSync(uninitializedDbPath, { force: true });
+        }
+    });
+
+    it(`shuts down workers cleanly`, async () => {
+        const shutdownWorker = new StatsWorker(DB_PATH);
+        await shutdownWorker.close();
+
+        try {
+            await shutdownWorker.calculateAllTime(clock.nowTimestamp());
+            assert.fail("Expected a closed worker error");
+        } catch (error) {
+            assert.equal(error.message, "Stats worker is closed");
+        }
     });
 });
 

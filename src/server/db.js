@@ -1,4 +1,4 @@
-import sqlite3 from "sqlite3";
+import { backup as sqliteBackup, DatabaseSync } from "node:sqlite";
 import * as Logger from "../shared/logger.js";
 
 export function initSchema(db) {
@@ -51,125 +51,54 @@ export function snakeCasedObject(object) {
 
 export class SqliteDb {
 
-    #dbs;
-    #nextDbIdx = 0;
+    #db;
+    #backups = new Set();
 
-    constructor(filePath, connections = 5) {
-        if (!connections || connections < 1 || connections > 10) {
-            throw new Error(`1 - 10 connections are supported but ${connections} were requested`);
-        }
-        this.#dbs = Array.from({ length: connections }, () => new sqlite3.Database(filePath));
+    constructor(filePath) {
+        this.#db = new DatabaseSync(filePath);
     }
 
-    #db() {
-        const db = this.#dbs[this.#nextDbIdx];
-        this.#nextDbIdx = (this.#nextDbIdx + 1) % this.#dbs.length;
+    static async initInstance(filePath) {
+        const db = new SqliteDb(filePath);
+        db.init();
         return db;
     }
 
-    static async initInstance(filePath, connections = 5) {
-        const db = new SqliteDb(filePath, connections);
-        await db.init();
-        return db;
-    }
-
-    async init() {
-        for (let db of this.#dbs) {
-            await this.#initDb(db);
-        }
-    }
-
-    async #initDb(db) {
+    init() {
         // Cache size stands for a multiple of page size - 4096 bytes by default.
         // Setting 10 000 gives us  ~ 40,96MB of cache.
         // Pragma reference: https://sqlite.org/pragma.html
-        await this.#execute(db, "PRAGMA cache_size=10000");
-        await this.#execute(db, "PRAGMA busy_timeout=5000");
-        await this.#execute(db, "PRAGMA journal_mode=WAL");
-        await this.#execute(db, "PRAGMA synchronous=NORMAL");
+        this.executeRaw("PRAGMA cache_size=10000");
+        this.executeRaw("PRAGMA busy_timeout=5000");
+        this.executeRaw("PRAGMA journal_mode=WAL");
+        this.executeRaw("PRAGMA synchronous=NORMAL");
     }
 
     executeRaw(sql) {
-        return new Promise((resolve, reject) => {
-            this.#db().exec(sql, err => {
-                if (err) {
-                    reject(err);
-                } else {
-                    resolve();
-                }
-            });
-        });
+        this.#db.exec(sql);
     }
 
     execute(sql, params = []) {
-        return this.#execute(this.#db(), sql, params);
-    }
-
-    #execute(db, sql, params = []) {
-        return new Promise((resolve, reject) => {
-            db.run(sql, params, function(err) {
-                if (err) {
-                    reject(err);
-                } else {
-                    resolve(this.changes);
-                }
-            });
-        });
+        return this.#db.prepare(sql).run(...params).changes;
     }
 
     queryOne(sql, params = []) {
-        return new Promise((resolve, reject) => {
-            this.#db().get(sql, params, (error, row) => {
-                if (error) {
-                    reject(error);
-                }
-                resolve(row);
-            });
-        });
+        return this.#db.prepare(sql).get(...params);
     }
 
     query(sql, params = []) {
-        return new Promise((resolve, reject) => {
-            this.#db().all(sql, params, (error, rows) => {
-                if (error) {
-                    reject(error);
-                }
-                resolve(rows);
-            });
-        });
+        return this.#db.prepare(sql).all(...params);
     }
 
     backup(backupPath) {
-        return new Promise((resolve, reject) => {
-            const backup = this.#db().backup(backupPath);
-            backup.step(-1, error => {
-                if (error) {
-                    reject(error);
-                } else {
-                    backup.finish(error => {
-                        if (error) {
-                            reject(error);
-                        } else {
-                            resolve()
-                        }
-                    });
-                }
-            });
-        });
+        const backupPromise = sqliteBackup(this.#db, backupPath);
+        this.#backups.add(backupPromise);
+        return backupPromise.finally(() => this.#backups.delete(backupPromise));
     }
 
-    close() {
-        const closePromises = this.#dbs.map(db =>
-            new Promise((resolve, reject) => {
-                db.close(error => {
-                    if (error) {
-                        reject(error);
-                    } else {
-                        resolve();
-                    }
-                });
-            }));
-        return Promise.all(closePromises);
+    async close() {
+        await Promise.all(this.#backups);
+        this.#db.close();
     }
 }
 
