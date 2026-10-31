@@ -3,7 +3,7 @@
 A blog with self-made static site generator, analytics and other tools. Simple yet powerful!
 
 Requirements:
- * node 20+
+ * node 26+
  * Docker
 
 Init:
