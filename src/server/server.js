@@ -9,6 +9,7 @@ import * as Web from "./web.js"
 import * as Config from "./config.js";
 
 import { initSchema, SqliteDb, SqliteDbBackuper } from "./db.js";
+import { StatsWorker } from "./stats-worker.js";
 
 import { Clock } from "../shared/dates.js";
 import { PostsSource } from "./posts.js";
@@ -17,6 +18,7 @@ let server;
 let scheduler;
 let eventsSaver;
 let db;
+let statsWorker;
 
 export async function start(appClock = new Clock(), appScheduler = new Scheduler(),
     postsRetryConfig = {
@@ -29,9 +31,11 @@ export async function start(appClock = new Clock(), appScheduler = new Scheduler
 
     const config = await Config.read();
 
-    db = await SqliteDb.initInstance(config.dbPath);
+    db = SqliteDb.initInstance(config.dbPath);
 
-    await initSchema(db);
+    initSchema(db);
+
+    statsWorker = new StatsWorker(config.dbPath);
 
     const dbBackuper = new SqliteDbBackuper(db, config.dbBackupPath, clock);
     dbBackuper.schedule(scheduler, config.dbBackupInterval, config.dbBackupScheduleDelay);
@@ -41,7 +45,7 @@ export async function start(appClock = new Clock(), appScheduler = new Scheduler
 
     const analyticsRepository = new SqliteAnalyticsRepository(db);
 
-    const statsViews = new StatsViews(analyticsRepository, db, clock);
+    const statsViews = new StatsViews(db, statsWorker, clock);
     statsViews.schedule(scheduler, {
         shorterPeriodsViewsInterval: config.statsViewsCalculateShorterPeriodsInterval,
         longerPeriodsViewsInterval: config.statsViewsCalculateLongerPeriodsInterval,
@@ -72,7 +76,7 @@ export async function start(appClock = new Clock(), appScheduler = new Scheduler
     app.use(cors(corsOptions));
 
     // TODO: some metrics + diagnostics endpoint!
-    app.post("/analytics/events", async (req, res) => {
+    app.post("/analytics/events", (req, res) => {
         try {
             const ip = Web.sourceIp(req);
             const ipHash = Web.hashedIp(ip);
@@ -80,7 +84,7 @@ export async function start(appClock = new Clock(), appScheduler = new Scheduler
             const event = new Event(clock.nowTimestamp(), reqBody.visitorId, reqBody.sessionId, ipHash,
                 reqBody.source, reqBody.medium, reqBody.campaign, reqBody.ref,
                 reqBody.path, reqBody.type, reqBody.data);
-            await analyticsService.addEvent(event);
+            analyticsService.addEvent(event);
         } catch (e) {
             if (e instanceof PingsFrequencyError) {
                 // known issue; there is some kind of repeating edge case that spams logs , not worth investigating (for know)
@@ -92,9 +96,9 @@ export async function start(appClock = new Clock(), appScheduler = new Scheduler
         res.sendStatus(200);
     });
 
-    app.get("/meta/stats", async (_, res) => {
+    app.get("/meta/stats", (_, res) => {
         try {
-            const stats = await statsViews.views();
+            const stats = statsViews.views();
             res.send(stats);
         } catch (e) {
             Logger.logError("Problem while getting stats...", e);
@@ -102,7 +106,7 @@ export async function start(appClock = new Clock(), appScheduler = new Scheduler
         }
     });
 
-    app.get("/meta/posts", async (_, res) => {
+    app.get("/meta/posts", (_, res) => {
         try {
             res.send(postsSource.knownPosts());
         } catch (e) {
@@ -188,9 +192,12 @@ export function stop(exit = true) {
             await scheduler.close();
 
             Logger.logInfo("Scheduler closed - saving potentially pending events");
-            await eventsSaver.close();
+            eventsSaver.close();
 
-            Logger.logInfo("All events saved - closing db");
+            Logger.logInfo("All events saved - closing stats worker");
+            await statsWorker.close();
+
+            Logger.logInfo("Stats worker closed - closing db");
             await db.close();
 
             Logger.logInfo("Db closed as well - the whole processed is about to exit successfully");

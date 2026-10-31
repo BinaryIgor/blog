@@ -70,7 +70,7 @@ function insertTestTableRow(timestamp = Date.now(), id = crypto.randomUUID()) {
 }
 
 function countTestTableRows(db) {
-    return db.queryOne("SELECT COUNT(*) AS rows FROM test_table").then(r => r['rows']);
+    return db.queryOne("SELECT COUNT(*) AS rows FROM test_table")['rows'];
 }
 
 function assertLastBackupTimestampEqual(backuper, expectedTimestamp) {
