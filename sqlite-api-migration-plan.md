@@ -1,5 +1,38 @@
 # SQLite API migration plan
 
+## Implementation handoff (2026-10-31)
+
+Completed and committed in three review checkpoints:
+
+1. `c0823b5 Migrate analytics storage to native SQLite worker`
+2. `34295dd Keep synchronous analytics queries synchronous`
+3. `cf442b9 Require and consolidate stats worker`
+
+The database wrapper now uses `node:sqlite`'s synchronous `DatabaseSync` API
+with one main-process connection. It retains the existing cache-size, WAL,
+synchronous-mode, and 5-second busy-timeout configuration. Fast validation,
+event saving, and `stats_view` reads use that connection. Backups use native
+`sqlite.backup(...)`; `SqliteDb.close()` waits for any in-progress backup.
+
+Stats calculations run through one required `StatsWorker`. Its manager,
+worker-thread entry point, serialized job queue, and calculation implementation
+are all in `src/server/stats-worker.js`. `StatsViews` is now a worker-backed
+facade with no nullable/main-thread calculation mode. Shutdown closes the
+worker before the main database connection. Tests cover worker-backed
+calculations, overlapping job serialization, error propagation, required worker
+construction, and clean worker shutdown.
+
+Verification so far: under Node `v26.0.0`, `npm test` passes with 63 tests.
+
+Still to do:
+
+1. Remove `sqlite3` from `package.json` and regenerate `package-lock.json`.
+2. Rerun the full test suite after the dependency removal.
+3. Update `package.json` engines to `>=26.0.0` and `ops/api/Dockerfile` to
+   `node:26-alpine`.
+4. Verify the API Docker image build, then commit that final metadata/runtime
+   checkpoint and stop for review.
+
 This project uses deprecated sqlite3 dependency that is no longer maintained.
 
 The native SQLite module has been available since Node 22.5.0; this migration targets Node 26, where it is supported, and we want to:
