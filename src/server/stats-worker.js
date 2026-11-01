@@ -21,15 +21,20 @@ export class StatsWorker {
     #nextRequestId = 0;
     #pendingRequests = new Map();
     #closed = false;
+    #closePromise;
 
     constructor(dbPath) {
         this.#worker = new Worker(new URL(import.meta.url), {
             workerData: { dbPath }
         });
         this.#worker.on("message", message => this.#handleMessage(message));
-        this.#worker.on("error", error => this.#rejectPendingRequests(error));
+        this.#worker.on("error", error => {
+            this.#closed = true;
+            this.#rejectPendingRequests(error);
+        });
         this.#worker.on("exit", code => {
-            if (code !== 0 && !this.#closed) {
+            this.#closed = true;
+            if (this.#pendingRequests.size > 0) {
                 this.#rejectPendingRequests(new Error(`Stats worker exited with code ${code}`));
             }
         });
@@ -48,16 +53,27 @@ export class StatsWorker {
     }
 
     async close() {
-        if (this.#closed) {
-            return;
+        if (this.#closePromise) {
+            return this.#closePromise;
         }
-        this.#closed = true;
-        await this.#request(CLOSE_COMMAND);
-        await this.#worker.terminate();
+        if (this.#closed) {
+            return Promise.resolve();
+        }
+
+        this.#closePromise = (async () => {
+            try {
+                await this.#request(CLOSE_COMMAND);
+            } finally {
+                this.#closed = true;
+                await this.#worker.terminate();
+            }
+        })();
+
+        return this.#closePromise;
     }
 
     #request(command, nowTimestamp) {
-        if (this.#closed && command !== CLOSE_COMMAND) {
+        if ((this.#closed || this.#closePromise) && command !== CLOSE_COMMAND) {
             return Promise.reject(new Error("Stats worker is closed"));
         }
         const id = this.#nextRequestId++;
@@ -132,6 +148,7 @@ if (!isMainThread) {
         startStatsWorker();
     } catch (e) {
         Logger.logError("Problem while starting stats worker.", e);
+        throw e;
     }
 }
 
